@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Light Mode Palette */
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --surface: #ffffff;
+    --surface-hover: #f1f5f9;
+    --surface-border: #e2e8f0;
+    --surface-card: #ffffff;
+    --surface-popover: #ffffff;
+
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    --muted-text: #64748b;
+    --subtle-text: #94a3b8;
+
+    /* Semantic Financial Status Tokens (Light) */
+    --status-paid-bg: #ecfdf5;
+    --status-paid-text: #047857;
+    --status-paid-border: #a7f3d0;
+
+    --status-pending-bg: #fffbeb;
+    --status-pending-text: #b45309;
+    --status-pending-border: #fde68a;
+
+    --status-partial-bg: #eff6ff;
+    --status-partial-text: #1d4ed8;
+    --status-partial-border: #bfdbfe;
+
+    --status-overdue-bg: #fef2f2;
+    --status-overdue-text: #b91c1c;
+    --status-overdue-border: #fecaca;
+
+    --status-waived-bg: #f1f5f9;
+    --status-waived-text: #475569;
+    --status-waived-border: #cbd5e1;
+
+    --amount-success: #059669;
+    --amount-warning: #d97706;
+    --amount-danger: #dc2626;
+
+    --radius-ui: 0.75rem;
+  }
+
+  .dark {
+    /* Dark Mode Palette */
+    --background: #060a12;
+    --foreground: #f8fafc;
+    --surface: #0e1526;
+    --surface-hover: #162038;
+    --surface-border: #1e293b;
+    --surface-card: #0b1120;
+    --surface-popover: #0f172a;
+
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --muted-text: #94a3b8;
+    --subtle-text: #64748b;
+
+    /* Semantic Financial Status Tokens (Dark) */
+    --status-paid-bg: rgba(16, 185, 129, 0.12);
+    --status-paid-text: #34d399;
+    --status-paid-border: rgba(16, 185, 129, 0.28);
+
+    --status-pending-bg: rgba(245, 158, 11, 0.12);
+    --status-pending-text: #fbbf24;
+    --status-pending-border: rgba(245, 158, 11, 0.28);
+
+    --status-partial-bg: rgba(59, 130, 246, 0.12);
+    --status-partial-text: #60a5fa;
+    --status-partial-border: rgba(59, 130, 246, 0.28);
+
+    --status-overdue-bg: rgba(239, 68, 68, 0.12);
+    --status-overdue-text: #f87171;
+    --status-overdue-border: rgba(239, 68, 68, 0.28);
+
+    --status-waived-bg: rgba(100, 116, 139, 0.12);
+    --status-waived-text: #94a3b8;
+    --status-waived-border: rgba(100, 116, 139, 0.25);
+
+    --amount-success: #34d399;
+    --amount-warning: #fbbf24;
+    --amount-danger: #f87171;
+  }
+}
+
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area support for iOS home bar and notch */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0rem);
+}
+
+/* Smooth transition for theme toggle */
+body {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
