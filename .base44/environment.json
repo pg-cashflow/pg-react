@@ -1,0 +1,27 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "VITE_FIREBASE_API_KEY",
+      "description": "Firebase Web App API key (Firebase Console → Project settings → Your apps → Web app). Needed for real auth; placeholder exists so the app boots.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "VITE_FIREBASE_AUTH_DOMAIN",
+      "description": "Firebase Auth domain, e.g. <project>.firebaseapp.com",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "VITE_FIREBASE_PROJECT_ID",
+      "description": "Firebase Project ID",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "VITE_FIREBASE_APP_ID",
+      "description": "Firebase Web App ID",
+      "requiredAtBoot": false
+    }
+  ]
+}
