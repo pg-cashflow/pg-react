@@ -1,10 +1,11 @@
-import React from "react";
 import {
   Receipt,
   CreditCard,
   LayoutDashboard,
   LogOut,
   Building2,
+  Sparkles,
+  UtensilsCrossed,
 } from "lucide-react";
 import { useAuth } from "@/auth/context";
 
@@ -27,6 +28,8 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
     { id: "dashboard", label: "Home", icon: LayoutDashboard },
     { id: "dues", label: "My Dues", icon: Receipt },
     { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "rewards", label: "Perks & Points", icon: Sparkles },
+    { id: "community", label: "Community & Meals", icon: UtensilsCrossed },
   ];
 
   return (

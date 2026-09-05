@@ -16,4 +16,28 @@ export const QUERY_KEYS = {
   tenantPayments: ["tenant", "payments"] as const,
   tenantProfile: ["tenant", "me"] as const,
   joinMe: ["join", "me"] as const,
+
+  // Gamification & Operations
+  tenantPoints: ["tenant", "points"] as const,
+  tenantRewards: ["tenant", "rewards"] as const,
+  tenantInspections: ["tenant", "inspections"] as const,
+  tenantMealRSVP: ["tenant", "meal-rsvp"] as const,
+  tenantMenuPoll: ["tenant", "menu-poll"] as const,
+  tenantViolations: ["tenant", "violations"] as const,
+  tenantLeaderboard: ["tenant", "leaderboard"] as const,
+  tenantReferrals: ["tenant", "referrals"] as const,
+
+  // Manager Keys
+  managerHeadcount: (propertyId: string, date?: string) =>
+    ["manager", "headcount", propertyId, date || "today"] as const,
+  managerInspections: (propertyId: string) => ["manager", "inspections", propertyId] as const,
+  managerHazards: (propertyId: string, status?: string) =>
+    ["manager", "hazards", propertyId, status || "all"] as const,
+
+  // Owner Facility & Settings
+  ownerGamificationSettings: (propertyId: string) =>
+    ["owner", "gamification-settings", propertyId] as const,
+  ownerFloors: (propertyId: string) => ["owner", "floors", propertyId] as const,
+  ownerRooms: (propertyId: string) => ["owner", "rooms", propertyId] as const,
 };
+

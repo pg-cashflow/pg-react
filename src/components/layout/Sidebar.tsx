@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   Building2,
+  Sliders,
 } from "lucide-react";
 import { useAuth } from "@/auth/context";
 
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "dues", label: "Dues & Billing", icon: Scale },
     { id: "payments", label: "Payments", icon: CreditCard },
     { id: "reconciliation", label: "Reconciliation", icon: Scale },
+    { id: "facility", label: "Facility & Rules", icon: Sliders },
     { id: "events", label: "Audit & Events", icon: Bell },
     { id: "more", label: "More", icon: Building2 },
   ];

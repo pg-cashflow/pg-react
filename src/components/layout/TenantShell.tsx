@@ -10,6 +10,8 @@ const TITLES: Record<string, string> = {
   "/tenant/": "My Dashboard",
   "/tenant/dues": "My Dues",
   "/tenant/payments": "My Payments",
+  "/tenant/rewards": "Perks & Points Store",
+  "/tenant/community": "Community & Meals",
 };
 
 export const TenantShell: React.FC = () => {

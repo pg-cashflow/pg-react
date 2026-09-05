@@ -175,6 +175,13 @@ export const LoginPage: React.FC = () => {
               >
                 Tenant: +91 90000 00000
               </button>
+              <button
+                type="button"
+                onClick={() => fillTestNumber("+919111111111", "123456")}
+                className="px-2.5 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-500/40 text-[11px] text-indigo-200 font-mono transition"
+              >
+                Warden: +91 91111 11111
+              </button>
             </div>
           )}
         </div>

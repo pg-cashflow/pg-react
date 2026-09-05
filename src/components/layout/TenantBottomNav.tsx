@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutDashboard, Receipt, CreditCard, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Receipt, CreditCard, Sparkles, UtensilsCrossed } from "lucide-react";
 
 interface TenantBottomNavProps {
   currentTab: string;
@@ -12,8 +12,10 @@ export const TenantBottomNav: React.FC<TenantBottomNavProps> = ({
 }) => {
   const tabs = [
     { id: "dashboard", label: "Home", icon: LayoutDashboard },
-    { id: "dues", label: "My Dues", icon: Receipt },
-    { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "dues", label: "Dues", icon: Receipt },
+    { id: "payments", label: "Pay", icon: CreditCard },
+    { id: "rewards", label: "Perks", icon: Sparkles },
+    { id: "community", label: "Meals", icon: UtensilsCrossed },
   ];
 
   return (
@@ -43,11 +45,6 @@ export const TenantBottomNav: React.FC<TenantBottomNavProps> = ({
             </button>
           );
         })}
-        <div className="flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-600">
-          <div className="p-1 rounded-xl">
-            <MoreHorizontal className="w-5 h-5 opacity-0" />
-          </div>
-        </div>
       </div>
     </nav>
   );

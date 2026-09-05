@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getMyDues, getMyPayments, getMyProfile, submitAadhaar } from "@/api/tenant";
+import { getTenantPoints } from "@/api/gamification";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { StatusPill } from "@/components/shared/StatusPill";
@@ -13,7 +14,7 @@ import {
   displayDueStatus,
 } from "@/lib/utils";
 import { subscribeToPush } from "@/push/subscribe";
-import { Receipt, CreditCard, Clock, ArrowUpRight, AlertTriangle } from "lucide-react";
+import { Receipt, CreditCard, Clock, ArrowUpRight, AlertTriangle, Flame, Sparkles, Award } from "lucide-react";
 
 interface TenantDashboardProps {
   onNavigate: (tab: string) => void;
@@ -36,14 +37,19 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
     queryFn: getMyPayments,
     refetchInterval: 30000,
   });
+  const pointsQuery = useQuery({
+    queryKey: QUERY_KEYS.tenantPoints,
+    queryFn: getTenantPoints,
+  });
 
   const isLoading = profileQuery.isLoading || duesQuery.isLoading || paymentsQuery.isLoading;
-  const isError = profileQuery.isError || duesQuery.isError || paymentsQuery.isError;
+  const isError = profileQuery.isError || duesQuery.isError || paymentsQuery.error;
   const error = profileQuery.error || duesQuery.error || paymentsQuery.error;
 
   const profile = profileQuery.data;
   const dues = duesQuery.data ?? profile?.active_dues ?? [];
   const payments = paymentsQuery.data ?? [];
+  const points = pointsQuery.data;
 
   const totalOutstanding = sumOutstandingFromDues(dues);
   const overdueCount = countOverdueDues(dues);
@@ -58,12 +64,13 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
   return (
     <QueryState
       isLoading={isLoading}
-      isError={isError}
+      isError={isError as boolean}
       error={error as Error | null}
       onRetry={() => {
         profileQuery.refetch();
         duesQuery.refetch();
         paymentsQuery.refetch();
+        pointsQuery.refetch();
       }}
       loadingMessage="Loading your dashboard..."
     >
@@ -86,6 +93,54 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
             )}
           </div>
         )}
+
+        {/* Gamification Streak & Points Hero Card */}
+        <div className="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-500/20 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Award className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+                Resident Perks & Habit Engine
+              </span>
+            </div>
+            <div className="flex items-center gap-4 pt-1">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-emerald-400">{points?.balance ?? 0}</span>
+                <span className="text-xs text-slate-400">pts</span>
+              </div>
+              <div className="h-4 w-px bg-slate-700" />
+              <div className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <span className="text-sm font-bold text-slate-100">{points?.on_time_months ?? 0} mo</span>
+                <span className="text-xs text-slate-400">streak</span>
+              </div>
+              {(points?.freezes_left ?? 0) > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-700" />
+                  <span className="text-xs text-cyan-400 font-medium">
+                    {points?.freezes_left} freeze{points?.freezes_left === 1 ? "" : "s"}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate("rewards")}
+              className="px-3 py-1.5 rounded-xl bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary text-xs font-semibold transition flex items-center gap-1"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Redeem Perks
+            </button>
+            <button
+              onClick={() => onNavigate("community")}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+            >
+              Meal RSVP
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">

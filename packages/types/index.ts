@@ -2,9 +2,9 @@
 export type Paise = number;
 
 export type DueStatus = "pending" | "partial" | "paid" | "waived";
-export type DueKind = "rent" | "deposit";
+export type DueKind = "rent" | "deposit" | "electricity" | "water";
 export type MatchedBy = "due_code" | "amount_date_window" | "manual" | "cash" | "cashfree";
-export type UserRole = "owner" | "tenant";
+export type UserRole = "owner" | "tenant" | "manager";
 export type TenantStatus = "pending_allocation" | "active" | "vacated";
 export type ContactMode = "self_service" | "cash_only";
 export type JoinStatus = "pending" | "approved" | "rejected";
@@ -203,4 +203,265 @@ export interface ImportResult {
   row_count: number;
   matched: number;
   failed: number;
+}
+
+// --- Facility Models ---
+export interface Floor {
+  id: string;
+  property_id: string;
+  floor_number: number;
+  name: string;
+  created_at: string;
+}
+
+export interface Room {
+  id: string;
+  property_id: string;
+  floor_id: string;
+  room_number: string;
+  capacity: number;
+  included_units: number;
+  created_at: string;
+}
+
+// --- Gamification & Settings ---
+export interface PropertyGamificationSettings {
+  property_id: string;
+  point_value_paise: number;
+  monthly_budget_paise: number;
+  earn_cap_per_tenant: number;
+  rsvp_sub_cap: number;
+  expiry_days: number;
+  floor_bonus_threshold: number;
+  electricity_tariff_paise: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PointRule {
+  id: string;
+  property_id: string;
+  code: string;
+  name: string;
+  description: string;
+  points: number;
+  monthly_cap: number;
+  is_rsvp: boolean;
+  active: boolean;
+  created_at: string;
+}
+
+export interface PointsLedgerEntry {
+  id: number;
+  tenant_id: string;
+  property_id: string;
+  rule_code: string;
+  delta: number;
+  ref_type?: string;
+  ref_id?: string;
+  expires_at?: string | null;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface TenantStreak {
+  tenant_id: string;
+  property_id: string;
+  on_time_months: number;
+  cached_balance: number;
+  last_on_time_due_id?: string;
+  freezes_available: number;
+  last_freeze_used_at?: string;
+  updated_at: string;
+}
+
+export interface TenantPointsSummary {
+  balance: number;
+  expiring_soon: number;
+  earliest_expiry?: string | null;
+  on_time_months: number;
+  freezes_left: number;
+  ledger: PointsLedgerEntry[];
+}
+
+export interface RewardsCatalogItem {
+  id: string;
+  property_id: string;
+  code: string;
+  title: string;
+  description: string;
+  category: "cash_credit" | "food_coupon" | "perk";
+  points_cost: number;
+  min_tenure_months: number;
+  is_active: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  eligible?: boolean;
+  reason?: string;
+}
+
+export interface Redemption {
+  id: string;
+  tenant_id: string;
+  property_id: string;
+  reward_id: string;
+  points_spent: number;
+  status: "completed" | "cancelled";
+  applied_due_id?: string;
+  coupon_code?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+// --- Daily Operations & Kitchen ---
+export interface MealRSVP {
+  id?: string;
+  tenant_id?: string;
+  property_id?: string;
+  meal_date: string;
+  meal_slot: "breakfast" | "lunch" | "dinner";
+  attending: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TenantMealRSVPSummary {
+  date: string;
+  breakfast?: MealRSVP | null;
+  lunch?: MealRSVP | null;
+  dinner?: MealRSVP | null;
+}
+
+export interface HeadcountReport {
+  meal_date: string;
+  breakfast: number;
+  lunch: number;
+  dinner: number;
+  total: number;
+}
+
+export interface MenuPoll {
+  id: string;
+  property_id: string;
+  month_year: string;
+  title: string;
+  options: Array<{ id: string; title: string; description?: string }>;
+  closed_at?: string | null;
+  created_at: string;
+}
+
+export interface MenuVote {
+  id: string;
+  poll_id: string;
+  tenant_id: string;
+  option_id: string;
+  created_at: string;
+}
+
+// --- Inspections & Audits ---
+export interface InspectionItem {
+  id: string;
+  inspection_id: string;
+  item_key: string;
+  description: string;
+  passed: boolean;
+  has_photo: boolean;
+  notes: string;
+  disputed_at?: string | null;
+  dispute_note?: string | null;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
+  resolution_status: "none" | "disputed" | "upheld" | "overturned";
+}
+
+export interface Inspection {
+  id: string;
+  property_id: string;
+  room_id?: string | null;
+  floor_id?: string | null;
+  inspector_user_id: string;
+  inspection_type: "room" | "floor" | "common_bathroom";
+  score_percent: number;
+  passed: boolean;
+  notes: string;
+  inspected_at: string;
+  created_at: string;
+  items?: InspectionItem[];
+}
+
+export interface VendorInspection {
+  id: string;
+  property_id: string;
+  inspector_user_id: string;
+  vendor_name: string;
+  inspection_type: string;
+  score_percent: number;
+  notes: string;
+  has_photo: boolean;
+  penalty_paise: number;
+  inspected_at: string;
+  created_at: string;
+}
+
+// --- Maintenance, Violations & Metering ---
+export interface HazardReport {
+  id: string;
+  property_id: string;
+  category: string;
+  description: string;
+  has_photo: boolean;
+  status: "open" | "in_progress" | "resolved" | "rejected";
+  resolved_at?: string | null;
+  resolved_by?: string | null;
+  points_awarded: boolean;
+  created_at: string;
+}
+
+export interface Violation {
+  id: string;
+  tenant_id: string;
+  property_id: string;
+  rule_code: string;
+  severity: "safety" | "lifestyle";
+  step: 1 | 2 | 3;
+  description: string;
+  has_evidence: boolean;
+  acknowledged_at?: string | null;
+  created_by: string;
+  created_at: string;
+}
+
+export interface MeterReading {
+  id: string;
+  property_id: string;
+  room_id?: string | null;
+  floor_id?: string | null;
+  kind: "electricity" | "water";
+  reading_value: number;
+  reading_at: string;
+  source: string;
+  recorded_by: string;
+  created_at: string;
+}
+
+export interface MeterReadingResult {
+  reading: MeterReading;
+  delta_units: number;
+  billable_paise: number;
+  excess_units: number;
+  anomaly?: boolean;
+}
+
+export interface Referral {
+  id: string;
+  property_id: string;
+  referrer_tenant_id: string;
+  referred_tenant_id?: string | null;
+  phone: string;
+  name: string;
+  status: "pending" | "moved_in" | "rewarded";
+  points_awarded: number;
+  created_at: string;
+  rewarded_at?: string | null;
 }

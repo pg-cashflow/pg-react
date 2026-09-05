@@ -58,7 +58,7 @@ function parseJwt(token: string): AuthTokenPayload | null {
 }
 
 function isValidRole(role: unknown): role is UserRole {
-  return role === "owner" || role === "tenant";
+  return role === "owner" || role === "tenant" || role === "manager";
 }
 
 function isTokenExpired(payload: AuthTokenPayload): boolean {
