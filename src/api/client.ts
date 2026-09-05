@@ -31,7 +31,7 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
       clearToken();
       window.dispatchEvent(new CustomEvent("pg:unauthorized"));
     }
-    if (res.status === 403 && /waiting for owner to assign room and rent/i.test(mapped)) {
+    if (res.status === 403 && /complete your profile to continue/i.test(mapped)) {
       window.dispatchEvent(new CustomEvent("pg:waiting-join"));
     }
     throw new ApiError(res.status, mapped);

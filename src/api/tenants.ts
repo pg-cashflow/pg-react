@@ -1,4 +1,4 @@
-import { apiFetch, unwrapList } from "./client";
+import { apiFetch, apiFetchBlob, unwrapList } from "./client";
 import type { Paise, Tenant } from "@pg/types";
 
 export interface CreateTenantPayload {
@@ -66,3 +66,6 @@ export const settleDeposit = (
     method: "POST",
     body: JSON.stringify({ refunded_amount_paise: refundedAmountPaise, reason }),
   });
+
+export const getTenantIdPhotoBlob = (id: string): Promise<Blob> =>
+  apiFetchBlob(`/owner/tenants/${id}/id-photo`);

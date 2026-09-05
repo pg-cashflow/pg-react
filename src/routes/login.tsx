@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/auth/context";
 import { getInviteCode } from "@/auth/storage";
 import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
-import { Building2, ArrowRight, KeyRound, Phone, AlertCircle, Loader2 } from "lucide-react";
+import { Building2, ArrowRight, KeyRound, Phone, AlertCircle, Loader2, Sparkles } from "lucide-react";
 
 const GoogleMark: React.FC = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -34,6 +34,7 @@ export const LoginPage: React.FC = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTestHelper, setShowTestHelper] = useState(false);
   const onLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
 
   const phonePrompt = linkingGoogle
@@ -102,12 +103,18 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const fillTestNumber = (testPhone: string, testOtp?: string) => {
+    setPhone(testPhone);
+    if (testOtp) setOtp(testOtp);
+    setError(null);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 relative z-10">
-        <div className="flex flex-col items-center text-center mb-8">
+        <div className="flex flex-col items-center text-center mb-6">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 ring-8 ring-primary/5">
             <Building2 className="w-6 h-6" />
           </div>
@@ -122,19 +129,67 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {onLocalhost && (
-          <div className="mb-6 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-sm">
-            Phone OTP fails on localhost. Open{" "}
-            <a className="underline font-medium text-amber-100" href="http://127.0.0.1:5173">
-              http://127.0.0.1:5173
-            </a>
-            .
+          <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>
+              Phone OTP fails on localhost. Open{" "}
+              <a className="underline font-semibold text-amber-100" href="http://127.0.0.1:5173">
+                http://127.0.0.1:5173
+              </a>
+              .
+            </span>
           </div>
         )}
 
+        {/* Spark testing guidance */}
+        <div className="mb-5 p-3 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-indigo-200 text-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-medium text-indigo-300">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              Firebase Spark Testing Tip
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowTestHelper(!showTestHelper)}
+              className="text-[11px] underline text-indigo-300 hover:text-indigo-100"
+            >
+              {showTestHelper ? "Hide" : "Show test numbers"}
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-300 leading-relaxed">
+            Real SMS requires Firebase Blaze. On the free Spark plan, use your Firebase test phone numbers configured in Console.
+          </p>
+          {showTestHelper && (
+            <div className="pt-2 border-t border-indigo-500/20 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => fillTestNumber("+918008281429", "123456")}
+                className="px-2.5 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-500/40 text-[11px] text-indigo-200 font-mono transition"
+              >
+                Owner: +91 80082 81429
+              </button>
+              <button
+                type="button"
+                onClick={() => fillTestNumber("+919000000000", "123456")}
+                className="px-2.5 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-500/40 text-[11px] text-indigo-200 font-mono transition"
+              >
+                Tenant: +91 90000 00000
+              </button>
+            </div>
+          )}
+        </div>
+
         {error && (
-          <div className="mb-6 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="mb-6 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div className="text-xs leading-relaxed">
+              <span>{error}</span>
+              {error.includes("Blaze") && (
+                <p className="mt-1 text-slate-300">
+                  Tip: Use a test number added to Firebase Auth &gt; Phone numbers for testing (e.g. +91 90000 00000 with OTP 123456).
+                </p>
+              )}
+            </div>
           </div>
         )}
 

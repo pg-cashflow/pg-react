@@ -8,13 +8,32 @@ import {
   attachPhone,
   prorateTenant,
   settleDeposit,
+  getTenantIdPhotoBlob,
   type UpdateTenantPayload,
 } from "@/api/tenants";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
-import { formatPaise, rupeesToPaise, paiseToRupeeInput, localDateInputValue } from "@/lib/utils";
+import { formatPaise, rupeesToPaise, paiseToRupeeInput, localDateInputValue, formatDate } from "@/lib/utils";
 import { Search, Loader2, Phone } from "lucide-react";
 import type { Tenant } from "@pg/types";
+
+const IdPhotoPreview: React.FC<{ tenantId: string }> = ({ tenantId }) => {
+  const [url, setUrl] = useState<string | null>(null);
+  React.useEffect(() => {
+    let revoked: string | null = null;
+    getTenantIdPhotoBlob(tenantId)
+      .then((blob) => {
+        revoked = URL.createObjectURL(blob);
+        setUrl(revoked);
+      })
+      .catch(() => setUrl(null));
+    return () => {
+      if (revoked) URL.revokeObjectURL(revoked);
+    };
+  }, [tenantId]);
+  if (!url) return <p className="text-slate-500">ID photo on file</p>;
+  return <img src={url} alt="ID photo" className="mt-2 max-h-40 rounded-lg object-contain bg-slate-900" />;
+};
 
 export const TenantsView: React.FC = () => {
   const queryClient = useQueryClient();
@@ -42,7 +61,7 @@ export const TenantsView: React.FC = () => {
     setEditName(t.name);
     setEditRoom(t.room_number || "");
     setEditRent(paiseToRupeeInput(t.rent_amount));
-    setEditDue(t.due_day);
+    setEditDue(t.due_day ?? 5);
     setPhone("");
     setRefund("");
     setReason("");
@@ -107,8 +126,10 @@ export const TenantsView: React.FC = () => {
                     <td className="px-6 py-4 font-mono text-xs">{t.phone || "cash only"}</td>
                     <td className="px-6 py-4">{t.room_number || "—"}</td>
                     <td className="px-6 py-4">{formatPaise(t.rent_amount)}</td>
-                    <td className="px-6 py-4">Day {t.due_day}</td>
-                    <td className="px-6 py-4 capitalize text-xs">{t.status}</td>
+                    <td className="px-6 py-4">{t.due_day != null ? `Day ${t.due_day}` : "—"}</td>
+                    <td className="px-6 py-4 capitalize text-xs">
+                      {t.status === "pending_allocation" ? "awaiting room/rent" : t.status}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -125,6 +146,18 @@ export const TenantsView: React.FC = () => {
               <button onClick={() => setSelected(null)} className="text-slate-400">Close</button>
             </div>
             {error && <p className="text-xs text-rose-400">{error}</p>}
+            <div className="text-xs text-slate-400 space-y-1 rounded-xl bg-slate-800/50 p-3">
+              {selected.parent_name && <p>Parent: {selected.parent_name}</p>}
+              {selected.emergency_phone && (
+                <p className="font-mono">Emergency: {selected.emergency_phone}</p>
+              )}
+              {selected.permanent_address && <p>Home: {selected.permanent_address}</p>}
+              {selected.current_address && <p>Current: {selected.current_address}</p>}
+              {selected.joined_on && <p>Joined: {formatDate(selected.joined_on)}</p>}
+              {selected.has_id_photo && (
+                <IdPhotoPreview tenantId={selected.id} />
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <input value={editName} onChange={(e) => setEditName(e.target.value)} className="px-3 py-2 bg-slate-800 rounded-xl text-sm text-slate-100" />
               <input value={editRoom} onChange={(e) => setEditRoom(e.target.value)} placeholder="Room" className="px-3 py-2 bg-slate-800 rounded-xl text-sm text-slate-100" />

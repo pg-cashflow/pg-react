@@ -68,6 +68,12 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
       loadingMessage="Loading your dashboard..."
     >
       <div className="space-y-6">
+        {profile && profile.status === "pending_allocation" && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-sm text-amber-200">
+            Your profile is in. The owner still needs to assign your room and rent. Pay stays locked until then.
+          </div>
+        )}
+
         {profile && (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
             <p className="text-xs text-slate-400 uppercase mb-1">Welcome back</p>
