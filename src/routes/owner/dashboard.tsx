@@ -79,7 +79,10 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
     .sort((a, b) => new Date(b.matched_at).getTime() - new Date(a.matched_at).getTime())
     .slice(0, 5);
 
-  const tenantMap = React.useMemo(() => new Map(tenants.map((t) => [t.id, t.name])), [tenants]);
+  const tenantMap = React.useMemo(
+    () => new Map((tenantsQuery.data ?? []).map((t) => [t.id, t.name])),
+    [tenantsQuery.data]
+  );
 
   return (
     <QueryState

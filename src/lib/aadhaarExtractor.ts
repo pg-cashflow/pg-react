@@ -125,7 +125,7 @@ export function parseAadhaarTextContent(text: string): AadhaarPreview | null {
   // 1. Extract 12-digit Aadhaar or Masked Aadhaar last 4 digits
   // Formats: "1234 5678 9012" or "XXXX XXXX 1234" or "123456789012"
   let uidLast4: string | undefined;
-  const matchAadhaar = text.match(/(?:[xX\d]{4}[\s\-][xX\d]{4}[\s\-]|\b\d{8}\s*)(\d{4})\b/);
+  const matchAadhaar = text.match(/(?:[xX\d]{4}[\s-][xX\d]{4}[\s-]|\b\d{8}\s*)(\d{4})\b/);
   if (matchAadhaar?.[1]) {
     uidLast4 = matchAadhaar[1];
   } else {
@@ -137,7 +137,7 @@ export function parseAadhaarTextContent(text: string): AadhaarPreview | null {
 
   // 2. Extract DOB / YOB
   let dob: string | undefined;
-  const matchDob = text.match(/(?:DOB|Birth|D\.O\.B|Year of Birth|YOB)\s*[:\-]?\s*(\d{2}[/-]\d{2}[/-]\d{4}|\d{4})/i);
+  const matchDob = text.match(/(?:DOB|Birth|D\.O\.B|Year of Birth|YOB)\s*[:-]?\s*(\d{2}[/-]\d{2}[/-]\d{4}|\d{4})/i);
   if (matchDob?.[1]) {
     dob = matchDob[1];
   } else {

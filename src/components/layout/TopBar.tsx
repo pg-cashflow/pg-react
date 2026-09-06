@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Menu, Bell, CheckCircle2, AlertCircle, Sun, Moon, Smartphone } from "lucide-react";
+import { Menu, Bell, CheckCircle2, AlertCircle, Smartphone } from "lucide-react";
 import { subscribeToPush } from "@/push/subscribe";
-import { useTheme } from "@/theme/context";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface TopBarProps {
   title: string;
@@ -10,7 +11,6 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPush = false }) => {
-  const { resolvedTheme, toggleTheme } = useTheme();
   const [pushStatus, setPushStatus] = useState<"idle" | "loading" | "subscribed" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -34,19 +34,19 @@ export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPus
   };
 
   return (
-    <header className="h-16 px-4 lg:px-8 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-30 pt-safe">
+    <header className="h-16 px-4 lg:px-8 bg-surface/90 backdrop-blur-md border-b border-hairline flex items-center justify-between sticky top-0 z-30 pt-safe transition-colors">
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileMenu}
-          className="p-2 -ml-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="p-2 -ml-2 rounded-xl text-ink-muted hover:text-ink hover:bg-accent-tint transition lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <h2 className="text-base sm:text-lg font-bold text-slate-100">{title}</h2>
+          <h2 className="text-base sm:text-lg font-bold text-ink tracking-tight">{title}</h2>
           {isStandalone && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-medium border border-primary/20">
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-tint text-accent text-[10px] font-medium border border-accent/20">
               <Smartphone className="w-3 h-3" /> PWA
             </span>
           )}
@@ -54,24 +54,16 @@ export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPus
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Theme Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 border border-slate-700/50 transition active:scale-95 min-h-[40px] min-w-[40px] flex items-center justify-center"
-          title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
-          aria-label="Toggle theme"
-        >
-          {resolvedTheme === "dark" ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-slate-400" />
-          )}
-        </button>
+        {/* Notification Center */}
+        <NotificationCenter />
+
+        {/* Theme Toggle Button (Cycle System -> Light -> Dark) */}
+        <ThemeToggle />
 
         {/* Push Notification Button */}
         {showPush &&
           (pushStatus === "subscribed" ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-success-tint border border-success/30 text-xs font-medium text-success">
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Push Active</span>
           </span>
@@ -79,7 +71,7 @@ export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPus
           <button
             onClick={handleEnablePush}
             title={errorMessage || "Error enabling push"}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-medium text-rose-400 hover:bg-rose-500/20 transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-danger-tint border border-danger/30 text-xs font-medium text-danger hover:bg-danger-tint/80 transition active:scale-95"
           >
             <AlertCircle className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Retry</span>
@@ -88,9 +80,9 @@ export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPus
           <button
             onClick={handleEnablePush}
             disabled={pushStatus === "loading"}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700/80 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-hairline text-xs font-medium text-ink-muted hover:text-ink hover:bg-accent-tint transition active:scale-95"
           >
-            <Bell className="w-3.5 h-3.5 text-primary" />
+            <Bell className="w-3.5 h-3.5 text-accent" />
             <span className="hidden sm:inline">
               {pushStatus === "loading" ? "Enabling..." : "Enable Push"}
             </span>

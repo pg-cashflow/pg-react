@@ -20,7 +20,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-800/80 pb-safe shadow-lg">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-lg border-t border-hairline pb-safe shadow-lg transition-colors">
       <div className="flex items-center justify-around h-16 px-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -31,13 +31,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               onClick={() => onSelectTab(tab.id)}
               className={`flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] transition-transform active:scale-95 ${
                 isActive
-                  ? "text-primary font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "text-accent font-semibold"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
               <div
                 className={`p-1 rounded-xl transition-colors ${
-                  isActive ? "bg-primary/10 text-primary" : "text-slate-400"
+                  isActive ? "bg-accent-tint text-accent" : "text-ink-muted"
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -52,15 +52,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           onClick={onOpenMore}
           className={`flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] transition-transform active:scale-95 ${
             ["reconciliation", "events", "more", "payments"].includes(currentTab)
-              ? "text-primary font-semibold"
-              : "text-slate-400 hover:text-slate-200"
+              ? "text-accent font-semibold"
+              : "text-ink-muted hover:text-ink"
           }`}
         >
           <div
             className={`p-1 rounded-xl transition-colors ${
               ["reconciliation", "events", "more", "payments"].includes(currentTab)
-                ? "bg-primary/10 text-primary"
-                : "text-slate-400"
+                ? "bg-accent-tint text-accent"
+                : "text-ink-muted"
             }`}
           >
             <MoreHorizontal className="w-5 h-5" />

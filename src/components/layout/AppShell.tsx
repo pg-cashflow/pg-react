@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
@@ -24,8 +24,15 @@ export const AppShell: React.FC = () => {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const tab = path.replace("/owner/", "") || "joins";
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-portal", "owner");
+    return () => {
+      document.documentElement.removeAttribute("data-portal");
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col transition-colors">
+    <div data-portal="owner" className="min-h-screen flex flex-col bg-bg text-ink transition-colors">
       <Sidebar
         currentTab={tab}
         onSelectTab={(next) => {

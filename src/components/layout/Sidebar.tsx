@@ -50,20 +50,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-surface border-r border-hairline flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand */}
-        <div className="h-16 px-6 flex items-center gap-3 border-b border-slate-800">
-          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+        <div className="h-16 px-6 flex items-center gap-3 border-b border-hairline">
+          <div className="p-2 rounded-xl bg-accent-tint text-accent">
             <Building2 className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-100 text-sm leading-tight">
+            <h1 className="font-bold text-ink text-sm leading-tight">
               PG Manager
             </h1>
-            <p className="text-[11px] text-slate-400">Cashflow & Billing</p>
+            <p className="text-[11px] text-ink-muted">Cashflow & Billing</p>
           </div>
         </div>
 
@@ -81,25 +81,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   active
-                    ? "bg-primary text-slate-950 shadow-md shadow-primary/20 font-semibold"
-                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
+                    ? "bg-accent text-white shadow-sm font-semibold"
+                    : "text-ink-muted hover:text-ink hover:bg-accent-tint"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? "text-slate-950" : "text-slate-400"}`} />
-                {item.label}
+                <Icon className={`w-4 h-4 ${active ? "text-white" : "text-ink-muted"}`} />
+                <span>{item.label}</span>
               </button>
             );
           })}
         </nav>
 
         {/* User profile / Logout */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-hairline">
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-danger hover:bg-danger-tint transition"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            <span>Logout</span>
           </button>
         </div>
       </aside>

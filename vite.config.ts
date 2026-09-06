@@ -27,8 +27,8 @@ export default defineConfig({
         name: 'PG Cashflow Manager',
         short_name: 'PG Manager',
         description: 'Automated rent-due tracking and collection for PG/Hostel',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#FAFAF7',
+        background_color: '#FAFAF7',
         display: 'standalone',
         icons: [
           {

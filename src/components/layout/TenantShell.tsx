@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { TenantSidebar } from "./TenantSidebar";
 import { TenantBottomNav } from "./TenantBottomNav";
@@ -20,8 +20,15 @@ export const TenantShell: React.FC = () => {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const tab = path === "/tenant" || path === "/tenant/" ? "dashboard" : path.replace("/tenant/", "");
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-portal", "tenant");
+    return () => {
+      document.documentElement.removeAttribute("data-portal");
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col transition-colors">
+    <div data-portal="tenant" className="min-h-screen flex flex-col bg-bg text-ink transition-colors">
       <TenantSidebar
         currentTab={tab}
         onSelectTab={(next) => {

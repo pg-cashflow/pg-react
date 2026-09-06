@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2,
@@ -21,9 +20,10 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useAuth } from "@/auth/context";
 import { getInviteCode } from "@/auth/storage";
 
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+
 export const JoinWaitingPage: React.FC = () => {
-  const { reExchangeFirebase, logout, user } = useAuth();
-  const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const inviteCode = getInviteCode();
 
   const [name, setName] = useState("");
@@ -108,8 +108,7 @@ export const JoinWaitingPage: React.FC = () => {
         consent: true,
         image: idPhoto,
       });
-      await reExchangeFirebase();
-      navigate({ to: "/tenant" });
+      await meQuery.refetch();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit profile. Please try again.");
     } finally {
@@ -118,13 +117,15 @@ export const JoinWaitingPage: React.FC = () => {
   };
 
   const inputClass =
-    "w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition";
+    "w-full pl-10 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-ink placeholder-ink-faint text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition";
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 sm:p-6">
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-bg text-ink flex flex-col items-center justify-center p-4 sm:p-6 relative transition-colors">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
 
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 relative z-10 space-y-6">
+      <div className="w-full max-w-lg bg-surface border border-hairline rounded-3xl shadow-xl p-6 sm:p-8 relative z-10 space-y-6 transition-colors">
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="flex items-center gap-1.5 font-medium text-primary">
