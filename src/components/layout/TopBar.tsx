@@ -2,15 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Menu, Bell, CheckCircle2, AlertCircle, Smartphone } from "lucide-react";
 import { subscribeToPush } from "@/push/subscribe";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { LanguageToggle } from "@/components/common/LanguageSelector";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
+import type { UserRole } from "@pg/types";
 
 interface TopBarProps {
   title: string;
+  subtitle?: string;
   onOpenMobileMenu: () => void;
   showPush?: boolean;
+  leading?: React.ReactNode;
+  searchRole?: UserRole;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPush = false }) => {
+export const TopBar: React.FC<TopBarProps> = ({ title, subtitle, onOpenMobileMenu, showPush = false, leading, searchRole }) => {
   const [pushStatus, setPushStatus] = useState<"idle" | "loading" | "subscribed" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -38,22 +44,28 @@ export const TopBar: React.FC<TopBarProps> = ({ title, onOpenMobileMenu, showPus
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileMenu}
-          className="p-2 -ml-2 rounded-xl text-ink-muted hover:text-ink hover:bg-accent-tint transition lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="p-2 -ml-2 rounded-xl text-ink-muted hover:text-ink hover:bg-accent-tint lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
-          <h2 className="text-base sm:text-lg font-bold text-ink tracking-tight">{title}</h2>
-          {isStandalone && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-tint text-accent text-[10px] font-medium border border-accent/20">
-              <Smartphone className="w-3 h-3" /> PWA
-            </span>
-          )}
+        {leading}
+        <div>
+          <h2 className="t-h3 text-ink tracking-tight">{title}</h2>
+          {subtitle && <p className="t-caption text-ink-muted">{subtitle}</p>}
         </div>
+        {isStandalone && (
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-tint text-accent text-[10px] font-medium border border-accent/20">
+            <Smartphone className="w-3 h-3" /> PWA
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
+        {searchRole && <GlobalSearch role={searchRole} />}
+        {/* Language Selector */}
+        <LanguageToggle />
+
         {/* Notification Center */}
         <NotificationCenter />
 

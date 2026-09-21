@@ -16,6 +16,8 @@ export const QUERY_KEYS = {
   tenantPayments: ["tenant", "payments"] as const,
   tenantProfile: ["tenant", "me"] as const,
   joinMe: ["join", "me"] as const,
+  preferences: ["me", "preferences"] as const,
+  locales: ["locales"] as const,
 
   // Gamification & Operations
   tenantPoints: ["tenant", "points"] as const,

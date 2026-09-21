@@ -6,7 +6,9 @@ import { createTenant } from "@/api/tenants";
 import { importStatements } from "@/api/payments";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { rupeesToPaise } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { ThemeSegmentedControl } from "@/components/common/ThemeToggle";
+import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 
 export const MoreView: React.FC = () => {
   const queryClient = useQueryClient();
@@ -75,6 +77,30 @@ export const MoreView: React.FC = () => {
           <p className="text-xs text-ink-muted mt-0.5">Customize your preferred display theme</p>
         </div>
         <ThemeSegmentedControl />
+      </section>
+
+      {/* Language Preferences */}
+      <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
+        <div>
+          <h3 className="font-semibold text-ink">Language / భాష / மொழி / ಭಾಷೆ</h3>
+          <p className="text-xs text-ink-muted mt-0.5">Select your preferred display language</p>
+        </div>
+        <LanguageSegmentedControl />
+      </section>
+
+      <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
+        <h3 className="font-semibold text-ink">Notifications</h3>
+        <p className="text-xs text-ink-muted">
+          Rent reminders go out on WhatsApp three days before each due date. Automatic send needs pg-go cron.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/owner/reminders" className="inline-flex h-10 items-center px-4 rounded-[10px] bg-accent text-white t-caption font-semibold">
+            Open reminders
+          </Link>
+          <Link to="/owner/facility" className="inline-flex h-10 items-center px-4 rounded-[10px] border border-hairline t-caption font-semibold">
+            Wardens, UPI & due day
+          </Link>
+        </div>
       </section>
 
       {/* Invite code */}

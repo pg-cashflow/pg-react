@@ -35,7 +35,7 @@ export const ReconciliationView: React.FC = () => {
         <select
           value={period}
           onChange={(e) => setPeriod(e.target.value)}
-          className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm text-slate-200"
+          className="px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
         >
           {periodOptions.map((p) => (
             <option key={p} value={p}>
@@ -44,8 +44,8 @@ export const ReconciliationView: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-3 text-xs text-slate-400">
-        <Scale className="w-5 h-5 text-primary flex-shrink-0" />
+      <div className="bg-surface/60 border border-hairline rounded-2xl p-4 flex items-center gap-3 text-xs text-ink-muted">
+        <Scale className="w-5 h-5 text-accent flex-shrink-0" />
         <span>
           Monthly collections digest for period {summary?.period ?? "current month"}. Outstanding
           reflects pending and partial rent dues.
@@ -71,17 +71,17 @@ export const ReconciliationView: React.FC = () => {
               <MetricCard label="Deposits Refunded" amount={summary.deposits_refunded_paise} />
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-800">
-                <h3 className="text-sm font-bold text-slate-200">Collected by Channel</h3>
+            <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
+              <div className="px-6 py-4 border-b border-hairline">
+                <h3 className="text-sm font-bold text-ink">Collected by Channel</h3>
               </div>
               {channels.length === 0 ? (
-                <p className="p-6 text-xs text-slate-500">No payments recorded this period.</p>
+                <p className="p-6 text-xs text-ink-muted">No payments recorded this period.</p>
               ) : (
-                <div className="divide-y divide-slate-800/60">
+                <div className="divide-y divide-hairline">
                   {channels.map(([channel, amount]) => (
                     <div key={channel} className="px-6 py-4 flex items-center justify-between">
-                      <span className="text-sm text-slate-300 capitalize">{formatMatchedBy(channel)}</span>
+                      <span className="text-sm text-ink capitalize">{formatMatchedBy(channel)}</span>
                       <AmountBadge amount={amount} variant="success" />
                     </div>
                   ))}
@@ -105,8 +105,8 @@ function MetricCard({
   variant?: "default" | "success" | "warning";
 }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{label}</p>
+    <div className="bg-surface border border-hairline rounded-2xl p-5">
+      <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">{label}</p>
       <AmountBadge amount={amount} variant={variant} />
     </div>
   );

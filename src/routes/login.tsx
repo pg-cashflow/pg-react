@@ -4,6 +4,7 @@ import { getInviteCode } from "@/auth/storage";
 import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
 import { Building2, ArrowRight, KeyRound, Phone, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import AuthLayout from "@/components/layout/AuthLayout";
 
 const GoogleMark: React.FC = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -108,29 +109,21 @@ export const LoginPage: React.FC = () => {
     setError(null);
   };
 
+  const subtitle = invite
+    ? `Joining with invite ${invite}`
+    : step === "phone"
+      ? phonePrompt
+      : `Enter the 6-digit OTP sent to ${phone}`;
+
   return (
-    <div className="min-h-screen bg-bg text-ink flex flex-col items-center justify-center p-4 relative transition-colors">
+    <div className="relative">
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
-
-      <div className="w-full max-w-md bg-surface border border-hairline rounded-2xl shadow-xl p-8 relative z-10 transition-colors">
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-accent-tint text-accent flex items-center justify-center mb-4 ring-8 ring-accent/5">
-            <Building2 className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-bold text-ink">PG Cashflow Manager</h1>
-          <p className="text-sm text-ink-muted mt-1">
-            {invite
-              ? `Joining with invite ${invite}`
-              : step === "phone"
-                ? phonePrompt
-                : `Enter the 6-digit OTP sent to ${phone}`}
-          </p>
-        </div>
+      <AuthLayout icon={Building2} title="Sign in" subtitle={subtitle}>
 
         {onLocalhost && (
-          <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 text-xs flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-accent-tint border border-accent/20 text-accent text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>
               Phone OTP fails on localhost. Open{" "}
@@ -143,6 +136,7 @@ export const LoginPage: React.FC = () => {
         )}
 
         {/* Spark testing guidance */}
+        {import.meta.env.DEV && (
         <div className="mb-5 p-3 rounded-xl bg-accent-tint/50 border border-accent/20 text-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 font-medium text-accent">
@@ -186,6 +180,7 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
         </div>
+        )}
 
         {error && (
           <div className="mb-6 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-sm flex items-start gap-2">
@@ -321,7 +316,7 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
         )}
-      </div>
+      </AuthLayout>
     </div>
   );
 };

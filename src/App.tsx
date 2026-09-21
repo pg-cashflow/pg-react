@@ -5,15 +5,19 @@ import { AuthProvider } from "./auth/context";
 import { ThemeProvider } from "./theme/context";
 import { queryClient } from "./lib/queryClient";
 import { router } from "./router";
+import { LocaleProvider, LocaleSync } from "./i18n";
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-      </ThemeProvider>
+      <LocaleProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <LocaleSync />
+            <RouterProvider router={router} />
+          </AuthProvider>
+        </ThemeProvider>
+      </LocaleProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );

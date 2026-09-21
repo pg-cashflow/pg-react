@@ -27,9 +27,10 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
   const navItems = [
     { id: "dashboard", label: "Home", icon: LayoutDashboard },
     { id: "dues", label: "My Dues", icon: Receipt },
-    { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "payments", label: "Passbook", icon: CreditCard },
     { id: "rewards", label: "Perks & Points", icon: Sparkles },
     { id: "community", label: "Community & Meals", icon: UtensilsCrossed },
+    { id: "profile", label: "Profile", icon: Building2 },
   ];
 
   return (

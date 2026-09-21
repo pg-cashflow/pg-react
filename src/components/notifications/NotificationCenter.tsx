@@ -51,17 +51,17 @@ function getNotificationIcon(type: string) {
     case "payment_review":
       return {
         icon: CreditCard,
-        bgClass: "bg-amber-500/10 text-amber-500",
+        bgClass: "bg-accent-tint text-accent",
       };
     case "due_paid":
       return {
         icon: Receipt,
-        bgClass: "bg-emerald-500/10 text-emerald-500",
+        bgClass: "bg-success-tint text-success",
       };
     case "payment_rejected":
       return {
         icon: AlertCircle,
-        bgClass: "bg-rose-500/10 text-rose-500",
+        bgClass: "bg-danger-tint text-danger",
       };
     case "join_requested":
       return {
@@ -72,7 +72,7 @@ function getNotificationIcon(type: string) {
     case "tenant_created":
       return {
         icon: UserCheck,
-        bgClass: "bg-emerald-500/10 text-emerald-500",
+        bgClass: "bg-success-tint text-success",
       };
     case "inspection_completed":
       return {
@@ -82,27 +82,27 @@ function getNotificationIcon(type: string) {
     case "inspection_disputed":
       return {
         icon: AlertTriangle,
-        bgClass: "bg-amber-500/10 text-amber-500",
+        bgClass: "bg-accent-tint text-accent",
       };
     case "hazard_reported":
       return {
         icon: Flame,
-        bgClass: "bg-rose-500/10 text-rose-500",
+        bgClass: "bg-danger-tint text-danger",
       };
     case "hazard_resolved":
       return {
         icon: CheckCircle2,
-        bgClass: "bg-emerald-500/10 text-emerald-500",
+        bgClass: "bg-success-tint text-success",
       };
     case "violation_issued":
       return {
         icon: ShieldAlert,
-        bgClass: "bg-rose-500/10 text-rose-500",
+        bgClass: "bg-danger-tint text-danger",
       };
     case "points_awarded":
       return {
         icon: Sparkles,
-        bgClass: "bg-amber-400/10 text-amber-400",
+        bgClass: "bg-accent-tint text-accent",
       };
     case "reward_redeemed":
       return {
@@ -299,7 +299,7 @@ export const NotificationCenter: React.FC = () => {
                           {notif.title}
                         </p>
                         {notif.is_action_required && (
-                          <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold tracking-wide uppercase bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                          <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold tracking-wide uppercase bg-danger-tint text-rose-600 dark:text-danger border border-danger/20">
                             Action
                           </span>
                         )}

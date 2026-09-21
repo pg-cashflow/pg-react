@@ -1,4 +1,4 @@
-import React from "react";
+import { CheckCircle2, Clock, AlertTriangle, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DueStatus } from "@pg/types";
 
@@ -7,59 +7,65 @@ interface StatusPillProps {
   className?: string;
 }
 
+const MAP: Record<
+  string,
+  { label: string; className: string; Icon: typeof CheckCircle2 }
+> = {
+  paid: {
+    label: "Paid",
+    className: "bg-[var(--status-paid-bg)] text-[var(--status-paid-text)] border-[var(--status-paid-border)]",
+    Icon: CheckCircle2,
+  },
+  pending: {
+    label: "Due",
+    className:
+      "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)] border-[var(--status-pending-border)]",
+    Icon: Clock,
+  },
+  due: {
+    label: "Due",
+    className:
+      "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)] border-[var(--status-pending-border)]",
+    Icon: Clock,
+  },
+  partial: {
+    label: "Partial",
+    className:
+      "bg-[var(--status-partial-bg)] text-[var(--status-partial-text)] border-[var(--status-partial-border)]",
+    Icon: Clock,
+  },
+  overdue: {
+    label: "Overdue",
+    className:
+      "bg-[var(--status-overdue-bg)] text-[var(--status-overdue-text)] border-[var(--status-overdue-border)]",
+    Icon: AlertTriangle,
+  },
+  waived: {
+    label: "Waived",
+    className:
+      "bg-[var(--status-waived-bg)] text-[var(--status-waived-text)] border-[var(--status-waived-border)]",
+    Icon: Minus,
+  },
+};
+
 export const StatusPill: React.FC<StatusPillProps> = ({ status, className }) => {
   const normalized = (status || "").toLowerCase();
-
-  const getStyles = () => {
-    switch (normalized) {
-      case "paid":
-        return {
-          backgroundColor: "var(--status-paid-bg)",
-          color: "var(--status-paid-text)",
-          borderColor: "var(--status-paid-border)",
-        };
-      case "pending":
-        return {
-          backgroundColor: "var(--status-pending-bg)",
-          color: "var(--status-pending-text)",
-          borderColor: "var(--status-pending-border)",
-        };
-      case "partial":
-        return {
-          backgroundColor: "var(--status-partial-bg)",
-          color: "var(--status-partial-text)",
-          borderColor: "var(--status-partial-border)",
-        };
-      case "overdue":
-        return {
-          backgroundColor: "var(--status-overdue-bg)",
-          color: "var(--status-overdue-text)",
-          borderColor: "var(--status-overdue-border)",
-        };
-      case "waived":
-        return {
-          backgroundColor: "var(--status-waived-bg)",
-          color: "var(--status-waived-text)",
-          borderColor: "var(--status-waived-border)",
-        };
-      default:
-        return {
-          backgroundColor: "var(--surface-hover)",
-          color: "var(--muted-text)",
-          borderColor: "var(--surface-border)",
-        };
-    }
+  const s = MAP[normalized] || {
+    label: status || "Unknown",
+    className: "bg-surface text-ink-muted border-hairline",
+    Icon: Clock,
   };
-
+  const Icon = s.Icon;
   return (
     <span
-      style={getStyles()}
       className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border uppercase tracking-wider transition-colors",
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 t-caption font-medium border",
+        s.className,
         className
       )}
     >
-      {status}
+      <Icon className="h-3 w-3" aria-hidden />
+      {s.label}
     </span>
   );
 };

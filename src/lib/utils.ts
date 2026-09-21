@@ -18,9 +18,11 @@ export function paiseToRupeeInput(paise: number): string {
   return (Number(paise || 0) / 100).toString();
 }
 
+import { getStoredLocale } from "@/auth/storage";
+
 /** Format paise as Indian rupee string, e.g. 150000 -> "₹1,500.00" */
-export function formatPaise(paise: number): string {
-  return new Intl.NumberFormat("en-IN", {
+export function formatPaise(paise: number, locale: string = getStoredLocale()): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "INR",
     minimumFractionDigits: 2,
@@ -28,11 +30,11 @@ export function formatPaise(paise: number): string {
 }
 
 /** Format ISO date string into readable Indian standard format */
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, locale: string = getStoredLocale()): string {
   if (!dateString) return "-";
   try {
     const d = new Date(dateString);
-    return new Intl.DateTimeFormat("en-IN", {
+    return new Intl.DateTimeFormat(locale, {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -41,6 +43,7 @@ export function formatDate(dateString: string): string {
     return dateString;
   }
 }
+
 
 /** Local calendar date for HTML date inputs (yyyy-MM-dd) */
 export function localDateInputValue(date = new Date()): string {
@@ -95,4 +98,46 @@ export function eventKey(evt: {
   due_id?: string;
 }): string {
   return `${evt.occurred_at}-${evt.event_type}-${evt.tenant_id ?? ""}-${evt.due_id ?? ""}`;
+}
+
+/** “₹8,500 due on 5 Sep” — tenant passbook, reminders, pay sheet. */
+export function formatDueSentence(due: Pick<Due, "amount" | "due_date">): string {
+  return `${formatPaise(due.amount)} due on ${formatDate(due.due_date)}`;
+}
+
+export function addCalendarDays(isoDate: string, days: number): Date {
+  const d = new Date(isoDate);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+export function csvEscape(value: string | number): string {
+  const s = String(value ?? "");
+  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+export function downloadTextFile(filename: string, contents: string, mime = "text/csv;charset=utf-8") {
+  const blob = new Blob([contents], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export type CopyFeedback = "idle" | "copied" | "failed";
+
+export async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function isOpenDue(due: Due): boolean {
+  return due.status === "pending" || due.status === "partial";
 }

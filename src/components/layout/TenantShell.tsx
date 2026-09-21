@@ -9,9 +9,10 @@ const TITLES: Record<string, string> = {
   "/tenant": "My Dashboard",
   "/tenant/": "My Dashboard",
   "/tenant/dues": "My Dues",
-  "/tenant/payments": "My Payments",
+  "/tenant/payments": "Passbook",
   "/tenant/rewards": "Perks & Points Store",
   "/tenant/community": "Community & Meals",
+  "/tenant/profile": "Profile",
 };
 
 export const TenantShell: React.FC = () => {
@@ -44,6 +45,7 @@ export const TenantShell: React.FC = () => {
           title={TITLES[path] || "Tenant Portal"}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           showPush
+          searchRole="tenant"
         />
 
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">

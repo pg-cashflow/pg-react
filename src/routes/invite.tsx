@@ -4,6 +4,7 @@ import { Building2, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { lookupInvite } from "@/api/join";
 import { setInviteCode } from "@/auth/storage";
 import { ApiError } from "@/api/client";
+import AuthLayout from "@/components/layout/AuthLayout";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 export const InvitePage: React.FC = () => {
@@ -34,31 +35,36 @@ export const InvitePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-ink flex flex-col items-center justify-center p-4 relative transition-colors">
+    <div className="relative">
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
-
-      <div className="w-full max-w-md bg-surface border border-hairline rounded-2xl shadow-xl p-8 transition-colors">
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-accent-tint text-accent flex items-center justify-center mb-4 ring-8 ring-accent/5">
-            <Building2 className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-bold text-ink">PG / Hostel</h1>
-          <p className="text-sm text-ink-muted mt-1">
-            Enter the invite from your owner. Owners can skip and sign in.
-          </p>
-        </div>
-
+      <AuthLayout
+        icon={Building2}
+        title="Join a property"
+        subtitle="Enter the invite from your owner. Owners can skip and sign in."
+        footer={
+          <button
+            type="button"
+            onClick={() => {
+              setInviteCode("");
+              navigate({ to: "/login" });
+            }}
+            className="text-ink-muted hover:text-ink"
+          >
+            I am the owner — sign in
+          </button>
+        }
+      >
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-sm flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-[10px] bg-danger-tint border border-danger/20 text-danger text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {property && (
-          <div className="mb-4 p-3 rounded-xl bg-success-tint border border-success/20 text-success text-sm font-medium">
+          <div className="mb-4 p-3 rounded-[10px] bg-success-tint border border-success/20 text-success text-sm font-medium">
             {property.property_name} · {property.owner_name}
           </div>
         )}
@@ -68,13 +74,13 @@ export const InvitePage: React.FC = () => {
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="Invite code"
-            className="w-full px-4 py-2.5 bg-bg border border-hairline rounded-xl text-ink font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full h-12 px-4 bg-bg border border-hairline rounded-[10px] text-ink font-mono tracking-widest text-center text-base focus:outline-none focus:ring-2 focus:ring-accent"
             autoCapitalize="characters"
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-pressed transition active:scale-95 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 h-12 rounded-[10px] bg-accent text-white font-semibold text-sm hover:bg-accent-pressed disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
           </button>
@@ -84,23 +90,12 @@ export const InvitePage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate({ to: "/login" })}
-            className="mt-3 w-full py-3 rounded-xl bg-accent-tint text-accent border border-accent/20 font-semibold text-sm hover:bg-accent-tint/80 transition"
+            className="mt-3 w-full h-12 rounded-[10px] bg-accent-tint text-accent border border-accent/20 font-semibold text-sm"
           >
             Sign in to join
           </button>
         )}
-
-        <button
-          type="button"
-          onClick={() => {
-            setInviteCode("");
-            navigate({ to: "/login" });
-          }}
-          className="mt-4 w-full text-center text-xs text-ink-muted hover:text-ink transition"
-        >
-          I am the owner — sign in
-        </button>
-      </div>
+      </AuthLayout>
     </div>
   );
 };

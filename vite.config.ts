@@ -14,7 +14,7 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: /^https?:\/\/.*\/(auth|owner|tenant|join|push|webhooks)\//,
+            urlPattern: /^https?:\/\/.*\/(api|auth|owner|tenant|join|push|webhooks|manager|notifications)\//,
             handler: 'NetworkOnly',
           },
           {
@@ -24,9 +24,9 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'PG Cashflow Manager',
-        short_name: 'PG Manager',
-        description: 'Automated rent-due tracking and collection for PG/Hostel',
+        name: 'PG Cashflow',
+        short_name: 'PG Cashflow',
+        description: 'Rent ledger and daily ops for Indian PGs and hostels',
         theme_color: '#FAFAF7',
         background_color: '#FAFAF7',
         display: 'standalone',

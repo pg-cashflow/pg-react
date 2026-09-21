@@ -13,7 +13,7 @@ export const TenantBottomNav: React.FC<TenantBottomNavProps> = ({
   const tabs = [
     { id: "dashboard", label: "Home", icon: LayoutDashboard },
     { id: "dues", label: "Dues", icon: Receipt },
-    { id: "payments", label: "Pay", icon: CreditCard },
+    { id: "payments", label: "Passbook", icon: CreditCard },
     { id: "rewards", label: "Perks", icon: Sparkles },
     { id: "community", label: "Meals", icon: UtensilsCrossed },
   ];

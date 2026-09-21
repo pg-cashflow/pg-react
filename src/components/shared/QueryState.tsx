@@ -1,5 +1,5 @@
 import React from "react";
-import { Loader2, AlertCircle, RotateCcw } from "lucide-react";
+import { AlertCircle, RotateCcw } from "lucide-react";
 
 interface QueryStateProps {
   isLoading: boolean;
@@ -8,8 +8,20 @@ interface QueryStateProps {
   isEmpty?: boolean;
   loadingMessage?: string;
   emptyMessage?: string;
+  emptyAction?: React.ReactNode;
   onRetry?: () => void;
+  isFetching?: boolean;
   children: React.ReactNode;
+}
+
+function SkeletonList() {
+  return (
+    <div className="space-y-3" aria-hidden>
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="h-16 rounded-[14px] pg-shimmer" />
+      ))}
+    </div>
+  );
 }
 
 export const QueryState: React.FC<QueryStateProps> = ({
@@ -17,34 +29,37 @@ export const QueryState: React.FC<QueryStateProps> = ({
   isError,
   error,
   isEmpty = false,
-  loadingMessage = "Loading...",
-  emptyMessage = "No records found.",
+  loadingMessage = "Loading the ledger…",
+  emptyMessage = "Nothing on this ledger yet.",
+  emptyAction,
   onRetry,
+  isFetching,
   children,
 }) => {
   if (isLoading) {
     return (
-      <div className="py-16 flex flex-col items-center justify-center gap-2 text-sm text-slate-500">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        <span>{loadingMessage}</span>
+      <div className="space-y-3">
+        <p className="sr-only">{loadingMessage}</p>
+        <SkeletonList />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="py-16 px-6 flex flex-col items-center justify-center gap-3 text-center">
-        <AlertCircle className="w-8 h-8 text-rose-400" />
-        <p className="text-sm text-slate-300 font-medium">Failed to load data</p>
-        <p className="text-xs text-slate-500 max-w-sm">
-          {error?.message || "An unexpected error occurred. Please try again."}
+      <div className="py-12 px-4 flex flex-col items-center justify-center gap-3 text-center">
+        <AlertCircle className="w-8 h-8 text-danger" />
+        <p className="t-h3 text-ink">Couldn’t load this page</p>
+        <p className="t-body-sm text-ink-muted max-w-sm">
+          {error?.message || "Check your connection and try again."}
         </p>
         {onRetry && (
           <button
+            type="button"
             onClick={onRetry}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-medium hover:bg-slate-700 transition"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold text-accent hover:bg-accent-tint"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-4 h-4" />
             Retry
           </button>
         )}
@@ -54,9 +69,17 @@ export const QueryState: React.FC<QueryStateProps> = ({
 
   if (isEmpty) {
     return (
-      <div className="py-16 text-center text-sm text-slate-500">{emptyMessage}</div>
+      <div className="py-12 px-4 text-center space-y-3">
+        <p className="t-h3 text-ink">{emptyMessage}</p>
+        {emptyAction}
+      </div>
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="relative">
+      {isFetching && <div className="pg-fetching absolute top-0 left-0 right-0 rounded-full" />}
+      {children}
+    </div>
+  );
 };

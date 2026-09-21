@@ -98,62 +98,75 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
       loadingMessage="Loading dashboard..."
     >
       <div className="space-y-6">
+        <button
+          type="button"
+          onClick={() => onNavigate("reminders")}
+          className="w-full text-left rounded-[14px] border border-hairline bg-surface px-5 py-4 flex items-center justify-between"
+        >
+          <div>
+            <div className="t-h3">Rent reminders</div>
+            <p className="t-body-sm text-ink-muted mt-1">
+              Open dues are messaged three days before the due date. Send now from the reminders ledger.
+            </p>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-accent shrink-0" />
+        </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase">Rent Collected</span>
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
+              <span className="text-xs font-semibold text-ink-muted uppercase">Rent Collected</span>
+              <TrendingUp className="w-5 h-5 text-success" />
             </div>
             <AmountBadge amount={summary?.rent_collected_paise ?? 0} variant="success" />
-            <p className="text-xs text-slate-500 mt-1">Period {summary?.period ?? "—"}</p>
+            <p className="text-xs text-ink-muted mt-1">Period {summary?.period ?? "—"}</p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase">Outstanding</span>
-              <Clock className="w-5 h-5 text-amber-400" />
+              <span className="text-xs font-semibold text-ink-muted uppercase">Outstanding</span>
+              <Clock className="w-5 h-5 text-accent" />
             </div>
             <AmountBadge amount={summary?.outstanding_paise ?? 0} variant="warning" />
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase">Overdue</span>
-              <AlertTriangle className="w-5 h-5 text-rose-400" />
+              <span className="text-xs font-semibold text-ink-muted uppercase">Overdue</span>
+              <AlertTriangle className="w-5 h-5 text-danger" />
             </div>
             <AmountBadge amount={totalOverduePaise} variant="danger" />
-            <p className="text-xs text-slate-500 mt-1">{overdueCount} overdue dues</p>
+            <p className="text-xs text-ink-muted mt-1">{overdueCount} overdue dues</p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase">Active Tenants</span>
-              <Users className="w-5 h-5 text-primary" />
+              <span className="text-xs font-semibold text-ink-muted uppercase">Active Tenants</span>
+              <Users className="w-5 h-5 text-accent" />
             </div>
-            <div className="text-2xl font-bold text-slate-100">{activeTenants.length}</div>
+            <div className="t-display-num text-ink">{activeTenants.length}</div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-accent" />
                 Latest Dues
               </h3>
-              <button onClick={() => onNavigate("dues")} className="text-xs text-primary hover:underline flex items-center gap-1">
+              <button onClick={() => onNavigate("dues")} className="text-xs text-accent hover:underline flex items-center gap-1">
                 View All <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
             {recentDues.length === 0 ? (
-              <p className="py-8 text-center text-xs text-slate-500">No dues yet.</p>
+              <p className="py-8 text-center text-xs text-ink-muted">No dues yet.</p>
             ) : (
-              <div className="divide-y divide-slate-800/80">
+              <div className="divide-y divide-hairline">
                 {recentDues.map((due) => (
                   <div key={due.id} className="py-3 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-200">{tenantMap.get(due.tenant_id) || "Tenant"}</p>
-                      <p className="text-xs text-slate-500">{due.due_code} · Due {formatDate(due.due_date)}</p>
+                      <p className="text-sm font-medium text-ink">{tenantMap.get(due.tenant_id) || "Tenant"}</p>
+                      <p className="text-xs text-ink-muted">{due.due_code} · Due {formatDate(due.due_date)}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <AmountBadge amount={due.amount} />
@@ -165,32 +178,32 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
             )}
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-success" />
                 Recent Payments
               </h3>
-              <button onClick={() => onNavigate("payments")} className="text-xs text-primary hover:underline flex items-center gap-1">
+              <button onClick={() => onNavigate("payments")} className="text-xs text-accent hover:underline flex items-center gap-1">
                 View All <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
             {recentPayments.length === 0 ? (
-              <p className="py-8 text-center text-xs text-slate-500">No payments yet.</p>
+              <p className="py-8 text-center text-xs text-ink-muted">No payments yet.</p>
             ) : (
-              <div className="divide-y divide-slate-800/80">
+              <div className="divide-y divide-hairline">
                 {recentPayments.map((p) => (
                   <div key={p.id} className="py-3 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-200">{tenantMap.get(p.tenant_id) || "Tenant"}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm font-medium text-ink">{tenantMap.get(p.tenant_id) || "Tenant"}</p>
+                      <p className="text-xs text-ink-muted">
                         {formatDate(p.matched_at)} · {formatMatchedBy(p.matched_by)}
                         {p.upi_txn_id ? ` (${p.upi_txn_id})` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <AmountBadge amount={p.amount} variant="success" />
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-success" />
                     </div>
                   </div>
                 ))}

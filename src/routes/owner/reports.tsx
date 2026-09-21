@@ -43,8 +43,8 @@ export const ReportsView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-slate-400">Confirm a UTR only after you see it in the bank. Cash is a separate action on Dues.</p>
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <p className="text-sm text-ink-muted">Confirm a UTR only after you see it in the bank. Cash is a separate action on Dues.</p>
+      <div className="bg-surface border border-hairline rounded-2xl overflow-hidden">
         <QueryState
           isLoading={reportsQuery.isLoading}
           isError={reportsQuery.isError}
@@ -53,15 +53,15 @@ export const ReportsView: React.FC = () => {
           emptyMessage="No UTR reports waiting."
           onRetry={() => reportsQuery.refetch()}
         >
-          <div className="divide-y divide-slate-800">
+          <div className="divide-y divide-hairline">
             {rows.map((r) => (
               <div key={r.id} className="p-4 space-y-2">
                 <div className="flex justify-between gap-3">
                   <div>
-                    <p className="font-medium text-slate-100">{tenantMap.get(r.tenant_id) || "Tenant"}</p>
-                    <p className="text-xs font-mono text-slate-400">{r.upi_txn_id}</p>
-                    <p className="text-xs text-slate-500">{formatDate(r.created_at)}</p>
-                    {r.has_image && <p className="text-xs text-slate-500">Screenshot attached</p>}
+                    <p className="font-medium text-ink">{tenantMap.get(r.tenant_id) || "Tenant"}</p>
+                    <p className="text-xs font-mono text-ink-muted">{r.upi_txn_id}</p>
+                    <p className="text-xs text-ink-muted">{formatDate(r.created_at)}</p>
+                    {r.has_image && <p className="text-xs text-ink-muted">Screenshot attached</p>}
                   </div>
                   <AmountBadge amount={r.amount} />
                 </div>
@@ -71,13 +71,13 @@ export const ReportsView: React.FC = () => {
                     onClick={() => {
                       if (window.confirm("Confirm this UTR and match the due?")) confirmMutation.mutate(r.id);
                     }}
-                    className="px-3 py-2 rounded-xl bg-emerald-500 text-slate-950 text-sm font-semibold disabled:opacity-50"
+                    className="px-3 py-2 rounded-xl bg-success text-white text-sm font-semibold disabled:opacity-50"
                   >
                     Confirm
                   </button>
                   <button
                     onClick={() => setRejectId(r.id)}
-                    className="px-3 py-2 rounded-xl bg-slate-800 text-rose-400 text-sm"
+                    className="px-3 py-2 rounded-xl bg-surface text-danger text-sm"
                   >
                     Reject
                   </button>
@@ -88,11 +88,11 @@ export const ReportsView: React.FC = () => {
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
                       placeholder="Reject note (optional)"
-                      className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100"
+                      className="flex-1 px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
                     />
                     <button
                       onClick={() => rejectMutation.mutate({ id: r.id, n: note })}
-                      className="px-3 py-2 rounded-xl bg-rose-500 text-slate-950 text-sm font-semibold"
+                      className="px-3 py-2 rounded-xl bg-danger text-white text-sm font-semibold"
                     >
                       Send
                     </button>

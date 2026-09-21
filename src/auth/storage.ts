@@ -3,6 +3,23 @@ import type { User } from "@pg/types";
 const TOKEN_KEY = "pg_jwt";
 const USER_KEY = "pg_user";
 const INVITE_KEY = "pg_invite";
+const LOCALE_KEY = "pg_locale";
+
+export const getStoredLocale = (): string => {
+  try {
+    return localStorage.getItem(LOCALE_KEY) || "en-IN";
+  } catch {
+    return "en-IN";
+  }
+};
+
+export const setStoredLocale = (locale: string): void => {
+  try {
+    localStorage.setItem(LOCALE_KEY, locale);
+  } catch {
+    // ignore
+  }
+};
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
 

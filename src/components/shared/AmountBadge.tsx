@@ -13,24 +13,17 @@ export const AmountBadge: React.FC<AmountBadgeProps> = ({
   className,
   variant = "default",
 }) => {
-  const getStyle = () => {
-    switch (variant) {
-      case "success":
-        return { color: "var(--amount-success)" };
-      case "danger":
-        return { color: "var(--amount-danger)" };
-      case "warning":
-        return { color: "var(--amount-warning)" };
-      default:
-        return { color: "inherit" };
-    }
-  };
+  const color =
+    variant === "success"
+      ? "text-success"
+      : variant === "danger"
+        ? "text-danger"
+        : variant === "warning"
+          ? "text-accent"
+          : "text-ink";
 
   return (
-    <span
-      style={getStyle()}
-      className={cn("tracking-tight font-mono font-semibold", className)}
-    >
+    <span className={cn("t-amount tracking-tight", color, className)}>
       {formatPaise(amount)}
     </span>
   );

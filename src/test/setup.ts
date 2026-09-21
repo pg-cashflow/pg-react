@@ -1,5 +1,8 @@
 import { afterEach } from "vitest";
 
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
 afterEach(() => {
   localStorage.clear();
 });
+

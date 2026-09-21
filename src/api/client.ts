@@ -1,12 +1,14 @@
 import { API_BASE } from "@/lib/constants";
-import { getToken, clearToken } from "@/auth/storage";
+import { getToken, clearToken, getStoredLocale } from "@/auth/storage";
 
 export class ApiError extends Error {
   status: number;
+  code?: string;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code?: string) {
     super(message);
     this.status = status;
+    this.code = code;
     this.name = "ApiError";
   }
 }
@@ -20,9 +22,13 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
 
   if (!res.ok) {
     let errorMsg = "An error occurred";
+    let errorCode: string | undefined;
     try {
       const data = await res.json();
       errorMsg = data.message || data.error || JSON.stringify(data);
+      if (typeof data.code === "string") {
+        errorCode = data.code;
+      }
     } catch {
       errorMsg = await res.text();
     }
@@ -34,7 +40,7 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
     if (res.status === 403 && /complete your profile to continue/i.test(mapped)) {
       window.dispatchEvent(new CustomEvent("pg:waiting-join"));
     }
-    throw new ApiError(res.status, mapped);
+    throw new ApiError(res.status, mapped, errorCode);
   }
 
   if (res.status === 204) {
@@ -77,6 +83,10 @@ function authHeaders(options: RequestInit): Record<string, string> {
   }
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+  const locale = getStoredLocale();
+  if (locale && !headers["Accept-Language"]) {
+    headers["Accept-Language"] = locale;
   }
   return headers;
 }

@@ -28,15 +28,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { logout } = useAuth();
 
   const navItems = [
-    { id: "joins", label: "Join queue", icon: LayoutDashboard },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "joins", label: "Join queue", icon: Users },
     { id: "reports", label: "UTR reports", icon: Receipt },
     { id: "tenants", label: "Tenants", icon: Users },
     { id: "dues", label: "Dues & Billing", icon: Scale },
     { id: "payments", label: "Payments", icon: CreditCard },
     { id: "reconciliation", label: "Reconciliation", icon: Scale },
+    { id: "reminders", label: "Reminders", icon: Bell },
     { id: "facility", label: "Facility & Rules", icon: Sliders },
     { id: "events", label: "Audit & Events", icon: Bell },
-    { id: "more", label: "More", icon: Building2 },
+    { id: "more", label: "Settings", icon: Building2 },
   ];
 
   return (
@@ -61,9 +63,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div>
             <h1 className="font-bold text-ink text-sm leading-tight">
-              PG Manager
+              PG Cashflow
             </h1>
-            <p className="text-[11px] text-ink-muted">Cashflow & Billing</p>
+            <p className="text-[11px] text-ink-muted">Owner ledger</p>
           </div>
         </div>
 

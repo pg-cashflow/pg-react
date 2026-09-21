@@ -13,9 +13,13 @@ import { InvitePage } from "@/routes/invite";
 import { LoginPage } from "@/routes/login";
 import { JoinWaitingPage } from "@/routes/join";
 import { AccessDeniedView } from "@/routes/access-denied";
+import { LandingPage } from "@/routes/landing";
+import { NotFoundView } from "@/routes/not-found";
+import { ActivationPage } from "@/routes/activation";
 import { AppShell } from "@/components/layout/AppShell";
 import { TenantShell } from "@/components/layout/TenantShell";
 import { ManagerShell } from "@/components/layout/ManagerShell";
+import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { JoinsView } from "@/routes/owner/joins";
 import { ReportsView } from "@/routes/owner/reports";
 import { TenantsView } from "@/routes/owner/tenants";
@@ -26,29 +30,28 @@ import { EventsView } from "@/routes/owner/events";
 import { MoreView } from "@/routes/owner/more";
 import { DashboardView } from "@/routes/owner/dashboard";
 import { OwnerFacilityView } from "@/routes/owner/facility";
+import { OwnerRemindersView } from "@/routes/owner/reminders";
 import { TenantDashboardView } from "@/routes/tenant/dashboard";
 import { TenantDuesView } from "@/routes/tenant/dues";
 import { TenantPaymentsView } from "@/routes/tenant/payments";
 import { TenantRewardsView } from "@/routes/tenant/rewards";
 import { TenantCommunityView } from "@/routes/tenant/community";
-import { ManagerDashboardView } from "@/routes/manager/dashboard";
-import { Loader2 } from "lucide-react";
-
-function Spinner() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-slate-400 gap-3">
-      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      <span className="text-sm font-medium">Loading session...</span>
-    </div>
-  );
-}
+import { TenantProfileView } from "@/routes/tenant/profile";
+import { KitchenHeadcountView } from "@/routes/manager/kitchen";
+import { InspectionsListView } from "@/routes/manager/inspections";
+import { InspectionNewView } from "@/routes/manager/inspection-new";
+import { InspectionDetailView } from "@/routes/manager/inspection-detail";
+import { MetersView } from "@/routes/manager/meters";
+import { HazardsView } from "@/routes/manager/hazards";
+import { ManagerProfileView } from "@/routes/manager/profile";
+import { ViolationsView } from "@/routes/manager/violations";
 
 function homeForRole(role: string | null, pending: boolean): string {
-  if (role === "owner") return "/owner/joins";
-  if (role === "manager") return "/manager";
+  if (role === "owner") return "/owner/dashboard";
+  if (role === "manager") return "/manager/kitchen";
   if (role === "tenant" && pending) return "/join";
   if (role === "tenant") return "/tenant";
-  return "/";
+  return "/landing";
 }
 
 const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -60,11 +63,11 @@ const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (isLoading) return;
     if (isAuthenticated) {
       const dest = homeForRole(role, isPendingJoin);
-      if (path === "/" || path === "/login") navigate({ to: dest });
+      if (path === "/" || path === "/login" || path === "/landing") navigate({ to: dest });
     }
   }, [isAuthenticated, isLoading, role, isPendingJoin, path, navigate]);
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <AppLoadingScreen />;
   return <>{children}</>;
 };
 
@@ -73,12 +76,12 @@ function RequireOwner() {
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/" });
-    else if (role === "manager") navigate({ to: "/manager" });
+    if (!isAuthenticated) navigate({ to: "/landing" });
+    else if (role === "manager") navigate({ to: "/manager/kitchen" });
     else if (role === "tenant") navigate({ to: isPendingJoin ? "/join" : "/tenant" });
     else if (role !== "owner") navigate({ to: "/denied" });
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
-  if (isLoading || role !== "owner") return <Spinner />;
+  if (isLoading || role !== "owner") return <AppLoadingScreen />;
   return <AppShell />;
 }
 
@@ -87,13 +90,13 @@ function RequireTenant() {
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/" });
+    if (!isAuthenticated) navigate({ to: "/landing" });
     else if (isPendingJoin) navigate({ to: "/join" });
-    else if (role === "owner") navigate({ to: "/owner/joins" });
-    else if (role === "manager") navigate({ to: "/manager" });
+    else if (role === "owner") navigate({ to: "/owner/dashboard" });
+    else if (role === "manager") navigate({ to: "/manager/kitchen" });
     else if (role !== "tenant") navigate({ to: "/denied" });
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
-  if (isLoading || role !== "tenant" || isPendingJoin) return <Spinner />;
+  if (isLoading || role !== "tenant" || isPendingJoin) return <AppLoadingScreen />;
   return <TenantShell />;
 }
 
@@ -102,12 +105,12 @@ function RequireManager() {
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/" });
-    else if (role === "owner") navigate({ to: "/owner/joins" });
+    if (!isAuthenticated) navigate({ to: "/landing" });
+    else if (role === "owner") navigate({ to: "/owner/dashboard" });
     else if (role === "tenant") navigate({ to: "/tenant" });
     else if (role !== "manager") navigate({ to: "/denied" });
   }, [isAuthenticated, isLoading, role, navigate]);
-  if (isLoading || role !== "manager") return <Spinner />;
+  if (isLoading || role !== "manager") return <AppLoadingScreen />;
   return <ManagerShell />;
 }
 
@@ -116,11 +119,11 @@ function RequireJoin() {
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/" });
-    else if (role === "owner") navigate({ to: "/owner/joins" });
+    if (!isAuthenticated) navigate({ to: "/landing" });
+    else if (role === "owner") navigate({ to: "/owner/dashboard" });
     else if (!isPendingJoin) navigate({ to: "/tenant" });
   }, [isAuthenticated, isLoading, isPendingJoin, role, navigate]);
-  if (isLoading || !isPendingJoin) return <Spinner />;
+  if (isLoading || !isPendingJoin) return <AppLoadingScreen />;
   return <JoinWaitingPage />;
 }
 
@@ -135,12 +138,19 @@ function WaitingJoinListener() {
 }
 
 const rootRoute = createRootRoute({
+  notFoundComponent: NotFoundView,
   component: () => (
     <>
       <WaitingJoinListener />
       <Outlet />
     </>
   ),
+});
+
+const landingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/landing",
+  component: LandingPage,
 });
 
 const indexRoute = createRoute({
@@ -161,6 +171,12 @@ const loginRoute = createRoute({
       <LoginPage />
     </AuthRedirect>
   ),
+});
+
+const activationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/activation",
+  component: ActivationPage,
 });
 
 const joinRoute = createRoute({
@@ -185,7 +201,7 @@ const ownerIndex = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/",
   beforeLoad: () => {
-    throw redirect({ to: "/owner/joins" });
+    throw redirect({ to: "/owner/dashboard" });
   },
 });
 
@@ -202,6 +218,11 @@ const ownerRecon = createRoute({
 const ownerEvents = createRoute({ getParentRoute: () => ownerRoute, path: "/events", component: EventsView });
 const ownerFacility = createRoute({ getParentRoute: () => ownerRoute, path: "/facility", component: OwnerFacilityView });
 const ownerMore = createRoute({ getParentRoute: () => ownerRoute, path: "/more", component: MoreView });
+const ownerReminders = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/reminders",
+  component: OwnerRemindersView,
+});
 const ownerDash = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/dashboard",
@@ -209,7 +230,7 @@ const ownerDash = createRoute({
     const navigate = useNavigate();
     return (
       <DashboardView
-        onNavigate={(tab) => navigate({ to: `/owner/${tab === "dashboard" ? "joins" : tab}` })}
+        onNavigate={(tab) => navigate({ to: `/owner/${tab === "dashboard" ? "dashboard" : tab}` })}
       />
     );
   },
@@ -249,6 +270,11 @@ const tenantCommunity = createRoute({
   path: "/community",
   component: TenantCommunityView,
 });
+const tenantProfile = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/profile",
+  component: TenantProfileView,
+});
 
 const managerRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -259,12 +285,56 @@ const managerRoute = createRoute({
 const managerIndex = createRoute({
   getParentRoute: () => managerRoute,
   path: "/",
-  component: ManagerDashboardView,
+  beforeLoad: () => {
+    throw redirect({ to: "/manager/kitchen" });
+  },
+});
+const managerKitchen = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/kitchen",
+  component: KitchenHeadcountView,
+});
+const managerInspections = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/inspections",
+  component: InspectionsListView,
+});
+const managerInspectionNew = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/inspections/new",
+  component: InspectionNewView,
+});
+const managerInspectionDetail = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/inspections/$id",
+  component: InspectionDetailView,
+});
+const managerMeters = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/meters",
+  component: MetersView,
+});
+const managerHazards = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/hazards",
+  component: HazardsView,
+});
+const managerProfile = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/profile",
+  component: ManagerProfileView,
+});
+const managerViolations = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/violations",
+  component: ViolationsView,
 });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  landingRoute,
   loginRoute,
+  activationRoute,
   joinRoute,
   deniedRoute,
   ownerRoute.addChildren([
@@ -278,6 +348,7 @@ const routeTree = rootRoute.addChildren([
     ownerEvents,
     ownerFacility,
     ownerMore,
+    ownerReminders,
     ownerDash,
   ]),
   tenantRoute.addChildren([
@@ -286,8 +357,19 @@ const routeTree = rootRoute.addChildren([
     tenantPayments,
     tenantRewards,
     tenantCommunity,
+    tenantProfile,
   ]),
-  managerRoute.addChildren([managerIndex]),
+  managerRoute.addChildren([
+    managerIndex,
+    managerKitchen,
+    managerInspections,
+    managerInspectionNew,
+    managerInspectionDetail,
+    managerMeters,
+    managerHazards,
+    managerProfile,
+    managerViolations,
+  ]),
 ]);
 
 export const router = createRouter({ routeTree });

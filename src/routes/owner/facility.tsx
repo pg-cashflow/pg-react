@@ -152,13 +152,13 @@ export const OwnerFacilityView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Property Selector & Subnav */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-hairline rounded-2xl p-5">
         <div>
-          <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-primary" />
+          <h2 className="text-base font-bold text-ink flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-accent" />
             Facility & Operations Management
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-ink-muted mt-0.5">
             Configure physical building floors, rooms, warden accounts, and gamification rules.
           </p>
         </div>
@@ -167,7 +167,7 @@ export const OwnerFacilityView: React.FC = () => {
           <select
             value={propertyId}
             onChange={(e) => setPropertyId(e.target.value)}
-            className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+            className="px-3 py-1.5 bg-surface border border-hairline rounded-xl text-xs text-ink"
           >
             {propertyList.map((p) => (
               <option key={p.id} value={p.id}>
@@ -182,8 +182,8 @@ export const OwnerFacilityView: React.FC = () => {
         <div
           className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
             msg.type === "ok"
-              ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-              : "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+              ? "bg-success-tint border border-success/20 text-success"
+              : "bg-danger-tint border border-danger/20 text-danger"
           }`}
         >
           {msg.type === "ok" ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
@@ -192,11 +192,11 @@ export const OwnerFacilityView: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl overflow-x-auto">
+      <div className="flex items-center gap-2 p-1.5 bg-surface border border-hairline rounded-2xl overflow-x-auto">
         <button
           onClick={() => setTab("floors")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "floors" ? "bg-primary text-slate-950" : "text-slate-400 hover:text-slate-200"
+            tab === "floors" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -205,7 +205,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("rooms")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "rooms" ? "bg-primary text-slate-950" : "text-slate-400 hover:text-slate-200"
+            tab === "rooms" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
           }`}
         >
           <DoorOpen className="w-4 h-4" />
@@ -214,7 +214,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("wardens")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "wardens" ? "bg-primary text-slate-950" : "text-slate-400 hover:text-slate-200"
+            tab === "wardens" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
           }`}
         >
           <UserCheck className="w-4 h-4" />
@@ -223,7 +223,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("gamification")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "gamification" ? "bg-primary text-slate-950" : "text-slate-400 hover:text-slate-200"
+            tab === "gamification" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Sliders className="w-4 h-4" />
@@ -234,50 +234,50 @@ export const OwnerFacilityView: React.FC = () => {
       {/* 1. Floors */}
       {tab === "floors" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-              <Plus className="w-4 h-4 text-primary" /> Add Floor
+          <div className="bg-surface border border-hairline rounded-2xl p-5 space-y-4">
+            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <Plus className="w-4 h-4 text-accent" /> Add Floor
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Floor Number</label>
+                <label className="block text-xs font-medium text-ink mb-1">Floor Number</label>
                 <input
                   type="number"
                   value={floorNumber}
                   onChange={(e) => setFloorNumber(e.target.value)}
                   placeholder="e.g. 1"
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                  className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Floor Name / Description</label>
+                <label className="block text-xs font-medium text-ink mb-1">Floor Name / Description</label>
                 <input
                   value={floorName}
                   onChange={(e) => setFloorName(e.target.value)}
                   placeholder="e.g. First Floor - North"
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                  className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                 />
               </div>
               <button
                 onClick={() => addFloorMutation.mutate()}
                 disabled={addFloorMutation.isPending || !floorNumber || !floorName}
-                className="w-full py-2.5 rounded-xl bg-primary text-slate-950 font-bold text-xs hover:bg-primary/90 disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
               >
                 {addFloorMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Create Floor"}
               </button>
             </div>
           </div>
 
-          <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-            <h3 className="text-sm font-bold text-slate-100">Floors in Property</h3>
-            <div className="divide-y divide-slate-800 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="md:col-span-2 bg-surface border border-hairline rounded-2xl p-5 space-y-3">
+            <h3 className="text-sm font-bold text-ink">Floors in Property</h3>
+            <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {floors.length === 0 ? (
-                <div className="p-4 text-xs text-slate-500">No floors added yet.</div>
+                <div className="p-4 text-xs text-ink-muted">No floors added yet.</div>
               ) : (
                 floors.map((f) => (
                   <div key={f.id} className="p-3 flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-200">Floor {f.floor_number}</span>
-                    <span className="text-slate-400">{f.name}</span>
+                    <span className="font-bold text-ink">Floor {f.floor_number}</span>
+                    <span className="text-ink-muted">{f.name}</span>
                   </div>
                 ))
               )}
@@ -289,17 +289,17 @@ export const OwnerFacilityView: React.FC = () => {
       {/* 2. Rooms */}
       {tab === "rooms" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-              <Plus className="w-4 h-4 text-primary" /> Add Room
+          <div className="bg-surface border border-hairline rounded-2xl p-5 space-y-4">
+            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <Plus className="w-4 h-4 text-accent" /> Add Room
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Floor</label>
+                <label className="block text-xs font-medium text-ink mb-1">Floor</label>
                 <select
                   value={roomFloorId}
                   onChange={(e) => setRoomFloorId(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                  className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                 >
                   <option value="">Select Floor...</option>
                   {floors.map((f) => (
@@ -310,57 +310,57 @@ export const OwnerFacilityView: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Room Number / Name</label>
+                <label className="block text-xs font-medium text-ink mb-1">Room Number / Name</label>
                 <input
                   value={roomNumber}
                   onChange={(e) => setRoomNumber(e.target.value)}
                   placeholder="e.g. 101"
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                  className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Capacity</label>
+                  <label className="block text-xs font-medium text-ink mb-1">Capacity</label>
                   <input
                     type="number"
                     value={roomCapacity}
                     onChange={(e) => setRoomCapacity(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                    className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Included Units (kWh)</label>
+                  <label className="block text-xs font-medium text-ink mb-1">Included Units (kWh)</label>
                   <input
                     type="number"
                     value={includedUnits}
                     onChange={(e) => setIncludedUnits(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                    className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                   />
                 </div>
               </div>
               <button
                 onClick={() => addRoomMutation.mutate()}
                 disabled={addRoomMutation.isPending || !roomNumber || !roomFloorId}
-                className="w-full py-2.5 rounded-xl bg-primary text-slate-950 font-bold text-xs hover:bg-primary/90 disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
               >
                 {addRoomMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Create Room"}
               </button>
             </div>
           </div>
 
-          <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-            <h3 className="text-sm font-bold text-slate-100">Rooms in Property</h3>
-            <div className="divide-y divide-slate-800 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="md:col-span-2 bg-surface border border-hairline rounded-2xl p-5 space-y-3">
+            <h3 className="text-sm font-bold text-ink">Rooms in Property</h3>
+            <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {rooms.length === 0 ? (
-                <div className="p-4 text-xs text-slate-500">No rooms added yet.</div>
+                <div className="p-4 text-xs text-ink-muted">No rooms added yet.</div>
               ) : (
                 rooms.map((r) => (
                   <div key={r.id} className="p-3 flex items-center justify-between text-xs">
                     <div>
-                      <span className="font-bold text-slate-200">Room {r.room_number}</span>
-                      <span className="text-slate-400 text-[11px] block">Capacity: {r.capacity} beds</span>
+                      <span className="font-bold text-ink">Room {r.room_number}</span>
+                      <span className="text-ink-muted text-[11px] block">Capacity: {r.capacity} beds</span>
                     </div>
-                    <span className="font-mono text-slate-400">{r.included_units} kWh included</span>
+                    <span className="font-mono text-ink-muted">{r.included_units} kWh included</span>
                   </div>
                 ))
               )}
@@ -371,27 +371,27 @@ export const OwnerFacilityView: React.FC = () => {
 
       {/* 3. Wardens / Managers */}
       {tab === "wardens" && (
-        <div className="max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-primary" /> Provision Warden Account
+        <div className="max-w-md bg-surface border border-hairline rounded-2xl p-6 space-y-4">
+          <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-accent" /> Provision Warden Account
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted">
             Grant warden privileges scoped strictly to this property. They will sign in using Phone OTP.
           </p>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Phone Number (E.164)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Phone Number (E.164)</label>
               <input
                 value={managerPhone}
                 onChange={(e) => setManagerPhone(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 font-mono"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink font-mono"
               />
             </div>
             <button
               onClick={() => addManagerMutation.mutate()}
               disabled={addManagerMutation.isPending || !managerPhone.trim()}
-              className="w-full py-2.5 rounded-xl bg-primary text-slate-950 font-bold text-xs hover:bg-primary/90 disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
             >
               {addManagerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Assign Warden"}
             </button>
@@ -401,76 +401,76 @@ export const OwnerFacilityView: React.FC = () => {
 
       {/* 4. Gamification Settings */}
       {tab === "gamification" && settings && (
-        <div className="max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-400" /> Gamification & Operational Budget Settings
+        <div className="max-w-2xl bg-surface border border-hairline rounded-2xl p-6 space-y-5">
+          <div className="border-b border-hairline pb-3">
+            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <Award className="w-4 h-4 text-accent" /> Gamification & Operational Budget Settings
             </h3>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               Configure points economics, monthly spend ceilings, and tariff parameters.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Point Value (Paise)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Point Value (Paise)</label>
               <input
                 type="number"
                 value={settings.point_value_paise}
                 onChange={(e) => setSettings({ ...settings, point_value_paise: parseInt(e.target.value, 10) || 0 })}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
-              <span className="text-[10px] text-slate-500">100 paise = ₹1.00</span>
+              <span className="text-[10px] text-ink-muted">100 paise = ₹1.00</span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Monthly Budget (Paise)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Monthly Budget (Paise)</label>
               <input
                 type="number"
                 value={settings.monthly_budget_paise}
                 onChange={(e) => setSettings({ ...settings, monthly_budget_paise: parseInt(e.target.value, 10) || 0 })}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Max Earn Cap Per Resident (Pts)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Max Earn Cap Per Resident (Pts)</label>
               <input
                 type="number"
                 value={settings.earn_cap_per_tenant}
                 onChange={(e) => setSettings({ ...settings, earn_cap_per_tenant: parseInt(e.target.value, 10) || 0 })}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Meal RSVP Monthly Sub-cap (Pts)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Meal RSVP Monthly Sub-cap (Pts)</label>
               <input
                 type="number"
                 value={settings.rsvp_sub_cap}
                 onChange={(e) => setSettings({ ...settings, rsvp_sub_cap: parseInt(e.target.value, 10) || 0 })}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Floor Cleanliness Threshold (%)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Floor Cleanliness Threshold (%)</label>
               <input
                 type="number"
                 value={settings.floor_bonus_threshold}
                 onChange={(e) => setSettings({ ...settings, floor_bonus_threshold: parseInt(e.target.value, 10) || 0 })}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
-              <span className="text-[10px] text-slate-500">Unlocks 1.5× clean points multiplier</span>
+              <span className="text-[10px] text-ink-muted">Unlocks 1.5× clean points multiplier</span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Electricity Tariff (Paise / kWh)</label>
+              <label className="block text-xs font-medium text-ink mb-1">Electricity Tariff (Paise / kWh)</label>
               <input
                 type="number"
                 value={settings.electricity_tariff_paise}
                 onChange={(e) => setSettings({ ...settings, electricity_tariff_paise: parseInt(e.target.value, 10) || 0 })}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100"
+                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
             </div>
           </div>
@@ -478,7 +478,7 @@ export const OwnerFacilityView: React.FC = () => {
           <button
             onClick={() => updateSettingsMutation.mutate()}
             disabled={updateSettingsMutation.isPending}
-            className="w-full py-2.5 rounded-xl bg-primary text-slate-950 font-bold text-xs hover:bg-primary/90 disabled:opacity-50"
+            className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
           >
             {updateSettingsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Save Gamification Rules"}
           </button>

@@ -98,16 +98,16 @@ export const JoinsView: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-ink-muted">
         Invite code already authorized these people. Assign room, rent, and due day here — pay unlocks after
         assignment. Reject only incomplete profiles that never finished onboarding.
       </p>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
+        <h2 className="text-sm font-semibold text-ink uppercase tracking-wider">
           Awaiting room & rent
         </h2>
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="bg-surface border border-hairline rounded-2xl overflow-hidden">
           <QueryState
             isLoading={isLoading}
             isError={isError}
@@ -120,31 +120,31 @@ export const JoinsView: React.FC = () => {
               tenantsQuery.refetch();
             }}
           >
-            <div className="divide-y divide-slate-800">
+            <div className="divide-y divide-hairline">
               {awaiting.map((j) => (
                 <div key={j.id} className="p-4 flex flex-col sm:flex-row sm:items-start gap-3 justify-between">
                   <div className="space-y-1 min-w-0">
-                    <p className="font-medium text-slate-100">{j.name || "Unnamed"}</p>
-                    <p className="text-xs text-slate-400 font-mono">{j.phone}</p>
+                    <p className="font-medium text-ink">{j.name || "Unnamed"}</p>
+                    <p className="text-xs text-ink-muted font-mono">{j.phone}</p>
                     {j.parent_name && (
-                      <p className="text-xs text-slate-500">Parent: {j.parent_name}</p>
+                      <p className="text-xs text-ink-muted">Parent: {j.parent_name}</p>
                     )}
                     {j.emergency_phone && (
-                      <p className="text-xs text-slate-500 font-mono">Emergency: {j.emergency_phone}</p>
+                      <p className="text-xs text-ink-muted font-mono">Emergency: {j.emergency_phone}</p>
                     )}
                     {j.permanent_address && (
-                      <p className="text-xs text-slate-500 truncate">Home: {j.permanent_address}</p>
+                      <p className="text-xs text-ink-muted truncate">Home: {j.permanent_address}</p>
                     )}
                     {j.current_address && (
-                      <p className="text-xs text-slate-500 truncate">Current: {j.current_address}</p>
+                      <p className="text-xs text-ink-muted truncate">Current: {j.current_address}</p>
                     )}
                     {j.joined_on && (
-                      <p className="text-xs text-slate-500">Joined {formatDate(j.joined_on)}</p>
+                      <p className="text-xs text-ink-muted">Joined {formatDate(j.joined_on)}</p>
                     )}
                   </div>
                   <button
                     onClick={() => void openAssign(j)}
-                    className="px-3 py-2 rounded-xl bg-primary text-slate-950 text-sm font-semibold shrink-0"
+                    className="px-3 py-2 rounded-xl bg-accent text-white text-sm font-semibold shrink-0"
                   >
                     Assign room & rent
                   </button>
@@ -157,22 +157,22 @@ export const JoinsView: React.FC = () => {
 
       {incomplete.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
+          <h2 className="text-sm font-semibold text-ink uppercase tracking-wider">
             Incomplete profiles
           </h2>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-800">
+          <div className="bg-surface border border-hairline rounded-2xl overflow-hidden divide-y divide-hairline">
             {incomplete.map((j) => (
               <div key={j.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                 <div>
-                  <p className="font-medium text-slate-100">{j.name || "Unnamed"}</p>
-                  <p className="text-xs text-slate-400 font-mono">{j.phone}</p>
-                  <p className="text-xs text-slate-500">{formatDate(j.created_at)}</p>
+                  <p className="font-medium text-ink">{j.name || "Unnamed"}</p>
+                  <p className="text-xs text-ink-muted font-mono">{j.phone}</p>
+                  <p className="text-xs text-ink-muted">{formatDate(j.created_at)}</p>
                 </div>
                 <button
                   onClick={() => {
                     if (window.confirm(`Reject ${j.name || j.phone}?`)) rejectMutation.mutate(j.id);
                   }}
-                  className="px-3 py-2 rounded-xl bg-slate-800 text-rose-400 text-sm"
+                  className="px-3 py-2 rounded-xl bg-surface text-danger text-sm"
                 >
                   Reject
                 </button>
@@ -189,26 +189,26 @@ export const JoinsView: React.FC = () => {
               e.preventDefault();
               activateMutation.mutate();
             }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-3 my-8"
+            className="bg-surface border border-hairline rounded-2xl w-full max-w-md p-6 space-y-3 my-8"
           >
-            <h3 className="text-lg font-bold text-slate-100">
+            <h3 className="text-lg font-bold text-ink">
               Assign terms — {active.name || active.phone}
             </h3>
-            {error && <p className="text-xs text-rose-400">{error}</p>}
-            <div className="text-xs text-slate-400 space-y-1 rounded-xl bg-slate-800/60 p-3">
+            {error && <p className="text-xs text-danger">{error}</p>}
+            <div className="text-xs text-ink-muted space-y-1 rounded-xl bg-bg p-3">
               {active.parent_name && <p>Parent: {active.parent_name}</p>}
               {active.emergency_phone && <p className="font-mono">Emergency: {active.emergency_phone}</p>}
               {active.permanent_address && <p>Home: {active.permanent_address}</p>}
               {active.current_address && <p>Current: {active.current_address}</p>}
             </div>
             {photoUrl && (
-              <img src={photoUrl} alt="ID photo" className="w-full max-h-48 object-contain rounded-xl bg-slate-800" />
+              <img src={photoUrl} alt="ID photo" className="w-full max-h-48 object-contain rounded-xl bg-surface" />
             )}
             <input
               value={room}
               onChange={(e) => setRoom(e.target.value)}
               placeholder="Room number"
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100"
+              className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <input
               value={rent}
@@ -217,7 +217,7 @@ export const JoinsView: React.FC = () => {
               type="number"
               min={1}
               required
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100"
+              className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <input
               value={dueDay}
@@ -226,14 +226,14 @@ export const JoinsView: React.FC = () => {
               min={1}
               max={28}
               required
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100"
+              className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <input
               value={deposit}
               onChange={(e) => setDeposit(e.target.value)}
               placeholder="Deposit (₹, optional — defaults to rent)"
               type="number"
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100"
+              className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <div className="flex justify-end gap-2 pt-2">
               <button
@@ -243,14 +243,14 @@ export const JoinsView: React.FC = () => {
                   if (photoUrl) URL.revokeObjectURL(photoUrl);
                   setPhotoUrl(null);
                 }}
-                className="px-3 py-2 text-slate-400"
+                className="px-3 py-2 text-ink-muted"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={activateMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-primary text-slate-950 font-semibold text-sm disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-50"
               >
                 {activateMutation.isPending && <Loader2 className="w-4 h-4 animate-spin inline mr-1" />}
                 Confirm assignment

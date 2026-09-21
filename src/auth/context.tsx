@@ -34,6 +34,7 @@ interface AuthContextType {
   confirmPhoneOtp: (otp: string) => Promise<void>;
   loginWithGoogle: () => Promise<"ok" | "needs-phone">;
   reExchangeFirebase: () => Promise<void>;
+  updateUser: (patch: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -100,6 +101,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTenantId(resolvedRole === "tenant" ? tid : null);
     setStoredUser(sessionUser);
     setIsLoading(false);
+  }, []);
+
+  const updateUser = useCallback((patch: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const next: User = { ...prev, ...patch };
+      setStoredUser(next);
+      return next;
+    });
   }, []);
 
   const evaluateStored = useCallback(() => {
@@ -185,6 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         confirmPhoneOtp: handleConfirmPhoneOtp,
         loginWithGoogle: handleGoogleLogin,
         reExchangeFirebase,
+        updateUser,
         logout,
       }}
     >

@@ -13,7 +13,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onOpenMore,
 }) => {
   const tabs = [
-    { id: "joins", label: "Home", icon: LayoutDashboard },
+    { id: "dashboard", label: "Home", icon: LayoutDashboard },
     { id: "dues", label: "Dues", icon: Receipt },
     { id: "reports", label: "UTRs", icon: CreditCard },
     { id: "tenants", label: "Tenants", icon: Users },
@@ -51,14 +51,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <button
           onClick={onOpenMore}
           className={`flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] transition-transform active:scale-95 ${
-            ["reconciliation", "events", "more", "payments"].includes(currentTab)
+            ["reconciliation", "events", "more", "payments", "reminders", "facility"].includes(currentTab)
               ? "text-accent font-semibold"
               : "text-ink-muted hover:text-ink"
           }`}
         >
           <div
             className={`p-1 rounded-xl transition-colors ${
-              ["reconciliation", "events", "more", "payments"].includes(currentTab)
+              ["reconciliation", "events", "more", "payments", "reminders", "facility"].includes(currentTab)
                 ? "bg-accent-tint text-accent"
                 : "text-ink-muted"
             }`}

@@ -8,8 +8,12 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { QRModal } from "@/components/shared/QRModal";
 import { QueryState } from "@/components/shared/QueryState";
-import { displayDueStatus, formatDate, isOverdue, paiseToRupeeInput, rupeesToPaise } from "@/lib/utils";
+import { displayDueStatus, downloadTextFile, formatDate, isOverdue, paiseToRupeeInput, rupeesToPaise } from "@/lib/utils";
+import { getPayments } from "@/api/payments";
+import { getProperties } from "@/api/properties";
+import { buildLedgerCsv } from "@/lib/exportLedgerCsv";
 import type { Due, Paise, PayIntent } from "@pg/types";
+import { Link } from "@tanstack/react-router";
 import { CheckCircle, Slash, X, Loader2, IndianRupee, QrCode, Link2 } from "lucide-react";
 
 export const DuesView: React.FC = () => {
@@ -35,6 +39,9 @@ export const DuesView: React.FC = () => {
     queryKey: QUERY_KEYS.tenants,
     queryFn: getTenants,
   });
+
+  const { data: properties = [] } = useQuery({ queryKey: QUERY_KEYS.properties, queryFn: getProperties });
+  const { data: payments = [] } = useQuery({ queryKey: QUERY_KEYS.payments(), queryFn: () => getPayments() });
 
   const {
     data: dues = [],
@@ -159,7 +166,7 @@ export const DuesView: React.FC = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
         >
           <option value="all">All Statuses</option>
           <option value="pending">Pending</option>
@@ -172,7 +179,7 @@ export const DuesView: React.FC = () => {
         <select
           value={tenantFilter}
           onChange={(e) => setTenantFilter(e.target.value)}
-          className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
         >
           <option value="all">All Tenants</option>
           {tenants.map((t) => (
@@ -181,15 +188,31 @@ export const DuesView: React.FC = () => {
             </option>
           ))}
         </select>
+
+        <button
+          type="button"
+          onClick={() =>
+            downloadTextFile(
+              `pg-ledger-${new Date().toISOString().slice(0, 10)}.csv`,
+              buildLedgerCsv(filteredDues, tenants, properties[0], payments)
+            )
+          }
+          className="h-10 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold"
+        >
+          Export CSV
+        </button>
+        <p className="t-caption text-ink-muted w-full sm:w-auto">
+          Filtered rows, including matched UTR when present.
+        </p>
       </div>
 
       {modalError && !payModalDue && !waiveModalDue && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+        <div className="p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs">
           {modalError}
         </div>
       )}
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
         <QueryState
           isLoading={isLoading}
           isError={duesError || tenantsError}
@@ -204,7 +227,7 @@ export const DuesView: React.FC = () => {
         >
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-800/50 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase tracking-wider border-b border-hairline">
                 <tr>
                   <th className="px-6 py-3.5">Tenant</th>
                   <th className="px-6 py-3.5">Due Code</th>
@@ -214,17 +237,21 @@ export const DuesView: React.FC = () => {
                   <th className="px-6 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-200">
+              <tbody className="divide-y divide-hairline text-ink">
                 {filteredDues.map((d) => (
-                  <tr key={d.id} className="hover:bg-slate-800/30 transition">
-                    <td className="px-6 py-4 font-medium text-slate-100">
+                  <tr key={d.id} className="hover:bg-accent-tint transition">
+                    <td className="px-6 py-4 font-medium text-ink">
                       {tenantMap.get(d.tenant_id) || "Tenant"}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-slate-400">{d.due_code}</td>
+                    <td className="px-6 py-4 font-mono text-xs text-ink-muted">
+                      <Link to="/owner/events" className="underline decoration-hairline hover:text-accent">
+                        {d.due_code}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4 font-semibold">
                       <AmountBadge amount={d.amount} />
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-400">{formatDate(d.due_date)}</td>
+                    <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(d.due_date)}</td>
                     <td className="px-6 py-4">
                       <StatusPill status={displayDueStatus(d)} />
                     </td>
@@ -234,7 +261,7 @@ export const DuesView: React.FC = () => {
                           <button
                             onClick={() => handleShowQR(d)}
                             title="Show Payment QR / Link"
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink hover:text-white transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
                           >
                             <QrCode className="w-4 h-4" />
                           </button>
@@ -248,7 +275,7 @@ export const DuesView: React.FC = () => {
                               setModalError(null);
                             }}
                             title="Record Cash Payment"
-                            className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            className="p-1.5 rounded-lg bg-success-tint hover:bg-success/20 text-success transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
@@ -261,7 +288,7 @@ export const DuesView: React.FC = () => {
                               setModalError(null);
                             }}
                             title="Match UTR"
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
                           >
                             <Link2 className="w-4 h-4" />
                           </button>
@@ -273,7 +300,7 @@ export const DuesView: React.FC = () => {
                               setModalError(null);
                             }}
                             title="Waive Due"
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            className="p-1.5 rounded-lg bg-surface hover:bg-danger-tint text-ink-muted hover:text-danger transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
                           >
                             <Slash className="w-4 h-4" />
                           </button>
@@ -299,51 +326,51 @@ export const DuesView: React.FC = () => {
 
       {payModalDue && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 relative">
+          <div className="bg-surface border border-hairline rounded-2xl w-full max-w-md p-6 relative">
             <button
               onClick={() => setPayModalDue(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition"
+              className="absolute top-4 right-4 text-ink-muted hover:text-ink p-1.5 rounded-lg hover:bg-accent-tint transition"
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-slate-100 mb-4">Record Cash Payment</h3>
+            <h3 className="text-lg font-bold text-ink mb-4">Record Cash Payment</h3>
             {modalError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs">
                 {modalError}
               </div>
             )}
             <form onSubmit={handlePaySubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-ink mb-1">
                   Cash Amount (₹) — locked to remaining due (all-or-nothing)
                 </label>
                 <div className="relative">
-                  <IndianRupee className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <IndianRupee className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
                   <input
                     type="number"
                     readOnly
                     value={payAmountRupees}
-                    className="w-full pl-9 pr-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-100 text-sm"
+                    className="w-full pl-9 pr-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Note (optional)</label>
+                <label className="block text-xs font-medium text-ink mb-1">Note (optional)</label>
                 <input
                   type="text"
                   value={payNotes}
                   onChange={(e) => setPayNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-100 text-sm"
+                  className="w-full px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm"
                 />
               </div>
               <div className="flex justify-end gap-3">
-                <button type="button" onClick={() => setPayModalDue(null)} className="px-4 py-2 text-slate-400">
+                <button type="button" onClick={() => setPayModalDue(null)} className="px-4 py-2 text-ink-muted">
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={payMutation.isPending}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-semibold text-sm disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-success text-white font-semibold text-sm disabled:opacity-50"
                 >
                   {payMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                   Confirm Payment
@@ -356,25 +383,25 @@ export const DuesView: React.FC = () => {
 
       {waiveModalDue && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 relative">
+          <div className="bg-surface border border-hairline rounded-2xl w-full max-w-md p-6 relative">
             <button
               onClick={() => setWaiveModalDue(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition"
+              className="absolute top-4 right-4 text-ink-muted hover:text-ink p-1.5 rounded-lg hover:bg-accent-tint transition"
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-slate-100 mb-4">Waive Due</h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <h3 className="text-lg font-bold text-ink mb-4">Waive Due</h3>
+            <p className="text-xs text-ink-muted mb-4">
               Waive <AmountBadge amount={waiveModalDue.amount} /> for{" "}
               {tenantMap.get(waiveModalDue.tenant_id)}?
             </p>
             {modalError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs">
                 {modalError}
               </div>
             )}
             <div className="flex justify-end gap-3">
-              <button type="button" onClick={() => setWaiveModalDue(null)} className="px-4 py-2 text-slate-400">
+              <button type="button" onClick={() => setWaiveModalDue(null)} className="px-4 py-2 text-ink-muted">
                 Cancel
               </button>
               <button
@@ -382,7 +409,7 @@ export const DuesView: React.FC = () => {
                   if (window.confirm("Waive this due?")) waiveMutation.mutate(waiveModalDue.id);
                 }}
                 disabled={waiveMutation.isPending}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-500 text-slate-950 font-semibold text-sm disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-danger text-white font-semibold text-sm disabled:opacity-50"
               >
                 {waiveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 Waive Due
@@ -407,28 +434,28 @@ export const DuesView: React.FC = () => {
                 utr: matchUtr.trim(),
               });
             }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-3 relative"
+            className="bg-surface border border-hairline rounded-2xl w-full max-w-md p-6 space-y-3 relative"
           >
-            <button type="button" onClick={() => setMatchDueRow(null)} className="absolute top-4 right-4 text-slate-400">
+            <button type="button" onClick={() => setMatchDueRow(null)} className="absolute top-4 right-4 text-ink-muted">
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-slate-100">Match UTR</h3>
-            {modalError && <p className="text-xs text-rose-400">{modalError}</p>}
-            <p className="text-xs text-slate-400">Amount {paiseToRupeeInput(matchDueRow.amount)} (remaining)</p>
+            <h3 className="text-lg font-bold text-ink">Match UTR</h3>
+            {modalError && <p className="text-xs text-danger">{modalError}</p>}
+            <p className="text-xs text-ink-muted">Amount {paiseToRupeeInput(matchDueRow.amount)} (remaining)</p>
             <input
               value={matchUtr}
               onChange={(e) => setMatchUtr(e.target.value)}
               placeholder="UPI transaction ID"
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100"
+              className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setMatchDueRow(null)} className="px-3 py-2 text-slate-400">
+              <button type="button" onClick={() => setMatchDueRow(null)} className="px-3 py-2 text-ink-muted">
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={matchMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-primary text-slate-950 font-semibold text-sm disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-50"
               >
                 Match
               </button>
