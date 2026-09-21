@@ -11,12 +11,92 @@ export type JoinStatus = "pending" | "approved" | "rejected";
 export type PaymentReportStatus = "pending_review" | "confirmed" | "rejected";
 export type PaymentMode = "manual" | "cashfree";
 
+export type SupportedLocale = "en-IN" | "te-IN" | "ta-IN" | "kn-IN";
+
+export const ERROR_CODES = [
+  "auth.missingToken",
+  "auth.invalidToken",
+  "auth.accessRevoked",
+  "auth.profileIncomplete",
+  "auth.forbidden",
+  "auth.alreadyActivated",
+  "auth.invalidOtp",
+  "auth.otpExpired",
+  "auth.otpLocked",
+  "auth.rateLimited",
+  "auth.noAccount",
+  "auth.invalidInvite",
+  "auth.firebaseNotConfigured",
+  "auth.emailNotVerified",
+  "auth.invalidFirebaseToken",
+  "auth.unauthorized",
+  "auth.noPropertyScope",
+  "join.invalidInvite",
+  "join.noPendingRequest",
+  "join.notFound",
+  "join.alreadyOnboarded",
+  "join.alreadyActive",
+  "join.nameRequired",
+  "join.consentRequired",
+  "join.photoRequired",
+  "join.profileIncomplete",
+  "join.requestNotPending",
+  "join.notAwaitingAssignment",
+  "payment.duplicateTxn",
+  "payment.cashPartialNotAllowed",
+  "payment.dueNotOpen",
+  "payment.noDepositDue",
+  "payment.emptyTxnId",
+  "payment.ambiguousMatch",
+  "payment.noMatch",
+  "finance.duplicateRequest",
+  "finance.idempotencyRequired",
+  "finance.invalidAmount",
+  "finance.invalidKind",
+  "finance.overpay",
+  "finance.expenseNotPayable",
+  "finance.policyExceeded",
+  "finance.approvalRequired",
+  "finance.periodNotCloseable",
+  "finance.notFound",
+  "finance.forbidden",
+  "finance.disabled",
+  "request.invalidBody",
+  "request.invalidId",
+  "request.dueDayInvalid",
+  "request.imageTooLarge",
+  "request.imageReadFailed",
+  "preferences.localeRequired",
+  "preferences.invalidLocale",
+] as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[number];
+
+
+export interface LocaleMetadata {
+  code: SupportedLocale;
+  name: string;
+  native_name: string;
+}
+
+export interface LocalesResponse {
+  locales: LocaleMetadata[];
+  default_locale: SupportedLocale;
+}
+
+export interface PreferencesResponse {
+  locale: SupportedLocale;
+  has_saved_preference: boolean;
+}
+
 export interface User {
   id: string;
   phone: string;
   role: UserRole;
   tenant_id?: string;
   property_id?: string;
+  locale?: string;
+  has_saved_preference?: boolean;
   created_at?: string;
   last_login_at?: string;
 }

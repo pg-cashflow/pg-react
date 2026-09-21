@@ -5,7 +5,7 @@ import { exchangeFirebaseToken } from "./auth";
 import { lookupInvite, activateJoin } from "./join";
 import { getTenantDuePay } from "./pay";
 
-const API = "http://localhost:8080";
+const API = "http://localhost:8080/api";
 
 const server = setupServer(
   http.get(`${API}/join/invite/:code`, ({ params }) => {
