@@ -1,5 +1,5 @@
 import { API_BASE } from "@/lib/constants";
-import { getToken, clearToken, getStoredLocale } from "@/auth/storage";
+import { getToken, setToken, clearToken, getStoredLocale, setStoredUser } from "@/auth/storage";
 
 export class ApiError extends Error {
   status: number;
@@ -11,6 +11,61 @@ export class ApiError extends Error {
     this.code = code;
     this.name = "ApiError";
   }
+}
+
+let activeRefreshPromise: Promise<string | null> | null = null;
+
+async function executeRefresh(failedToken: string | null): Promise<string | null> {
+  const currentToken = getToken();
+  if (currentToken && currentToken !== failedToken) {
+    return currentToken;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      clearToken();
+      window.dispatchEvent(new CustomEvent("pg:unauthorized"));
+      return null;
+    }
+
+    const data = await res.json();
+    if (data?.token) {
+      setToken(data.token);
+      if (data.user) {
+        setStoredUser(data.user);
+      }
+      return data.token;
+    }
+  } catch {
+    // network or other failure
+  }
+
+  clearToken();
+  window.dispatchEvent(new CustomEvent("pg:unauthorized"));
+  return null;
+}
+
+export async function requestTokenRefresh(failedToken: string | null): Promise<string | null> {
+  if (typeof navigator !== "undefined" && navigator.locks?.request) {
+    return navigator.locks.request("pg_token_refresh", async () => {
+      return executeRefresh(failedToken);
+    });
+  }
+
+  if (!activeRefreshPromise) {
+    activeRefreshPromise = executeRefresh(failedToken).finally(() => {
+      activeRefreshPromise = null;
+    });
+  }
+  return activeRefreshPromise;
 }
 
 async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promise<T> {
@@ -33,11 +88,11 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
       errorMsg = await res.text();
     }
     const mapped = mapApiErrorMessage(res.status, errorMsg);
-    if (res.status === 403 && /access revoked/i.test(mapped)) {
+    if (res.status === 403 && (errorCode === "auth.accessRevoked" || /access revoked/i.test(mapped))) {
       clearToken();
       window.dispatchEvent(new CustomEvent("pg:unauthorized"));
     }
-    if (res.status === 403 && /complete your profile to continue/i.test(mapped)) {
+    if (res.status === 403 && (errorCode === "join.profileRequired" || /complete your profile to continue/i.test(mapped))) {
       window.dispatchEvent(new CustomEvent("pg:waiting-join"));
     }
     throw new ApiError(res.status, mapped, errorCode);
@@ -53,7 +108,7 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
 function mapApiErrorMessage(status: number, raw: string): string {
   const text = (raw || "").trim();
   if (status === 503 && /firebase auth not configured/i.test(text)) {
-    return "Backend Firebase Admin is not loaded. Place the service-account JSON at pg-go/secrets (GOOGLE_APPLICATION_CREDENTIALS), restart the Go server, and confirm the log says firebase phone auth enabled.";
+    return "Phone authentication is temporarily unavailable. Please try again later or contact support.";
   }
   if (status === 404 && /no account for phone|Get the PG invite code/i.test(text)) {
     return "Get the PG invite code from your owner, then sign in again.";
@@ -95,8 +150,24 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       ...options,
+      credentials: options.credentials ?? "include",
       headers: authHeaders(options),
     });
+
+    const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth";
+    if (res.status === 401 && !isAuthEndpoint) {
+      const originalToken = getToken();
+      const newToken = await requestTokenRefresh(originalToken);
+      if (newToken) {
+        const retryRes = await fetch(`${API_BASE}${path}`, {
+          ...options,
+          credentials: options.credentials ?? "include",
+          headers: authHeaders(options),
+        });
+        return await handleResponse(retryRes, () => retryRes.json() as Promise<T>);
+      }
+    }
+
     return await handleResponse(res, () => res.json() as Promise<T>);
   } catch (err) {
     if (err instanceof ApiError) throw err;
@@ -109,8 +180,24 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       ...options,
+      credentials: options.credentials ?? "include",
       headers: authHeaders(options),
     });
+
+    const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth";
+    if (res.status === 401 && !isAuthEndpoint) {
+      const originalToken = getToken();
+      const newToken = await requestTokenRefresh(originalToken);
+      if (newToken) {
+        const retryRes = await fetch(`${API_BASE}${path}`, {
+          ...options,
+          credentials: options.credentials ?? "include",
+          headers: authHeaders(options),
+        });
+        return await handleResponse(retryRes, () => retryRes.blob());
+      }
+    }
+
     return await handleResponse(res, () => res.blob());
   } catch (err) {
     if (err instanceof ApiError) throw err;

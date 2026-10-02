@@ -13,3 +13,15 @@ export const exchangeFirebaseToken = (
     body: JSON.stringify(body),
   });
 };
+
+export const refreshSession = (): Promise<LoginResponse> => {
+  return apiFetch<LoginResponse>("/auth/refresh", {
+    method: "POST",
+  });
+};
+
+export const logoutSession = (): Promise<{ ok: boolean }> => {
+  return apiFetch<{ ok: boolean }>("/auth/logout", {
+    method: "POST",
+  });
+};

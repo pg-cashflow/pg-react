@@ -9,7 +9,7 @@ import {
   setStoredUser,
   getInviteCode,
 } from "./storage";
-import { exchangeFirebaseToken } from "@/api/auth";
+import { exchangeFirebaseToken, refreshSession, logoutSession } from "@/api/auth";
 import {
   sendFirebasePhoneOtp,
   confirmFirebasePhoneOtp,
@@ -78,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const logout = useCallback(() => {
+    logoutSession().catch(() => {});
     queryClient.clear();
     clearServiceWorkerCaches().catch(() => {});
     resetFirebasePhoneAuth();
@@ -94,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const applySession = useCallback((rawToken: string, sessionUser: User, payload: AuthTokenPayload) => {
     const resolvedRole = sessionUser.role;
     const tid = sessionUser.tenant_id || payload.tenant_id || null;
+    setToken(rawToken);
     setTokenState(rawToken);
     setUser(sessionUser);
     setRole(resolvedRole);
@@ -112,32 +114,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const evaluateStored = useCallback(() => {
+  const evaluateStored = useCallback(async () => {
     const rawToken = getToken();
     const stored = getStoredUser();
-    if (!rawToken) {
-      logout();
-      setIsLoading(false);
-      return;
+
+    if (rawToken) {
+      const payload = parseJwt(rawToken);
+      if (payload && !isTokenExpired(payload) && isValidRole(stored?.role ?? payload.role)) {
+        const sessionUser: User = stored ?? {
+          id: payload.user_id ?? payload.sub,
+          phone: "",
+          role: payload.role,
+          tenant_id: payload.tenant_id,
+          property_id: payload.property_id,
+        };
+        applySession(rawToken, sessionUser, payload);
+        return;
+      }
     }
-    const payload = parseJwt(rawToken);
-    if (!payload || isTokenExpired(payload) || !isValidRole(stored?.role ?? payload.role)) {
-      logout();
-      setIsLoading(false);
-      return;
+
+    try {
+      const res = await refreshSession();
+      if (res?.token) {
+        const freshPayload = parseJwt(res.token);
+        if (freshPayload && isValidRole(res.user?.role ?? freshPayload.role)) {
+          applySession(res.token, res.user, freshPayload);
+          return;
+        }
+      }
+    } catch {
+      // Refresh cookie absent or expired
     }
-    const sessionUser: User = stored ?? {
-      id: payload.user_id ?? payload.sub,
-      phone: "",
-      role: payload.role,
-      tenant_id: payload.tenant_id,
-      property_id: payload.property_id,
-    };
-    applySession(rawToken, sessionUser, payload);
+
+    logout();
+    setIsLoading(false);
   }, [applySession, logout]);
 
   useEffect(() => {
-    evaluateStored();
+    void evaluateStored();
     const handleUnauthorized = () => logout();
     window.addEventListener("pg:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);

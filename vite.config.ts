@@ -11,17 +11,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: {
-        runtimeCaching: [
-          {
-            urlPattern: /^https?:\/\/.*\/(api|auth|owner|tenant|join|push|webhooks|manager|notifications)\//,
-            handler: 'NetworkOnly',
-          },
-          {
-            urlPattern: /^https?:\/\/localhost:8080\/.*/,
-            handler: 'NetworkOnly',
-          },
-        ],
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
       },
       manifest: {
         name: 'PG Cashflow',

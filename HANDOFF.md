@@ -1,6 +1,6 @@
 # pg-react — Comprehensive End-to-End Codebase Handoff
 
-> **Canonical Backend:** `pg-go` **CONTRACT Rev 7** (`pg-go/CONTRACT.md`) is the HTTP source of truth. `packages/types/index.ts` (`@pg/types`) is the TypeScript mirror of Go domain types — if they diverge, **fix types to match the backend**. This Progressive Web App implements client state, responsive UIs, and end-to-end workflows for Property Owners, Wardens / Property Managers, and Tenants.
+> **Canonical Backend:** `pg-go` **CONTRACT Rev 10** (`pg-go/CONTRACT.md`) is the authoritative HTTP source of truth, complemented by Rev 11 Finance & Intelligence specifications. `packages/types/index.ts` (`@pg/types`) is the strict TypeScript mirror of Go domain models, payload shapes, and the 54 machine-readable `ERROR_CODES` catalog — if they diverge, **fix types to match the backend**. This Progressive Web App implements client state, responsive mobile-first UIs, and end-to-end workflows for Property Owners, Wardens / Property Managers, and Tenants.
 
 ---
 
@@ -9,7 +9,7 @@
 1. [System Architecture & Tech Stack](#1-system-architecture--tech-stack)
 2. [Project Directory & File Structure](#2-project-directory--file-structure)
 3. [Authentication, Identity Lifecycle & Session Management](#3-authentication-identity-lifecycle--session-management)
-4. [Localization (i18n) & Preference Synchronization](#4-localization-i18n--preference-synchronization)
+4. [Localization (i18n), Preferences & Error Code Parity](#4-localization-i18n-preferences--error-code-parity)
 5. [Role-Based Access Control & Route Hierarchy](#5-role-based-access-control--route-hierarchy)
 6. [End-to-End Role Workflows & Portal Specifications](#6-end-to-end-role-workflows--portal-specifications)
    - [Workflow A: Property Owner Portal](#workflow-a-property-owner-portal)
@@ -17,7 +17,7 @@
    - [Workflow C: Warden / Property Manager Portal](#workflow-c-warden--property-manager-portal)
 7. [API Layer Reference & TanStack Query State](#7-api-layer-reference--tanstack-query-state)
 8. [Design System, Semantic Tokens & ANTI_SLOP Rules](#8-design-system-semantic-tokens--anti_slop-rules)
-9. [Core Financial & Operational Invariants](#9-core-financial--operational-invariants)
+9. [Core Financial, KYC & Operational Invariants](#9-core-financial-kyc--operational-invariants)
 10. [Environment Setup, Configuration & Local Development](#10-environment-setup-configuration--local-development)
 11. [Testing, Linting & Quality Gates](#11-testing-linting--quality-gates)
 12. [Documentation Index & References](#12-documentation-index--references)
@@ -26,22 +26,24 @@
 
 ## 1. System Architecture & Tech Stack
 
-`pg-react` is built as a high-performance, mobile-first Progressive Web App designed specifically for Indian Paying Guest (PG) hostels and co-living operations.
+`pg-react` is engineered as a high-performance, mobile-first Progressive Web App designed specifically for Indian Paying Guest (PG) hostels and co-living operations.
 
 - **Runtime & Build Tools:** React 19 (`react` 19.2.8, `react-dom` 19.2.8), TypeScript ~6.0.2, Vite 8.2.0 (`@vitejs/plugin-react` 6.0.4).
-- **Styling & Design Tokens:** Tailwind CSS v4 (`@tailwindcss/vite` 4.3.3) paired with an explicit semantic token system in `src/index.css`. Includes three distinct portal themes (`[data-portal="owner|tenant|manager"]`), seamless light/dark mode resolution, and strict design token linting via custom AST and regex scripts (`check-palette.mjs`, `check-typography.mjs`).
+- **Styling & Design Tokens:** Tailwind CSS v4 (`@tailwindcss/vite` 4.3.3) paired with an explicit semantic token system in `src/index.css`. Includes three distinct portal themes (`[data-portal="owner|tenant|manager"]`), seamless light/dark mode resolution (`src/theme/context.tsx`), and automated design token linting via custom AST and regex scripts (`check-palette.mjs`, `check-typography.mjs`).
 - **Typography:** IBM Plex Sans and IBM Plex Mono typography scale defined using semantic classes (`.t-display`, `.t-h1`, `.t-h2`, `.t-h3`, `.t-body`, `.t-body-sm`, `.t-caption`, `.t-amount`, `.t-amount-lg`, `.t-code`, `.t-display-num`).
 - **Icons:** Lucide React (`lucide-react` 1.31.0).
-- **Routing:** TanStack Router (`@tanstack/react-router` 1.170.27) featuring a typed route tree, centralized guard wrappers (`RequireOwner`, `RequireTenant`, `RequireManager`, `RequireJoin`, `AuthRedirect`), and automatic 404 handling (`NotFoundView`).
+- **Routing:** TanStack Router (`@tanstack/react-router` 1.170.27) featuring a fully typed route tree, centralized guard wrappers (`RequireOwner`, `RequireTenant`, `RequireManager`, `RequireJoin`, `AuthRedirect`), and automatic 404 handling (`NotFoundView`).
 - **Server State & Caching:** TanStack Query v5 (`@tanstack/react-query` 5.101.4) with devtools (`@tanstack/react-query-devtools`), organized under a centralized key dictionary (`QUERY_KEYS` in `src/lib/queryKeys.ts`).
-- **Authentication:** Firebase Client SDK v12 (`firebase` 12.17.1) for Phone OTP (reCAPTCHA) and Google Sign-In, exchanging Firebase ID tokens with `pg-go` via `POST /api/auth/firebase` for a 30-day app JWT.
-- **Internationalization (i18n):** Multi-language localization powered by `react-intl` 12.1.2 supporting English (`en-IN`), Telugu (`te-IN`), Tamil (`ta-IN`), and Kannada (`kn-IN`), with background server preference synchronization (`/api/me/preferences`).
-- **Payments:** Dual-mode payments:
-  - **Manual UPI:** Dynamic QR code (`qrcode` 1.5.4), deep links (`upi://pay`), PG VPA, and 12-digit UTR payment slip submission with screenshot upload and OCR parsing (`upiScreenshotExtractor.ts`).
+- **Authentication:** Firebase Client SDK v12 (`firebase` 12.17.1) for Phone OTP (invisible reCAPTCHA) and Google Sign-In, exchanging Firebase ID tokens with `pg-go` via `POST /api/auth/firebase` for a 30-day app JWT. Session revocation is supported globally via `POST /api/auth/revoke-sessions`.
+- **Error Handling & Classification:** Standardized `ApiError` class in `src/api/client.ts` parsing both human-readable `error` strings and machine-readable dot-delimited error codes (`code?: string`), strictly validated against the 54-code catalog in `src/i18n/error-codes.json` and `packages/types/index.ts`.
+- **Internationalization (i18n):** Multi-language localization powered by `react-intl` 12.1.2 supporting English (`en-IN`), Telugu (`te-IN`), Tamil (`ta-IN`), and Kannada (`kn-IN`), with background server preference synchronization (`/api/me/preferences`) and `Accept-Language` HTTP header propagation on every request.
+- **Payments:** Dual-mode payment architecture:
+  - **Manual UPI (P2P Proof):** Dynamic QR code (`qrcode` 1.5.4), deep links (`upi://pay`), PG VPA, and 12-digit UTR payment slip submission with screenshot upload and client-side OCR extraction (`upiScreenshotExtractor.ts`).
   - **Payment Gateway:** Cashfree Checkout SDK (`payment_session_id`) integration (`src/lib/cashfree.ts`).
-- **Push & Notifications:** Universal In-App Notification Center (`<NotificationCenter />`) with badge polling, action filtering, read state mutation, and Web Push notifications via Service Worker and VAPID public key subscription (`src/push/subscribe.ts`).
-- **Global Search:** Command palette / search in `TopBar` querying `GET /api/search` (mode: lexical or hybrid) with client-side navigation shortcuts (`src/lib/navIndex.ts`).
-- **PWA & Offline:** `vite-plugin-pwa` 1.3.0 and `workbox-window` 7.4.1 configuring standalone web application manifest, auto-updating service worker, and selective `NetworkOnly` runtime caching for all data API calls.
+- **KYC & Identity Verification (ADR-004):** DPDP Act 2023 compliant identity architecture supporting Tier 1 Cashfree DigiLocker redirects, Tier 2 UIDAI Secure QR offline parsing (`aadhaarExtractor.ts`), consent recording/revocation with PII scrubbing, and owner duplicate audit reviews.
+- **Push & Notifications:** Universal In-App Notification Center (`<NotificationCenter />`) with unread count polling, action filtering (`is_action_required`), read state mutation, and Web Push notifications via Service Worker and VAPID public key subscription (`src/push/subscribe.ts`).
+- **Global Search:** Command palette (`Cmd+K`) / search in `TopBar` querying `GET /api/search` (mode: lexical or hybrid) with client-side navigation shortcuts (`src/lib/navIndex.ts`).
+- **PWA & Offline:** `vite-plugin-pwa` 1.3.0 and `workbox-window` 7.4.1 configuring standalone web application manifest, auto-updating service worker (`registerType: 'autoUpdate'`), and selective `NetworkOnly` runtime caching for all data API calls.
 
 ### Shell → CONTRACT Mapping
 
@@ -59,18 +61,28 @@
 
 ```
 pg-react/
+├── .github/
+│   └── workflows/
+│       └── test.yml                  # GitHub Actions CI: lint, test, build
 ├── packages/
 │   └── types/
-│       └── index.ts                  # Canonical TypeScript definitions matching pg-go CONTRACT Rev 7
+│       └── index.ts                  # Canonical TypeScript definitions matching pg-go CONTRACT Rev 10 & ERROR_CODES
 ├── public/
-│   ├── favicon.ico
-│   ├── pwa-192x192.png
-│   └── pwa-512x512.png
+│   ├── favicon.svg                   # Vector favicon
+│   ├── icons.svg                     # SVG sprite icon set
+│   ├── pwa-192x192.png               # PWA icon 192x192
+│   └── pwa-512x512.png               # PWA icon 512x512
+├── scripts/
+│   ├── check-error-codes.mjs         # Cross-repo parity checker validating 54 error codes against pg-go
+│   ├── check-palette.mjs             # ANTI_SLOP linter verifying zero forbidden Tailwind color classes
+│   ├── check-typography.mjs          # ANTI_SLOP linter enforcing semantic .t-* typography classes
+│   ├── gen-icons.mjs                 # Asset generation helper for PWA icons
+│   └── restyle-tokens.mjs            # Semantic token transformation helper
 ├── src/
 │   ├── api/                          # Typed HTTP client modules interacting with pg-go (/api/*)
 │   │   ├── auth.ts                   # Token exchange (POST /auth/firebase)
-│   │   ├── client.ts                 # Fetch wrapper: JWT injection, Accept-Language, 401/403 event dispatchers
-│   │   ├── contract.test.ts          # Contract tests validating endpoints against live/mock backend
+│   │   ├── client.ts                 # Fetch wrapper: JWT injection, Accept-Language, ApiError parsing, 401/403 dispatchers
+│   │   ├── contract.test.ts          # Contract tests validating endpoints against MSW mock backend
 │   │   ├── dues.ts                   # Dues querying, waiving, cash settlement, WhatsApp reminder tokens, QR
 │   │   ├── events.ts                 # Audit ledger events (GET /owner/events)
 │   │   ├── gamification.ts           # Points, rewards, inspections, headcount, sub-meters, hazards, violations, referrals
@@ -82,13 +94,17 @@ pg-react/
 │   │   ├── properties.ts             # Property portfolio listing
 │   │   ├── reports.ts                # Tenant UTR payment slip review, confirmation & rejection
 │   │   ├── search.ts                 # Federated global search (GET /search)
-│   │   ├── tenant.ts                 # Tenant self-service profile, passbook dues/payments, Aadhaar KYC, UTR submission
-│   │   └── tenants.ts                # Owner tenant roster, direct tenant creation, notices, vacating, deposits, ID photos
+│   │   ├── tenant.ts                 # Tenant self-service profile, dues/payments, Aadhaar KYC, UTR submission
+│   │   └── tenants.ts                # Owner tenant roster, direct creation, notices, vacating, deposits, ID photos
+│   ├── assets/
+│   │   ├── hero.png                  # Landing hero visual asset
+│   │   ├── react.svg                 # React logo asset
+│   │   └── vite.svg                  # Vite logo asset
 │   ├── auth/                         # Authentication subsystem
-│   │   ├── context.tsx               # AuthProvider, useAuth hook, token parser & session lifecycle
+│   │   ├── context.tsx               # AuthProvider, useAuth hook, token claims parser & session lifecycle
 │   │   ├── firebaseGoogle.ts         # Google Sign-In popup with phone credential verification
 │   │   ├── firebasePhone.ts          # Phone OTP verification with invisible reCAPTCHA
-│   │   └── storage.ts                # LocalStorage abstraction (pg_jwt, pg_user, pg_invite, pg_locale)
+│   │   └── storage.ts                # LocalStorage abstraction (pg_jwt, pg_user, pg_invite, pg_locale, pg_theme)
 │   ├── components/
 │   │   ├── common/                   # Shared UI primitives
 │   │   │   ├── LanguageSelector.tsx  # Language toggle button & segmented picker
@@ -122,6 +138,7 @@ pg-react/
 │   │       └── StreakFlame.tsx       # Visual gamification flame indicating on-time payment streak
 │   ├── i18n/                         # Internationalization subsystem
 │   │   ├── config.ts                 # Supported locales (en-IN, te-IN, ta-IN, kn-IN) & configuration
+│   │   ├── error-codes.json          # Machine-readable 54-code catalog mirrored from pg-go
 │   │   ├── index.ts                  # Public exports for LocaleProvider, LocaleSync, useLocale
 │   │   ├── provider.tsx              # LocaleProvider, useLocale, and LocaleSync server reconciliation
 │   │   └── messages/                 # Localized string dictionaries
@@ -144,7 +161,7 @@ pg-react/
 │   │   └── utils.ts                  # Paise/Rupee conversions, date formatters, Indian phone normalizer
 │   ├── push/
 │   │   └── subscribe.ts              # Web Push service worker registration & VAPID key exchange
-│   ├── routes/                       # Route components
+│   ├── routes/                       # TanStack Router components
 │   │   ├── access-denied.tsx         # 403 Forbidden screen
 │   │   ├── activation.tsx            # Celebration screen after tenant/owner activation
 │   │   ├── invite.tsx                # Invite landing page with invite code resolver
@@ -161,7 +178,7 @@ pg-react/
 │   │   │   ├── more.tsx              # Property overview, walk-in tenant creation, statement import, settings
 │   │   │   ├── payments.tsx          # Verified payment audit trail & filters
 │   │   │   ├── reconciliation.tsx    # Monthly revenue by channel & held deposit balances
-│   │   │   ├── reminders.tsx         # T-3 automated/manual rent reminder queue with WhatsApp intents
+│   │   │   ├── reminders.tsx         # T-3 rent reminder queue with WhatsApp intent links
 │   │   │   ├── reports.tsx           # Tenant UTR payment slip review & manual approval/rejection
 │   │   │   └── tenants.tsx           # Active and vacated tenant rosters, notices, vacate & deposit settle
 │   │   ├── tenant/                   # Tenant portal routes
@@ -191,11 +208,6 @@ pg-react/
 │   ├── main.tsx                      # DOM root mount (<StrictMode><App /></StrictMode>)
 │   ├── router.tsx                    # TanStack Router tree with route guards & redirection
 │   └── vite-env.d.ts
-├── scripts/
-│   ├── check-palette.mjs             # ANTI_SLOP linter verifying zero forbidden Tailwind color classes
-│   ├── check-typography.mjs          # ANTI_SLOP linter enforcing semantic .t-* typography classes
-│   ├── gen-icons.mjs                 # Script generating PWA icon assets
-│   └── restyle-tokens.mjs            # Token transformation helper
 ├── docs/
 │   ├── BRAND_VOICE.md                # Communication guidelines, tone of voice & terminology
 │   ├── CRAFT.md                      # Engineering principles: speed on scope, never on money/trust
@@ -204,10 +216,15 @@ pg-react/
 │   ├── REMINDERS.md                  # Rent reminder specification & server automation contract
 │   ├── UX_SESSIONS.md                # Usability testing scoreboard and journey evaluations
 │   └── UX_VALIDATION.md              # UX evaluation protocols and AI critic guidelines
-├── HANDOFF.md                        # This canonical handoff documentation
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+├── .env.example                      # Reference environment configuration
+├── .oxlintrc.json                    # Oxlint static analysis configuration
+├── index.html                        # Application entry HTML with font preconnects
+├── package.json                      # NPM dependencies, scripts, metadata
+├── tsconfig.app.json                 # Application TypeScript configuration
+├── tsconfig.json                     # Solution TypeScript root
+├── tsconfig.node.json                # Vite tooling TypeScript configuration
+├── vite.config.ts                    # Vite config, PWA plugin, Tailwind v4, aliases
+└── vitest.config.ts                  # Vitest testing configuration with jsdom & path aliases
 ```
 
 ---
@@ -222,51 +239,61 @@ pg-react/
       │◀── 2. Firebase ID Token Returned ───│                               │
       │                                                                     │
       │── 3. POST /api/auth/firebase { id_token, invite_code } ────────────▶│
-      │◀── 4. Return 30-Day App JWT + User Record ──────────────────────────│
+      │◀── 4. Set HttpOnly Cookie: pg_refresh_token (30d, SameSite=Strict) ─│
+      │◀── 5. Return 15-Minute Access Token + User Record ──────────────────│
       │                                                                     │
-      │── 5. Store in localStorage (pg_jwt, pg_user)                        │
-      │── 6. Decode JWT claims: sub, user_id, role, tenant_id, property_id  │
-      │── 7. TanStack Router Guard routes to role home surface              │
+      │── 6. Store access token in localStorage (pg_jwt, pg_user)           │
+      │── 7. Decode JWT claims: sub, user_id, role, tenant_id, property_id  │
+      │── 8. TanStack Router Guard routes to role home surface              │
 ```
 
-### Identity State Machine
+### Identity State Machine & Token Rotation Architecture
 
 1. **Firebase Authentication Options:**
-   - **Phone Auth:** User enters an Indian phone number (`+91...`). reCAPTCHA resolves invisibly, Firebase delivers a 6-digit OTP, and the client receives a Firebase ID token.
+   - **Phone Auth:** User enters an Indian phone number (`+91...`). Invisible reCAPTCHA executes, Firebase delivers a 6-digit OTP, and the client receives a Firebase ID token.
    - **Google Sign-In:** User authenticates via Google popup. The backend validates `email_verified: true`. If no phone number is linked to the Firebase account, the client prompts for phone linking.
-2. **Backend Token Exchange:**
-   - Client invokes `POST /api/auth/firebase` passing `{ id_token, invite_code? }`.
-   - The Go backend verifies the cryptographic signature with Firebase Admin, provisions or updates the user record, associates invite codes if provided, and returns an application JWT.
+2. **Backend Token Exchange & Session Issuance:**
+   - Client invokes `POST /api/auth/firebase` passing `{ id_token, invite_code? }` (with `credentials: "include"`).
+   - The Go backend verifies cryptographic signatures with Firebase Admin, provisions or updates the user record, associates invite codes if provided, and issues:
+     - **Short-Lived Access Token:** 15-minute TTL JWT with unique `jti` for API authorization.
+     - **Refresh Token (HttpOnly Cookie):** 30-day TTL cryptographically hashed (`SHA-256`) refresh token bound to a `family_id` set via `Set-Cookie: pg_refresh_token=...; Path=/api/auth; HttpOnly; SameSite=Strict; [Secure]`.
 3. **Session Persistence (`src/auth/storage.ts`):**
-   - Application JWT is stored under `pg_jwt`.
+   - Access token is stored under `pg_jwt`.
    - Serialized `User` object is stored under `pg_user`.
    - Pending property invite code is cached under `pg_invite`.
    - Active language code is cached under `pg_locale`.
    - User theme preference (`system` | `light` | `dark`) is stored under `pg_theme`.
-   - Reminders sent log is stored under `pg_reminder_sent`.
-4. **Tenant Wait State (`isPendingJoin`):**
+   - Sent reminders tracking map is stored under `pg_reminder_sent`.
+4. **Token Family Rotation & Replay Attack Defense (ADR-007 / Gate 3):**
+   - Rotating tokens on `POST /api/auth/refresh` issues a new access token and a single-use replacement refresh token while revoking the consumed token.
+   - If an attacker attempts to replay an already-consumed refresh token, the backend detects replay, revokes the **entire token family**, and invalidates all active sessions for that family.
+5. **Client Concurrency & Multi-Tab Synchronization (`src/api/client.ts`):**
+   - Multi-tab race conditions are eliminated using the Web Locks API (`navigator.locks.request("pg_token_refresh", ...)`) with in-memory lock fallback.
+   - When multiple requests or tabs experience a 401 or token expiry simultaneously, only the lock-winning request performs rotation against `/api/auth/refresh`; concurrent callers await the lock, discover the newly refreshed token, and retry their operations without triggering replay detection.
+   - `AuthProvider` (`src/auth/context.tsx`) performs a silent background refresh on boot if the access token has lapsed, keeping returning users logged in seamlessly.
+6. **Tenant Wait State (`isPendingJoin`):**
    - When a user has `role === "tenant"` but `tenant_id` is null or undefined, the user is in `pending_allocation`.
    - The user is strictly restricted to the `/join` screen by `RequireTenant` and `RequireJoin`.
-   - Direct navigation to `/tenant/*` receives a `403 Forbidden` response (`"complete your profile to continue"`), triggering a `pg:waiting-join` event which automatically routes the user back to `/join`.
+   - Direct navigation to `/tenant/*` receives a `403 Forbidden` response (`auth.profileIncomplete`: `"complete your profile to continue"`), triggering a `pg:waiting-join` event which automatically routes the user back to `/join`.
    - Once the owner reviews the KYC submission, assigns a room and specifies rent, the tenant clicks **"Continue"** on `/join`. The client forces a token refresh via `getIdToken(true)` and re-exchanges it with `POST /api/auth/firebase` to receive a fresh JWT containing the allocated `tenant_id`.
-5. **Session Revocation & Centralized Interceptors (`src/api/client.ts`):**
-   - **`401 Unauthorized`:** Token has expired or is invalid. Calls `clearToken()`, dispatches the `pg:unauthorized` window event, evicts React Query cache, and redirects to `/landing`.
-   - **`403 Forbidden` (`access revoked`):** User's sessions were invalidated by `POST /api/auth/revoke-sessions`. Immediately clears session and redirects to `/landing`.
-   - **`403 Forbidden` (`complete your profile to continue`):** Tenant has not been allocated. Dispatches `pg:waiting-join` window event to redirect to `/join`.
-   - **`503 Service Unavailable` (`firebase auth not configured`):** Friendly error banner explaining missing backend service-account credentials.
-   - **`404 Not Found` (`no account for phone`):** Instructs the user to obtain an invite code from the PG owner.
+7. **Session Revocation & Centralized Interceptors (`src/api/client.ts`):**
+   - **`401 Unauthorized` (`auth.missingToken` / `auth.invalidToken`):** On non-auth endpoints, automatically attempts silent token rotation. If refresh fails (or cookie expired/revoked), calls `clearToken()`, dispatches the `pg:unauthorized` window event, evicts React Query cache, and redirects to `/landing`.
+   - **`403 Forbidden` (`auth.accessRevoked`):** User's sessions were invalidated by `POST /api/auth/revoke-sessions` (token version increment) or token replay detection. Immediately clears session and redirects to `/landing`.
+   - **`403 Forbidden` (`auth.profileIncomplete`):** Tenant has not been allocated. Dispatches `pg:waiting-join` window event to redirect to `/join`.
+   - **`503 Service Unavailable` (`auth.firebaseNotConfigured`):** Error banner explaining missing backend service-account credentials.
+   - **`404 Not Found` (`auth.noAccount`):** Instructs the user to obtain an invite code from the PG owner.
 
 ---
 
-## 4. Localization (i18n) & Preference Synchronization
+## 4. Localization (i18n), Preferences & Error Code Parity
 
-`pg-react` implements an enterprise-grade internationalization architecture with offline resilience, optimistic UI updates, and bi-directional server synchronization.
+`pg-react` implements an enterprise-grade internationalization architecture with offline resilience, optimistic UI updates, bi-directional server synchronization, and strict error code parity against `pg-go`.
 
 ### Supported Locales
 
 | Locale Code | Language | Native Name | Default |
 | :--- | :--- | :--- | :--- |
-| `en-IN` | English (India) | English | **Yes** |
+| `en-IN` | English (India) | English | **Yes (Fallback)** |
 | `te-IN` | Telugu | తెలుగు | No |
 | `ta-IN` | Tamil | தமிழ் | No |
 | `kn-IN` | Kannada | ಕನ್ನಡ | No |
@@ -299,7 +326,15 @@ pg-react/
 3. **HTTP Header Propagation:**
    - `src/api/client.ts` automatically extracts the active locale using `getStoredLocale()` and attaches an `Accept-Language: <locale>` header to every outbound HTTP request.
 4. **Number and Currency Formatting:**
-   - Currency formatting (`formatPaise(paise, locale)`) and date formatting (`formatDate(dateString, locale)`) in `src/lib/utils.ts` format numbers and dates according to the Indian localized conventions of the active locale.
+   - Currency formatting (`formatPaise(paise, locale)`) and date formatting (`formatDate(dateString, locale)`) in `src/lib/utils.ts` format numbers and dates according to Indian localized conventions.
+5. **Cross-Repo Error Code Parity:**
+   - `scripts/check-error-codes.mjs` (`npm run check:error-codes`) compares `src/i18n/error-codes.json` against `pg-go/internal/apierr/error-codes.json`. All 54 codes match byte-for-byte across:
+     - `auth.*` (17 codes: missingToken, invalidToken, accessRevoked, profileIncomplete, forbidden, alreadyActivated, invalidOtp, otpExpired, otpLocked, rateLimited, noAccount, invalidInvite, firebaseNotConfigured, emailNotVerified, invalidFirebaseToken, unauthorized, noPropertyScope)
+     - `join.*` (11 codes: invalidInvite, noPendingRequest, notFound, alreadyOnboarded, alreadyActive, nameRequired, consentRequired, photoRequired, profileIncomplete, requestNotPending, notAwaitingAssignment)
+     - `payment.*` (7 codes: duplicateTxn, cashPartialNotAllowed, dueNotOpen, noDepositDue, emptyTxnId, ambiguousMatch, noMatch)
+     - `finance.*` (12 codes: duplicateRequest, idempotencyRequired, invalidAmount, invalidKind, overpay, expenseNotPayable, policyExceeded, approvalRequired, periodNotCloseable, notFound, forbidden, disabled)
+     - `request.*` (5 codes: invalidBody, invalidId, dueDayInvalid, imageTooLarge, imageReadFailed)
+     - `preferences.*` (2 codes: localeRequired, invalidLocale)
 
 ---
 
@@ -315,7 +350,7 @@ Navigation is strictly partitioned into three isolated role domains, plus public
 | `/activation` | None | Authenticated | Post-join / post-creation celebratory splash screen |
 | `/join` | `RequireJoin` | Tenant (`tenant_id == null`) | KYC submission form & room allocation waiting room |
 | `/denied` | None | All | 403 Forbidden warning screen |
-| `*` (Catch-all) | `notFoundComponent` | All | Custom 404 "Page isn't on the ledger" screen |
+| `*` (Catch-all) | `notFoundComponent` | All | Custom 404 "Page isn't on the ledger" screen (`NotFoundView`) |
 | **Owner Portal** | `RequireOwner` (`AppShell`) | `owner` | **Default landing: `/owner/dashboard`** |
 | `/owner/dashboard` | `RequireOwner` (`AppShell`) | `owner` | Real-time metrics, collection aggregates & fast actions |
 | `/owner/joins` | `RequireOwner` (`AppShell`) | `owner` | Pending join requests, Aadhaar KYC review & room assignment |
@@ -375,17 +410,17 @@ function homeForRole(role: string | null, pending: boolean): string {
    - **Walk-in Creation:** Alternatively, create offline walk-in tenants directly from `/owner/more`.
 3. **Billing, Dues & Reminders (`/owner/dues`, `/owner/reminders`):**
    - Generate recurring or ad-hoc dues for rent, security deposits, water, or electricity.
-   - **Rent Reminders (`/owner/reminders`):** System calculates T-3 due date reminders. Owners click **Send now** to invoke `POST /api/owner/dues/:id/token`, instantly generating a pre-filled WhatsApp intent link (`wa.me/?text=...`) containing the exact due amount and `PG-XXXXXX` due code.
-   - **Cash Settlement:** If a tenant pays cash, record the settlement via `POST /api/owner/dues/:id/mark-cash-paid`. Cash payments are strictly all-or-nothing against the remaining balance.
+   - **Rent Reminders (`/owner/reminders`):** System calculates T-3 due date reminders. Owners click **Send now** to invoke `POST /api/owner/dues/:id/token`, generating a pre-filled WhatsApp intent link (`wa.me/?text=...`) containing the exact due amount and `PG-XXXXXX` due code.
+   - **Cash Settlement:** If a tenant pays cash, record settlement via `POST /api/owner/dues/:id/mark-cash-paid`. Cash payments are strictly all-or-nothing against the remaining balance.
 4. **Payment Review & Reconciliation (`/owner/reports`, `/owner/reconciliation`, `/owner/payments`):**
-   - **UTR Slip Queue (`/owner/reports`):** Review manual payment reports submitted by tenants. Confirming the UTR settles the due and credits reward points; rejecting marks the report invalid with an optional note.
+   - **UTR Slip Queue (`/owner/reports`):** Review manual payment reports submitted by tenants. Confirming the UTR settles the due and credits reward points; rejecting marks the report invalid with an optional note. Duplicate image submissions are visually badged (`is_duplicate`).
    - **Statement Import (`/owner/more`):** Upload standard bank CSV statements (`POST /api/owner/statements/import`) to automatically match bank credits against dues by due code or amount/date windows.
    - **Reconciliation Summary (`/owner/reconciliation`):** Audit monthly rent collected, collections by channel (Cash, UPI, Gateway), outstanding overdue balances, and held security deposits.
 5. **Tenant Lifecycle & Offboarding (`/owner/tenants`):**
    - Issue formal move-out notice (`POST /api/owner/tenants/:id/notice`).
    - Calculate prorated final rent based on vacate date (`POST /api/owner/tenants/:id/prorate`).
    - Settle and refund security deposits (`POST /api/owner/tenants/:id/deposit/settle`).
-   - Mark tenant as vacated (`POST /api/owner/tenants/:id/vacate`), freeing up room capacity.
+   - Mark tenant as vacated (`POST /api/owner/tenants/:id/vacate`), freeing up room capacity and immediately revoking tenant session access.
 
 ---
 
@@ -395,7 +430,7 @@ function homeForRole(role: string | null, pending: boolean): string {
    - Tenant arrives via invite link (`/?invite=PG123`) or enters code manually on `/`.
    - Authenticates via Phone OTP or Google Sign-In.
    - Submits KYC profile (`POST /api/join`): Full name, permanent/current address, parent name, emergency contact, consent, and photo ID.
-   - Remains on `/join` waiting room until the owner assigns a room. Once approved, tapping **Continue** refreshes the session token and navigates to `/tenant`.
+   - Remains on `/join` waiting room until the owner assigns terms. Once approved, tapping **Continue** refreshes the session token and navigates to `/tenant`.
 2. **Passbook Dashboard & Streaks (`/tenant`):**
    - Displays current room allocation, rent due date, active balance, and overdue dues.
    - **Streak Flame:** Renders current on-time payment streak in months, available streak freezes, and reward points balance (`GET /api/tenant/points`).
@@ -403,7 +438,7 @@ function homeForRole(role: string | null, pending: boolean): string {
    - Tapping **Pay** on an open due opens the `PayPanel`.
    - **Manual Mode:** Displays PG UPI VPA, dynamic QR code, one-click `upi://pay` deep link, and copyable note (`PG-XXXXXX`).
    - **Cashfree Mode:** Initializes Cashfree Checkout SDK for instant credit/debit card, net banking, or gateway UPI transactions.
-   - **UTR Submission:** After paying via external UPI apps (GPay, PhonePe, Paytm), tenant enters the 12-digit bank UTR and attaches an optional screenshot. The client extracts UTR via OCR (`upiScreenshotExtractor.ts`) and submits the slip (`POST /api/tenant/dues/:id/reports`).
+   - **UTR Submission:** After paying via external UPI apps, tenant enters the 12-digit bank UTR and attaches an optional screenshot. The client extracts UTR via OCR (`upiScreenshotExtractor.ts`) and submits the slip (`POST /api/tenant/dues/:id/reports`).
 4. **Perks & Rewards Redemption (`/tenant/rewards`):**
    - Browse catalog of perks (rent discounts, food vouchers, maintenance perks) (`GET /api/tenant/rewards`).
    - Enforces tenure requirements (e.g. minimum 3 on-time months).
@@ -448,7 +483,7 @@ Accessible at `/manager/*` for users with `role: "manager"` or `role: "owner"`.
 
 ## 7. API Layer Reference & TanStack Query State
 
-All HTTP requests pass through `apiFetch` or `apiFetchBlob` in `src/api/client.ts`, which automatically injects `Authorization: Bearer <token>` and `Accept-Language: <locale>`, and handles 401/403 event dispatching.
+All HTTP requests pass through `apiFetch` or `apiFetchBlob` in `src/api/client.ts`, which automatically injects `Authorization: Bearer <token>` and `Accept-Language: <locale>`, formats payloads, and handles 401/403 event dispatching.
 
 ### Complete API Module Directory
 
@@ -621,10 +656,11 @@ Visual standards and recipes follow [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM
 Code commits must adhere to automated quality gate scripts:
 - `npm run lint:palette` (`scripts/check-palette.mjs`): Disallows generic, uncontrolled color utilities (`slate-*`, `amber-*`, `cyan-*`, `text-primary`, or inline `#hex`).
 - `npm run lint:type` (`scripts/check-typography.mjs`): Disallows raw arbitrary typography sizes (`text-xl`, `text-2xl`, `text-3xl`) in favor of semantic `.t-*` classes. Escape hatch for third-party or explicit exceptions: comment `/* lint-allow-palette */` or `/* lint-allow-type */`.
+- `npm run check:error-codes` (`scripts/check-error-codes.mjs`): Disallows drift between `src/i18n/error-codes.json` and backend `pg-go` error codes.
 
 ---
 
-## 9. Core Financial & Operational Invariants
+## 9. Core Financial, KYC & Operational Invariants
 
 1. **Integer Paise Representation:**
    - Currency amounts across the database, backend endpoints, and TypeScript types (`@pg/types`) are integers in **paise** (`₹1 = 100 paise`).
@@ -635,9 +671,12 @@ Code commits must adhere to automated quality gate scripts:
    - The owner's UPI VPA is never hardcoded or exposed in public routes. It is securely delivered via authenticated `GET /api/owner/dues/:id/pay` or `GET /api/tenant/dues/:id/pay`.
 4. **All-or-Nothing Cash Settlement:**
    - Cash recording via `POST /api/owner/dues/:id/mark-cash-paid` strictly requires the full remaining due amount.
-5. **Inspection Dispute SLA:**
+5. **DPDP Act 2023 KYC Invariants (ADR-004):**
+   - Active explicit consent is required before any KYC initiation.
+   - On consent revocation (`POST /api/tenant/kyc/revoke`), an atomic backend transaction scrubs `masked_uid` and `identity_hash` across `kyc_verification` and `tenants.aadhaar_last4`.
+   - Tenant views strictly hide internal fraud detection signals (`identity_hash`, `duplicate_detected`, `vendor_reference_id`).
+6. **Inspection Dispute SLA & Photo Enforcement:**
    - Tenants have an immutable 48-hour dispute window starting from the inspection timestamp. After 48 hours, the dispute action locks permanently.
-6. **Inspection Photo Enforcement:**
    - During room or floor inspections, any checklist item marked as failed strictly requires photo attachment before the manager can submit the audit.
 
 ---
@@ -710,7 +749,10 @@ npm run lint:palette
 # Check typography scale conformance
 npm run lint:type
 
-# Run Vitest test suite
+# Verify cross-repo error code parity with pg-go (54 error codes)
+npm run check:error-codes
+
+# Run Vitest test suite (16 tests across contract, export CSV, and i18n)
 npm run test
 
 # Preview production build locally
@@ -722,9 +764,10 @@ npm run preview
 Before submitting a pull request or deploying a build, verify:
 
 1. `tsc -b`: Type check completes with 0 compiler errors.
-2. `vitest run`: Unit, contract, and i18n test suites pass (`src/test/i18n.test.ts`, `src/lib/exportLedgerCsv.test.ts`, `src/api/contract.test.ts`).
-3. `npm run lint`: Oxlint, palette AST checker, and typography checker pass cleanly.
-4. Responsive verification: Test 390px (mobile viewport) and 1280px (desktop viewport) in both Light and Dark themes.
+2. `npm run check:error-codes`: Confirms byte-for-byte parity for all 54 error codes against `pg-go`.
+3. `vitest run`: Unit, contract, and i18n test suites pass cleanly (`src/test/i18n.test.ts`, `src/lib/exportLedgerCsv.test.ts`, `src/api/contract.test.ts`).
+4. `npm run lint`: Oxlint, palette AST checker, and typography checker pass with zero errors.
+5. Responsive verification: Test 390px (mobile viewport) and 1280px (desktop viewport) in both Light and Dark themes.
 
 ---
 

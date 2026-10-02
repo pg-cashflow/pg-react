@@ -177,6 +177,36 @@ export interface ReconciliationSummary {
   deposits_refunded_paise: Paise;
 }
 
+export interface DiscrepancyItem {
+  category: string;
+  amount_paise: Paise;
+  note?: string;
+  severity: "critical" | "warning" | "info";
+}
+
+export interface DailySettlementBalance {
+  id: string;
+  property_id: string;
+  balance_date: string;
+  gateway_gross_paise: Paise;
+  gateway_net_settled_paise: Paise;
+  gateway_fees_paise: Paise;
+  gateway_tax_paise: Paise;
+  gateway_adjustment_paise: Paise;
+  gateway_in_transit_paise: Paise;
+  bank_credits_paise: Paise;
+  bank_debits_paise: Paise;
+  ledger_bank_dr_paise: Paise;
+  ledger_bank_cr_paise: Paise;
+  unapplied_quarantine_paise: Paise;
+  discrepancy_paise: Paise;
+  is_balanced: boolean;
+  discrepancies: DiscrepancyItem[];
+  balanced_at?: string;
+  created_at: string;
+}
+
+
 export interface DueTokenResponse {
   path: string;
   url: string;
