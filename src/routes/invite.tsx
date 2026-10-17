@@ -18,6 +18,10 @@ export const InvitePage: React.FC = () => {
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (property) {
+      navigate({ to: "/login" });
+      return;
+    }
     const trimmed = code.trim();
     if (!trimmed) return;
     setLoading(true);
@@ -26,6 +30,7 @@ export const InvitePage: React.FC = () => {
       const out = await lookupInvite(trimmed);
       setInviteCode(trimmed);
       setProperty({ property_name: out.property_name, owner_name: out.owner_name });
+      navigate({ to: "/login" });
     } catch (err) {
       setProperty(null);
       setError(err instanceof ApiError ? err.message : "Invalid invite code");
@@ -50,7 +55,7 @@ export const InvitePage: React.FC = () => {
               setInviteCode("");
               navigate({ to: "/login" });
             }}
-            className="text-ink-muted hover:text-ink"
+            className="text-ink-muted hover:text-ink text-sm underline"
           >
             I am the owner — sign in
           </button>
@@ -72,7 +77,10 @@ export const InvitePage: React.FC = () => {
         <form onSubmit={handleLookup} className="space-y-4">
           <input
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              setCode(e.target.value.toUpperCase());
+              if (property) setProperty(null);
+            }}
             placeholder="Invite code"
             className="w-full h-12 px-4 bg-bg border border-hairline rounded-[10px] text-ink font-mono tracking-widest text-center text-base focus:outline-none focus:ring-2 focus:ring-accent"
             autoCapitalize="characters"
@@ -85,16 +93,6 @@ export const InvitePage: React.FC = () => {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
           </button>
         </form>
-
-        {property && (
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/login" })}
-            className="mt-3 w-full h-12 rounded-[10px] bg-accent-tint text-accent border border-accent/20 font-semibold text-sm"
-          >
-            Sign in to join
-          </button>
-        )}
       </AuthLayout>
     </div>
   );

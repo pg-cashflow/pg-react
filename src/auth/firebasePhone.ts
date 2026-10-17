@@ -107,8 +107,18 @@ export async function sendFirebasePhoneOtp(e164Phone: string): Promise<void> {
     const verifier = await createRecaptchaVerifier();
     const user = firebaseAuth.currentUser;
     if (user && !user.phoneNumber) {
-      pendingConfirmation = await linkWithPhoneNumber(user, e164Phone, verifier);
-      return;
+      try {
+        pendingConfirmation = await linkWithPhoneNumber(user, e164Phone, verifier);
+        return;
+      } catch (linkErr: unknown) {
+        const code = (linkErr as { code?: string })?.code;
+        if (code === "auth/credential-already-in-use" || code === "auth/account-exists-with-different-credential") {
+          const fallbackVerifier = await createRecaptchaVerifier();
+          pendingConfirmation = await signInWithPhoneNumber(firebaseAuth, e164Phone, fallbackVerifier);
+          return;
+        }
+        throw linkErr;
+      }
     }
     pendingConfirmation = await signInWithPhoneNumber(firebaseAuth, e164Phone, verifier);
   } catch (err) {

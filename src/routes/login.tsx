@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/auth/context";
-import { getInviteCode } from "@/auth/storage";
+import { getInviteCode, setInviteCode } from "@/auth/storage";
 import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
-import { Building2, ArrowRight, Phone, AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { Building2, ArrowRight, Phone, AlertCircle, Loader2, Sparkles, X } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import AuthLayout from "@/components/layout/AuthLayout";
 
@@ -31,9 +31,8 @@ const GoogleMark: React.FC = () => (
 
 export const LoginPage: React.FC = () => {
   const { sendPhoneOtp, confirmPhoneOtp, loginWithGoogle } = useAuth();
-  const invite = getInviteCode();
+  const [invite, setInvite] = useState<string | null>(() => getInviteCode() || null);
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [linkingGoogle, setLinkingGoogle] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,9 +67,7 @@ export const LoginPage: React.FC = () => {
     return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);
   }, []);
 
-  const phonePrompt = linkingGoogle
-    ? "Link your registered phone number to finish Google sign-in"
-    : "Enter your phone number to continue";
+  const phonePrompt = "Enter your phone number to continue";
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,11 +124,7 @@ export const LoginPage: React.FC = () => {
       setLoading(true);
       setError(null);
       setSessionNotice(null);
-      const result = await loginWithGoogle();
-      if (result === "needs-phone") {
-        setLinkingGoogle(true);
-        setStep("phone");
-      }
+      await loginWithGoogle();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Google sign-in failed");
     } finally {
@@ -146,18 +139,50 @@ export const LoginPage: React.FC = () => {
     setSessionNotice(null);
   };
 
-  const subtitle = invite
-    ? `Joining with invite ${invite}`
-    : step === "phone"
-      ? phonePrompt
-      : `Enter the 6-digit OTP sent to ${phone}`;
+  const handleClearInvite = () => {
+    setInviteCode("");
+    setInvite(null);
+  };
+
+  const subtitle = invite ? (
+    <span className="inline-flex items-center gap-1.5 flex-wrap justify-center">
+      <span>Joining with invite <strong className="font-mono text-accent">{invite}</strong></span>
+      <button
+        type="button"
+        onClick={handleClearInvite}
+        className="inline-flex items-center gap-0.5 text-xs text-ink-muted hover:text-danger transition underline cursor-pointer"
+        title="Remove invite code"
+      >
+        <X className="w-3 h-3" /> Clear
+      </button>
+    </span>
+  ) : step === "phone" ? (
+    phonePrompt
+  ) : (
+    `Enter the 6-digit OTP sent to ${phone}`
+  );
 
   return (
     <div className="relative">
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
-      <AuthLayout icon={Building2} title="Sign in" subtitle={subtitle}>
+      <AuthLayout
+        icon={Building2}
+        title="Sign in"
+        subtitle={subtitle}
+        footer={
+          invite ? (
+            <button
+              type="button"
+              onClick={handleClearInvite}
+              className="text-xs text-ink-muted hover:text-ink transition underline cursor-pointer"
+            >
+              I am an owner — sign in without invite
+            </button>
+          ) : undefined
+        }
+      >
 
         {onLocalhost && (
           <div className="mb-4 p-3 rounded-xl bg-accent-tint border border-accent/20 text-accent text-xs flex items-center gap-2">
@@ -277,30 +302,27 @@ export const LoginPage: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  {linkingGoogle ? "Send link OTP" : "Send OTP"}
+                  Send OTP
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
 
-            {!linkingGoogle && (
-              <>
-                <div className="flex items-center gap-3 py-1">
-                  <div className="h-px flex-1 bg-hairline" />
-                  <span className="text-[11px] uppercase tracking-wider text-ink-faint">or</span>
-                  <div className="h-px flex-1 bg-hairline" />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleGoogle}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-surface text-ink font-semibold text-sm border border-hairline hover:bg-accent-tint transition disabled:opacity-50"
-                >
-                  <GoogleMark />
-                  Continue with Google
-                </button>
-              </>
-            )}
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-hairline" />
+              <span className="text-[11px] uppercase tracking-wider text-ink-faint">or</span>
+              <div className="h-px flex-1 bg-hairline" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGoogle}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-surface text-ink font-semibold text-sm border border-hairline hover:bg-accent-tint transition disabled:opacity-50"
+            >
+              <GoogleMark />
+              Continue with Google
+            </button>
 
             <div className="pt-2 text-center">
               <button

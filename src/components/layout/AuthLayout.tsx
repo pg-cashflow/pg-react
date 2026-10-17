@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
 interface AuthLayoutProps {
   icon?: React.ComponentType<{ className?: string }>;
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   footer?: React.ReactNode;
   children: React.ReactNode;
 }

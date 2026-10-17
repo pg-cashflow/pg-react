@@ -20,6 +20,7 @@ export const getJoinMe = (): Promise<{
 
 export interface JoinProfilePayload {
   name: string;
+  phone?: string;
   permanent_address: string;
   current_address: string;
   parent_name: string;
@@ -41,6 +42,9 @@ export const submitJoinProfile = (
 ): Promise<SubmitJoinProfileResult> => {
   const form = new FormData();
   form.append("name", body.name);
+  if (body.phone) {
+    form.append("phone", body.phone);
+  }
   form.append("permanent_address", body.permanent_address);
   form.append("current_address", body.current_address);
   form.append("parent_name", body.parent_name);

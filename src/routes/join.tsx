@@ -34,6 +34,15 @@ export const JoinWaitingPage: React.FC = () => {
   const [currentAddress, setCurrentAddress] = useState("");
   const [parentName, setParentName] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
+  const isPhoneFixed = Boolean(
+    (user?.phone && !user.phone.startsWith("+G")) ||
+    (meQuery.data?.user?.phone && !meQuery.data.user.phone.startsWith("+G"))
+  );
+  const fixedPhone =
+    (user?.phone && !user.phone.startsWith("+G") ? user.phone : null) ||
+    (meQuery.data?.user?.phone && !meQuery.data.user.phone.startsWith("+G") ? meQuery.data.user.phone : "");
+
+  const [personalPhone, setPersonalPhone] = useState(fixedPhone || "");
   const [consent, setConsent] = useState(false);
   const [idPhoto, setIdPhoto] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -60,7 +69,10 @@ export const JoinWaitingPage: React.FC = () => {
     if (meQuery.data?.join?.name) {
       setName(meQuery.data.join.name);
     }
-  }, [meQuery.data?.join?.name]);
+    if (fixedPhone && !personalPhone) {
+      setPersonalPhone(fixedPhone);
+    }
+  }, [meQuery.data?.join?.name, fixedPhone, personalPhone]);
 
   const handleIdUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,13 +90,18 @@ export const JoinWaitingPage: React.FC = () => {
     setError(null);
 
     const trimmedName = name.trim();
+    const trimmedPhone = isPhoneFixed ? fixedPhone : personalPhone.trim();
     const permanent = permanentAddress.trim();
     const current = currentAddress.trim();
     const parent = parentName.trim();
     const emergency = emergencyPhone.trim();
 
-    if (!trimmedName || !permanent || !current || !parent || !emergency) {
+    if (!trimmedName || !trimmedPhone || !permanent || !current || !parent || !emergency) {
       setError("Please fill all required fields.");
+      return;
+    }
+    if (!/^\+?[0-9\s-]{10,15}$/.test(trimmedPhone)) {
+      setError("Please enter a valid personal mobile number.");
       return;
     }
     if (!/^\+?[0-9\s-]{10,15}$/.test(emergency)) {
@@ -104,6 +121,7 @@ export const JoinWaitingPage: React.FC = () => {
     try {
       const res = await submitJoinProfile({
         name: trimmedName,
+        phone: trimmedPhone,
         permanent_address: permanent,
         current_address: current,
         parent_name: parent,
@@ -212,18 +230,34 @@ export const JoinWaitingPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                Personal Mobile Number
+                Personal Mobile Number *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
                   <Phone className="w-4 h-4" />
                 </div>
-                <input
-                  disabled
-                  value={user?.phone || meQuery.data?.user?.phone || "+91 Logged In Mobile"}
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface/40 border border-hairline/50 rounded-xl text-ink-muted text-sm font-mono cursor-not-allowed"
-                />
+                {isPhoneFixed ? (
+                  <input
+                    disabled
+                    value={fixedPhone}
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface/40 border border-hairline/50 rounded-xl text-ink-muted text-sm font-mono cursor-not-allowed"
+                  />
+                ) : (
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+91 98765 43210"
+                    value={personalPhone}
+                    onChange={(e) => setPersonalPhone(e.target.value)}
+                    className={inputClass}
+                  />
+                )}
               </div>
+              {!isPhoneFixed && (
+                <p className="text-[11px] text-ink-faint mt-1">
+                  Enter your active mobile number for PG communication and rent receipts
+                </p>
+              )}
             </div>
 
             <div>
