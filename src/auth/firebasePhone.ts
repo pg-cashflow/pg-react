@@ -32,7 +32,7 @@ function mapFirebaseAuthError(code: string): string {
     case "auth/billing-not-enabled":
       return "Real SMS requires a Blaze billing plan. Use a Firebase test phone number on Spark.";
     case "auth/network-request-failed":
-      return "Network error talking to Firebase. Open http://127.0.0.1:5173 (not localhost) and try again.";
+      return "Network error connecting to Firebase. Check your internet connection, disable ad-blockers/shields (which block reCAPTCHA/Google Identity Toolkit), and confirm 127.0.0.1 and localhost are added to Firebase Console Authorized Domains.";
     case "auth/missing-phone-number":
       return "Phone number is required.";
     case "auth/popup-closed-by-user":
