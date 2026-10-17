@@ -122,14 +122,22 @@ export const JoinWaitingPage: React.FC = () => {
         };
         applySession(res.token, sessionUser);
       } else if (res.tenant?.id && user) {
-        applySession(
-          getAccessToken() || "",
-          {
-            ...user,
-            tenant_id: res.tenant.id,
-            property_id: res.tenant.property_id ?? user.property_id,
-          }
-        );
+        // Fallback: When the backend omits a fresh token in the join response,
+        // retain the active in-memory token. getAccessToken() is guaranteed
+        // non-null here because the preceding completeProfile call succeeded
+        // via authenticated apiFetch. Guard against null to prevent passing ""
+        // which would flip isAuthenticated to false and bounce the user to /landing.
+        const currentToken = getAccessToken();
+        if (currentToken) {
+          applySession(
+            currentToken,
+            {
+              ...user,
+              tenant_id: res.tenant.id,
+              property_id: res.tenant.property_id ?? user.property_id,
+            }
+          );
+        }
       }
 
       await meQuery.refetch();
@@ -313,7 +321,7 @@ export const JoinWaitingPage: React.FC = () => {
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider flex items-center justify-between">
                 <span>Aadhaar / Govt ID Photo *</span>
-                <span className="text-[10px] text-ink-muted font-normal">No OCR — upload only</span>
+                <span className="text-[10px] text-ink-muted font-normal">We don't auto-read this photo — just upload it for your records</span>
               </label>
               <div className="relative border border-dashed border-hairline hover:border-hairline bg-surface/30 rounded-xl p-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 text-ink truncate">
@@ -344,8 +352,7 @@ export const JoinWaitingPage: React.FC = () => {
                 className="mt-0.5 rounded border-hairline"
               />
               <span>
-                I consent to storing this ID photo with the PG for occupancy records. It is not used for automated
-                extraction.
+                I agree to the PG storing this ID photo for occupancy and KYC records.
               </span>
             </label>
 
@@ -358,7 +365,7 @@ export const JoinWaitingPage: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Submit & Enter Portal
+                  Submit & continue
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

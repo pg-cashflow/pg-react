@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
+import { PwaInstallPrompt } from "@/components/common/PwaInstallPrompt";
 
 const FEATURES = [
   ["01", "Dues ledger", "Every payment reconciled against a UTR and a date."],
@@ -57,6 +58,7 @@ export const LandingPage: React.FC = () => {
               Sign in
             </Link>
           </div>
+          <PwaInstallPrompt className="mt-8" />
         </div>
       </header>
 

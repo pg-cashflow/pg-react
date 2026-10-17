@@ -13,7 +13,7 @@ export const AccessDeniedView: React.FC = () => {
         </div>
         <h1 className="t-h1 mb-2">Access denied</h1>
         <p className="t-body-sm text-ink-muted mb-6">
-          Your account does not have a valid role assigned. Please contact your PG owner.
+          You're signed in, but no role is set up for your account yet. Ask your PG owner to add you.
         </p>
         <button
           onClick={logout}

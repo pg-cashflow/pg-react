@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/auth/context";
 import { getInviteCode } from "@/auth/storage";
 import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
-import { Building2, ArrowRight, KeyRound, Phone, AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { Building2, ArrowRight, Phone, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import AuthLayout from "@/components/layout/AuthLayout";
+
+import { OtpInput } from "@/components/shared/OtpInput";
 
 const GoogleMark: React.FC = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -38,7 +40,16 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sessionNotice, setSessionNotice] = useState<string | null>(null);
   const [showTestHelper, setShowTestHelper] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const onLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     const handleUnauthorized = (e: Event) => {
@@ -58,7 +69,7 @@ export const LoginPage: React.FC = () => {
 
   const phonePrompt = linkingGoogle
     ? "Link your registered phone number to finish Google sign-in"
-    : "Enter your registered phone number to sign in";
+    : "Enter your phone number to continue";
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +80,7 @@ export const LoginPage: React.FC = () => {
       setError(null);
       setSessionNotice(null);
       await sendPhoneOtp(phone.trim());
+      setResendCooldown(30);
       setStep("otp");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to send OTP");
@@ -77,15 +89,16 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.length !== 6) return;
+  const handleVerifyOtp = async (e?: React.FormEvent, codeOverride?: string) => {
+    if (e) e.preventDefault();
+    const codeToVerify = codeOverride ?? otp;
+    if (codeToVerify.length !== 6 || loading) return;
 
     try {
       setLoading(true);
       setError(null);
       setSessionNotice(null);
-      await confirmPhoneOtp(otp);
+      await confirmPhoneOtp(codeToVerify);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid verification code");
     } finally {
@@ -94,12 +107,13 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleResendOtp = async () => {
-    if (!phone.trim()) return;
+    if (!phone.trim() || resendCooldown > 0 || loading) return;
     try {
       setLoading(true);
       setError(null);
       setSessionNotice(null);
       await sendPhoneOtp(phone.trim());
+      setResendCooldown(30);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to resend OTP");
     } finally {
@@ -230,7 +244,7 @@ export const LoginPage: React.FC = () => {
         )}
 
         {step === "phone" ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+          <form key="phone-form" onSubmit={handleSendOtp} className="space-y-4 animate-step-in">
             <div>
               <label className="block text-xs font-medium text-ink-muted mb-1.5 uppercase tracking-wider">
                 Phone Number
@@ -288,32 +302,24 @@ export const LoginPage: React.FC = () => {
             )}
           </form>
         ) : (
-          <form onSubmit={handleVerifyOtp} className="space-y-4">
+          <form key="otp-form" onSubmit={(e) => void handleVerifyOtp(e)} className="space-y-4 animate-step-in">
             <div>
-              <label className="block text-xs font-medium text-ink-muted mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-medium text-ink-muted mb-2 uppercase tracking-wider text-center">
                 Verification Code
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-faint">
-                  <KeyRound className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  required
-                  maxLength={6}
-                  placeholder="123456"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  className="w-full pl-10 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-ink placeholder-ink-faint text-sm font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition"
-                />
-              </div>
+              <OtpInput
+                value={otp}
+                onChange={setOtp}
+                onComplete={(code) => void handleVerifyOtp(undefined, code)}
+                disabled={loading}
+                hasError={!!error}
+                autoFocus
+              />
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || otp.length !== 6}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-pressed transition shadow-sm active:scale-95 disabled:opacity-50"
             >
               {loading ? (
@@ -329,10 +335,12 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => void handleResendOtp()}
-              disabled={loading}
-              className="w-full text-center text-xs text-ink-muted hover:text-ink transition py-1 disabled:opacity-50"
+              disabled={loading || resendCooldown > 0}
+              className="w-full text-center text-xs text-ink-muted hover:text-ink transition py-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Resend OTP
+              {resendCooldown > 0
+                ? `Resend OTP (0:${resendCooldown < 10 ? `0${resendCooldown}` : resendCooldown})`
+                : "Resend OTP"}
             </button>
 
             <button
@@ -340,6 +348,7 @@ export const LoginPage: React.FC = () => {
               onClick={() => {
                 setStep("phone");
                 setOtp("");
+                setResendCooldown(0);
                 setError(null);
                 resetFirebasePhoneAuth();
               }}
