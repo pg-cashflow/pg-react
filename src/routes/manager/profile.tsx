@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useAuth } from "@/auth/context";
 import { useManagerAction } from "@/components/layout/ManagerShell";
+import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 
 export const ManagerProfileView: React.FC = () => {
   const { user, logout } = useAuth();
@@ -24,6 +25,7 @@ export const ManagerProfileView: React.FC = () => {
           <span className="t-body font-medium">Warden</span>
         </div>
       </section>
+      <ActiveSessionsCard />
       <button
         type="button"
         onClick={logout}

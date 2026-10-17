@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
   joinMe: ["join", "me"] as const,
   preferences: ["me", "preferences"] as const,
   locales: ["locales"] as const,
+  sessions: ["auth", "sessions"] as const,
 
   // Gamification & Operations
   tenantPoints: ["tenant", "points"] as const,

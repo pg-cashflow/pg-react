@@ -7,6 +7,7 @@ import { useAuth } from "@/auth/context";
 import { subscribeToPush } from "@/push/subscribe";
 import { BadgeCheck } from "lucide-react";
 import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
+import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 
 export const TenantProfileView: React.FC = () => {
   const { logout } = useAuth();
@@ -97,6 +98,8 @@ export const TenantProfileView: React.FC = () => {
           <p className="t-caption text-ink-muted">Choose your preferred language</p>
           <LanguageSegmentedControl />
         </section>
+
+        <ActiveSessionsCard />
 
         <button
           type="button"

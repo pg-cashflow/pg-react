@@ -105,3 +105,11 @@ Opposite instruction, same model. Still **not a user**. It cannot be confused.
 - Stranger completes T1, O2, J1, W2 without you speaking (or ≤1 domain clarification).
 - Pause count on the prediction sheet drops session over session.
 - Wrong paths change **labels, landing, or cross-links** — not more copy on the same wrong screen.
+
+## Adversarial test prompts — Auth & Sessions
+
+- [ ] OTP: paste a 6-digit SMS code — does native autofill still work, or did the overlay break it?
+- [ ] OTP: focus the input on a real iPhone — does the page zoom? (text-base regression check)
+- [ ] Resend: tap rapidly 5x in 2s — does the cooldown block it, and does the server also 429 if the client timer is bypassed via devtools?
+- [ ] Sessions: revoke all devices from device A — does device B get force-logged-out within one request (not just on next refresh)?
+

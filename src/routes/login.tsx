@@ -41,6 +41,7 @@ export const LoginPage: React.FC = () => {
   const [sessionNotice, setSessionNotice] = useState<string | null>(null);
   const [showTestHelper, setShowTestHelper] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showLostPhoneHelp, setShowLostPhoneHelp] = useState(false);
   const onLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
 
   useEffect(() => {
@@ -300,6 +301,21 @@ export const LoginPage: React.FC = () => {
                 </button>
               </>
             )}
+
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setShowLostPhoneHelp((prev) => !prev)}
+                className="text-xs text-ink-muted hover:text-ink transition underline"
+              >
+                Lost access to this number?
+              </button>
+              {showLostPhoneHelp && (
+                <div className="mt-2 p-3 rounded-xl bg-surface border border-hairline text-xs text-ink-muted leading-relaxed text-left animate-step-in">
+                  Contact your PG owner directly — they can update your number from the Tenants list.
+                </div>
+              )}
+            </div>
           </form>
         ) : (
           <form key="otp-form" onSubmit={(e) => void handleVerifyOtp(e)} className="space-y-4 animate-step-in">

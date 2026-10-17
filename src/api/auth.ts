@@ -25,3 +25,29 @@ export const logoutSession = (): Promise<{ ok: boolean }> => {
     method: "POST",
   });
 };
+
+export interface ActiveSession {
+  id: string;
+  device_label: string;
+  user_agent: string;
+  ip_address: string;
+  last_seen: string;
+  created_at: string;
+  is_current: boolean;
+}
+
+export const getActiveSessions = (): Promise<{ sessions: ActiveSession[] }> => {
+  return apiFetch<{ sessions: ActiveSession[] }>("/auth/sessions");
+};
+
+export const deleteSession = (id: string): Promise<{ ok: boolean }> => {
+  return apiFetch<{ ok: boolean }>(`/auth/sessions/${id}`, {
+    method: "DELETE",
+  });
+};
+
+export const revokeAllSessions = (): Promise<{ ok: boolean }> => {
+  return apiFetch<{ ok: boolean }>("/auth/revoke-sessions", {
+    method: "POST",
+  });
+};

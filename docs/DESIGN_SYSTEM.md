@@ -93,3 +93,15 @@ In-repo cards, `QueryState`, `StatusPill`, `ConfirmDialog`, `AuthLayout`, and `C
 `src/routes/**` and product components must not use `slate-`, `amber-`, `cyan-`, `text-primary`, or raw `#hex`. CI: `npm run lint:palette`.
 
 Display type in those files must use `.t-*`, not `text-xl` / `text-2xl` / `text-3xl`. CI: `npm run lint:type`. Escape hatch: `lint-allow-type` on the line (same idea as `lint-allow-palette`).
+
+## Recipes — Auth
+
+**OtpInput** (`src/components/shared/OtpInput.tsx`)
+Single real `<input type="tel" autoComplete="one-time-code">`, `text-base`, `opacity-0`, `absolute inset-0` over 6 display boxes (`w-11 h-12`, `rounded-[10px]`). Preserves native SMS autofill — never split into 6 real inputs. `hasError` triggers `.animate-shake`; error ring uses `border-danger`.
+
+## Tokens — status
+
+Add alongside existing `danger-tint` / `success-tint` / `accent-tint`:
+| Token | Use |
+|---|---|
+| `warning-tint` | Resend-cooldown / session-expiring-soon notices — distinct from error red |

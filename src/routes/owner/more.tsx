@@ -9,6 +9,7 @@ import { rupeesToPaise } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { ThemeSegmentedControl } from "@/components/common/ThemeToggle";
 import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
+import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 
 export const MoreView: React.FC = () => {
   const queryClient = useQueryClient();
@@ -213,6 +214,9 @@ export const MoreView: React.FC = () => {
           className="text-sm text-ink-muted"
         />
       </section>
+
+      {/* Active Sessions */}
+      <ActiveSessionsCard />
     </div>
   );
 };

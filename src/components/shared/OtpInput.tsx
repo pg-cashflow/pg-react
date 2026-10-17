@@ -95,7 +95,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({
         onBlur={() => setIsFocused(false)}
         disabled={disabled}
         autoFocus={autoFocus}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-default"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-default text-base"
         aria-label="Verification code"
       />
       {boxes}
