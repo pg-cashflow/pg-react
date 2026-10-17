@@ -15,7 +15,8 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatPaise, rupeesToPaise, paiseToRupeeInput, localDateInputValue, formatDate } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Search, Loader2, Phone } from "lucide-react";
+import { Search, Loader2, Phone, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
+import { getOwnerTenantKYC } from "@/api/kyc";
 import type { Tenant } from "@pg/types";
 
 const IdPhotoPreview: React.FC<{ tenantId: string }> = ({ tenantId }) => {
@@ -34,6 +35,43 @@ const IdPhotoPreview: React.FC<{ tenantId: string }> = ({ tenantId }) => {
   }, [tenantId]);
   if (!url) return <p className="text-ink-muted">ID photo on file</p>;
   return <img src={url} alt="ID photo" className="mt-2 max-h-40 rounded-lg object-contain bg-surface" />;
+};
+
+const TenantKYCStatusBadge: React.FC<{ tenantId: string }> = ({ tenantId }) => {
+  const { data: kyc, isLoading } = useQuery({
+    queryKey: QUERY_KEYS.ownerTenantKYC(tenantId),
+    queryFn: () => getOwnerTenantKYC(tenantId),
+    staleTime: 60000,
+  });
+
+  if (isLoading) return <span className="text-ink-faint text-xs">Checking KYC...</span>;
+  if (!kyc || !kyc.status) return <span className="text-ink-faint text-xs">Unverified</span>;
+
+  if (kyc.status === "verified") {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
+        <ShieldCheck className="w-3.5 h-3.5" />
+        Verified {kyc.masked_uid ? `(**** ${kyc.masked_uid})` : ""}
+      </span>
+    );
+  }
+  if (kyc.status === "pending_manual_review") {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-warning">
+        <Clock className="w-3.5 h-3.5" />
+        Pending Review
+      </span>
+    );
+  }
+  if (kyc.status === "rejected") {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-danger">
+        <AlertTriangle className="w-3.5 h-3.5" />
+        Rejected
+      </span>
+    );
+  }
+  return <span className="text-ink-faint text-xs capitalize">{kyc.status}</span>;
 };
 
 export const TenantsView: React.FC = () => {
@@ -156,6 +194,10 @@ export const TenantsView: React.FC = () => {
               {selected.permanent_address && <p>Home: {selected.permanent_address}</p>}
               {selected.current_address && <p>Current: {selected.current_address}</p>}
               {selected.joined_on && <p>Joined: {formatDate(selected.joined_on)}</p>}
+              <div className="flex items-center gap-2 pt-1 border-t border-hairline/60">
+                <span className="text-ink-faint">KYC Status:</span>
+                <TenantKYCStatusBadge tenantId={selected.id} />
+              </div>
               {selected.has_id_photo && (
                 <IdPhotoPreview tenantId={selected.id} />
               )}

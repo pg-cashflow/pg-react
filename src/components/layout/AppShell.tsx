@@ -11,6 +11,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 
 const TITLES: Record<string, string> = {
   "/owner/joins": "Join requests",
+  "/owner/kyc": "KYC Review",
   "/owner/reports": "UTR reports",
   "/owner/tenants": "Tenants",
   "/owner/dues": "Dues",

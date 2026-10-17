@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getMyProfile, submitAadhaar } from "@/api/tenant";
+import { getMyProfile } from "@/api/tenant";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { useAuth } from "@/auth/context";
@@ -8,12 +8,11 @@ import { subscribeToPush } from "@/push/subscribe";
 import { BadgeCheck } from "lucide-react";
 import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
+import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 
 export const TenantProfileView: React.FC = () => {
   const { logout } = useAuth();
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
-  const [aadhaarLast4, setAadhaarLast4] = useState("");
-  const [consent, setConsent] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const profile = profileQuery.data;
 
@@ -48,45 +47,24 @@ export const TenantProfileView: React.FC = () => {
           </div>
         </section>
 
+        <TenantKYCCard />
+
         <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
-          <h2 className="t-h3">Aadhaar (optional)</h2>
-          <input
-            value={aadhaarLast4}
-            onChange={(e) => setAadhaarLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-            maxLength={4}
-            placeholder="Last 4"
-            className="w-full h-12 px-4 rounded-[10px] border border-hairline bg-bg t-code text-base"
-          />
-          <label className="flex items-center gap-2 t-body-sm text-ink-muted">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-            I consent
-          </label>
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                await submitAadhaar({ consent, uid_last4: aadhaarLast4 || undefined, confirm: true, channel: "tenant_app" });
-                setMsg("Saved");
-                profileQuery.refetch();
-              } catch (err) {
-                setMsg(err instanceof Error ? err.message : "Failed");
-              }
-            }}
-            className="h-11 px-4 rounded-[10px] border border-hairline t-body font-semibold"
-          >
-            Save Aadhaar
-          </button>
+          <h2 className="t-h3">Reminders & Notifications</h2>
+          <p className="t-caption text-ink-muted">
+            Receive rent due notifications and UPI payment alerts on your device.
+          </p>
           <button
             type="button"
             onClick={async () => {
               try {
                 await subscribeToPush();
-                setMsg("Push enabled");
+                setMsg("Push notifications enabled");
               } catch (err) {
-                setMsg(err instanceof Error ? err.message : "Push failed");
+                setMsg(err instanceof Error ? err.message : "Push registration failed");
               }
             }}
-            className="h-11 px-4 rounded-[10px] border border-hairline t-body font-semibold ml-2"
+            className="h-11 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold hover:bg-bg transition"
           >
             Enable rent reminders
           </button>

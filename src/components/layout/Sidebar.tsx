@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Users,
   Receipt,
@@ -9,8 +8,12 @@ import {
   LogOut,
   Building2,
   Sliders,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/auth/context";
+import { useQuery } from "@tanstack/react-query";
+import { getOwnerKYCQueue } from "@/api/kyc";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 interface SidebarProps {
   currentTab: string;
@@ -26,10 +29,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const { logout } = useAuth();
+  const kycQueueQuery = useQuery({
+    queryKey: QUERY_KEYS.ownerKYCQueue,
+    queryFn: getOwnerKYCQueue,
+    refetchInterval: 30000,
+  });
+  const pendingCount = kycQueueQuery.data?.items?.length ?? 0;
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "joins", label: "Join queue", icon: Users },
+    { id: "kyc", label: "KYC Review", icon: ShieldCheck, badge: pendingCount > 0 ? pendingCount : undefined },
     { id: "reports", label: "UTR reports", icon: Receipt },
     { id: "tenants", label: "Tenants", icon: Users },
     { id: "dues", label: "Dues & Billing", icon: Scale },
@@ -88,7 +98,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }`}
               >
                 <Icon className={`w-4 h-4 ${active ? "text-white" : "text-ink-muted"}`} />
-                <span>{item.label}</span>
+                <span className="flex-1 text-left">{item.label}</span>
+                {item.badge !== undefined && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      active
+                        ? "bg-white text-accent"
+                        : "bg-warning-tint text-warning border border-warning/20"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}

@@ -281,6 +281,50 @@ export interface AadhaarPreview {
   needs_confirm?: boolean;
 }
 
+export type KYCStatus =
+  | "pending"
+  | "pending_manual_review"
+  | "verified"
+  | "failed"
+  | "rejected"
+  | "expired"
+  | "revoked";
+
+export type KYCMethod = "digilocker" | "aadhaar_otp" | "ocr" | "qr";
+
+export interface KYCVerification {
+  id: string;
+  status: KYCStatus;
+  method: KYCMethod;
+  masked_uid?: string;
+  verified_at?: string;
+  expires_at?: string;
+  failure_reason?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OwnerKYCVerificationView extends KYCVerification {
+  duplicate_detected?: boolean;
+  is_dedupable?: boolean;
+  trust_tier?: string;
+  qr_status?: string;
+  photo_stored?: boolean;
+  name_mismatch?: boolean;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  document_url?: string;
+  tenant_name?: string;
+  room_number?: string;
+  tenant_id?: string;
+}
+
+export interface KYCStatusResponse {
+  verification: KYCVerification | null;
+  consent_active: boolean;
+}
+
 export interface Event {
   tenant_id?: string;
   property_id?: string;

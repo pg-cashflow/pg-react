@@ -21,6 +21,7 @@ import { TenantShell } from "@/components/layout/TenantShell";
 import { ManagerShell } from "@/components/layout/ManagerShell";
 import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { JoinsView } from "@/routes/owner/joins";
+import { OwnerKYCView } from "@/routes/owner/kyc";
 import { ReportsView } from "@/routes/owner/reports";
 import { TenantsView } from "@/routes/owner/tenants";
 import { DuesView } from "@/routes/owner/dues";
@@ -222,6 +223,7 @@ const ownerIndex = createRoute({
 });
 
 const ownerJoins = createRoute({ getParentRoute: () => ownerRoute, path: "/joins", component: JoinsView });
+const ownerKYC = createRoute({ getParentRoute: () => ownerRoute, path: "/kyc", component: OwnerKYCView });
 const ownerReports = createRoute({ getParentRoute: () => ownerRoute, path: "/reports", component: ReportsView });
 const ownerTenants = createRoute({ getParentRoute: () => ownerRoute, path: "/tenants", component: TenantsView });
 const ownerDues = createRoute({ getParentRoute: () => ownerRoute, path: "/dues", component: DuesView });
@@ -356,6 +358,7 @@ const routeTree = rootRoute.addChildren([
   ownerRoute.addChildren([
     ownerIndex,
     ownerJoins,
+    ownerKYC,
     ownerReports,
     ownerTenants,
     ownerDues,

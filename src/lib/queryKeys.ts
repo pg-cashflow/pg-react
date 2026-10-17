@@ -47,5 +47,10 @@ export const QUERY_KEYS = {
   settlementEOD: (date?: string) =>
     date ? (["settlement", "eod", date] as const) : (["settlement", "eod"] as const),
   settlementHistory: (limit?: number) => ["settlement", "history", limit || 30] as const,
+
+  // KYC
+  tenantKYCStatus: ["tenant", "kyc", "status"] as const,
+  ownerKYCQueue: ["owner", "kyc", "queue"] as const,
+  ownerTenantKYC: (tenantId: string) => ["owner", "tenants", tenantId, "kyc"] as const,
 };
 

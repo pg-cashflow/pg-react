@@ -8,7 +8,8 @@ import { StatusPill } from "@/components/shared/StatusPill";
 import { QueryState } from "@/components/shared/QueryState";
 import StreakFlame from "@/components/shared/StreakFlame";
 import { countOverdueDues, displayDueStatus, formatDate, formatDueSentence, sumOutstandingFromDues } from "@/lib/utils";
-import { Flame, ShieldCheck } from "lucide-react";
+import { Flame, ShieldCheck, Clock, ArrowRight } from "lucide-react";
+import { getTenantKYCStatus } from "@/api/kyc";
 
 interface TenantDashboardProps {
   onNavigate: (tab: string) => void;
@@ -27,10 +28,14 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
     refetchInterval: 30000,
   });
   const pointsQuery = useQuery({ queryKey: QUERY_KEYS.tenantPoints, queryFn: getTenantPoints });
+  const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
 
   const profile = profileQuery.data;
   const dues = duesQuery.data ?? profile?.active_dues ?? [];
   const points = pointsQuery.data;
+  const kyc = kycQuery.data?.verification;
+  const isKycVerified = kyc?.status === "verified";
+  const isKycPendingReview = kyc?.status === "pending_manual_review";
   const outstanding = sumOutstandingFromDues(dues);
   const overdueCount = countOverdueDues(dues);
   const current = [...dues]
@@ -48,6 +53,7 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
         duesQuery.refetch();
         paymentsQuery.refetch();
         pointsQuery.refetch();
+        kycQuery.refetch();
       }}
       isFetching={duesQuery.isFetching}
     >
@@ -61,6 +67,39 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
             </div>
           )}
         </div>
+
+        {/* KYC Status Reminder Banner */}
+        {!isKycVerified && (
+          <div
+            onClick={() => onNavigate("profile")}
+            className={`p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition ${
+              isKycPendingReview
+                ? "bg-warning-tint/30 border-warning/20 text-warning"
+                : "bg-accent-tint border-accent/20 text-accent"
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0 pr-2">
+              {isKycPendingReview ? (
+                <Clock className="w-5 h-5 shrink-0" />
+              ) : (
+                <ShieldCheck className="w-5 h-5 shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className="t-body font-semibold">
+                  {isKycPendingReview
+                    ? "KYC Document Under Review"
+                    : "Identity Verification Required"}
+                </p>
+                <p className="t-caption text-ink-muted mt-0.5 truncate">
+                  {isKycPendingReview
+                    ? "Your uploaded ID is being verified by management."
+                    : "Complete Aadhaar OTP verification to enable full passbook features."}
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 shrink-0 text-ink-muted" />
+          </div>
+        )}
 
         <section className="rounded-[14px] bg-accent-tint border border-accent-tint overflow-hidden">
           <div className="flex items-center gap-4 px-5 pt-5">
