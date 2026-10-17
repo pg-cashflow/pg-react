@@ -1,5 +1,5 @@
 import { API_BASE } from "@/lib/constants";
-import { getStoredLocale, setStoredUser } from "@/auth/storage";
+import { getStoredLocale, getStoredUser, setStoredUser } from "@/auth/storage";
 import { getAccessToken, setAccessToken } from "@/auth/tokenStore";
 
 export class ApiError extends Error {
@@ -72,12 +72,15 @@ export async function executeRefresh(failedToken: string | null): Promise<string
     });
 
     if (!res.ok) {
+      const hadPriorSession = Boolean(currentToken || getStoredUser());
       setAccessToken(null);
       setStoredUser(null);
       stopProactiveRefresh();
-      window.dispatchEvent(
-        new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
-      );
+      if (hadPriorSession) {
+        window.dispatchEvent(
+          new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+        );
+      }
       return null;
     }
 
@@ -94,12 +97,15 @@ export async function executeRefresh(failedToken: string | null): Promise<string
     // network or other failure
   }
 
+  const hadPriorSession = Boolean(currentToken || getStoredUser());
   setAccessToken(null);
   setStoredUser(null);
   stopProactiveRefresh();
-  window.dispatchEvent(
-    new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
-  );
+  if (hadPriorSession) {
+    window.dispatchEvent(
+      new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+    );
+  }
   return null;
 }
 
@@ -120,12 +126,15 @@ export async function requestTokenRefresh(failedToken: string | null): Promise<s
 
 async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promise<T> {
   if (res.status === 401) {
+    const hadPriorSession = Boolean(getAccessToken() || getStoredUser());
     setAccessToken(null);
     setStoredUser(null);
     stopProactiveRefresh();
-    window.dispatchEvent(
-      new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
-    );
+    if (hadPriorSession) {
+      window.dispatchEvent(
+        new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+      );
+    }
     throw new ApiError(401, "Session expired or unauthorized");
   }
 
@@ -204,20 +213,29 @@ function authHeaders(options: RequestInit): Record<string, string> {
   return headers;
 }
 
+function resolveUrl(path: string): string {
+  let cleanPath = path.startsWith("/") ? path : `/${path}`;
+  if (API_BASE.endsWith("/api") && cleanPath.startsWith("/api/")) {
+    cleanPath = cleanPath.slice(4);
+  }
+  return `${API_BASE}${cleanPath}`;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const url = resolveUrl(path);
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(url, {
       ...options,
       credentials: options.credentials ?? "include",
       headers: authHeaders(options),
     });
 
-    const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth";
+    const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth" || path.startsWith("/api/auth/") || path === "/api/auth";
     if (res.status === 401 && !isAuthEndpoint) {
       const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
-        const retryRes = await fetch(`${API_BASE}${path}`, {
+        const retryRes = await fetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
           headers: authHeaders(options),
@@ -236,19 +254,20 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 }
 
 export async function apiFetchBlob(path: string, options: RequestInit = {}): Promise<Blob> {
+  const url = resolveUrl(path);
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(url, {
       ...options,
       credentials: options.credentials ?? "include",
       headers: authHeaders(options),
     });
 
-    const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth";
+    const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth" || path.startsWith("/api/auth/") || path === "/api/auth";
     if (res.status === 401 && !isAuthEndpoint) {
       const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
-        const retryRes = await fetch(`${API_BASE}${path}`, {
+        const retryRes = await fetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
           headers: authHeaders(options),
