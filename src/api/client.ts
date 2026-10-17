@@ -1,5 +1,6 @@
 import { API_BASE } from "@/lib/constants";
-import { getToken, setToken, clearToken, getStoredLocale, setStoredUser } from "@/auth/storage";
+import { getStoredLocale, setStoredUser } from "@/auth/storage";
+import { getAccessToken, setAccessToken } from "@/auth/tokenStore";
 
 export class ApiError extends Error {
   status: number;
@@ -14,9 +15,52 @@ export class ApiError extends Error {
 }
 
 let activeRefreshPromise: Promise<string | null> | null = null;
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
-async function executeRefresh(failedToken: string | null): Promise<string | null> {
-  const currentToken = getToken();
+export async function checkBiometricGate(): Promise<boolean> {
+  if (typeof window !== "undefined") {
+    const gate = (window as unknown as { pgBiometricGate?: () => Promise<boolean> }).pgBiometricGate;
+    if (typeof gate === "function") {
+      try {
+        return await gate();
+      } catch {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+export function scheduleProactiveRefresh(delayMs = 12 * 60 * 1000): void {
+  stopProactiveRefresh();
+  refreshTimer = setTimeout(async () => {
+    const ok = await checkBiometricGate();
+    if (!ok) {
+      setAccessToken(null);
+      setStoredUser(null);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("pg:unauthorized", { detail: { reason: "biometric_failed" } })
+        );
+      }
+      return;
+    }
+    const refreshedToken = await executeRefresh(getAccessToken());
+    if (refreshedToken) {
+      scheduleProactiveRefresh(delayMs);
+    }
+  }, delayMs);
+}
+
+export function stopProactiveRefresh(): void {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
+export async function executeRefresh(failedToken: string | null): Promise<string | null> {
+  const currentToken = getAccessToken();
   if (currentToken && currentToken !== failedToken) {
     return currentToken;
   }
@@ -31,14 +75,18 @@ async function executeRefresh(failedToken: string | null): Promise<string | null
     });
 
     if (!res.ok) {
-      clearToken();
-      window.dispatchEvent(new CustomEvent("pg:unauthorized"));
+      setAccessToken(null);
+      setStoredUser(null);
+      stopProactiveRefresh();
+      window.dispatchEvent(
+        new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+      );
       return null;
     }
 
     const data = await res.json();
     if (data?.token) {
-      setToken(data.token);
+      setAccessToken(data.token);
       if (data.user) {
         setStoredUser(data.user);
       }
@@ -48,8 +96,12 @@ async function executeRefresh(failedToken: string | null): Promise<string | null
     // network or other failure
   }
 
-  clearToken();
-  window.dispatchEvent(new CustomEvent("pg:unauthorized"));
+  setAccessToken(null);
+  setStoredUser(null);
+  stopProactiveRefresh();
+  window.dispatchEvent(
+    new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+  );
   return null;
 }
 
@@ -70,8 +122,12 @@ export async function requestTokenRefresh(failedToken: string | null): Promise<s
 
 async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promise<T> {
   if (res.status === 401) {
-    clearToken();
-    window.dispatchEvent(new CustomEvent("pg:unauthorized"));
+    setAccessToken(null);
+    setStoredUser(null);
+    stopProactiveRefresh();
+    window.dispatchEvent(
+      new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+    );
     throw new ApiError(401, "Session expired or unauthorized");
   }
 
@@ -89,8 +145,12 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
     }
     const mapped = mapApiErrorMessage(res.status, errorMsg);
     if (res.status === 403 && (errorCode === "auth.accessRevoked" || /access revoked/i.test(mapped))) {
-      clearToken();
-      window.dispatchEvent(new CustomEvent("pg:unauthorized"));
+      setAccessToken(null);
+      setStoredUser(null);
+      stopProactiveRefresh();
+      window.dispatchEvent(
+        new CustomEvent("pg:unauthorized", { detail: { reason: "access_revoked" } })
+      );
     }
     if (res.status === 403 && (errorCode === "join.profileRequired" || /complete your profile to continue/i.test(mapped))) {
       window.dispatchEvent(new CustomEvent("pg:waiting-join"));
@@ -129,7 +189,7 @@ function networkFailureMessage(): string {
 }
 
 function authHeaders(options: RequestInit): Record<string, string> {
-  const token = getToken();
+  const token = getAccessToken();
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
   };
@@ -156,7 +216,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
     const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth";
     if (res.status === 401 && !isAuthEndpoint) {
-      const originalToken = getToken();
+      const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
         const retryRes = await fetch(`${API_BASE}${path}`, {
@@ -186,7 +246,7 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
 
     const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth";
     if (res.status === 401 && !isAuthEndpoint) {
-      const originalToken = getToken();
+      const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
         const retryRes = await fetch(`${API_BASE}${path}`, {

@@ -1,5 +1,5 @@
 import { API_BASE } from "@/lib/constants";
-import { getToken } from "@/auth/storage";
+import { getAccessToken } from "@/auth/tokenStore";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -19,7 +19,7 @@ export async function subscribeToPush(): Promise<boolean> {
     throw new Error("Push notifications are not supported by this browser");
   }
 
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) {
     throw new Error("Must be logged in to subscribe to push notifications");
   }

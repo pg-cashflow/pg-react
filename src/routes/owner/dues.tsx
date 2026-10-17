@@ -154,56 +154,160 @@ export const DuesView: React.FC = () => {
 
   const tenantMap = React.useMemo(() => new Map(tenants.map((t) => [t.id, t.name])), [tenants]);
 
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number>(0);
+  const tableRowRefs = React.useRef<(HTMLTableRowElement | null)[]>([]);
+
   const filteredDues = dues.filter((d) => {
     if (statusFilter === "overdue") return isOverdue(d);
     if (statusFilter !== "all" && d.status !== statusFilter) return false;
     return true;
   });
 
+  // Clamp selected row index when filtered dues change
+  React.useEffect(() => {
+    if (filteredDues.length === 0) {
+      setSelectedRowIndex(0);
+    } else if (selectedRowIndex >= filteredDues.length) {
+      setSelectedRowIndex(Math.max(0, filteredDues.length - 1));
+    }
+  }, [filteredDues.length, selectedRowIndex]);
+
+  // Scroll active row into view
+  React.useEffect(() => {
+    if (tableRowRefs.current[selectedRowIndex]) {
+      tableRowRefs.current[selectedRowIndex]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [selectedRowIndex]);
+
+  // Global keyboard shortcuts for arrow navigation & Enter verification
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      const isInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT");
+      
+      const isModalOpen = payModalDue || waiveModalDue || matchDueRow || qrModal;
+      if (isModalOpen || isInput) {
+        if (e.key === "Escape") {
+          setPayModalDue(null);
+          setWaiveModalDue(null);
+          setMatchDueRow(null);
+          closeQrModal();
+        }
+        return;
+      }
+
+      if (filteredDues.length === 0) return;
+
+      if (e.key === "ArrowDown" || e.key === "j") {
+        e.preventDefault();
+        setSelectedRowIndex((prev) => Math.min(prev + 1, filteredDues.length - 1));
+      } else if (e.key === "ArrowUp" || e.key === "k") {
+        e.preventDefault();
+        setSelectedRowIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const selectedDue = filteredDues[selectedRowIndex];
+        if (selectedDue && selectedDue.status !== "paid" && selectedDue.status !== "waived") {
+          setPayModalDue(selectedDue);
+          setPayAmountRupees(paiseToRupeeInput(selectedDue.amount));
+          setPayNotes("");
+          setModalError(null);
+        }
+      } else if (e.key === "m" || e.key === "M") {
+        e.preventDefault();
+        const selectedDue = filteredDues[selectedRowIndex];
+        if (selectedDue && selectedDue.status !== "paid" && selectedDue.status !== "waived") {
+          setMatchDueRow(selectedDue);
+          setMatchUtr("");
+          setModalError(null);
+        }
+      } else if (e.key === "q" || e.key === "Q") {
+        e.preventDefault();
+        const selectedDue = filteredDues[selectedRowIndex];
+        if (selectedDue) {
+          handleShowQR(selectedDue);
+        }
+      } else if (e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        const selectedDue = filteredDues[selectedRowIndex];
+        if (selectedDue && selectedDue.status !== "paid" && selectedDue.status !== "waived") {
+          setWaiveModalDue(selectedDue);
+          setModalError(null);
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredDues, selectedRowIndex, payModalDue, waiveModalDue, matchDueRow, qrModal]);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-        >
-          <option value="all">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="overdue">Overdue</option>
-          <option value="partial">Partial</option>
-          <option value="paid">Paid</option>
-          <option value="waived">Waived</option>
-        </select>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="overdue">Overdue</option>
+            <option value="partial">Partial</option>
+            <option value="paid">Paid</option>
+            <option value="waived">Waived</option>
+          </select>
 
-        <select
-          value={tenantFilter}
-          onChange={(e) => setTenantFilter(e.target.value)}
-          className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-        >
-          <option value="all">All Tenants</option>
-          {tenants.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+          <select
+            value={tenantFilter}
+            onChange={(e) => setTenantFilter(e.target.value)}
+            className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+          >
+            <option value="all">All Tenants</option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
 
-        <button
-          type="button"
-          onClick={() =>
-            downloadTextFile(
-              `pg-ledger-${new Date().toISOString().slice(0, 10)}.csv`,
-              buildLedgerCsv(filteredDues, tenants, properties[0], payments)
-            )
-          }
-          className="h-10 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold"
-        >
-          Export CSV
-        </button>
-        <p className="t-caption text-ink-muted w-full sm:w-auto">
-          Filtered rows, including matched UTR when present.
-        </p>
+          <button
+            type="button"
+            onClick={() =>
+              downloadTextFile(
+                `pg-ledger-${new Date().toISOString().slice(0, 10)}.csv`,
+                buildLedgerCsv(filteredDues, tenants, properties[0], payments)
+              )
+            }
+            className="h-10 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold hover:bg-surface/80 active:scale-95 transition"
+          >
+            Export CSV
+          </button>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface border border-hairline rounded-xl text-xs text-ink-muted">
+          <span className="font-semibold text-ink">Keyboard:</span>
+          <span className="inline-flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">↑</kbd>
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">↓</kbd>
+            <span>Navigate</span>
+          </span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Enter</kbd>
+            <span>Verify Cash</span>
+          </span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">M</kbd>
+            <span>Match</span>
+          </span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Q</kbd>
+            <span>QR</span>
+          </span>
+        </div>
       </div>
 
       {modalError && !payModalDue && !waiveModalDue && (
@@ -238,25 +342,51 @@ export const DuesView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
-                {filteredDues.map((d) => (
-                  <tr key={d.id} className="hover:bg-accent-tint transition">
-                    <td className="px-6 py-4 font-medium text-ink">
-                      {tenantMap.get(d.tenant_id) || "Tenant"}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs text-ink-muted">
-                      <Link to="/owner/events" className="underline decoration-hairline hover:text-accent">
-                        {d.due_code}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 font-semibold">
-                      <AmountBadge amount={d.amount} />
-                    </td>
-                    <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(d.due_date)}</td>
-                    <td className="px-6 py-4">
-                      <StatusPill status={displayDueStatus(d)} />
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                {filteredDues.map((d, idx) => {
+                  const isSelected = selectedRowIndex === idx;
+                  return (
+                    <tr
+                      key={d.id}
+                      ref={(el) => {
+                        tableRowRefs.current[idx] = el;
+                      }}
+                      onClick={() => setSelectedRowIndex(idx)}
+                      tabIndex={0}
+                      className={`transition cursor-pointer outline-none ${
+                        isSelected
+                          ? "bg-accent-tint/60 ring-2 ring-accent ring-inset"
+                          : "hover:bg-accent-tint/30"
+                      }`}
+                    >
+                      <td className="px-6 py-4 font-medium text-ink">
+                        <div className="flex items-center gap-2">
+                          <span>{tenantMap.get(d.tenant_id) || "Student / Tenant"}</span>
+                          {isSelected && (
+                            <span className="inline-flex items-center text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-white">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-ink-muted">
+                        <Link to="/owner/events" className="underline decoration-hairline hover:text-accent">
+                          {d.due_code}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 font-semibold">
+                        <AmountBadge amount={d.amount} />
+                      </td>
+                      <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(d.due_date)}</td>
+                      <td className="px-6 py-4">
+                        <StatusPill status={displayDueStatus(d)} />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {isSelected && d.status !== "paid" && d.status !== "waived" && (
+                            <span className="hidden sm:inline-flex items-center text-[11px] font-mono text-accent bg-surface border border-accent/40 px-1.5 py-0.5 rounded shadow-xs font-semibold mr-1">
+                              ↵ Enter to Pay
+                            </span>
+                          )}
                         {d.status !== "paid" && d.status !== "waived" && (
                           <button
                             onClick={() => handleShowQR(d)}
@@ -308,7 +438,8 @@ export const DuesView: React.FC = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

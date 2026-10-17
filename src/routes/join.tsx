@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2,
@@ -23,7 +24,8 @@ import { getInviteCode } from "@/auth/storage";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 export const JoinWaitingPage: React.FC = () => {
-  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const { logout, user, triggerActivation } = useAuth();
   const inviteCode = getInviteCode();
 
   const [name, setName] = useState("");
@@ -109,6 +111,8 @@ export const JoinWaitingPage: React.FC = () => {
         image: idPhoto,
       });
       await meQuery.refetch();
+      triggerActivation();
+      navigate({ to: "/activation" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit profile. Please try again.");
     } finally {

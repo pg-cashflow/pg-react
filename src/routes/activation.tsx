@@ -1,16 +1,36 @@
 import React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Flame } from "lucide-react";
+import { useAuth } from "@/auth/context";
 
-export const ActivationCelebration: React.FC<{ role?: string }> = ({ role = "tenant" }) => {
+export const ActivationCelebration: React.FC<{ role?: string }> = ({ role }) => {
   const navigate = useNavigate();
-  const dest = role === "owner" ? "/owner/dashboard" : role === "manager" ? "/manager/kitchen" : "/tenant";
+  const { role: authRole, consumeActivation } = useAuth();
+
+  const queryRole =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("role")
+      : null;
+
+  const effectiveRole = role || queryRole || authRole || "tenant";
+  const dest =
+    effectiveRole === "owner"
+      ? "/owner/dashboard"
+      : effectiveRole === "manager"
+        ? "/manager/kitchen"
+        : "/tenant";
+
   const copy =
-    role === "owner"
+    effectiveRole === "owner"
       ? { headline: "You're live!", line: "Your property is on the ledger.", cta: "Open your portal" }
-      : role === "manager"
+      : effectiveRole === "manager"
         ? { headline: "You're in!", line: "Your floors are assigned. Operations are yours.", cta: "Start your first round" }
         : { headline: "You're in!", line: "Your room is on the ledger.", cta: "Go to your passbook" };
+
+  const handleCta = () => {
+    consumeActivation();
+    navigate({ to: dest });
+  };
 
   return (
     <div className="min-h-screen grid place-items-center bg-bg px-4">
@@ -20,8 +40,8 @@ export const ActivationCelebration: React.FC<{ role?: string }> = ({ role = "ten
         <p className="t-body text-ink-muted mt-2">{copy.line}</p>
         <button
           type="button"
-          onClick={() => navigate({ to: dest })}
-          className="w-full h-12 font-semibold mt-8 rounded-[10px] bg-accent text-white"
+          onClick={handleCta}
+          className="w-full h-12 font-semibold mt-8 rounded-[10px] bg-accent text-white hover:bg-accent-pressed transition active:scale-95"
         >
           {copy.cta}
         </button>

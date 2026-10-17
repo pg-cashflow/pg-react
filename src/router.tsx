@@ -55,17 +55,23 @@ function homeForRole(role: string | null, pending: boolean): string {
 }
 
 const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading, role, isPendingJoin } = useAuth();
+  const { isAuthenticated, isLoading, role, isPendingJoin, justActivated } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     if (isLoading) return;
     if (isAuthenticated) {
+      if (justActivated && !isPendingJoin) {
+        if (path === "/" || path === "/login" || path === "/landing") {
+          navigate({ to: "/activation" });
+          return;
+        }
+      }
       const dest = homeForRole(role, isPendingJoin);
       if (path === "/" || path === "/login" || path === "/landing") navigate({ to: dest });
     }
-  }, [isAuthenticated, isLoading, role, isPendingJoin, path, navigate]);
+  }, [isAuthenticated, isLoading, role, isPendingJoin, justActivated, path, navigate]);
 
   if (isLoading) return <AppLoadingScreen />;
   return <>{children}</>;

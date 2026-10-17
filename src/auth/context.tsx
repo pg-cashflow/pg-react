@@ -1,15 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { signOut } from "firebase/auth";
 import type { User, UserRole, AuthTokenPayload } from "@pg/types";
-import {
-  getToken,
-  setToken,
-  clearToken,
-  getStoredUser,
-  setStoredUser,
-  getInviteCode,
-} from "./storage";
+import { getStoredUser, setStoredUser, getInviteCode } from "./storage";
+import { getAccessToken, setAccessToken, onAccessTokenChange } from "./tokenStore";
 import { exchangeFirebaseToken, refreshSession, logoutSession } from "@/api/auth";
+import { scheduleProactiveRefresh, stopProactiveRefresh } from "@/api/client";
 import {
   sendFirebasePhoneOtp,
   confirmFirebasePhoneOtp,
@@ -30,6 +25,9 @@ interface AuthContextType {
   isPendingJoin: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
+  justActivated: boolean;
+  consumeActivation: () => void;
+  triggerActivation: () => void;
   sendPhoneOtp: (phone: string) => Promise<void>;
   confirmPhoneOtp: (otp: string) => Promise<void>;
   loginWithGoogle: () => Promise<"ok" | "needs-phone">;
@@ -62,46 +60,48 @@ function isValidRole(role: unknown): role is UserRole {
   return role === "owner" || role === "tenant" || role === "manager";
 }
 
-function isTokenExpired(payload: AuthTokenPayload): boolean {
-  if (typeof payload.exp !== "number" || payload.exp <= 0) {
-    return true;
-  }
-  return payload.exp * 1000 < Date.now();
-}
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setTokenState] = useState<string | null>(() => getToken());
-  const [user, setUser] = useState<User | null>(() => getStoredUser());
-  const [role, setRole] = useState<UserRole | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [tenantId, setTenantId] = useState<string | null>(null);
+  const initialStored = getStoredUser();
+  const [token, setTokenState] = useState<string | null>(() => getAccessToken());
+  const [user, setUser] = useState<User | null>(() => initialStored);
+  const [role, setRole] = useState<UserRole | null>(() =>
+    initialStored && isValidRole(initialStored.role) ? initialStored.role : null
+  );
+  const [userId, setUserId] = useState<string | null>(() => initialStored?.id || null);
+  const [tenantId, setTenantId] = useState<string | null>(() =>
+    initialStored?.role === "tenant" ? initialStored.tenant_id || null : null
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [justActivated, setJustActivated] = useState<boolean>(false);
 
   const logout = useCallback(() => {
+    stopProactiveRefresh();
     logoutSession().catch(() => {});
     queryClient.clear();
     clearServiceWorkerCaches().catch(() => {});
     resetFirebasePhoneAuth();
     signOut(firebaseAuth).catch(() => {});
-    clearToken();
+    setAccessToken(null);
     setStoredUser(null);
     setTokenState(null);
     setUser(null);
     setRole(null);
     setUserId(null);
     setTenantId(null);
+    setJustActivated(false);
   }, []);
 
   const applySession = useCallback((rawToken: string, sessionUser: User, payload: AuthTokenPayload) => {
     const resolvedRole = sessionUser.role;
     const tid = sessionUser.tenant_id || payload.tenant_id || null;
-    setToken(rawToken);
+    setAccessToken(rawToken);
     setTokenState(rawToken);
     setUser(sessionUser);
     setRole(resolvedRole);
     setUserId(sessionUser.id || payload.user_id || payload.sub || null);
     setTenantId(resolvedRole === "tenant" ? tid : null);
     setStoredUser(sessionUser);
+    scheduleProactiveRefresh();
     setIsLoading(false);
   }, []);
 
@@ -115,21 +115,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const evaluateStored = useCallback(async () => {
-    const rawToken = getToken();
     const stored = getStoredUser();
-
-    if (rawToken) {
-      const payload = parseJwt(rawToken);
-      if (payload && !isTokenExpired(payload) && isValidRole(stored?.role ?? payload.role)) {
-        const sessionUser: User = stored ?? {
-          id: payload.user_id ?? payload.sub,
-          phone: "",
-          role: payload.role,
-          tenant_id: payload.tenant_id,
-          property_id: payload.property_id,
-        };
-        applySession(rawToken, sessionUser, payload);
-        return;
+    if (stored) {
+      setUser(stored);
+      if (isValidRole(stored.role)) {
+        setRole(stored.role);
+        setUserId(stored.id || null);
+        setTenantId(stored.role === "tenant" ? stored.tenant_id || null : null);
       }
     }
 
@@ -157,12 +149,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);
   }, [evaluateStored, logout]);
 
+  useEffect(() => {
+    return onAccessTokenChange((t) => {
+      setTokenState(t);
+    });
+  }, []);
+
   const completeWithIdToken = async (idToken: string) => {
+    const priorUser = getStoredUser();
+    const isFirstEntry = !priorUser;
     const res = await exchangeFirebaseToken(idToken, getInviteCode() || undefined);
-    setToken(res.token);
     const payload = parseJwt(res.token);
     if (!payload || !isValidRole(res.user.role)) {
       throw new Error("Invalid session from server");
+    }
+    if (isFirstEntry && (res.user.role === "owner" || res.user.role === "manager")) {
+      setJustActivated(true);
     }
     applySession(res.token, res.user, payload);
   };
@@ -192,6 +194,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await completeWithIdToken(idToken);
   };
 
+  const consumeActivation = useCallback(() => {
+    setJustActivated(false);
+  }, []);
+
+  const triggerActivation = useCallback(() => {
+    setJustActivated(true);
+  }, []);
+
   const isPendingJoin = role === "tenant" && !tenantId;
 
   return (
@@ -205,6 +215,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPendingJoin,
         isAuthenticated: !!token && !!role && !isLoading,
         isLoading,
+        justActivated,
+        consumeActivation,
+        triggerActivation,
         sendPhoneOtp: handleSendPhoneOtp,
         confirmPhoneOtp: handleConfirmPhoneOtp,
         loginWithGoogle: handleGoogleLogin,

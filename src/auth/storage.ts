@@ -1,6 +1,5 @@
 import type { User } from "@pg/types";
 
-const TOKEN_KEY = "pg_jwt";
 const USER_KEY = "pg_user";
 const INVITE_KEY = "pg_invite";
 const LOCALE_KEY = "pg_locale";
@@ -19,17 +18,6 @@ export const setStoredLocale = (locale: string): void => {
   } catch {
     // ignore
   }
-};
-
-export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
-
-export const setToken = (token: string): void => {
-  localStorage.setItem(TOKEN_KEY, token);
-};
-
-export const clearToken = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
 };
 
 export const getStoredUser = (): User | null => {

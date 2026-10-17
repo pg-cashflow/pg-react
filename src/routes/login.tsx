@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/auth/context";
 import { getInviteCode } from "@/auth/storage";
 import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
@@ -36,8 +36,25 @@ export const LoginPage: React.FC = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionNotice, setSessionNotice] = useState<string | null>(null);
   const [showTestHelper, setShowTestHelper] = useState(false);
   const onLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
+
+  useEffect(() => {
+    const handleUnauthorized = (e: Event) => {
+      const custom = e as CustomEvent<{ reason?: string }>;
+      if (custom.detail?.reason === "biometric_failed") {
+        setSessionNotice("Face ID didn't match. Try again or sign in with your phone.");
+      } else if (
+        custom.detail?.reason === "access_revoked" ||
+        custom.detail?.reason === "session_ended"
+      ) {
+        setSessionNotice("Your session ended. Sign in again to continue.");
+      }
+    };
+    window.addEventListener("pg:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);
+  }, []);
 
   const phonePrompt = linkingGoogle
     ? "Link your registered phone number to finish Google sign-in"
@@ -50,6 +67,7 @@ export const LoginPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setSessionNotice(null);
       await sendPhoneOtp(phone.trim());
       setStep("otp");
     } catch (err: unknown) {
@@ -66,6 +84,7 @@ export const LoginPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setSessionNotice(null);
       await confirmPhoneOtp(otp);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid verification code");
@@ -79,6 +98,7 @@ export const LoginPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setSessionNotice(null);
       await sendPhoneOtp(phone.trim());
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to resend OTP");
@@ -91,6 +111,7 @@ export const LoginPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setSessionNotice(null);
       const result = await loginWithGoogle();
       if (result === "needs-phone") {
         setLinkingGoogle(true);
@@ -107,6 +128,7 @@ export const LoginPage: React.FC = () => {
     setPhone(testPhone);
     if (testOtp) setOtp(testOtp);
     setError(null);
+    setSessionNotice(null);
   };
 
   const subtitle = invite
@@ -180,6 +202,17 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
         </div>
+        )}
+
+        {sessionNotice && !error && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mb-4 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-sm flex items-start gap-2"
+          >
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="text-xs leading-relaxed">{sessionNotice}</span>
+          </div>
         )}
 
         {error && (
