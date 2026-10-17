@@ -45,10 +45,7 @@ export function scheduleProactiveRefresh(delayMs = 12 * 60 * 1000): void {
       }
       return;
     }
-    const refreshedToken = await executeRefresh(getAccessToken());
-    if (refreshedToken) {
-      scheduleProactiveRefresh(delayMs);
-    }
+    await requestTokenRefresh(getAccessToken());
   }, delayMs);
 }
 
@@ -90,6 +87,7 @@ export async function executeRefresh(failedToken: string | null): Promise<string
       if (data.user) {
         setStoredUser(data.user);
       }
+      scheduleProactiveRefresh();
       return data.token;
     }
   } catch {
@@ -226,6 +224,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
         });
         return await handleResponse(retryRes, () => retryRes.json() as Promise<T>);
       }
+      throw new ApiError(401, "Session expired or unauthorized");
     }
 
     return await handleResponse(res, () => res.json() as Promise<T>);
@@ -256,6 +255,7 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
         });
         return await handleResponse(retryRes, () => retryRes.blob());
       }
+      throw new ApiError(401, "Session expired or unauthorized");
     }
 
     return await handleResponse(res, () => res.blob());

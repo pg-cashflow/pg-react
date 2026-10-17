@@ -6,6 +6,7 @@ import type {
   OwnerInvite,
   Paise,
   Tenant,
+  User,
 } from "@pg/types";
 
 export const lookupInvite = (code: string): Promise<InviteLookup> =>
@@ -27,9 +28,17 @@ export interface JoinProfilePayload {
   image: File;
 }
 
+export interface SubmitJoinProfileResult {
+  join: JoinRequest;
+  tenant: Tenant;
+  token?: string;
+  user?: User;
+  message: string;
+}
+
 export const submitJoinProfile = (
   body: JoinProfilePayload
-): Promise<{ join: JoinRequest; tenant: Tenant; message: string }> => {
+): Promise<SubmitJoinProfileResult> => {
   const form = new FormData();
   form.append("name", body.name);
   form.append("permanent_address", body.permanent_address);
@@ -38,7 +47,7 @@ export const submitJoinProfile = (
   form.append("emergency_phone", body.emergency_phone);
   form.append("consent", body.consent ? "true" : "false");
   form.append("image", body.image);
-  return apiFetch("/join", { method: "POST", body: form });
+  return apiFetch<SubmitJoinProfileResult>("/join", { method: "POST", body: form });
 };
 
 export const getOwnerInvite = (): Promise<OwnerInvite> => apiFetch("/owner/invite");

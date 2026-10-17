@@ -19,13 +19,14 @@ import {
 import { getJoinMe, submitJoinProfile, lookupInvite } from "@/api/join";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useAuth } from "@/auth/context";
+import { getAccessToken } from "@/auth/tokenStore";
 import { getInviteCode } from "@/auth/storage";
 
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 export const JoinWaitingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { logout, user, triggerActivation } = useAuth();
+  const { logout, user, triggerActivation, applySession } = useAuth();
   const inviteCode = getInviteCode();
 
   const [name, setName] = useState("");
@@ -101,7 +102,7 @@ export const JoinWaitingPage: React.FC = () => {
 
     setSaving(true);
     try {
-      await submitJoinProfile({
+      const res = await submitJoinProfile({
         name: trimmedName,
         permanent_address: permanent,
         current_address: current,
@@ -110,6 +111,27 @@ export const JoinWaitingPage: React.FC = () => {
         consent: true,
         image: idPhoto,
       });
+
+      if (res.token) {
+        const sessionUser = res.user ?? {
+          id: user?.id ?? "",
+          phone: user?.phone ?? "",
+          role: "tenant",
+          tenant_id: res.tenant?.id,
+          property_id: res.tenant?.property_id,
+        };
+        applySession(res.token, sessionUser);
+      } else if (res.tenant?.id && user) {
+        applySession(
+          getAccessToken() || "",
+          {
+            ...user,
+            tenant_id: res.tenant.id,
+            property_id: res.tenant.property_id ?? user.property_id,
+          }
+        );
+      }
+
       await meQuery.refetch();
       triggerActivation();
       navigate({ to: "/activation" });

@@ -2,10 +2,11 @@ import React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Flame } from "lucide-react";
 import { useAuth } from "@/auth/context";
+import { homeForRole } from "@/auth/roles";
 
 export const ActivationCelebration: React.FC<{ role?: string }> = ({ role }) => {
   const navigate = useNavigate();
-  const { role: authRole, consumeActivation } = useAuth();
+  const { role: authRole, isPendingJoin, consumeActivation } = useAuth();
 
   const queryRole =
     typeof window !== "undefined"
@@ -13,12 +14,7 @@ export const ActivationCelebration: React.FC<{ role?: string }> = ({ role }) => 
       : null;
 
   const effectiveRole = role || queryRole || authRole || "tenant";
-  const dest =
-    effectiveRole === "owner"
-      ? "/owner/dashboard"
-      : effectiveRole === "manager"
-        ? "/manager/kitchen"
-        : "/tenant";
+  const dest = homeForRole(effectiveRole, isPendingJoin);
 
   const copy =
     effectiveRole === "owner"

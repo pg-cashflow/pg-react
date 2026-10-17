@@ -45,16 +45,9 @@ import { MetersView } from "@/routes/manager/meters";
 import { HazardsView } from "@/routes/manager/hazards";
 import { ManagerProfileView } from "@/routes/manager/profile";
 import { ViolationsView } from "@/routes/manager/violations";
+import { homeForRole } from "@/auth/roles";
 
-function homeForRole(role: string | null, pending: boolean): string {
-  if (role === "owner") return "/owner/dashboard";
-  if (role === "manager") return "/manager/kitchen";
-  if (role === "tenant" && pending) return "/join";
-  if (role === "tenant") return "/tenant";
-  return "/landing";
-}
-
-const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading, role, isPendingJoin, justActivated } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -64,12 +57,14 @@ const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (isAuthenticated) {
       if (justActivated && !isPendingJoin) {
         if (path === "/" || path === "/login" || path === "/landing") {
-          navigate({ to: "/activation" });
+          navigate({ to: "/activation", replace: true });
           return;
         }
       }
       const dest = homeForRole(role, isPendingJoin);
-      if (path === "/" || path === "/login" || path === "/landing") navigate({ to: dest });
+      if (path === "/" || path === "/login" || path === "/landing") {
+        navigate({ to: dest, replace: true });
+      }
     }
   }, [isAuthenticated, isLoading, role, isPendingJoin, justActivated, path, navigate]);
 
@@ -77,66 +72,77 @@ const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   return <>{children}</>;
 };
 
-function RequireOwner() {
+export function RequireOwner() {
   const { isAuthenticated, isLoading, role, isPendingJoin } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/landing" });
-    else if (role === "manager") navigate({ to: "/manager/kitchen" });
-    else if (role === "tenant") navigate({ to: isPendingJoin ? "/join" : "/tenant" });
-    else if (role !== "owner") navigate({ to: "/denied" });
+    if (!isAuthenticated) navigate({ to: "/landing", replace: true });
+    else if (role === "manager") navigate({ to: "/manager/kitchen", replace: true });
+    else if (role === "tenant") navigate({ to: isPendingJoin ? "/join" : "/tenant", replace: true });
+    else if (role !== "owner") navigate({ to: "/denied", replace: true });
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
   if (isLoading || role !== "owner") return <AppLoadingScreen />;
   return <AppShell />;
 }
 
-function RequireTenant() {
+export function RequireTenant() {
   const { isAuthenticated, isLoading, role, isPendingJoin } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/landing" });
-    else if (isPendingJoin) navigate({ to: "/join" });
-    else if (role === "owner") navigate({ to: "/owner/dashboard" });
-    else if (role === "manager") navigate({ to: "/manager/kitchen" });
-    else if (role !== "tenant") navigate({ to: "/denied" });
+    if (!isAuthenticated) navigate({ to: "/landing", replace: true });
+    else if (isPendingJoin) navigate({ to: "/join", replace: true });
+    else if (role === "owner") navigate({ to: "/owner/dashboard", replace: true });
+    else if (role === "manager") navigate({ to: "/manager/kitchen", replace: true });
+    else if (role !== "tenant") navigate({ to: "/denied", replace: true });
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
   if (isLoading || role !== "tenant" || isPendingJoin) return <AppLoadingScreen />;
   return <TenantShell />;
 }
 
-function RequireManager() {
+export function RequireManager() {
   const { isAuthenticated, isLoading, role } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/landing" });
-    else if (role === "owner") navigate({ to: "/owner/dashboard" });
-    else if (role === "tenant") navigate({ to: "/tenant" });
-    else if (role !== "manager") navigate({ to: "/denied" });
+    if (!isAuthenticated) navigate({ to: "/landing", replace: true });
+    else if (role === "tenant") navigate({ to: "/tenant", replace: true });
+    else if (role !== "manager" && role !== "owner") navigate({ to: "/denied", replace: true });
   }, [isAuthenticated, isLoading, role, navigate]);
-  if (isLoading || role !== "manager") return <AppLoadingScreen />;
+  if (isLoading || (role !== "manager" && role !== "owner")) return <AppLoadingScreen />;
   return <ManagerShell />;
 }
 
-function RequireJoin() {
+export function RequireJoin() {
   const { isAuthenticated, isLoading, isPendingJoin, role } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated) navigate({ to: "/landing" });
-    else if (role === "owner") navigate({ to: "/owner/dashboard" });
-    else if (!isPendingJoin) navigate({ to: "/tenant" });
+    if (!isAuthenticated) navigate({ to: "/landing", replace: true });
+    else if (role === "owner") navigate({ to: "/owner/dashboard", replace: true });
+    else if (role === "manager") navigate({ to: "/manager/kitchen", replace: true });
+    else if (!isPendingJoin) navigate({ to: "/tenant", replace: true });
   }, [isAuthenticated, isLoading, isPendingJoin, role, navigate]);
   if (isLoading || !isPendingJoin) return <AppLoadingScreen />;
   return <JoinWaitingPage />;
 }
 
+export function RequireActivation() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated) navigate({ to: "/landing", replace: true });
+  }, [isAuthenticated, isLoading, navigate]);
+  if (isLoading || !isAuthenticated) return <AppLoadingScreen />;
+  return <ActivationPage />;
+}
+
 function WaitingJoinListener() {
   const navigate = useNavigate();
   useEffect(() => {
-    const go = () => navigate({ to: "/join" });
+    const go = () => navigate({ to: "/join", replace: true });
     window.addEventListener("pg:waiting-join", go);
     return () => window.removeEventListener("pg:waiting-join", go);
   }, [navigate]);
@@ -156,7 +162,11 @@ const rootRoute = createRootRoute({
 const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/landing",
-  component: LandingPage,
+  component: () => (
+    <AuthRedirect>
+      <LandingPage />
+    </AuthRedirect>
+  ),
 });
 
 const indexRoute = createRoute({
@@ -182,7 +192,7 @@ const loginRoute = createRoute({
 const activationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/activation",
-  component: ActivationPage,
+  component: RequireActivation,
 });
 
 const joinRoute = createRoute({
@@ -378,7 +388,11 @@ const routeTree = rootRoute.addChildren([
   ]),
 ]);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({
+  routeTree,
+  defaultPreload: "intent",
+  scrollRestoration: true,
+});
 
 declare module "@tanstack/react-router" {
   interface Register {

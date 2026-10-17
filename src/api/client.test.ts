@@ -4,6 +4,8 @@ import {
   stopProactiveRefresh,
   executeRefresh,
   checkBiometricGate,
+  requestTokenRefresh,
+  apiFetch,
 } from "./client";
 import { getAccessToken, setAccessToken } from "@/auth/tokenStore";
 import { getStoredUser, setStoredUser } from "@/auth/storage";
@@ -15,6 +17,7 @@ describe("api/client proactive refresh & biometric gate", () => {
     setAccessToken(null);
     setStoredUser(null);
     delete (window as unknown as { pgBiometricGate?: unknown }).pgBiometricGate;
+    delete (navigator as unknown as { locks?: unknown }).locks;
   });
 
   afterEach(() => {
@@ -22,6 +25,7 @@ describe("api/client proactive refresh & biometric gate", () => {
     vi.clearAllTimers();
     vi.useRealTimers();
     vi.restoreAllMocks();
+    delete (navigator as unknown as { locks?: unknown }).locks;
   });
 
   it("checkBiometricGate returns true by default when no gate is configured", async () => {
@@ -75,6 +79,82 @@ describe("api/client proactive refresh & biometric gate", () => {
     // Re-arms for next cycle: advance another 12 minutes
     await vi.advanceTimersByTimeAsync(12 * 60 * 1000);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("proactive refresh routes through navigator.locks to prevent cross-tab refresh race", async () => {
+    const lockRequestSpy = vi.fn().mockImplementation((name, cb) => cb());
+    Object.defineProperty(navigator, "locks", {
+      value: { request: lockRequestSpy },
+      configurable: true,
+      writable: true,
+    });
+
+    setAccessToken("token-to-rotate");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        token: "new-token-locked",
+        user: { id: "u1", role: "owner", phone: "+918008281429" },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    scheduleProactiveRefresh(1000);
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(lockRequestSpy).toHaveBeenCalledWith("pg_token_refresh", expect.any(Function));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(getAccessToken()).toBe("new-token-locked");
+  });
+
+  it("reactive refresh re-arms proactive refresh timer (Bug 3 fix)", async () => {
+    setAccessToken("stale-token");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        token: "reactive-refreshed-token",
+        user: { id: "u1", role: "owner", phone: "+918008281429" },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    // Call reactive refresh directly
+    const res = await requestTokenRefresh("stale-token");
+    expect(res).toBe("reactive-refreshed-token");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    // Proactive refresh should now be armed for minute 12
+    await vi.advanceTimersByTimeAsync(12 * 60 * 1000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("apiFetch 401 dispatches pg:unauthorized exactly once when refresh fails (Bug 4 fix)", async () => {
+    setAccessToken("bad-token");
+    const unauthorizedSpy = vi.fn();
+    window.addEventListener("pg:unauthorized", unauthorizedSpy);
+
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("/auth/refresh")) {
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          json: async () => ({ error: "AUTH_ACCESS_REVOKED" }),
+        });
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: "Unauthorized" }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiFetch("/owner/properties")).rejects.toThrow("Session expired or unauthorized");
+
+    // Exactly one pg:unauthorized event should have been dispatched
+    expect(unauthorizedSpy).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener("pg:unauthorized", unauthorizedSpy);
   });
 
   it("biometric rejection blocks proactive refresh and dispatches pg:unauthorized", async () => {

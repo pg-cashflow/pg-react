@@ -28,6 +28,7 @@ interface AuthContextType {
   justActivated: boolean;
   consumeActivation: () => void;
   triggerActivation: () => void;
+  applySession: (rawToken: string, sessionUser: User, payload?: AuthTokenPayload) => void;
   sendPhoneOtp: (phone: string) => Promise<void>;
   confirmPhoneOtp: (otp: string) => Promise<void>;
   loginWithGoogle: () => Promise<"ok" | "needs-phone">;
@@ -38,7 +39,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function parseJwt(token: string): AuthTokenPayload | null {
+export function parseJwt(token: string): AuthTokenPayload | null {
   try {
     const base64Url = token.split(".")[1];
     if (!base64Url) return null;
@@ -91,14 +92,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setJustActivated(false);
   }, []);
 
-  const applySession = useCallback((rawToken: string, sessionUser: User, payload: AuthTokenPayload) => {
-    const resolvedRole = sessionUser.role;
-    const tid = sessionUser.tenant_id || payload.tenant_id || null;
+  const applySession = useCallback((rawToken: string, sessionUser: User, payload?: AuthTokenPayload) => {
+    const jwtPayload = payload ?? parseJwt(rawToken);
+    const resolvedRole = sessionUser.role ?? jwtPayload?.role;
+    const tid = sessionUser.tenant_id || jwtPayload?.tenant_id || null;
     setAccessToken(rawToken);
     setTokenState(rawToken);
     setUser(sessionUser);
-    setRole(resolvedRole);
-    setUserId(sessionUser.id || payload.user_id || payload.sub || null);
+    if (isValidRole(resolvedRole)) {
+      setRole(resolvedRole);
+    }
+    setUserId(sessionUser.id || jwtPayload?.user_id || jwtPayload?.sub || null);
     setTenantId(resolvedRole === "tenant" ? tid : null);
     setStoredUser(sessionUser);
     scheduleProactiveRefresh();
@@ -218,6 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         justActivated,
         consumeActivation,
         triggerActivation,
+        applySession,
         sendPhoneOtp: handleSendPhoneOtp,
         confirmPhoneOtp: handleConfirmPhoneOtp,
         loginWithGoogle: handleGoogleLogin,

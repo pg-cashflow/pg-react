@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { exchangeFirebaseToken } from "./auth";
-import { lookupInvite, activateJoin } from "./join";
+import { lookupInvite, activateJoin, submitJoinProfile } from "./join";
 import { getTenantDuePay } from "./pay";
 
 const API = "http://localhost:8080/api";
@@ -64,6 +64,15 @@ const server = setupServer(
       qr_png_url: "/tenant/dues/d1/qr",
       payable: true,
     })
+  ),
+  http.post(`${API}/join`, async () =>
+    HttpResponse.json({
+      join: { id: "j1", status: "submitted" },
+      tenant: { id: "t1", property_id: "prop-1", status: "active" },
+      token: "jwt-tenant-allocated",
+      user: { id: "u1", role: "tenant", tenant_id: "t1", property_id: "prop-1" },
+      message: "Profile submitted and session upgraded",
+    })
   )
 );
 
@@ -88,6 +97,21 @@ describe("CONTRACT fixtures", () => {
     const t = await activateJoin("j1", { rent_amount: 1500000, due_day: 5 });
     expect(t.rent_amount).toBe(1500000);
     expect(t.due_day).toBe(5);
+  });
+
+  it("submits join profile and returns upgraded session token per Patch 2", async () => {
+    const file = new File(["dummy"], "id.png", { type: "image/png" });
+    const res = await submitJoinProfile({
+      name: "Rahul",
+      permanent_address: "Address",
+      current_address: "Current",
+      parent_name: "Parent",
+      emergency_phone: "+919876543210",
+      consent: true,
+      image: file,
+    });
+    expect(res.token).toBe("jwt-tenant-allocated");
+    expect(res.user?.tenant_id).toBe("t1");
   });
 
   it("returns pay JSON with VPA only on the pay payload", async () => {
