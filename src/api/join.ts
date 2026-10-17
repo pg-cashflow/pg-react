@@ -24,9 +24,12 @@ export interface JoinProfilePayload {
   permanent_address: string;
   current_address: string;
   parent_name: string;
+  guardian_relation?: string;
   emergency_phone: string;
+  kyc_method?: string;
+  aadhaar_last4?: string;
   consent: boolean;
-  image: File;
+  image?: File | null;
 }
 
 export interface SubmitJoinProfileResult {
@@ -48,9 +51,20 @@ export const submitJoinProfile = (
   form.append("permanent_address", body.permanent_address);
   form.append("current_address", body.current_address);
   form.append("parent_name", body.parent_name);
+  if (body.guardian_relation) {
+    form.append("guardian_relation", body.guardian_relation);
+  }
   form.append("emergency_phone", body.emergency_phone);
+  if (body.kyc_method) {
+    form.append("kyc_method", body.kyc_method);
+  }
+  if (body.aadhaar_last4) {
+    form.append("aadhaar_last4", body.aadhaar_last4);
+  }
   form.append("consent", body.consent ? "true" : "false");
-  form.append("image", body.image);
+  if (body.image) {
+    form.append("image", body.image);
+  }
   return apiFetch<SubmitJoinProfileResult>("/join", { method: "POST", body: form });
 };
 
