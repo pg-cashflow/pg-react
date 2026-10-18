@@ -503,7 +503,34 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       )}
 
       {/* Messages */}
-      {uiError && <p className="t-caption text-danger">{uiError}</p>}
+      {uiError && (
+        <div className="rounded-xl border border-danger/30 bg-danger-tint/20 p-3 space-y-2 text-left">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+            <div className="space-y-1 flex-1">
+              <p className="t-caption font-semibold text-danger">{uiError}</p>
+              {activeTab === "otp" && (
+                <p className="t-caption text-ink-muted">
+                  Aadhaar OTP service is unavailable or in sandbox mode. You can instantly proceed by uploading your ID document instead.
+                </p>
+              )}
+            </div>
+          </div>
+          {activeTab === "otp" && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("upload");
+                setUiError(null);
+              }}
+              className="w-full py-2 px-3 rounded-lg bg-surface border border-hairline hover:bg-hairline/20 t-caption font-semibold text-ink flex items-center justify-center gap-1.5 transition"
+            >
+              <Upload className="w-4 h-4 text-accent" />
+              <span>Upload ID Document Instead →</span>
+            </button>
+          )}
+        </div>
+      )}
       {successMsg && <p className="t-caption text-success font-medium">{successMsg}</p>}
 
       {/* Revocation Modal */}
