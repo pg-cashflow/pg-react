@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ShieldCheck,
@@ -7,7 +7,6 @@ import {
   FileText,
   Upload,
   KeyRound,
-  ExternalLink,
   Loader2,
   CheckCircle2,
   Lock,
@@ -18,8 +17,6 @@ import {
   submitKYCConsent,
   requestAadhaarOTP,
   verifyAadhaarOTP,
-  initiateDigiLockerKYC,
-  getTenantKYCReturn,
   uploadKYCDocument,
   revokeKYCConsent,
 } from "@/api/kyc";
@@ -30,7 +27,7 @@ export interface TenantKYCCardProps {
   isModal?: boolean;
   onClose?: () => void;
   onSuccess?: () => void;
-  defaultTab?: "otp" | "digilocker" | "upload";
+  defaultTab?: "otp" | "upload";
 }
 
 export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
@@ -40,7 +37,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   defaultTab = "otp",
 }) => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"otp" | "digilocker" | "upload">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"otp" | "upload">(defaultTab);
 
   // Form states
   const [aadhaarInput, setAadhaarInput] = useState("");
@@ -66,25 +63,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantKYCStatus });
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantProfile });
   };
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const vendorRefId = params.get("vendor_ref_id") || params.get("verification_id");
-    if (vendorRefId) {
-      getTenantKYCReturn(vendorRefId)
-        .then(() => {
-          refreshKYC();
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-          setSuccessMsg("DigiLocker verification completed successfully!");
-          onSuccess?.();
-        })
-        .catch((err) => {
-          setUiError(err instanceof Error ? err.message : "Failed to sync DigiLocker status");
-        });
-    }
-  }, []);
 
   // Mutations
   const consentMutation = useMutation({
@@ -130,24 +108,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     },
     onError: (err: unknown) => {
       setUiError(err instanceof Error ? err.message : "Invalid or expired OTP");
-    },
-  });
-
-  const digiLockerMutation = useMutation({
-    mutationFn: async () => {
-      setUiError(null);
-      await consentMutation.mutateAsync();
-      const returnUrl = window.location.href;
-      return initiateDigiLockerKYC(returnUrl);
-    },
-    onSuccess: (res) => {
-      const url = res.verification_url;
-      if (url) {
-        window.location.href = url;
-      }
-    },
-    onError: (err: unknown) => {
-      setUiError(err instanceof Error ? err.message : "Could not open DigiLocker");
     },
   });
 
@@ -347,23 +307,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       {/* Action View: Unverified or Rejected */}
       {(!isVerified && !isPendingReview) && (
         <div className="space-y-3 pt-1">
-          {/* Two Primary Instant Verification Actions */}
+          {/* Two Primary Verification Actions: Aadhaar OTP & Document Upload */}
           <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("digilocker");
-                setUiError(null);
-              }}
-              className={`py-2.5 px-3 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
-                activeTab === "digilocker"
-                  ? "bg-accent text-white border-accent shadow-sm"
-                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
-              }`}
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Verify via DigiLocker</span>
-            </button>
             <button
               type="button"
               onClick={() => {
@@ -378,6 +323,21 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             >
               <KeyRound className="w-4 h-4" />
               <span>Verify via Aadhaar OTP</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("upload");
+                setUiError(null);
+              }}
+              className={`py-2.5 px-3 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
+                activeTab === "upload"
+                  ? "bg-accent text-white border-accent shadow-sm"
+                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
+              }`}
+            >
+              <Upload className="w-4 h-4" />
+              <span>Upload ID Document</span>
             </button>
           </div>
 
@@ -462,49 +422,34 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   </button>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Tab 2: DigiLocker */}
-          {activeTab === "digilocker" && (
-            <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
-              <div>
-                <span className="t-caption font-semibold text-ink flex items-center gap-1">
-                  <ExternalLink className="w-4 h-4 text-accent" />
-                  Government DigiLocker Authentication
-                </span>
-                <p className="t-caption text-ink-muted mt-0.5">
-                  Sign in through your official DigiLocker account. Cashfree automatically imports
-                  verified demographic records.
-                </p>
+              {/* Direct fallback to upload if OTP doesn't arrive or fails */}
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("upload");
+                    setUiError(null);
+                  }}
+                  className="t-caption text-ink-muted hover:text-accent underline transition"
+                >
+                  Aadhaar OTP not working? Upload your ID document instead →
+                </button>
               </div>
-
-              <button
-                type="button"
-                disabled={!consentChecked || digiLockerMutation.isPending}
-                onClick={() => digiLockerMutation.mutate()}
-                className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
-              >
-                {digiLockerMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Proceed to DigiLocker Portal"
-                )}
-              </button>
             </div>
           )}
 
-          {/* Tab 3: Manual Upload */}
+          {/* Tab 2: Manual Upload */}
           {activeTab === "upload" && (
             <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
               <div>
                 <span className="t-caption font-semibold text-ink flex items-center gap-1">
                   <FileText className="w-4 h-4 text-ink-muted" />
-                  Manual ID Photo Upload (Fallback)
+                  Manual ID Photo Upload (Direct Fallback)
                 </span>
                 <p className="t-caption text-ink-muted mt-0.5">
                   Attach an Aadhaar Card, Passport, or Driving Licence photo (JPG, PNG, PDF up to 5MB).
-                  Requires human verification by the property owner.
+                  Once submitted, you can immediately access your dashboard while the owner reviews it.
                 </p>
               </div>
 
@@ -540,33 +485,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               </button>
             </div>
           )}
-
-          {/* De-emphasized secondary manual upload option */}
-          <div className="text-center pt-0.5">
-            {activeTab !== "upload" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("upload");
-                  setUiError(null);
-                }}
-                className="t-caption text-ink-muted hover:text-ink underline transition"
-              >
-                Can't use these? Upload manually
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("digilocker");
-                  setUiError(null);
-                }}
-                className="t-caption text-accent hover:underline transition"
-              >
-                Back to instant verification
-              </button>
-            )}
-          </div>
 
           {/* DPDP Consent Checkbox */}
           <label className="flex items-start gap-2 pt-1 cursor-pointer">

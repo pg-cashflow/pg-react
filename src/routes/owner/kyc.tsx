@@ -90,7 +90,7 @@ export const OwnerKYCView: React.FC = () => {
           <h1 className="t-h1">KYC Manual Review Queue</h1>
           <p className="t-body-sm text-ink-muted mt-0.5">
             Manual document photo uploads requiring owner or manager verification.
-            (DigiLocker and direct Aadhaar OTP verify automatically).
+            (Aadhaar OTP verifies automatically).
           </p>
         </div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-hairline t-caption text-ink-muted shrink-0">
@@ -120,7 +120,7 @@ export const OwnerKYCView: React.FC = () => {
           isError={isError}
           error={error as Error | null}
           isEmpty={!isLoading && queueItems.length === 0}
-          emptyMessage="No pending manual reviews. DigiLocker and Aadhaar OTP verifications are authenticated automatically by UIDAI."
+          emptyMessage="No pending manual reviews. Aadhaar OTP verifications are authenticated automatically by UIDAI."
           onRetry={() => refetch()}
         >
           <div className="divide-y divide-hairline">

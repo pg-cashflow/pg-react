@@ -69,8 +69,8 @@ describe("TenantKYCOnboardingGate", () => {
     expect(container?.querySelector("[data-testid='dashboard']")).toBeNull();
     expect(container?.textContent).toContain("Verify your identity to continue");
     // Both methods offered upfront, as equal choices.
-    expect(container?.textContent).toContain("Verify via DigiLocker");
     expect(container?.textContent).toContain("Verify via Aadhaar OTP");
+    expect(container?.textContent).toContain("Upload ID Document");
   });
 
   it("blocks the dashboard while rejected (tenant must re-attempt)", async () => {
