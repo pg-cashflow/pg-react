@@ -40,6 +40,11 @@ vi.mock("@/components/layout/ManagerShell", () => ({
 vi.mock("@/components/layout/AppLoadingScreen", () => ({
   AppLoadingScreen: () => <div data-testid="loading-screen">Loading...</div>,
 }));
+// The KYC onboarding gate has its own dedicated tests (see kycOnboardingGate.test.tsx).
+// Here we only care that RequireTenant routes by role/auth state, so pass straight through.
+vi.mock("@/components/shared/TenantKYCOnboardingGate", () => ({
+  TenantKYCOnboardingGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 vi.mock("@/routes/join", () => ({
   JoinWaitingPage: () => <div data-testid="join-waiting">JoinWaitingPage</div>,
 }));

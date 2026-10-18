@@ -9,6 +9,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { useAuth } from "@/auth/context";
+import { TenantKYCOnboardingGate } from "@/components/shared/TenantKYCOnboardingGate";
 import { InvitePage } from "@/routes/invite";
 import { LoginPage } from "@/routes/login";
 import { JoinWaitingPage } from "@/routes/join";
@@ -99,7 +100,11 @@ export function RequireTenant() {
     else if (role !== "tenant") navigate({ to: "/denied", replace: true });
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
   if (isLoading || role !== "tenant" || isPendingJoin) return <AppLoadingScreen />;
-  return <TenantShell />;
+  return (
+    <TenantKYCOnboardingGate>
+      <TenantShell />
+    </TenantKYCOnboardingGate>
+  );
 }
 
 export function RequireManager() {
