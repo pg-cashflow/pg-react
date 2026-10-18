@@ -214,11 +214,8 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                     key={rm.id}
                     onClick={() => {
                       setSelectedRoom(rm);
-                      if (isFull) {
-                        setAllowOverCapacity(true);
-                      } else {
-                        setAllowOverCapacity(false);
-                      }
+                      setAllowOverCapacity(false);
+                      setOverCapacityReason("");
                     }}
                     className={`p-3 rounded-xl border cursor-pointer transition text-left relative ${
                       isRoomSelected
@@ -342,19 +339,35 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
             </div>
           )}
 
-          <button
-            type="button"
-            disabled={createMutation.isPending}
-            onClick={() => createMutation.mutate()}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition disabled:opacity-50"
-          >
-            {createMutation.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <PlusCircle className="w-4 h-4" />
-            )}
-            Generate Room {selectedRoom.room_number} Invite Link
-          </button>
+          {(() => {
+            const isFull = selectedRoom.vacant_beds <= 0;
+            const requiresReason = isFull && allowOverCapacity;
+            const isReasonMissing = requiresReason && !overCapacityReason.trim();
+            const isDisabled = createMutation.isPending || (isFull && !allowOverCapacity) || isReasonMissing;
+
+            let buttonLabel = `Generate Room ${selectedRoom.room_number} Invite Link`;
+            if (isFull && !allowOverCapacity) {
+              buttonLabel = `Room ${selectedRoom.room_number} is Full`;
+            } else if (isReasonMissing) {
+              buttonLabel = `Reason Required for Over-Capacity`;
+            }
+
+            return (
+              <button
+                type="button"
+                disabled={isDisabled}
+                onClick={() => createMutation.mutate()}
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {createMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <PlusCircle className="w-4 h-4" />
+                )}
+                {buttonLabel}
+              </button>
+            );
+          })()}
         </div>
       )}
 
