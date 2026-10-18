@@ -162,6 +162,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       setSuccessMsg("Document submitted for manual review by the owner.");
       setUploadFile(null);
       refreshKYC();
+      onSuccess?.();
     },
     onError: (err: unknown) => {
       setUiError(err instanceof Error ? err.message : "Upload failed");
