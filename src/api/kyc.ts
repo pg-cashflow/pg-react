@@ -69,6 +69,15 @@ export const initiateDigiLockerKYC = (
     body: JSON.stringify(returnUrl ? { return_url: returnUrl } : {}),
   });
 
+export const getTenantKYCReturn = (
+  vendorRefId?: string
+): Promise<KYCVerification> =>
+  apiFetch<KYCVerification>(
+    vendorRefId
+      ? `/tenant/kyc/return?vendor_ref_id=${encodeURIComponent(vendorRefId)}`
+      : "/tenant/kyc/return"
+  );
+
 export const uploadKYCDocument = (file: File): Promise<KYCVerification> => {
   const fd = new FormData();
   fd.append("file", file);

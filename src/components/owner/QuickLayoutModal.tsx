@@ -85,6 +85,14 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
   const [customFloors, setCustomFloors] = useState(generatedLayout);
 
   React.useEffect(() => {
+    if (isOpen) {
+      setStartFloor(startFloorNumber);
+      setErrorMsg(null);
+      setCustomEditing(false);
+    }
+  }, [isOpen, startFloorNumber]);
+
+  React.useEffect(() => {
     if (!customEditing) {
       setCustomFloors(generatedLayout);
     }
@@ -297,6 +305,11 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
                 }}
                 className="w-full bg-transparent text-xs font-bold text-ink focus:outline-none"
               >
+                {startFloorNumber > 1 && (
+                  <option value={startFloorNumber} className="bg-surface text-ink">
+                    Floor {startFloorNumber} ({startFloorNumber}01..)
+                  </option>
+                )}
                 <option value={1} className="bg-surface text-ink">
                   1st Floor (101..)
                 </option>

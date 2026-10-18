@@ -10,18 +10,26 @@ import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 
+import { getTenantKYCStatus } from "@/api/kyc";
+
 export const TenantProfileView: React.FC = () => {
   const { logout } = useAuth();
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
+  const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
   const [msg, setMsg] = useState<string | null>(null);
   const profile = profileQuery.data;
+  const isVerified = kycQuery.data?.verification?.status === "verified";
+  const isPendingReview = kycQuery.data?.verification?.status === "pending_manual_review";
 
   return (
     <QueryState
       isLoading={profileQuery.isLoading}
       isError={profileQuery.isError}
       error={profileQuery.error as Error | null}
-      onRetry={() => profileQuery.refetch()}
+      onRetry={() => {
+        profileQuery.refetch();
+        kycQuery.refetch();
+      }}
     >
       <div className="space-y-4 pb-4">
         <h1 className="t-h1">Profile</h1>
@@ -40,9 +48,21 @@ export const TenantProfileView: React.FC = () => {
           </div>
           <div className="flex items-center justify-between px-4 py-3">
             <span className="t-caption text-ink-faint">KYC</span>
-            <span className="t-body font-medium text-success flex items-center gap-1">
+            <span
+              className={`t-body font-medium flex items-center gap-1 ${
+                isVerified
+                  ? "text-success"
+                  : isPendingReview
+                  ? "text-warning"
+                  : "text-amber-500"
+              }`}
+            >
               <BadgeCheck className="h-4 w-4" />
-              {profile?.aadhaar_last4 ? `****${profile.aadhaar_last4}` : "Not on file"}
+              {isVerified
+                ? `Verified (****${profile?.aadhaar_last4 || ""})`
+                : isPendingReview
+                ? "Under Review"
+                : "Verification Required"}
             </span>
           </div>
         </section>

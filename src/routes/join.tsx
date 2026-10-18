@@ -17,8 +17,18 @@ import {
   Calendar,
   ChevronDown,
   ShieldCheck,
+  KeyRound,
+  ExternalLink,
+  CheckCircle2,
 } from "lucide-react";
 import { getJoinMe, submitJoinProfile, lookupInvite } from "@/api/join";
+import {
+  requestAadhaarOTP,
+  verifyAadhaarOTP,
+  initiateDigiLockerKYC,
+  submitKYCConsent,
+  uploadKYCDocument,
+} from "@/api/kyc";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useAuth } from "@/auth/context";
 import { getAccessToken } from "@/auth/tokenStore";
@@ -59,8 +69,14 @@ export const JoinWaitingPage: React.FC = () => {
   const [personalPhone, setPersonalPhone] = useState(fixedPhone || "");
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [parentRelation, setParentRelation] = useState("Father");
-  const [kycMethod, setKycMethod] = useState<"digilocker" | "upload">("digilocker");
+  const [kycMethod, setKycMethod] = useState<"aadhaar_otp" | "digilocker" | "upload">("aadhaar_otp");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [otpRefId, setOtpRefId] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [verifiedSuccess, setVerifiedSuccess] = useState(false);
   const [consent, setConsent] = useState(false);
   const [idPhoto, setIdPhoto] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -81,6 +97,14 @@ export const JoinWaitingPage: React.FC = () => {
     }
   }, [meQuery.data?.join?.name, fixedPhone, personalPhone]);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
   const handleIdUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -90,6 +114,47 @@ export const JoinWaitingPage: React.FC = () => {
     }
     setIdPhoto(file);
     setError(null);
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    const cleanAadhaar = aadhaarNumber.replace(/\D/g, "");
+    setError(null);
+    setSaving(true);
+    try {
+      const res = await requestAadhaarOTP(cleanAadhaar);
+      setOtpRefId(res.ref_id);
+      setResendCooldown(30);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to resend OTP");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpRefId || otpCode.length !== 6) return;
+    setOtpVerifying(true);
+    setError(null);
+    try {
+      await verifyAadhaarOTP(otpRefId, otpCode.trim());
+      setVerifiedSuccess(true);
+      setTimeout(async () => {
+        await meQuery.refetch();
+        triggerActivation();
+        navigate({ to: "/activation" });
+      }, 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid or expired OTP");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
+  const handleSkipToActivation = async () => {
+    await meQuery.refetch();
+    triggerActivation();
+    navigate({ to: "/activation" });
   };
 
   const handleSubmitProfile = async (e: React.FormEvent) => {
@@ -119,8 +184,8 @@ export const JoinWaitingPage: React.FC = () => {
       setError("Please upload your Aadhaar / government ID photo as fallback verification.");
       return;
     }
-    if (kycMethod === "digilocker" && aadhaarNumber.replace(/\D/g, "").length < 4) {
-      setError("Please enter your 12-digit Aadhaar number or last 4 digits for DigiLocker verification.");
+    if (kycMethod === "aadhaar_otp" && aadhaarNumber.replace(/\D/g, "").length !== 12) {
+      setError("Please enter your complete 12-digit Aadhaar number for instant UIDAI OTP verification.");
       return;
     }
     if (!consent) {
@@ -142,7 +207,7 @@ export const JoinWaitingPage: React.FC = () => {
         parent_name: formattedParent,
         guardian_relation: parentRelation,
         emergency_phone: emergency,
-        kyc_method: kycMethod,
+        kyc_method: kycMethod === "aadhaar_otp" ? "aadhaar_otp" : kycMethod,
         aadhaar_last4: aadhaarLast4,
         consent: true,
         image: kycMethod === "upload" ? idPhoto : idPhoto || null,
@@ -158,11 +223,6 @@ export const JoinWaitingPage: React.FC = () => {
         };
         applySession(res.token, sessionUser);
       } else if (res.tenant?.id && user) {
-        // Fallback: When the backend omits a fresh token in the join response,
-        // retain the active in-memory token. getAccessToken() is guaranteed
-        // non-null here because the preceding completeProfile call succeeded
-        // via authenticated apiFetch. Guard against null to prevent passing ""
-        // which would flip isAuthenticated to false and bounce the user to /landing.
         const currentToken = getAccessToken();
         if (currentToken) {
           applySession(
@@ -173,6 +233,63 @@ export const JoinWaitingPage: React.FC = () => {
               property_id: res.tenant.property_id ?? user.property_id,
             }
           );
+        }
+      }
+
+      // Record consent under DPDP Act
+      try {
+        await submitKYCConsent({
+          purpose: "residency_verification_and_kyc",
+          consent_version: "v1.0",
+          consent_text:
+            "I agree to my identity details being verified and stored for PG occupancy records in compliance with the DPDP Act.",
+        });
+      } catch (consentErr) {
+        console.warn("Consent recording note:", consentErr);
+      }
+
+      // Trigger KYC verification based on selected method
+      if (kycMethod === "aadhaar_otp") {
+        try {
+          const otpRes = await requestAadhaarOTP(cleanAadhaar);
+          setOtpRefId(otpRes.ref_id);
+          setOtpStep(true);
+          setResendCooldown(30);
+          setSaving(false);
+          return;
+        } catch (otpErr) {
+          setError(
+            otpErr instanceof Error
+              ? `Profile saved, but Aadhaar OTP request failed: ${otpErr.message}. You can continue to dashboard and complete verification later from profile.`
+              : "Profile saved, but Aadhaar OTP request failed. You can complete verification from your profile."
+          );
+          setSaving(false);
+          return;
+        }
+      }
+
+      if (kycMethod === "digilocker") {
+        try {
+          const returnUrl = window.location.origin + "/activation?role=tenant";
+          const digiRes = await initiateDigiLockerKYC(returnUrl);
+          if (digiRes.verification_url) {
+            window.location.href = digiRes.verification_url;
+            return;
+          }
+        } catch (digiErr) {
+          setError(
+            digiErr instanceof Error
+              ? `Profile saved, but DigiLocker redirect failed: ${digiErr.message}.`
+              : "Profile saved, but DigiLocker redirect failed."
+          );
+        }
+      }
+
+      if (kycMethod === "upload" && idPhoto) {
+        try {
+          await uploadKYCDocument(idPhoto);
+        } catch (uploadErr) {
+          console.warn("KYC upload error:", uploadErr);
         }
       }
 
@@ -188,6 +305,99 @@ export const JoinWaitingPage: React.FC = () => {
 
   const inputClass =
     "w-full pl-10 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-ink placeholder-ink-faint text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition";
+
+  if (otpStep) {
+    return (
+      <div className="min-h-screen bg-bg text-ink flex flex-col items-center justify-center p-4 sm:p-6 relative transition-colors">
+        <div className="absolute top-4 right-4 z-20">
+          <ThemeToggle />
+        </div>
+
+        <div className="w-full max-w-lg bg-surface border border-hairline rounded-3xl shadow-xl p-6 sm:p-8 relative z-10 space-y-6 transition-colors">
+          <div className="text-center space-y-2">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-accent-tint text-accent flex items-center justify-center shadow-sm">
+              <KeyRound className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-ink">
+              UIDAI Aadhaar OTP Verification
+            </h1>
+            <p className="text-xs text-ink-muted max-w-xs mx-auto leading-relaxed">
+              We've requested an authentic verification OTP from UIDAI. Enter the 6-digit code sent to your Aadhaar-linked mobile phone (Aadhaar ending in{" "}
+              <span className="font-mono font-semibold text-ink">•••• {aadhaarNumber.replace(/\D/g, "").slice(-4)}</span>).
+            </p>
+          </div>
+
+          {verifiedSuccess ? (
+            <div className="p-4 rounded-2xl bg-success-tint border border-success/30 text-success text-center space-y-2 animate-in fade-in duration-300">
+              <CheckCircle2 className="w-8 h-8 mx-auto" />
+              <p className="font-semibold text-sm">Identity Certified with UIDAI!</p>
+              <p className="text-xs text-ink-muted">Redirecting to your new passbook...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-ink-muted mb-1.5 text-center">
+                  6-Digit Verification Code
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="• • • • • •"
+                  maxLength={6}
+                  className="w-full h-12 px-4 rounded-2xl border border-hairline bg-bg font-mono text-center text-lg tracking-[0.5em] text-ink focus:outline-none focus:ring-2 focus:ring-accent transition shadow-inner"
+                  autoFocus
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={otpCode.length !== 6 || otpVerifying}
+                onClick={handleVerifyOtp}
+                className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm hover:bg-accent-pressed transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {otpVerifying ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    Verify & Certify Identity
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-between pt-1 text-xs">
+                <button
+                  type="button"
+                  disabled={resendCooldown > 0 || saving}
+                  onClick={handleResendOtp}
+                  className="text-accent hover:underline disabled:text-ink-faint font-medium"
+                >
+                  {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSkipToActivation}
+                  className="text-ink-muted hover:text-ink transition"
+                >
+                  Verify later from dashboard →
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg text-ink flex flex-col items-center justify-center p-4 sm:p-6 relative transition-colors">
@@ -431,55 +641,71 @@ export const JoinWaitingPage: React.FC = () => {
               </div>
 
               {/* Method Switcher */}
-              <div className="grid grid-cols-2 gap-2 bg-surface/50 p-1 rounded-2xl border border-hairline">
+              <div className="grid grid-cols-3 gap-1.5 bg-surface/50 p-1 rounded-2xl border border-hairline">
+                <button
+                  type="button"
+                  onClick={() => setKycMethod("aadhaar_otp")}
+                  className={`py-2 px-2 rounded-xl text-xs font-medium flex flex-col sm:flex-row items-center justify-center gap-1 transition ${
+                    kycMethod === "aadhaar_otp"
+                      ? "bg-accent text-white shadow-sm font-semibold"
+                      : "text-ink-muted hover:text-ink hover:bg-surface/60"
+                  }`}
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Aadhaar OTP</span>
+                  <span className="text-[9px] px-1 py-0.2 bg-white/20 rounded font-normal uppercase tracking-wider hidden sm:inline">
+                    Instant
+                  </span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setKycMethod("digilocker")}
-                  className={`py-2 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition ${
+                  className={`py-2 px-2 rounded-xl text-xs font-medium flex flex-col sm:flex-row items-center justify-center gap-1 transition ${
                     kycMethod === "digilocker"
                       ? "bg-accent text-white shadow-sm font-semibold"
                       : "text-ink-muted hover:text-ink hover:bg-surface/60"
                   }`}
                 >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>DigiLocker / OTP</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>DigiLocker</span>
                   <span className="text-[9px] px-1 py-0.2 bg-white/20 rounded font-normal uppercase tracking-wider hidden sm:inline">
-                    Authentic
+                    Portal
                   </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setKycMethod("upload")}
-                  className={`py-2 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition ${
+                  className={`py-2 px-2 rounded-xl text-xs font-medium flex flex-col sm:flex-row items-center justify-center gap-1 transition ${
                     kycMethod === "upload"
-                      ? "bg-surface text-ink border border-hairline shadow-sm font-semibold"
+                      ? "bg-accent text-white shadow-sm font-semibold"
                       : "text-ink-muted hover:text-ink hover:bg-surface/60"
                   }`}
                 >
                   <Upload className="w-3.5 h-3.5" />
-                  <span>Upload ID Card</span>
+                  <span>Upload ID</span>
                   <span className="text-[9px] px-1 py-0.2 bg-hairline text-ink-muted rounded font-normal uppercase tracking-wider hidden sm:inline">
-                    Fallback
+                    Review
                   </span>
                 </button>
               </div>
 
-              {kycMethod === "digilocker" ? (
+              {kycMethod === "aadhaar_otp" && (
                 <div className="p-3.5 rounded-2xl border border-accent/20 bg-accent-tint/30 space-y-3">
                   <div>
                     <span className="text-xs font-semibold text-accent flex items-center gap-1">
                       <ShieldCheck className="w-4 h-4" />
-                      Cashfree DigiLocker Instant Aadhaar Verification
+                      Direct UIDAI Instant Aadhaar OTP
                     </span>
                     <p className="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
-                      Authenticates directly with UIDAI via Aadhaar number and OTP. No physical paper/card scan required.
+                      Instant verification. Clicking continue triggers an official UIDAI SMS OTP to your Aadhaar-linked mobile phone.
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-medium text-ink-muted mb-1">
-                      12-Digit Aadhaar Number (or Last 4 Digits) *
+                      12-Digit Aadhaar Number *
                     </label>
                     <div className="relative">
                       <input
@@ -489,6 +715,7 @@ export const JoinWaitingPage: React.FC = () => {
                           setAadhaarNumber(digits);
                         }}
                         placeholder="XXXX XXXX 1234"
+                        maxLength={12}
                         className="w-full pl-3.5 pr-28 py-2 bg-bg border border-hairline rounded-xl text-ink font-mono text-sm tracking-wider focus:outline-none focus:ring-2 focus:ring-accent"
                       />
                       <div className="absolute inset-y-0 right-1.5 flex items-center">
@@ -498,18 +725,49 @@ export const JoinWaitingPage: React.FC = () => {
                       </div>
                     </div>
                     <p className="text-[10px] text-ink-faint mt-1">
-                      Encrypted and verified via UIDAI. Your Aadhaar number is never shared.
+                      Certified via UIDAI. Your full 12-digit number is never stored unmasked.
                     </p>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {kycMethod === "digilocker" && (
+                <div className="p-3.5 rounded-2xl border border-accent/20 bg-accent-tint/30 space-y-3">
+                  <div>
+                    <span className="text-xs font-semibold text-accent flex items-center gap-1">
+                      <ExternalLink className="w-4 h-4" />
+                      Cashfree DigiLocker Verification Portal
+                    </span>
+                    <p className="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
+                      You will be redirected to sign in through your official DigiLocker account. Cashfree imports verified demographic records.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-ink-muted mb-1">
+                      Aadhaar Number (Optional)
+                    </label>
+                    <input
+                      value={aadhaarNumber}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
+                        setAadhaarNumber(digits);
+                      }}
+                      placeholder="XXXX XXXX 1234 (optional)"
+                      maxLength={12}
+                      className="w-full px-3.5 py-2 bg-bg border border-hairline rounded-xl text-ink font-mono text-sm tracking-wider focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {kycMethod === "upload" && (
                 <div className="space-y-2">
                   <div className="p-2.5 rounded-xl bg-surface/40 border border-hairline/60 flex items-center justify-between text-xs text-ink-muted">
                     <span className="flex items-center gap-1.5">
                       <FileCheck className="w-3.5 h-3.5 text-ink-muted" />
                       Manual ID verification fallback
                     </span>
-                    <span className="text-[10px] text-ink-faint">Only if DigiLocker is unavailable</span>
+                    <span className="text-[10px] text-ink-faint">Requires manager review</span>
                   </div>
 
                   <div className="relative border border-dashed border-hairline hover:border-hairline bg-surface/30 rounded-xl p-3 flex items-center justify-between text-xs">
@@ -528,7 +786,7 @@ export const JoinWaitingPage: React.FC = () => {
                     </div>
                     <label className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface border border-hairline text-ink text-xs font-medium cursor-pointer transition">
                       {idPhoto ? "Change" : "Browse"}
-                      <input type="file" accept="image/*" onChange={handleIdUpload} className="hidden" />
+                      <input type="file" accept="image/*,.pdf" onChange={handleIdUpload} className="hidden" />
                     </label>
                   </div>
                 </div>
@@ -550,13 +808,17 @@ export const JoinWaitingPage: React.FC = () => {
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm hover:bg-accent/90 transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm hover:bg-accent-pressed transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Submit & continue
+                  {kycMethod === "aadhaar_otp"
+                    ? "Continue to Aadhaar OTP"
+                    : kycMethod === "digilocker"
+                    ? "Proceed to DigiLocker"
+                    : "Submit & Complete Setup"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ShieldCheck,
@@ -11,6 +11,7 @@ import {
   Loader2,
   CheckCircle2,
   Lock,
+  X,
 } from "lucide-react";
 import {
   getTenantKYCStatus,
@@ -18,15 +19,28 @@ import {
   requestAadhaarOTP,
   verifyAadhaarOTP,
   initiateDigiLockerKYC,
+  getTenantKYCReturn,
   uploadKYCDocument,
   revokeKYCConsent,
 } from "@/api/kyc";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { formatDate } from "@/lib/utils";
 
-export const TenantKYCCard: React.FC = () => {
+export interface TenantKYCCardProps {
+  isModal?: boolean;
+  onClose?: () => void;
+  onSuccess?: () => void;
+  defaultTab?: "otp" | "digilocker" | "upload";
+}
+
+export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
+  isModal,
+  onClose,
+  onSuccess,
+  defaultTab = "otp",
+}) => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"otp" | "digilocker" | "upload">("otp");
+  const [activeTab, setActiveTab] = useState<"otp" | "digilocker" | "upload">(defaultTab);
 
   // Form states
   const [aadhaarInput, setAadhaarInput] = useState("");
@@ -52,6 +66,25 @@ export const TenantKYCCard: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantKYCStatus });
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantProfile });
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const vendorRefId = params.get("vendor_ref_id") || params.get("verification_id");
+    if (vendorRefId) {
+      getTenantKYCReturn(vendorRefId)
+        .then(() => {
+          refreshKYC();
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+          setSuccessMsg("DigiLocker verification completed successfully!");
+          onSuccess?.();
+        })
+        .catch((err) => {
+          setUiError(err instanceof Error ? err.message : "Failed to sync DigiLocker status");
+        });
+    }
+  }, []);
 
   // Mutations
   const consentMutation = useMutation({
@@ -93,6 +126,7 @@ export const TenantKYCCard: React.FC = () => {
       setOtpCode("");
       setAadhaarInput("");
       refreshKYC();
+      onSuccess?.();
     },
     onError: (err: unknown) => {
       setUiError(err instanceof Error ? err.message : "Invalid or expired OTP");
@@ -194,8 +228,8 @@ export const TenantKYCCard: React.FC = () => {
     );
   }
 
-  return (
-    <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-4">
+  const content = (
+    <section className={`rounded-[14px] ${isModal ? "" : "border border-hairline bg-surface p-4"} space-y-4`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -584,4 +618,26 @@ export const TenantKYCCard: React.FC = () => {
       )}
     </section>
   );
+
+  if (isModal) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-surface border border-hairline p-5 sm:p-6 shadow-2xl relative space-y-4">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 rounded-xl text-ink-muted hover:text-ink hover:bg-hairline/20 transition z-10"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return content;
 };

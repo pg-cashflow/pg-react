@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getMyDues, getMyPayments, getMyProfile } from "@/api/tenant";
 import { getTenantPoints } from "@/api/gamification";
@@ -10,12 +10,14 @@ import StreakFlame from "@/components/shared/StreakFlame";
 import { countOverdueDues, displayDueStatus, formatDate, formatDueSentence, sumOutstandingFromDues } from "@/lib/utils";
 import { Flame, ShieldCheck, Clock, ArrowRight } from "lucide-react";
 import { getTenantKYCStatus } from "@/api/kyc";
+import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 
 interface TenantDashboardProps {
   onNavigate: (tab: string) => void;
 }
 
 export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate }) => {
+  const [showKycModal, setShowKycModal] = useState(false);
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
   const duesQuery = useQuery({
     queryKey: QUERY_KEYS.tenantDues,
@@ -71,11 +73,11 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
         {/* KYC Status Reminder Banner */}
         {!isKycVerified && (
           <div
-            onClick={() => onNavigate("profile")}
+            onClick={() => setShowKycModal(true)}
             className={`p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition ${
               isKycPendingReview
                 ? "bg-warning-tint/30 border-warning/20 text-warning"
-                : "bg-accent-tint border-accent/20 text-accent"
+                : "bg-accent-tint border-accent/20 text-accent hover:border-accent/40"
             }`}
           >
             <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -99,6 +101,18 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
             </div>
             <ArrowRight className="w-4 h-4 shrink-0 text-ink-muted" />
           </div>
+        )}
+
+        {showKycModal && (
+          <TenantKYCCard
+            isModal
+            onClose={() => setShowKycModal(false)}
+            onSuccess={() => {
+              setShowKycModal(false);
+              kycQuery.refetch();
+              profileQuery.refetch();
+            }}
+          />
         )}
 
         <section className="rounded-[14px] bg-accent-tint border border-accent-tint overflow-hidden">
