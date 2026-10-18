@@ -4,8 +4,9 @@ import { setupServer } from "msw/node";
 import { exchangeFirebaseToken } from "./auth";
 import { lookupInvite, activateJoin, submitJoinProfile } from "./join";
 import { getTenantDuePay } from "./pay";
+import { API_BASE } from "@/lib/constants";
 
-const API = "http://localhost:8080/api";
+const API = API_BASE;
 
 const server = setupServer(
   http.get(`${API}/join/invite/:code`, ({ params }) => {

@@ -249,9 +249,60 @@ export interface InviteLookup {
   owner_name: string;
 }
 
-export interface OwnerInvite {
-  invite_code: string;
-  payment_mode: PaymentMode;
+export type SlotInviteStatus = "open" | "consumed" | "revoked" | "expired";
+
+export interface SlotInvite {
+  id: string;
+  property_id: string;
+  floor_id: string;
+  room_id: string;
+  code: string;
+  rent_paise: Paise;
+  deposit_paise: Paise;
+  due_day: number;
+  status: SlotInviteStatus;
+  terms_frozen_at: string;
+  profile_schema_version?: number;
+  allow_over_capacity: boolean;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface RoomOccupancy {
+  id: string;
+  room_number: string;
+  capacity: number;
+  occupied_beds: number;
+  vacant_beds: number;
+  is_vacant: boolean;
+  tenant_names?: string[];
+}
+
+export interface FloorOccupancy {
+  floor_id: string;
+  floor_number: number;
+  floor_name: string;
+  total_rooms: number;
+  occupied_rooms: number;
+  vacant_rooms: number;
+  capacity_beds: number;
+  occupied_beds: number;
+  vacant_beds: number;
+  occupancy_rate_pct: number;
+  rooms: RoomOccupancy[];
+}
+
+export interface PropertyOccupancyResponse {
+  property_id: string;
+  capacity_beds: number;
+  occupied_beds: number;
+  vacant_beds: number;
+  beds_at_risk: number;
+  total_rooms: number;
+  occupied_rooms: number;
+  vacant_rooms: number;
+  occupancy_rate_pct: number;
+  floors: FloorOccupancy[];
 }
 
 export interface PaymentReport {

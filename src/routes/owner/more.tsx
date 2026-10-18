@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Check, Loader2 } from "lucide-react";
-import { getOwnerInvite, rotateInvite } from "@/api/join";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { createTenant } from "@/api/tenants";
 import { importStatements } from "@/api/payments";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -10,10 +9,10 @@ import { Link } from "@tanstack/react-router";
 import { ThemeSegmentedControl } from "@/components/common/ThemeToggle";
 import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
+import { SlotInviteCard } from "@/components/owner/SlotInviteCard";
 
 export const MoreView: React.FC = () => {
   const queryClient = useQueryClient();
-  const [copied, setCopied] = useState(false);
   const [walkName, setWalkName] = useState("");
   const [walkPhone, setWalkPhone] = useState("");
   const [walkRoom, setWalkRoom] = useState("");
@@ -22,13 +21,6 @@ export const MoreView: React.FC = () => {
   const [walkDeposit, setWalkDeposit] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [importMsg, setImportMsg] = useState<string | null>(null);
-
-  const inviteQuery = useQuery({ queryKey: QUERY_KEYS.ownerInvite, queryFn: getOwnerInvite });
-
-  const rotateMutation = useMutation({
-    mutationFn: rotateInvite,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerInvite }),
-  });
 
   const walkMutation = useMutation({
     mutationFn: () =>
@@ -61,13 +53,6 @@ export const MoreView: React.FC = () => {
     },
     onError: (err: Error) => setImportMsg(err.message),
   });
-
-  const copyInvite = () => {
-    if (!inviteQuery.data?.invite_code) return;
-    navigator.clipboard.writeText(inviteQuery.data.invite_code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="space-y-6 max-w-2xl text-ink">
@@ -104,32 +89,8 @@ export const MoreView: React.FC = () => {
         </div>
       </section>
 
-      {/* Invite code */}
-      <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
-        <h3 className="font-semibold text-ink">Active invite code</h3>
-        <p className="text-xs text-ink-muted">
-          Tenants use this code to request to join your property.
-        </p>
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2 rounded-xl bg-bg border border-hairline font-mono text-lg font-bold tracking-widest text-ink">
-            {inviteQuery.data?.invite_code || "—"}
-          </div>
-          <button
-            onClick={copyInvite}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-tint text-accent text-xs font-semibold hover:bg-accent-tint/80 transition"
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            onClick={() => rotateMutation.mutate()}
-            disabled={rotateMutation.isPending}
-            className="text-xs text-ink-muted hover:text-ink underline disabled:opacity-50"
-          >
-            Rotate code
-          </button>
-        </div>
-      </section>
+      {/* Room-bound Slot Invites */}
+      <SlotInviteCard />
 
       {/* Walk-in tenant */}
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">

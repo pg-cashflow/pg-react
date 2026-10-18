@@ -3,7 +3,6 @@ import type {
   InviteLookup,
   JoinRequest,
   JoinStatus,
-  OwnerInvite,
   Paise,
   Tenant,
   User,
@@ -67,11 +66,6 @@ export const submitJoinProfile = (
   }
   return apiFetch<SubmitJoinProfileResult>("/join", { method: "POST", body: form });
 };
-
-export const getOwnerInvite = (): Promise<OwnerInvite> => apiFetch("/owner/invite");
-
-export const rotateInvite = (): Promise<{ invite_code: string }> =>
-  apiFetch("/owner/invite/rotate", { method: "POST", body: "{}" });
 
 export const getJoinRequests = async (status?: JoinStatus): Promise<JoinRequest[]> => {
   const qs = status ? `?status=${status}` : "";

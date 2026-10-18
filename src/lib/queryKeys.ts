@@ -9,7 +9,9 @@ export const QUERY_KEYS = {
     period ? (["reconciliation", period] as const) : (["reconciliation"] as const),
   events: ["events"] as const,
   joinRequests: ["owner", "join-requests"] as const,
-  ownerInvite: ["owner", "invite"] as const,
+  slotInvites: (status?: string) =>
+    status ? (["owner", "slot-invites", status] as const) : (["owner", "slot-invites"] as const),
+  ownerOccupancy: ["owner", "occupancy"] as const,
   paymentReports: ["owner", "payment-reports"] as const,
   properties: ["owner", "properties"] as const,
   tenantDues: ["tenant", "dues"] as const,

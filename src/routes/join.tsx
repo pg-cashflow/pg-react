@@ -17,8 +17,6 @@ import {
   Calendar,
   ChevronDown,
   ShieldCheck,
-  CheckCircle2,
-  Shield,
 } from "lucide-react";
 import { getJoinMe, submitJoinProfile, lookupInvite } from "@/api/join";
 import { QUERY_KEYS } from "@/lib/queryKeys";
