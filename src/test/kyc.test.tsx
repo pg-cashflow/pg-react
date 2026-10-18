@@ -122,7 +122,7 @@ describe("TenantKYCCard", () => {
     expect(container?.textContent).toContain("Document photo is blurry and unreadable");
   });
 
-  it("renders unverified action tabs for Aadhaar OTP, DigiLocker, and Upload", async () => {
+  it("renders unverified action buttons for Aadhaar OTP, DigiLocker, and manual upload", async () => {
     vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
       verification: null,
       consent_active: false,
@@ -137,9 +137,9 @@ describe("TenantKYCCard", () => {
     });
     await flushQueries();
 
-    expect(container?.textContent).toContain("Aadhaar OTP");
-    expect(container?.textContent).toContain("DigiLocker");
-    expect(container?.textContent).toContain("Upload ID");
+    expect(container?.textContent).toContain("Verify via Aadhaar OTP");
+    expect(container?.textContent).toContain("Verify via DigiLocker");
+    expect(container?.textContent).toContain("Upload manually");
     expect(container?.textContent).toContain("Instant Automatic UIDAI Verification");
   });
 });

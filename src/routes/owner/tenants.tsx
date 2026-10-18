@@ -167,8 +167,24 @@ export const TenantsView: React.FC = () => {
                     <td className="px-6 py-4">{t.room_number || "—"}</td>
                     <td className="px-6 py-4">{formatPaise(t.rent_amount)}</td>
                     <td className="px-6 py-4">{t.due_day != null ? `Day ${t.due_day}` : "—"}</td>
-                    <td className="px-6 py-4 capitalize text-xs">
-                      {t.status === "pending_allocation" ? "awaiting room/rent" : t.status}
+                    <td className="px-6 py-4 text-xs">
+                      {t.status === "active" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
+                          Active
+                        </span>
+                      ) : t.status === "pending_allocation" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
+                          Awaiting Room
+                        </span>
+                      ) : t.status === "vacated" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline">
+                          Vacated
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg text-ink border border-hairline capitalize">
+                          {t.status}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -181,8 +197,23 @@ export const TenantsView: React.FC = () => {
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 overflow-y-auto">
           <div className="bg-surface border border-hairline rounded-2xl w-full max-w-lg p-6 my-8 space-y-4">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-bold text-ink">{selected.name}</h3>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold text-ink">{selected.name}</h3>
+                {selected.status === "active" ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
+                    Active
+                  </span>
+                ) : selected.status === "pending_allocation" ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
+                    Awaiting Room
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline capitalize">
+                    {selected.status}
+                  </span>
+                )}
+              </div>
               <button onClick={() => setSelected(null)} className="text-ink-muted">Close</button>
             </div>
             {error && <p className="text-xs text-danger">{error}</p>}

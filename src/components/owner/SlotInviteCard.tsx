@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Copy,
@@ -102,6 +102,16 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
   const floors: FloorOccupancy[] = occupancyQuery.data?.floors ?? [];
   const activeFloor = floors.find((f) => f.floor_id === selectedFloorId) ?? floors[0];
   const activeRooms = activeFloor?.rooms ?? [];
+
+  const roomMap = useMemo(() => {
+    const map = new Map<string, RoomOccupancy>();
+    for (const fl of floors) {
+      for (const rm of fl.rooms) {
+        map.set(rm.id, rm);
+      }
+    }
+    return map;
+  }, [floors]);
 
   const handleCopy = (code: string) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -413,30 +423,52 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
               </p>
             ) : (
               <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden bg-bg">
-                {slotInvitesQuery.data?.map((inv) => (
-                  <div
-                    key={inv.id}
-                    className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold tracking-wider text-ink bg-surface px-2 py-0.5 rounded border border-hairline">
-                          {inv.code}
-                        </span>
-                        <span className="text-ink-muted">·</span>
-                        <span className="font-medium text-ink">
-                          {formatPaise(inv.rent_paise)}/mo
-                        </span>
-                        <span className="text-ink-muted">·</span>
-                        <span className="text-[11px] text-ink-muted">
-                          Due: {inv.due_day}th
-                        </span>
+                {slotInvitesQuery.data?.map((inv) => {
+                  const room = roomMap.get(inv.room_id);
+                  return (
+                    <div
+                      key={inv.id}
+                      className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold tracking-wider text-ink bg-surface px-2 py-0.5 rounded border border-hairline">
+                            {inv.code}
+                          </span>
+                          <span className="text-ink-muted">·</span>
+                          <span className="font-medium text-ink">
+                            {formatPaise(inv.rent_paise)}/mo
+                          </span>
+                          <span className="text-ink-muted">·</span>
+                          <span className="text-[11px] text-ink-muted">
+                            Due: {inv.due_day}th
+                          </span>
+                        </div>
+                        {room && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-ink font-medium">
+                            <span>Room {room.room_number}</span>
+                            <span className="text-ink-muted">·</span>
+                            <span className="text-ink-muted">
+                              {room.occupied_beds}/{room.capacity} beds
+                            </span>
+                            {room.tenant_names && room.tenant_names.length > 0 && (
+                              <>
+                                <span className="text-ink-muted">·</span>
+                                <span
+                                  className="text-ink-muted truncate max-w-[220px]"
+                                  title={room.tenant_names.join(", ")}
+                                >
+                                  ({room.tenant_names.join(", ")})
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                        <div className="text-[11px] text-ink-muted">
+                          Expires: {new Date(inv.expires_at).toLocaleDateString()} {new Date(inv.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          {inv.allow_over_capacity && " · (Over-capacity allowed)"}
+                        </div>
                       </div>
-                      <div className="text-[11px] text-ink-muted">
-                        Expires: {new Date(inv.expires_at).toLocaleDateString()} {new Date(inv.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        {inv.allow_over_capacity && " · (Over-capacity allowed)"}
-                      </div>
-                    </div>
 
                     <div className="flex items-center gap-2 self-end sm:self-auto">
                       <button
@@ -467,7 +499,8 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                       </button>
                     </div>
                   </div>
-                ))}
+                );
+              })}
               </div>
             )}
           </div>

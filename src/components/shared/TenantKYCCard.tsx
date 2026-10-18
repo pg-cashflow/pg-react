@@ -107,8 +107,9 @@ export const TenantKYCCard: React.FC = () => {
       return initiateDigiLockerKYC(returnUrl);
     },
     onSuccess: (res) => {
-      if (res.vendor_flow_url) {
-        window.location.href = res.vendor_flow_url;
+      const url = res.vendor_flow_url || res.verification_url;
+      if (url) {
+        window.location.href = url;
       }
     },
     onError: (err: unknown) => {
@@ -311,52 +312,37 @@ export const TenantKYCCard: React.FC = () => {
       {/* Action View: Unverified or Rejected */}
       {(!isVerified && !isPendingReview) && (
         <div className="space-y-3 pt-1">
-          {/* Method Selector Tabs */}
-          <div className="grid grid-cols-3 gap-1 bg-bg p-1 rounded-xl border border-hairline">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("otp");
-                setUiError(null);
-              }}
-              className={`py-2 px-2 rounded-lg t-caption font-semibold flex items-center justify-center gap-1.5 transition ${
-                activeTab === "otp"
-                  ? "bg-surface text-ink shadow-sm border border-hairline"
-                  : "text-ink-muted hover:text-ink"
-              }`}
-            >
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Aadhaar OTP</span>
-            </button>
+          {/* Two Primary Instant Verification Actions */}
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => {
                 setActiveTab("digilocker");
                 setUiError(null);
               }}
-              className={`py-2 px-2 rounded-lg t-caption font-semibold flex items-center justify-center gap-1.5 transition ${
+              className={`py-2.5 px-3 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
                 activeTab === "digilocker"
-                  ? "bg-surface text-ink shadow-sm border border-hairline"
-                  : "text-ink-muted hover:text-ink"
+                  ? "bg-accent text-white border-accent shadow-sm"
+                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
               }`}
             >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>DigiLocker</span>
+              <ExternalLink className="w-4 h-4" />
+              <span>Verify via DigiLocker</span>
             </button>
             <button
               type="button"
               onClick={() => {
-                setActiveTab("upload");
+                setActiveTab("otp");
                 setUiError(null);
               }}
-              className={`py-2 px-2 rounded-lg t-caption font-semibold flex items-center justify-center gap-1.5 transition ${
-                activeTab === "upload"
-                  ? "bg-surface text-ink shadow-sm border border-hairline"
-                  : "text-ink-muted hover:text-ink"
+              className={`py-2.5 px-3 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
+                activeTab === "otp"
+                  ? "bg-accent text-white border-accent shadow-sm"
+                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
               }`}
             >
-              <Upload className="w-3.5 h-3.5" />
-              <span>Upload ID</span>
+              <KeyRound className="w-4 h-4" />
+              <span>Verify via Aadhaar OTP</span>
             </button>
           </div>
 
@@ -519,6 +505,33 @@ export const TenantKYCCard: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* De-emphasized secondary manual upload option */}
+          <div className="text-center pt-0.5">
+            {activeTab !== "upload" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("upload");
+                  setUiError(null);
+                }}
+                className="t-caption text-ink-muted hover:text-ink underline transition"
+              >
+                Can't use these? Upload manually
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("digilocker");
+                  setUiError(null);
+                }}
+                className="t-caption text-accent hover:underline transition"
+              >
+                Back to instant verification
+              </button>
+            )}
+          </div>
 
           {/* DPDP Consent Checkbox */}
           <label className="flex items-start gap-2 pt-1 cursor-pointer">

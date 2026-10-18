@@ -25,8 +25,9 @@ export interface DigiLockerInitiatePayload {
 }
 
 export interface DigiLockerInitiateResponse {
-  verification_id: string;
-  vendor_flow_url: string;
+  verification_url?: string;
+  vendor_flow_url?: string;
+  verification_id?: string;
 }
 
 export interface RejectKYCPayload {
@@ -71,6 +72,7 @@ export const initiateDigiLockerKYC = (
 
 export const uploadKYCDocument = (file: File): Promise<KYCVerification> => {
   const fd = new FormData();
+  fd.append("file", file);
   fd.append("document", file);
   return apiFetch<KYCVerification>("/tenant/kyc/upload", {
     method: "POST",
