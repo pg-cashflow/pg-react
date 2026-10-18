@@ -287,6 +287,29 @@ export const createOwnerRoom = (body: {
     body: JSON.stringify(body),
   });
 
+export interface BulkGenerateFloorsRoomsInput {
+  property_id?: string;
+  floors_count?: number;
+  total_rooms_count?: number;
+  rooms_per_floor?: number;
+  room_capacity?: number;
+  start_floor?: number;
+  custom_floors?: {
+    floor_number: number;
+    name: string;
+    rooms: string[];
+    capacity?: number;
+  }[];
+}
+
+export const bulkGenerateFloorsRooms = (
+  body: BulkGenerateFloorsRoomsInput
+): Promise<{ ok: boolean; floors_created: number; rooms_created: number }> =>
+  apiFetch<{ ok: boolean; floors_created: number; rooms_created: number }>("/owner/floors/bulk", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
 export const createOwnerManager = (body: {
   property_id?: string;
   phone: string;

@@ -169,7 +169,17 @@ async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promis
     return {} as T;
   }
 
-  return parse();
+  try {
+    return await parse();
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new ApiError(
+        res.status,
+        `Server returned an invalid response (expected JSON, received HTML or malformed body). Ensure pg-go is running with the latest routes.`
+      );
+    }
+    throw err;
+  }
 }
 
 function mapApiErrorMessage(status: number, raw: string): string {

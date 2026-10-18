@@ -8,6 +8,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { getProperties } from "@/api/properties";
 import { getReconciliation } from "@/api/payments";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
 
 const TITLES: Record<string, string> = {
   "/owner/joins": "Join requests",
@@ -26,6 +27,7 @@ const TITLES: Record<string, string> = {
 
 export const AppShell: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAddPropertyOpen, setIsAddPropertyOpen] = useState(false);
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const tab = path.replace("/owner/", "") || "joins";
@@ -61,6 +63,7 @@ export const AppShell: React.FC = () => {
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           showPush={false}
           searchRole="owner"
+          onAddProperty={() => setIsAddPropertyOpen(true)}
         />
 
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
@@ -74,6 +77,14 @@ export const AppShell: React.FC = () => {
         currentTab={tab}
         onSelectTab={(next) => navigate({ to: `/owner/${next}` })}
         onOpenMore={() => setIsMobileMenuOpen(true)}
+      />
+
+      <AddPropertyModal
+        isOpen={isAddPropertyOpen}
+        onClose={() => setIsAddPropertyOpen(false)}
+        onPropertyCreated={() => {
+          navigate({ to: "/owner/facility" });
+        }}
       />
     </div>
   );

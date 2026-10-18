@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, Bell, CheckCircle2, AlertCircle, Smartphone } from "lucide-react";
+import { Menu, Bell, CheckCircle2, AlertCircle, Smartphone, Plus } from "lucide-react";
 import { subscribeToPush } from "@/push/subscribe";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { LanguageToggle } from "@/components/common/LanguageSelector";
@@ -14,9 +14,18 @@ interface TopBarProps {
   showPush?: boolean;
   leading?: React.ReactNode;
   searchRole?: UserRole;
+  onAddProperty?: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ title, subtitle, onOpenMobileMenu, showPush = false, leading, searchRole }) => {
+export const TopBar: React.FC<TopBarProps> = ({
+  title,
+  subtitle,
+  onOpenMobileMenu,
+  showPush = false,
+  leading,
+  searchRole,
+  onAddProperty,
+}) => {
   const [pushStatus, setPushStatus] = useState<"idle" | "loading" | "subscribed" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -62,6 +71,16 @@ export const TopBar: React.FC<TopBarProps> = ({ title, subtitle, onOpenMobileMen
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
+        {onAddProperty && (
+          <button
+            onClick={onAddProperty}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent-tint text-accent hover:bg-accent hover:text-white border border-accent/20 text-xs font-semibold transition active:scale-95 shadow-sm"
+            title="Add New Property with Floors & Rooms"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">New Property</span>
+          </button>
+        )}
         {searchRole && <GlobalSearch role={searchRole} />}
         {/* Language Selector */}
         <LanguageToggle />

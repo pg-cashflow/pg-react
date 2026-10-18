@@ -105,13 +105,13 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
 
   const roomMap = useMemo(() => {
     const map = new Map<string, RoomOccupancy>();
-    for (const fl of floors) {
+    for (const fl of occupancyQuery.data?.floors ?? []) {
       for (const rm of fl.rooms) {
         map.set(rm.id, rm);
       }
     }
     return map;
-  }, [floors]);
+  }, [occupancyQuery.data?.floors]);
 
   const handleCopy = (code: string) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";

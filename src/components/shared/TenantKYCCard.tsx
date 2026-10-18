@@ -107,7 +107,7 @@ export const TenantKYCCard: React.FC = () => {
       return initiateDigiLockerKYC(returnUrl);
     },
     onSuccess: (res) => {
-      const url = res.vendor_flow_url || res.verification_url;
+      const url = res.verification_url;
       if (url) {
         window.location.href = url;
       }

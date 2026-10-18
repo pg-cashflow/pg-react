@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 import { OwnerKYCView } from "@/routes/owner/kyc";
 import * as kycApi from "@/api/kyc";
+import * as clientApi from "@/api/client";
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -192,5 +193,23 @@ describe("OwnerKYCView", () => {
     await flushQueries();
 
     expect(container?.textContent).toContain("No pending manual reviews");
+  });
+});
+
+describe("uploadKYCDocument", () => {
+  it("appends file only once under 'file' and avoids duplicate payload", async () => {
+    let capturedBody: FormData | null = null;
+    vi.spyOn(clientApi, "apiFetch").mockImplementation(async (_path, options) => {
+      capturedBody = options?.body as FormData;
+      return { id: "test-verif" } as any;
+    });
+
+    const file = new File(["dummy"], "doc.pdf", { type: "application/pdf" });
+    await kycApi.uploadKYCDocument(file);
+
+    expect(capturedBody).toBeInstanceOf(FormData);
+    expect(capturedBody?.get("file")).toBe(file);
+    expect(capturedBody?.get("document")).toBeNull();
+    expect(Array.from(capturedBody?.keys() || [])).toEqual(["file"]);
   });
 });

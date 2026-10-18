@@ -22,8 +22,11 @@ import {
   AlertCircle,
   Loader2,
   Award,
+  Sparkles,
 } from "lucide-react";
 import type { PropertyGamificationSettings } from "@pg/types";
+import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
+import { QuickLayoutModal } from "@/components/owner/QuickLayoutModal";
 
 export const OwnerFacilityView: React.FC = () => {
   const queryClient = useQueryClient();
@@ -59,6 +62,10 @@ export const OwnerFacilityView: React.FC = () => {
 
   // Add Manager state
   const [managerPhone, setManagerPhone] = useState("");
+
+  // Modals for New Property & Quick Layout
+  const [isAddPropertyOpen, setIsAddPropertyOpen] = useState(false);
+  const [isQuickLayoutOpen, setIsQuickLayoutOpen] = useState(false);
 
   // Feedback messages
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -163,19 +170,29 @@ export const OwnerFacilityView: React.FC = () => {
           </p>
         </div>
 
-        {propertyList.length > 1 && (
-          <select
-            value={propertyId}
-            onChange={(e) => setPropertyId(e.target.value)}
-            className="px-3 py-1.5 bg-surface border border-hairline rounded-xl text-xs text-ink"
+        <div className="flex items-center gap-2">
+          {propertyList.length > 0 && (
+            <select
+              value={propertyId}
+              onChange={(e) => setPropertyId(e.target.value)}
+              className="px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink font-medium"
+            >
+              {propertyList.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            onClick={() => setIsAddPropertyOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-accent text-white rounded-xl text-xs font-semibold hover:bg-accent/90 transition shadow-sm"
           >
-            {propertyList.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        )}
+            <Plus className="w-4 h-4" />
+            <span>New Property</span>
+          </button>
+        </div>
       </div>
 
       {msg && (
@@ -269,10 +286,30 @@ export const OwnerFacilityView: React.FC = () => {
           </div>
 
           <div className="md:col-span-2 bg-surface border border-hairline rounded-2xl p-5 space-y-3">
-            <h3 className="text-sm font-bold text-ink">Floors in Property</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-ink">Floors in Property</h3>
+              <button
+                type="button"
+                onClick={() => setIsQuickLayoutOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-tint text-accent border border-accent/20 rounded-xl text-xs font-semibold hover:bg-accent hover:text-white transition shadow-sm"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Quick Setup (3F, 12R...)</span>
+              </button>
+            </div>
             <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {floors.length === 0 ? (
-                <div className="p-4 text-xs text-ink-muted">No floors added yet.</div>
+                <div className="p-6 text-center space-y-3">
+                  <p className="text-xs text-ink-muted">No floors added yet for this property.</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsQuickLayoutOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Quick Generate Layout (e.g. 3 floors, 12 rooms)</span>
+                  </button>
+                </div>
               ) : (
                 floors.map((f) => (
                   <div key={f.id} className="p-3 flex items-center justify-between text-xs">
@@ -349,10 +386,30 @@ export const OwnerFacilityView: React.FC = () => {
           </div>
 
           <div className="md:col-span-2 bg-surface border border-hairline rounded-2xl p-5 space-y-3">
-            <h3 className="text-sm font-bold text-ink">Rooms in Property</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-ink">Rooms in Property</h3>
+              <button
+                type="button"
+                onClick={() => setIsQuickLayoutOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-tint text-accent border border-accent/20 rounded-xl text-xs font-semibold hover:bg-accent hover:text-white transition shadow-sm"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Quick Setup (3F, 12R...)</span>
+              </button>
+            </div>
             <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {rooms.length === 0 ? (
-                <div className="p-4 text-xs text-ink-muted">No rooms added yet.</div>
+                <div className="p-6 text-center space-y-3">
+                  <p className="text-xs text-ink-muted">No rooms configured yet.</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsQuickLayoutOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Quick Generate Layout (e.g. 3 floors, 12 rooms)</span>
+                  </button>
+                </div>
               ) : (
                 rooms.map((r) => (
                   <div key={r.id} className="p-3 flex items-center justify-between text-xs">
@@ -484,6 +541,32 @@ export const OwnerFacilityView: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Modals */}
+      <AddPropertyModal
+        isOpen={isAddPropertyOpen}
+        onClose={() => setIsAddPropertyOpen(false)}
+        onPropertyCreated={(newProp) => {
+          setPropertyId(newProp.id);
+          setMsg({
+            type: "ok",
+            text: `Property "${newProp.name}" created and switched successfully with room layout!`,
+          });
+        }}
+      />
+
+      <QuickLayoutModal
+        isOpen={isQuickLayoutOpen}
+        onClose={() => setIsQuickLayoutOpen(false)}
+        propertyId={propertyId}
+        propertyName={propertyList.find((p) => p.id === propertyId)?.name}
+        startFloorNumber={
+          floors.length > 0 ? Math.max(...floors.map((f) => f.floor_number)) + 1 : 1
+        }
+        onSuccess={() => {
+          setMsg({ type: "ok", text: "Floors and rooms generated successfully!" });
+        }}
+      />
     </div>
   );
 };

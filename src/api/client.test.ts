@@ -7,8 +7,8 @@ import {
   requestTokenRefresh,
   apiFetch,
 } from "./client";
-import { getAccessToken, setAccessToken } from "@/auth/tokenStore";
-import { getStoredUser, setStoredUser } from "@/auth/storage";
+import { getAccessToken, setAccessToken } from "../auth/tokenStore";
+import { getStoredUser, setStoredUser } from "../auth/storage";
 
 describe("api/client proactive refresh & biometric gate", () => {
   beforeEach(() => {
@@ -82,7 +82,7 @@ describe("api/client proactive refresh & biometric gate", () => {
   });
 
   it("proactive refresh routes through navigator.locks to prevent cross-tab refresh race", async () => {
-    const lockRequestSpy = vi.fn().mockImplementation((name, cb) => cb());
+    const lockRequestSpy = vi.fn().mockImplementation((_name, cb) => cb());
     Object.defineProperty(navigator, "locks", {
       value: { request: lockRequestSpy },
       configurable: true,
@@ -217,4 +217,20 @@ describe("api/client proactive refresh & biometric gate", () => {
     await vi.advanceTimersByTimeAsync(10000);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("converts SyntaxError into clean ApiError when server returns non-JSON body", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new SyntaxError("Unexpected token '<', \"<!doctype \"... is not valid JSON");
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiFetch("/test-path")).rejects.toThrow(
+      "Server returned an invalid response (expected JSON, received HTML or malformed body). Ensure pg-go is running with the latest routes."
+    );
+  });
 });
+
