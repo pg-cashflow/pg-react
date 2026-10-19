@@ -154,22 +154,27 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-*,
-*::before,
-*::after {
+/* Fallback transition: only active on browsers without View Transitions */
+html.theme-transition,
+html.theme-transition body,
+html.theme-transition header,
+html.theme-transition nav,
+html.theme-transition main,
+html.theme-transition aside,
+html.theme-transition [data-theme-surface] {
   transition: background-color 160ms ease,
               border-color 160ms ease,
-              color 160ms ease,
-              fill 160ms ease,
-              stroke 160ms ease;
+              color 160ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+  html.theme-transition,
+  html.theme-transition body,
+  html.theme-transition header,
+  html.theme-transition nav,
+  html.theme-transition main,
+  html.theme-transition aside,
+  html.theme-transition [data-theme-surface] {
     transition: none !important;
   }
 }

@@ -12,6 +12,7 @@ export type PaymentReportStatus = "pending_review" | "confirmed" | "rejected";
 export type PaymentMode = "manual" | "cashfree";
 
 export type SupportedLocale = "en-IN" | "te-IN" | "ta-IN" | "kn-IN";
+export type SupportedTheme = "system" | "light" | "dark";
 
 export const ERROR_CODES = [
   "auth.missingToken",
@@ -49,6 +50,7 @@ export const ERROR_CODES = [
   "payment.emptyTxnId",
   "payment.ambiguousMatch",
   "payment.noMatch",
+  "payment.invalidAmount",
   "finance.duplicateRequest",
   "finance.idempotencyRequired",
   "finance.invalidAmount",
@@ -58,9 +60,16 @@ export const ERROR_CODES = [
   "finance.policyExceeded",
   "finance.approvalRequired",
   "finance.periodNotCloseable",
+  "finance.periodNotReopenable",
+  "finance.periodClosed",
   "finance.notFound",
   "finance.forbidden",
   "finance.disabled",
+  "finance.expenseNotVoidable",
+  "finance.expenseStateChanged",
+  "finance.reasonRequired",
+  "finance.dateOutOfRange",
+  "finance.invalidSettings",
   "request.invalidBody",
   "request.invalidId",
   "request.dueDayInvalid",
@@ -68,6 +77,10 @@ export const ERROR_CODES = [
   "request.imageReadFailed",
   "preferences.localeRequired",
   "preferences.invalidLocale",
+  "preferences.invalidTheme",
+  "preferences.noFields",
+  "push.endpointInvalid",
+  "push.endpointConflict",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -87,6 +100,8 @@ export interface LocalesResponse {
 export interface PreferencesResponse {
   locale: SupportedLocale;
   has_saved_preference: boolean;
+  theme: SupportedTheme | null;
+  has_saved_theme: boolean;
 }
 
 export interface User {
@@ -97,6 +112,8 @@ export interface User {
   property_id?: string;
   locale?: string;
   has_saved_preference?: boolean;
+  theme?: SupportedTheme | null;
+  has_saved_theme?: boolean;
   created_at?: string;
   last_login_at?: string;
 }

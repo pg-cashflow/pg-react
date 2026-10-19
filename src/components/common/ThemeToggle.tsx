@@ -1,5 +1,4 @@
 import React, { useRef, useState, useLayoutEffect, useCallback } from "react";
-import { flushSync } from "react-dom";
 import { Sun, Moon, Laptop } from "lucide-react";
 import { useTheme, type Theme } from "@/theme/context";
 
@@ -9,47 +8,7 @@ export function ThemeToggle() {
 
   const handleToggle = useCallback(
     (e: React.MouseEvent) => {
-      // If View Transitions API is unavailable or user requested reduced motion, fall back to pure CSS crossfade
-      if (
-        !document.startViewTransition ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        cycleTheme();
-        return;
-      }
-
-      const x = e.clientX;
-      const y = e.clientY;
-      const endRadius = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y)
-      );
-
-      const transition = document.startViewTransition(() => {
-        flushSync(() => {
-          cycleTheme();
-        });
-      });
-
-      transition.ready
-        .then(() => {
-          document.documentElement.animate(
-            {
-              clipPath: [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${endRadius}px at ${x}px ${y}px)`,
-              ],
-            },
-            {
-              duration: 360,
-              easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-              pseudoElement: "::view-transition-new(root)",
-            }
-          );
-        })
-        .catch(() => {
-          // Graceful fallback if clipPath animation throws
-        });
+      cycleTheme({ x: e.clientX, y: e.clientY });
     },
     [cycleTheme]
   );
@@ -149,9 +108,17 @@ export function ThemeSegmentedControl() {
               buttonRefs.current[opt.value] = el;
             }}
             type="button"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              void setTheme(opt.value, {
+                origin: {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2,
+                },
+              });
+            }}
             role="radio"
             aria-checked={active}
-            onClick={() => setTheme(opt.value)}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent ${
               active
                 ? "text-white font-semibold"

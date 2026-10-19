@@ -1,6 +1,7 @@
 import { apiFetch } from "./client";
 import type {
   SupportedLocale,
+  SupportedTheme,
   LocaleMetadata,
   LocalesResponse,
   PreferencesResponse,
@@ -17,7 +18,7 @@ export async function getMyPreferences(): Promise<PreferencesResponse> {
 }
 
 export async function updateMyPreferences(
-  data: { locale: SupportedLocale },
+  data: { locale?: SupportedLocale; theme?: SupportedTheme },
   signal?: AbortSignal
 ): Promise<PreferencesResponse> {
   return apiFetch<PreferencesResponse>("/me/preferences", {
@@ -26,4 +27,3 @@ export async function updateMyPreferences(
     signal,
   });
 }
-
