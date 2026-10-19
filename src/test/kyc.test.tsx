@@ -194,6 +194,117 @@ describe("OwnerKYCView", () => {
 
     expect(container?.textContent).toContain("No pending manual reviews");
   });
+
+  it("fetches blob and renders preview when clicking View Document", async () => {
+    if (!window.URL.createObjectURL) {
+      window.URL.createObjectURL = vi.fn(() => "blob:http://localhost/mock-blob-uuid");
+    }
+    if (!window.URL.revokeObjectURL) {
+      window.URL.revokeObjectURL = vi.fn();
+    }
+    const createObjectURLSpy = vi.spyOn(window.URL, "createObjectURL").mockReturnValue("blob:http://localhost/mock-blob-uuid");
+    const revokeObjectURLSpy = vi.spyOn(window.URL, "revokeObjectURL").mockImplementation(() => {});
+
+    vi.spyOn(kycApi, "getOwnerKYCQueue").mockResolvedValue({
+      items: [
+        {
+          id: "review-1",
+          status: "pending_manual_review",
+          method: "ocr",
+          tenant_name: "Rahul Sharma",
+          room_number: "204",
+          document_name: "aadhaar.pdf",
+          document_url: "/api/owner/kyc/review-1/document",
+          created_at: "2026-10-17T10:00:00Z",
+          updated_at: "2026-10-17T10:00:00Z",
+        },
+      ],
+    });
+
+    const mockBlob = new Blob(["%PDF-1.4 mock content"], { type: "application/pdf" });
+    const getDocBlobSpy = vi.spyOn(kycApi, "getOwnerKYCDocumentBlob").mockResolvedValue(mockBlob);
+
+    await act(async () => {
+      root?.render(
+        <QueryClientProvider client={queryClient}>
+          <OwnerKYCView />
+        </QueryClientProvider>
+      );
+    });
+    await flushQueries();
+
+    // Click "View Document" (or button with document_name "aadhaar.pdf")
+    const viewButton = Array.from(container?.querySelectorAll("button") || []).find((b) =>
+      b.textContent?.includes("aadhaar.pdf") || b.textContent?.includes("View Document")
+    );
+    expect(viewButton).toBeDefined();
+
+    await act(async () => {
+      viewButton?.click();
+    });
+    await flushQueries();
+
+    expect(getDocBlobSpy).toHaveBeenCalledWith("review-1");
+    expect(createObjectURLSpy).toHaveBeenCalledWith(mockBlob);
+
+    // Modal should now be visible with iframe for pdf
+    expect(container?.textContent).toContain("ID Document Preview");
+    expect(container?.textContent).toContain("Rahul Sharma");
+    const iframe = container?.querySelector("iframe");
+    expect(iframe).toBeDefined();
+    expect(iframe?.getAttribute("src")).toBe("blob:http://localhost/mock-blob-uuid");
+
+    // Close preview
+    const closeBtn = container?.querySelector('button[aria-label="Close preview"]') as HTMLButtonElement | null;
+    expect(closeBtn).toBeDefined();
+
+    await act(async () => {
+      closeBtn?.click();
+    });
+    await flushQueries();
+
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:http://localhost/mock-blob-uuid");
+  });
+
+  it("handles preview error gracefully when document is not found", async () => {
+    vi.spyOn(kycApi, "getOwnerKYCQueue").mockResolvedValue({
+      items: [
+        {
+          id: "review-legacy",
+          status: "pending_manual_review",
+          method: "ocr",
+          tenant_name: "Legacy User",
+          document_name: "legacy.jpg",
+          created_at: "2026-10-17T10:00:00Z",
+          updated_at: "2026-10-17T10:00:00Z",
+        },
+      ],
+    });
+
+    vi.spyOn(kycApi, "getOwnerKYCDocumentBlob").mockRejectedValue(new Error("404 Not Found"));
+
+    await act(async () => {
+      root?.render(
+        <QueryClientProvider client={queryClient}>
+          <OwnerKYCView />
+        </QueryClientProvider>
+      );
+    });
+    await flushQueries();
+
+    const viewButton = Array.from(container?.querySelectorAll("button") || []).find((b) =>
+      b.textContent?.includes("legacy.jpg") || b.textContent?.includes("View Document")
+    );
+    expect(viewButton).toBeDefined();
+
+    await act(async () => {
+      viewButton?.click();
+    });
+    await flushQueries();
+
+    expect(container?.textContent).toContain("ID Document Preview");
+    expect(container?.textContent).toContain("Document Preview Unavailable");
+  });
 });
 
 describe("uploadKYCDocument", () => {

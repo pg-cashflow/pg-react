@@ -335,3 +335,63 @@ describe("Landing Route AuthRedirect", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
+
+describe("Feature routes and redirect aliases", () => {
+  it("registers essential feature aliases in the router tree", () => {
+    const paths = Object.keys(router.routesByPath);
+    expect(paths).toContain("/owner/join-requests");
+    expect(paths).toContain("/owner/payment-reports");
+    expect(paths).toContain("/owner/finance/tie-out");
+    expect(paths).toContain("/owner/tie-out");
+    expect(paths).toContain("/owner/hazards");
+    expect(paths).toContain("/owner/inspections");
+    expect(paths).toContain("/owner/kyc-queue");
+    expect(paths).toContain("/owner/billing");
+    expect(paths).toContain("/owner/settings");
+    expect(paths).toContain("/tenant/me");
+    expect(paths).toContain("/tenant/points");
+    expect(paths).toContain("/tenant/kyc");
+    expect(paths).toContain("/manager/kyc");
+    expect(paths).toContain("/dashboard");
+    expect(paths).toContain("/join-requests");
+  });
+
+  it("owner /join-requests redirect hook redirects to /owner/joins", () => {
+    const route = router.routesByPath["/owner/join-requests"];
+    expect(route).toBeDefined();
+    expect(route.options.beforeLoad).toBeDefined();
+
+    try {
+      (route.options.beforeLoad as any)({});
+      expect.fail("Expected beforeLoad to throw redirect");
+    } catch (err: any) {
+      expect(err?.options?.to || err?.to || err?.href).toBe("/owner/joins");
+    }
+  });
+
+  it("owner /payment-reports redirect hook redirects to /owner/reports", () => {
+    const route = router.routesByPath["/owner/payment-reports"];
+    expect(route).toBeDefined();
+    expect(route.options.beforeLoad).toBeDefined();
+
+    try {
+      (route.options.beforeLoad as any)({});
+      expect.fail("Expected beforeLoad to throw redirect");
+    } catch (err: any) {
+      expect(err?.options?.to).toBe("/owner/reports");
+    }
+  });
+
+  it("tenant /me redirect hook redirects to /tenant", () => {
+    const route = router.routesByPath["/tenant/me"];
+    expect(route).toBeDefined();
+    expect(route.options.beforeLoad).toBeDefined();
+
+    try {
+      (route.options.beforeLoad as any)({});
+      expect.fail("Expected beforeLoad to throw redirect");
+    } catch (err: any) {
+      expect(err?.options?.to).toBe("/tenant");
+    }
+  });
+});

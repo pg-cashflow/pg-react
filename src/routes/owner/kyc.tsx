@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -8,8 +8,17 @@ import {
   Loader2,
   Search,
   Eye,
+  ExternalLink,
+  FileText,
+  X,
 } from "lucide-react";
-import { getOwnerKYCQueue, approveOwnerKYC, rejectOwnerKYC } from "@/api/kyc";
+import {
+  getOwnerKYCQueue,
+  approveOwnerKYC,
+  rejectOwnerKYC,
+  getOwnerKYCDocumentBlob,
+  getOwnerTenantKYCPhoto,
+} from "@/api/kyc";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate } from "@/lib/utils";
@@ -20,8 +29,74 @@ export const OwnerKYCView: React.FC = () => {
   const [rejectingItem, setRejectingItem] = useState<OwnerKYCVerificationView | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [reasonError, setReasonError] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const [previewItem, setPreviewItem] = useState<OwnerKYCVerificationView | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewContentType, setPreviewContentType] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (previewBlobUrl) {
+        URL.revokeObjectURL(previewBlobUrl);
+      }
+    };
+  }, [previewBlobUrl]);
+
+  const handleClosePreview = () => {
+    if (previewBlobUrl) {
+      URL.revokeObjectURL(previewBlobUrl);
+    }
+    setPreviewBlobUrl(null);
+    setPreviewItem(null);
+    setPreviewLoading(false);
+    setPreviewError(null);
+    setPreviewContentType(null);
+  };
+
+  const handleOpenPreview = async (item: OwnerKYCVerificationView) => {
+    if (previewBlobUrl) {
+      URL.revokeObjectURL(previewBlobUrl);
+      setPreviewBlobUrl(null);
+    }
+    setPreviewItem(item);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    setPreviewContentType(null);
+
+    try {
+      const blob = await getOwnerKYCDocumentBlob(item.id);
+      const url = URL.createObjectURL(blob);
+      setPreviewBlobUrl(url);
+      setPreviewContentType(blob.type);
+    } catch {
+      if (item.tenant_id) {
+        try {
+          const photoBlob = await getOwnerTenantKYCPhoto(item.tenant_id);
+          const url = URL.createObjectURL(photoBlob);
+          setPreviewBlobUrl(url);
+          setPreviewContentType(photoBlob.type || "image/jpeg");
+          return;
+        } catch {
+          // Both failed
+        }
+      }
+      setPreviewError(
+        "No preview document file is currently available for this record. The document may have been submitted on an earlier version or consent was revoked."
+      );
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const isPdf = Boolean(
+    previewContentType?.includes("pdf") ||
+    previewItem?.document_name?.toLowerCase().endsWith(".pdf") ||
+    previewItem?.document_url?.toLowerCase().endsWith(".pdf")
+  );
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.ownerKYCQueue,
@@ -165,18 +240,14 @@ export const OwnerKYCView: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-ink-faint block">Document</span>
-                      {item.document_url ? (
-                        <button
-                          type="button"
-                          onClick={() => setPreviewUrl(item.document_url || null)}
-                          className="text-accent hover:underline inline-flex items-center gap-1 font-medium"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          View Document
-                        </button>
-                      ) : (
-                        <span className="text-ink-faint">Attached to profile</span>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenPreview(item)}
+                        className="text-accent hover:underline inline-flex items-center gap-1 font-medium"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        {item.document_name || "View Document"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -215,29 +286,121 @@ export const OwnerKYCView: React.FC = () => {
       </div>
 
       {/* Document Preview Modal */}
-      {previewUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-surface border border-hairline rounded-2xl max-w-2xl w-full p-5 space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between">
-              <h3 className="t-h3">ID Document Preview</h3>
+      {previewItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="bg-surface border border-hairline rounded-2xl max-w-3xl w-full p-5 space-y-4 max-h-[92vh] flex flex-col shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-3 border-b border-hairline pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-accent" />
+                  <h3 className="t-h3">ID Document Preview</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-1 t-caption text-ink-muted flex-wrap">
+                  <span className="font-medium text-ink">
+                    {previewItem.tenant_name || "Tenant"}
+                  </span>
+                  {previewItem.room_number && (
+                    <span className="px-1.5 py-0.5 rounded bg-bg border border-hairline font-mono text-xs">
+                      Room {previewItem.room_number}
+                    </span>
+                  )}
+                  {previewItem.document_name && (
+                    <span className="text-ink-faint truncate max-w-[200px]" title={previewItem.document_name}>
+                      • {previewItem.document_name}
+                    </span>
+                  )}
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => setPreviewUrl(null)}
-                className="t-caption text-ink-muted hover:text-ink font-semibold"
+                onClick={handleClosePreview}
+                className="p-1 rounded-lg text-ink-muted hover:text-ink hover:bg-bg transition"
+                aria-label="Close preview"
               >
-                Close
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-auto rounded-xl bg-bg border border-hairline flex items-center justify-center min-h-[300px]">
-              {previewUrl.endsWith(".pdf") ? (
-                <iframe src={previewUrl} className="w-full h-[500px]" title="Document PDF" />
-              ) : (
-                <img
-                  src={previewUrl}
-                  alt="Uploaded KYC Document"
-                  className="max-h-[500px] w-auto object-contain rounded-lg"
-                />
-              )}
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-auto rounded-xl bg-bg border border-hairline flex items-center justify-center min-h-[380px] p-2">
+              {previewLoading ? (
+                <div className="flex flex-col items-center gap-3 py-12 text-ink-muted">
+                  <Loader2 className="w-8 h-8 animate-spin text-accent" />
+                  <span className="t-body-sm">Loading document preview...</span>
+                </div>
+              ) : previewError ? (
+                <div className="max-w-md text-center p-6 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-warning-tint text-warning flex items-center justify-center mx-auto">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <h4 className="t-body font-semibold text-ink">Document Preview Unavailable</h4>
+                  <p className="t-caption text-ink-muted">{previewError}</p>
+                </div>
+              ) : previewBlobUrl ? (
+                isPdf ? (
+                  <iframe
+                    src={previewBlobUrl}
+                    className="w-full h-[520px] rounded-lg border-0 bg-white"
+                    title={previewItem.document_name || "KYC Document"}
+                  />
+                ) : (
+                  <img
+                    src={previewBlobUrl}
+                    alt={previewItem.document_name || "KYC Document"}
+                    className="max-h-[520px] w-auto max-w-full object-contain rounded-lg"
+                  />
+                )
+              ) : null}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-hairline flex-wrap">
+              <div>
+                {previewBlobUrl && (
+                  <a
+                    href={previewBlobUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-accent hover:underline t-caption font-semibold"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open in new tab
+                  </a>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const itemToReject = previewItem;
+                    handleClosePreview();
+                    openRejectDialog(itemToReject);
+                  }}
+                  className="h-9 px-3 rounded-[10px] border border-hairline text-danger t-caption font-semibold hover:bg-bg transition flex items-center gap-1.5"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Reject
+                </button>
+                <button
+                  type="button"
+                  disabled={approveMutation.isPending}
+                  onClick={() => {
+                    handleApprove(previewItem);
+                    handleClosePreview();
+                  }}
+                  className="h-9 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold flex items-center gap-1.5 hover:bg-accent/90 transition disabled:opacity-50"
+                >
+                  {approveMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Approve
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

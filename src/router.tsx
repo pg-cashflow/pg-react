@@ -228,19 +228,110 @@ const ownerIndex = createRoute({
 });
 
 const ownerJoins = createRoute({ getParentRoute: () => ownerRoute, path: "/joins", component: JoinsView });
+const ownerJoinRequests = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/join-requests",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/joins" });
+  },
+});
 const ownerKYC = createRoute({ getParentRoute: () => ownerRoute, path: "/kyc", component: OwnerKYCView });
+const ownerKYCQueue = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/kyc-queue",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/kyc" });
+  },
+});
 const ownerReports = createRoute({ getParentRoute: () => ownerRoute, path: "/reports", component: ReportsView });
+const ownerPaymentReports = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/payment-reports",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/reports" });
+  },
+});
 const ownerTenants = createRoute({ getParentRoute: () => ownerRoute, path: "/tenants", component: TenantsView });
 const ownerDues = createRoute({ getParentRoute: () => ownerRoute, path: "/dues", component: DuesView });
+const ownerBilling = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/billing",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/dues" });
+  },
+});
 const ownerPayments = createRoute({ getParentRoute: () => ownerRoute, path: "/payments", component: PaymentsView });
 const ownerRecon = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/reconciliation",
   component: ReconciliationView,
 });
+const ownerTieOut = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/finance/tie-out",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/reconciliation" });
+  },
+});
+const ownerTieOutShort = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/tie-out",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/reconciliation" });
+  },
+});
 const ownerEvents = createRoute({ getParentRoute: () => ownerRoute, path: "/events", component: EventsView });
+const ownerAudit = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/audit",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/events" });
+  },
+});
+const ownerLogs = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/logs",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/events" });
+  },
+});
 const ownerFacility = createRoute({ getParentRoute: () => ownerRoute, path: "/facility", component: OwnerFacilityView });
+const ownerHazards = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/hazards",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/facility" });
+  },
+});
+const ownerHazardDetail = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/hazards/$id",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/facility" });
+  },
+});
+const ownerInspections = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/inspections",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/facility" });
+  },
+});
+const ownerInspectionDetail = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/inspections/$id",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/facility" });
+  },
+});
 const ownerMore = createRoute({ getParentRoute: () => ownerRoute, path: "/more", component: MoreView });
+const ownerSettings = createRoute({
+  getParentRoute: () => ownerRoute,
+  path: "/settings",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/more" });
+  },
+});
 const ownerReminders = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/reminders",
@@ -277,6 +368,13 @@ const tenantIndex = createRoute({
     );
   },
 });
+const tenantMe = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/me",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant" });
+  },
+});
 const tenantDues = createRoute({ getParentRoute: () => tenantRoute, path: "/dues", component: TenantDuesView });
 const tenantPayments = createRoute({
   getParentRoute: () => tenantRoute,
@@ -288,6 +386,13 @@ const tenantRewards = createRoute({
   path: "/rewards",
   component: TenantRewardsView,
 });
+const tenantPoints = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/points",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant/rewards" });
+  },
+});
 const tenantCommunity = createRoute({
   getParentRoute: () => tenantRoute,
   path: "/community",
@@ -297,6 +402,41 @@ const tenantProfile = createRoute({
   getParentRoute: () => tenantRoute,
   path: "/profile",
   component: TenantProfileView,
+});
+const tenantKYC = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/kyc",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant/profile" });
+  },
+});
+const tenantHazards = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/hazards",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant" });
+  },
+});
+const tenantInspections = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/inspections",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant" });
+  },
+});
+const tenantInspectionDetail = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/inspections/$id",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant" });
+  },
+});
+const tenantViolations = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/violations",
+  beforeLoad: () => {
+    throw redirect({ to: "/tenant" });
+  },
 });
 
 const managerRoute = createRoute({
@@ -342,6 +482,11 @@ const managerHazards = createRoute({
   path: "/hazards",
   component: HazardsView,
 });
+const managerHazardDetail = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/hazards/$id",
+  component: HazardsView,
+});
 const managerProfile = createRoute({
   getParentRoute: () => managerRoute,
   path: "/profile",
@@ -352,6 +497,45 @@ const managerViolations = createRoute({
   path: "/violations",
   component: ViolationsView,
 });
+const managerKYC = createRoute({
+  getParentRoute: () => managerRoute,
+  path: "/kyc",
+  component: OwnerKYCView,
+});
+
+const rootDashboard = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard",
+  component: () => (
+    <AuthRedirect>
+      <AppLoadingScreen />
+    </AuthRedirect>
+  ),
+});
+
+const rootJoinRequests = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/join-requests",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/joins" });
+  },
+});
+
+const rootJoins = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/joins",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/joins" });
+  },
+});
+
+const rootKYC = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/kyc",
+  beforeLoad: () => {
+    throw redirect({ to: "/owner/kyc" });
+  },
+});
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -360,28 +544,52 @@ const routeTree = rootRoute.addChildren([
   activationRoute,
   joinRoute,
   deniedRoute,
+  rootDashboard,
+  rootJoinRequests,
+  rootJoins,
+  rootKYC,
   ownerRoute.addChildren([
     ownerIndex,
     ownerJoins,
+    ownerJoinRequests,
     ownerKYC,
+    ownerKYCQueue,
     ownerReports,
+    ownerPaymentReports,
     ownerTenants,
     ownerDues,
+    ownerBilling,
     ownerPayments,
     ownerRecon,
+    ownerTieOut,
+    ownerTieOutShort,
     ownerEvents,
+    ownerAudit,
+    ownerLogs,
     ownerFacility,
+    ownerHazards,
+    ownerHazardDetail,
+    ownerInspections,
+    ownerInspectionDetail,
     ownerMore,
+    ownerSettings,
     ownerReminders,
     ownerDash,
   ]),
   tenantRoute.addChildren([
     tenantIndex,
+    tenantMe,
     tenantDues,
     tenantPayments,
     tenantRewards,
+    tenantPoints,
     tenantCommunity,
     tenantProfile,
+    tenantKYC,
+    tenantHazards,
+    tenantInspections,
+    tenantInspectionDetail,
+    tenantViolations,
   ]),
   managerRoute.addChildren([
     managerIndex,
@@ -391,8 +599,10 @@ const routeTree = rootRoute.addChildren([
     managerInspectionDetail,
     managerMeters,
     managerHazards,
+    managerHazardDetail,
     managerProfile,
     managerViolations,
+    managerKYC,
   ]),
 ]);
 

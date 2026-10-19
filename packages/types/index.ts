@@ -366,6 +366,7 @@ export interface OwnerKYCVerificationView extends KYCVerification {
   reviewed_by?: string;
   reviewed_at?: string;
   document_url?: string;
+  document_name?: string;
   tenant_name?: string;
   room_number?: string;
   tenant_id?: string;

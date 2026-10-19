@@ -11,6 +11,7 @@ export interface NavIndexItem {
 const OWNER_NAV: NavIndexItem[] = [
   { id: "nav-dashboard", title: "Dashboard", path: "/owner/dashboard", keywords: "home overview" },
   { id: "nav-joins", title: "Join requests", path: "/owner/joins", keywords: "onboarding invite" },
+  { id: "nav-kyc", title: "KYC Review", path: "/owner/kyc", keywords: "kyc aadhaar identity documents verify" },
   { id: "nav-reports", title: "UTR reports", path: "/owner/reports", keywords: "payment proof utr" },
   { id: "nav-tenants", title: "Tenants", path: "/owner/tenants", keywords: "roster rooms" },
   { id: "nav-dues", title: "Dues", path: "/owner/dues", keywords: "rent billing" },

@@ -120,3 +120,7 @@ export const getOwnerTenantKYC = (
 
 export const getOwnerTenantKYCPhoto = (tenantId: string): Promise<Blob> =>
   apiFetchBlob(`/owner/tenants/${tenantId}/kyc/photo`);
+
+export const getOwnerKYCDocumentBlob = (id: string): Promise<Blob> =>
+  apiFetchBlob(`/owner/kyc/${id}/document`);
+
