@@ -4,7 +4,7 @@ import { useLocale } from "@/i18n";
 import type { SupportedLocale } from "@pg/types";
 
 export function LanguageToggle() {
-  const { locale, setLocale, locales } = useLocale();
+  const { locale, setLocale, locales, t } = useLocale();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -27,8 +27,8 @@ export function LanguageToggle() {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        aria-label={`Language: ${activeOption?.nativeName || "English"}. Tap to change.`}
-        title={`Language: ${activeOption?.nativeName || "English"}`}
+        aria-label={t("settings.languageToggleLabel")}
+        title={t("settings.languageToggleLabel")}
         className="flex h-10 items-center gap-1.5 px-2.5 rounded-[10px]
                    text-ink-muted hover:bg-accent-tint hover:text-accent
                    active:scale-95 transition-transform duration-100 border border-hairline bg-surface"
@@ -42,7 +42,7 @@ export function LanguageToggle() {
       {open && (
         <div className="absolute right-0 mt-2 w-48 rounded-xl bg-surface border border-hairline shadow-xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
           <div className="px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted uppercase tracking-wider border-b border-hairline mb-1">
-            Language / భాష / மொழி / ಭಾಷೆ
+            {t("settings.languageMenuTitle")}
           </div>
           {locales.map((opt) => {
             const isSelected = locale === opt.code;

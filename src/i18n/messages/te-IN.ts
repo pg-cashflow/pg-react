@@ -86,6 +86,9 @@ export const teIN: Record<MessageKey, string> = {
   "settings.themeDark": "డార్క్",
   "settings.language": "భాష",
   "settings.languageDesc": "అప్లికేషన్ కోసం మీకు కావలసిన భాషను ఎంచుకోండి",
+  "settings.languageMenuTitle": "భాషను ఎంచుకోండి",
+  "settings.languageToggleLabel": "భాషను మార్చండి",
+  "settings.themeToggleLabel": "థీమ్‌ను మార్చండి",
   "settings.selectLanguage": "భాషను ఎంచుకోండి",
 
   // Dues & Payments

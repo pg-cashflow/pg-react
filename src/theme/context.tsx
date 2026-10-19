@@ -25,16 +25,46 @@ const ORDER: Theme[] = ["system", "light", "dark"];
 const TRANSITION_CLASS = "theme-transition";
 const TRANSITION_FALLBACK_MS = 220;
 
+function readStoredTheme(): Theme {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored === "system" || stored === "light" || stored === "dark" ? stored : "system";
+  } catch {
+    // Storage can be blocked in private browsing or under restrictive browser policy.
+    return "system";
+  }
+}
+
+function writeStoredTheme(theme: Theme): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // Theme remains usable for this session even when persistence is unavailable.
+  }
+}
+
+function removeStoredTheme(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Best effort only; never break the visible theme because storage is blocked.
+  }
+}
+
+function isTheme(value: unknown): value is Theme {
+  return value === "system" || value === "light" || value === "dark";
+}
+
 function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function getSystemTheme(): ResolvedTheme {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function resolve(theme: Theme): ResolvedTheme {
-  return theme === "system" ? getSystemTheme() : theme;
+  return theme === "dark" ? "dark" : theme === "light" ? "light" : getSystemTheme();
 }
 
 function applyToDocument(resolved: ResolvedTheme) {
@@ -60,9 +90,7 @@ export interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem(STORAGE_KEY) as Theme) || "system"
-  );
+  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolve(theme));
 
   const activeTransitionRef = useRef<ReturnType<Document["startViewTransition"]> | null>(null);
@@ -156,8 +184,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const persistServer = opts?.persistServer ?? true;
       const seq = ++requestSeqRef.current;
 
+      // Runtime callers can bypass TypeScript; reject invalid values before mutating state.
+      if (!isTheme(t)) return false;
+
       applyWithSingleAnimation(() => {
-        localStorage.setItem(STORAGE_KEY, t);
+        writeStoredTheme(t);
         setThemeState(t);
       }, opts?.origin);
 
@@ -176,13 +207,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       try {
         const res = await updateMyPreferences({ theme: t }, controller.signal);
         if (seq === requestSeqRef.current) {
-          try {
-            localStorage.removeItem(PENDING_KEY);
-          } catch {
-            // ignore
-          }
+          removeStoredTheme(PENDING_KEY);
           queryClient.setQueryData(QUERY_KEYS.preferences, res);
-          authUpdaterRef.current?.((res.theme as Theme) ?? "system");
+          authUpdaterRef.current?.(isTheme(res.theme) ? res.theme : t);
           return true;
         }
         return false;
@@ -195,11 +222,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             err?.message?.includes("Session expired");
 
           if (is401) {
-            try {
-              localStorage.removeItem(PENDING_KEY);
-            } catch {
-              // ignore
-            }
+            removeStoredTheme(PENDING_KEY);
             return false;
           }
 
@@ -207,7 +230,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           try {
             localStorage.setItem(PENDING_KEY, t);
           } catch {
-            // ignore
+            // Theme remains applied locally; sync can be retried after another user action.
           }
         }
         return false;
@@ -233,6 +256,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyToDocument(r);
 
     if (theme !== "system") return;
+    if (typeof window.matchMedia !== "function") return;
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
       const next = getSystemTheme();
@@ -371,11 +395,7 @@ export const ThemeSync: FC = () => {
       setTheme(currentTheme, { persistServer: true })
         .then((ok) => {
           if (ok) {
-            try {
-              localStorage.removeItem(PENDING_KEY);
-            } catch {
-              // ignore
-            }
+            removeStoredTheme(PENDING_KEY);
             initialReconciledUserIdRef.current = user.id;
             lastConfirmedRef.current = { userId: user.id!, theme: currentTheme };
           }

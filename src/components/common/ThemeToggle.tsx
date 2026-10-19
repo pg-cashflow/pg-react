@@ -1,9 +1,11 @@
 import React, { useRef, useState, useLayoutEffect, useCallback } from "react";
 import { Sun, Moon, Laptop } from "lucide-react";
 import { useTheme, type Theme } from "@/theme/context";
+import { useLocale } from "@/i18n";
 
 export function ThemeToggle() {
   const { resolvedTheme, theme, cycleTheme } = useTheme();
+  const { t } = useLocale();
   const Icon = resolvedTheme === "dark" ? Moon : Sun;
 
   const handleToggle = useCallback(
@@ -17,8 +19,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={handleToggle}
-      aria-label={`Theme: ${theme}. Tap to change.`}
-      title={`Theme: ${theme} (resolved: ${resolvedTheme}). Tap to cycle.`}
+      aria-label={t("settings.themeToggleLabel")}
+      title={`${t("settings.themeToggleLabel")}: ${theme} (${resolvedTheme})`}
       className="relative flex h-10 w-10 items-center justify-center rounded-[10px]
                  text-ink-muted hover:bg-accent-tint hover:text-accent
                  active:scale-95 transition-transform duration-100"

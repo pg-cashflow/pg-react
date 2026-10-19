@@ -84,6 +84,9 @@ export const enIN = {
   "settings.themeDark": "Dark",
   "settings.language": "Language",
   "settings.languageDesc": "Choose your preferred language for the application",
+  "settings.languageMenuTitle": "Choose a language",
+  "settings.languageToggleLabel": "Change language",
+  "settings.themeToggleLabel": "Change theme",
   "settings.selectLanguage": "Select language",
 
   // Dues & Payments

@@ -86,6 +86,9 @@ export const knIN: Record<MessageKey, string> = {
   "settings.themeDark": "ಡಾರ್ಕ್",
   "settings.language": "ಭಾಷೆ",
   "settings.languageDesc": "ಅಪ್ಲಿಕೇಶನ್‌ಗಾಗಿ ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "settings.languageMenuTitle": "ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "settings.languageToggleLabel": "ಭಾಷೆ ಬದಲಾಯಿಸಿ",
+  "settings.themeToggleLabel": "ಥೀಮ್ ಬದಲಾಯಿಸಿ",
   "settings.selectLanguage": "ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
 
   // Dues & Payments

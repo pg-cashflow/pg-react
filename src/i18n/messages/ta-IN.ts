@@ -86,6 +86,9 @@ export const taIN: Record<MessageKey, string> = {
   "settings.themeDark": "இருண்ட",
   "settings.language": "மொழி",
   "settings.languageDesc": "பயன்பாட்டிற்கான உங்கள் விருப்ப மொழியைத் தேர்ந்தெடுக்கவும்",
+  "settings.languageMenuTitle": "மொழியைத் தேர்ந்தெடுக்கவும்",
+  "settings.languageToggleLabel": "மொழியை மாற்றவும்",
+  "settings.themeToggleLabel": "தோற்றத்தை மாற்றவும்",
   "settings.selectLanguage": "மொழியைத் தேர்ந்தெடுக்கவும்",
 
   // Dues & Payments
