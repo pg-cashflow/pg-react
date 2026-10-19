@@ -415,7 +415,7 @@ export const LandingPage: React.FC = () => {
 
                 <div className="mt-6 pt-5 border-t border-hairline">
                   <div className="t-caption text-ink-muted">Authorized Integration</div>
-                  <div className="t-body-sm font-semibold text-ink mt-0.5">UIDAI · DigiLocker Tier 1 · Cashfree Gateway</div>
+                  <div className="t-body-sm font-semibold text-ink mt-0.5">UIDAI Aadhaar OTP · Cashfree Verification Gateway</div>
                 </div>
               </div>
             </div>
