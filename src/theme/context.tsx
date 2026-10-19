@@ -19,6 +19,7 @@ export type Theme = SupportedTheme;
 export type ResolvedTheme = "light" | "dark";
 
 const STORAGE_KEY = "pg_theme";
+const PENDING_KEY = "pg_theme_pending";
 const ORDER: Theme[] = ["system", "light", "dark"];
 const TRANSITION_CLASS = "theme-transition";
 const TRANSITION_FALLBACK_MS = 220;
@@ -166,6 +167,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       try {
         const res = await updateMyPreferences({ theme: t }, controller.signal);
         if (seq === requestSeqRef.current) {
+          try {
+            localStorage.removeItem(PENDING_KEY);
+          } catch {
+            // ignore
+          }
           queryClient.setQueryData(QUERY_KEYS.preferences, res);
           authUpdaterRef.current?.((res.theme as Theme) ?? "system");
         }
@@ -173,6 +179,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       } catch (err: any) {
         if (!controller.signal.aborted && err?.name !== "AbortError") {
           console.warn("[theme] Failed to persist theme preference:", err);
+          try {
+            localStorage.setItem(PENDING_KEY, t);
+          } catch {
+            // ignore
+          }
         }
         return false;
       } finally {
@@ -234,6 +245,11 @@ export const ThemeSync: FC = () => {
 
   useEffect(() => {
     registerAuthUpdater((newTheme) => {
+      try {
+        localStorage.removeItem(PENDING_KEY);
+      } catch {
+        // ignore
+      }
       updateUser({ theme: newTheme, has_saved_theme: true });
       if (user?.id) {
         lastConfirmedRef.current = { userId: user.id, theme: newTheme };
@@ -259,6 +275,35 @@ export const ThemeSync: FC = () => {
 
     // 1. Initial Session Reconciliation
     if (initialReconciledUserIdRef.current !== user.id) {
+      let pendingTheme: string | null = null;
+      try {
+        pendingTheme = localStorage.getItem(PENDING_KEY);
+      } catch {
+        // ignore
+      }
+
+      if (pendingTheme && (pendingTheme === "system" || pendingTheme === "light" || pendingTheme === "dark")) {
+        // User has an unconfirmed local pick: do NOT overwrite with server value.
+        // Instead, push local choice to server.
+        initialReconciledUserIdRef.current = user.id;
+        syncInProgressRef.current = true;
+        setTheme(pendingTheme as SupportedTheme, { persistServer: true })
+          .then((ok) => {
+            if (ok) {
+              try {
+                localStorage.removeItem(PENDING_KEY);
+              } catch {
+                // ignore
+              }
+              lastConfirmedRef.current = { userId: user.id!, theme: pendingTheme as SupportedTheme };
+            }
+          })
+          .finally(() => {
+            syncInProgressRef.current = false;
+          });
+        return;
+      }
+
       if (user.has_saved_theme && user.theme) {
         initialReconciledUserIdRef.current = user.id;
         lastConfirmedRef.current = { userId: user.id, theme: user.theme };
@@ -274,6 +319,11 @@ export const ThemeSync: FC = () => {
         setTheme(currentTheme, { persistServer: true })
           .then((ok) => {
             if (ok) {
+              try {
+                localStorage.removeItem(PENDING_KEY);
+              } catch {
+                // ignore
+              }
               initialReconciledUserIdRef.current = user.id;
               lastConfirmedRef.current = { userId: user.id!, theme: currentTheme };
             }
@@ -294,6 +344,11 @@ export const ThemeSync: FC = () => {
       setTheme(currentTheme, { persistServer: true })
         .then((ok) => {
           if (ok) {
+            try {
+              localStorage.removeItem(PENDING_KEY);
+            } catch {
+              // ignore
+            }
             initialReconciledUserIdRef.current = user.id;
             lastConfirmedRef.current = { userId: user.id!, theme: currentTheme };
           }

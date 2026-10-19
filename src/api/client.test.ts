@@ -232,5 +232,39 @@ describe("api/client proactive refresh & biometric gate", () => {
       "Server returned an invalid response (expected JSON, received HTML or malformed body). Ensure pg-go is running with the latest routes."
     );
   });
+
+  it("apiFetch retried 401 does not clear session or dispatch pg:unauthorized if token refresh succeeded", async () => {
+    setAccessToken("valid-token");
+    setStoredUser({ id: "u1", role: "tenant", phone: "+919000000000" });
+    const unauthorizedSpy = vi.fn();
+    window.addEventListener("pg:unauthorized", unauthorizedSpy);
+
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("/auth/refresh")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ token: "new-valid-token", user: { id: "u1", role: "tenant", phone: "+919000000000" } }),
+        });
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: "Scoped unauthorized on this resource", code: "auth.scopedUnauthorized" }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiFetch("/restricted-endpoint")).rejects.toThrow();
+
+    // pg:unauthorized should NOT have been dispatched
+    expect(unauthorizedSpy).not.toHaveBeenCalled();
+    // Access token should still exist (refreshed token)
+    expect(getAccessToken()).toBe("new-valid-token");
+    expect(getStoredUser()).not.toBeNull();
+
+    window.removeEventListener("pg:unauthorized", unauthorizedSpy);
+  });
 });
+
 

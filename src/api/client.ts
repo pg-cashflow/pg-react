@@ -124,18 +124,36 @@ export async function requestTokenRefresh(failedToken: string | null): Promise<s
   return activeRefreshPromise;
 }
 
-async function handleResponse<T>(res: Response, parse: () => Promise<T>): Promise<T> {
+async function handleResponse<T>(
+  res: Response,
+  parse: () => Promise<T>,
+  opts: { allowSessionClearOn401?: boolean } = { allowSessionClearOn401: true }
+): Promise<T> {
   if (res.status === 401) {
-    const hadPriorSession = Boolean(getAccessToken() || getStoredUser());
-    setAccessToken(null);
-    setStoredUser(null);
-    stopProactiveRefresh();
-    if (hadPriorSession) {
-      window.dispatchEvent(
-        new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
-      );
+    if (opts.allowSessionClearOn401 !== false) {
+      const hadPriorSession = Boolean(getAccessToken() || getStoredUser());
+      setAccessToken(null);
+      setStoredUser(null);
+      stopProactiveRefresh();
+      if (hadPriorSession) {
+        window.dispatchEvent(
+          new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+        );
+      }
     }
-    throw new ApiError(401, "Session expired or unauthorized");
+    let errorMsg = "Session expired or unauthorized";
+    let errorCode: string | undefined;
+    try {
+      const data = await res.json();
+      errorMsg = data.message || data.error || errorMsg;
+      if (typeof data.code === "string") {
+        errorCode = data.code;
+      }
+    } catch {
+      // ignore
+    }
+    const mapped = mapApiErrorMessage(401, errorMsg);
+    throw new ApiError(401, mapped, errorCode);
   }
 
   if (!res.ok) {
@@ -250,12 +268,16 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
           credentials: options.credentials ?? "include",
           headers: authHeaders(options),
         });
-        return await handleResponse(retryRes, () => retryRes.json() as Promise<T>);
+        return await handleResponse(retryRes, () => retryRes.json() as Promise<T>, {
+          allowSessionClearOn401: false,
+        });
       }
       throw new ApiError(401, "Session expired or unauthorized");
     }
 
-    return await handleResponse(res, () => res.json() as Promise<T>);
+    return await handleResponse(res, () => res.json() as Promise<T>, {
+      allowSessionClearOn401: !isAuthEndpoint,
+    });
   } catch (err) {
     if (err instanceof ApiError) throw err;
     if (isNetworkFailure(err)) throw new ApiError(0, networkFailureMessage());
@@ -282,12 +304,16 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
           credentials: options.credentials ?? "include",
           headers: authHeaders(options),
         });
-        return await handleResponse(retryRes, () => retryRes.blob());
+        return await handleResponse(retryRes, () => retryRes.blob(), {
+          allowSessionClearOn401: false,
+        });
       }
       throw new ApiError(401, "Session expired or unauthorized");
     }
 
-    return await handleResponse(res, () => res.blob());
+    return await handleResponse(res, () => res.blob(), {
+      allowSessionClearOn401: !isAuthEndpoint,
+    });
   } catch (err) {
     if (err instanceof ApiError) throw err;
     if (isNetworkFailure(err)) throw new ApiError(0, networkFailureMessage());

@@ -33,6 +33,8 @@ export interface LocaleProviderProps {
   children: ReactNode;
 }
 
+const PENDING_LOCALE_KEY = "pg_locale_pending";
+
 export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   const [locale, setLocaleState] = useState<SupportedLocale>(() => {
     const cached = getStoredLocale();
@@ -71,6 +73,11 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
 
         // Discard result if superseded by a newer call while in-flight
         if (seq === requestSeqRef.current) {
+          try {
+            localStorage.removeItem(PENDING_LOCALE_KEY);
+          } catch {
+            // ignore
+          }
           queryClient.setQueryData(QUERY_KEYS.preferences, res);
           authUpdaterRef.current?.(res.locale);
         }
@@ -79,6 +86,11 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
         // Silently ignore aborted requests; warn only on genuine network/server errors
         if (!controller.signal.aborted && err?.name !== "AbortError") {
           console.warn("[i18n] Failed to persist locale preference:", err);
+          try {
+            localStorage.setItem(PENDING_LOCALE_KEY, newLocale);
+          } catch {
+            // ignore
+          }
         }
         return false;
       } finally {
@@ -182,6 +194,11 @@ export const LocaleSync: FC = () => {
   // Wire auth updateUser to the provider's write path
   useEffect(() => {
     registerAuthUpdater((newLocale) => {
+      try {
+        localStorage.removeItem(PENDING_LOCALE_KEY);
+      } catch {
+        // ignore
+      }
       updateUser({ locale: newLocale, has_saved_preference: true });
       if (user?.id) {
         lastConfirmedRef.current = { userId: user.id, locale: newLocale };
@@ -207,6 +224,35 @@ export const LocaleSync: FC = () => {
 
     // 1. Initial Session Reconciliation (runs once per user login / mount)
     if (initialReconciledUserIdRef.current !== user.id) {
+      let pendingLocale: string | null = null;
+      try {
+        pendingLocale = localStorage.getItem(PENDING_LOCALE_KEY);
+      } catch {
+        // ignore
+      }
+
+      if (pendingLocale && isSupportedLocale(pendingLocale)) {
+        // User has an unconfirmed local pick: do NOT overwrite with server value.
+        // Instead, push local choice to server.
+        initialReconciledUserIdRef.current = user.id;
+        syncInProgressRef.current = true;
+        setLocale(pendingLocale as SupportedLocale, true)
+          .then((ok) => {
+            if (ok) {
+              try {
+                localStorage.removeItem(PENDING_LOCALE_KEY);
+              } catch {
+                // ignore
+              }
+              lastConfirmedRef.current = { userId: user.id!, locale: pendingLocale as SupportedLocale };
+            }
+          })
+          .finally(() => {
+            syncInProgressRef.current = false;
+          });
+        return;
+      }
+
       if (user.has_saved_preference && user.locale && isSupportedLocale(user.locale)) {
         // Returning user: saved DB preference is authoritative over device's anonymous cache
         initialReconciledUserIdRef.current = user.id;
@@ -223,6 +269,11 @@ export const LocaleSync: FC = () => {
         setLocale(currentLocale, true)
           .then((ok) => {
             if (ok) {
+              try {
+                localStorage.removeItem(PENDING_LOCALE_KEY);
+              } catch {
+                // ignore
+              }
               initialReconciledUserIdRef.current = user.id;
               lastConfirmedRef.current = { userId: user.id!, locale: currentLocale };
             }
@@ -243,6 +294,11 @@ export const LocaleSync: FC = () => {
       setLocale(currentLocale, true)
         .then((ok) => {
           if (ok) {
+            try {
+              localStorage.removeItem(PENDING_LOCALE_KEY);
+            } catch {
+              // ignore
+            }
             initialReconciledUserIdRef.current = user.id;
             lastConfirmedRef.current = { userId: user.id!, locale: currentLocale };
           }
