@@ -83,4 +83,10 @@ export const teIN: Record<MessageKey, string> = {
   "notifications.title": "నోటిఫికేషన్‌లు",
   "notifications.empty": "ఇంకా నోటిఫికేషన్‌లు ఏవీ లేవు",
   "notifications.markAllRead": "అన్నీ చదివినట్లు గుర్తించు",
+
+  // Plurals & Structured Sentences
+  "due.amountOnDate": "{date}న {amount} చెల్లించవలసి ఉంది",
+  "dues.countPending": "{count, plural, =0 {బకాయిలు లేవు} one {# బకాయి ఉంది} other {# బకాయిలు ఉన్నాయి}}",
+  "rooms.countVacant": "{count, plural, =0 {ఖాళీ గదులు లేవు} one {# గది ఖాళీగా ఉంది} other {# గదులు ఖాళీగా ఉన్నాయి}}",
+  "dues.daysOverdue": "{count, plural, =0 {ఈరోజే గడువు} one {# రోజు ఆలస్యం} other {# రోజులు ఆలస్యం}}",
 };

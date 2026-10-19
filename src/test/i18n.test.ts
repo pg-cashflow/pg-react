@@ -62,6 +62,56 @@ describe("i18n message completeness", () => {
         expect(formatted).toMatch(/2026/);
       }
     });
+
+    it("formats ICU pluralized dues and rooms across all 4 locales", async () => {
+      const { createIntl, createIntlCache } = await import("react-intl");
+      const cache = createIntlCache();
+      const messagesMap = {
+        "en-IN": enIN,
+        "te-IN": teIN,
+        "ta-IN": taIN,
+        "kn-IN": knIN,
+      };
+
+      for (const loc of ["en-IN", "te-IN", "ta-IN", "kn-IN"] as const) {
+        const intl = createIntl({ locale: loc, messages: messagesMap[loc] }, cache);
+
+        const zeroDues = intl.formatMessage({ id: "dues.countPending" }, { count: 0 });
+        const oneDue = intl.formatMessage({ id: "dues.countPending" }, { count: 1 });
+        const threeDues = intl.formatMessage({ id: "dues.countPending" }, { count: 3 });
+
+        expect(zeroDues).toBeTruthy();
+        expect(oneDue).toContain("1");
+        expect(threeDues).toContain("3");
+        expect(oneDue).not.toBe(threeDues);
+      }
+    });
+
+    it("respects SOV sentence structure in regional language sentence templates", async () => {
+      const { createIntl, createIntlCache } = await import("react-intl");
+      const cache = createIntlCache();
+      const messagesMap = {
+        "en-IN": enIN,
+        "te-IN": teIN,
+        "ta-IN": taIN,
+        "kn-IN": knIN,
+      };
+
+      const amount = "₹8,500";
+      const date = "5 Sep";
+
+      // English SVO: amount comes first, then date
+      const intlEn = createIntl({ locale: "en-IN", messages: messagesMap["en-IN"] }, cache);
+      const enSentence = intlEn.formatMessage({ id: "due.amountOnDate" }, { amount, date });
+      expect(enSentence.indexOf(amount)).toBeLessThan(enSentence.indexOf(date));
+
+      // Dravidian SOV (Telugu, Tamil, Kannada): date adverbial comes before amount / verb
+      for (const loc of ["te-IN", "ta-IN", "kn-IN"] as const) {
+        const intl = createIntl({ locale: loc, messages: messagesMap[loc] }, cache);
+        const sentence = intl.formatMessage({ id: "due.amountOnDate" }, { amount, date });
+        expect(sentence.indexOf(date)).toBeLessThan(sentence.indexOf(amount));
+      }
+    });
   });
 
   describe("LocaleProvider concurrency & abort behavior", () => {

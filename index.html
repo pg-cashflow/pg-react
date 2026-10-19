@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="theme-color" content="#FAFAF7" />
     <script>
       (function () {
         try {
@@ -10,8 +11,11 @@
           var resolved = theme === 'system'
             ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
             : theme;
-          document.documentElement.classList.toggle('dark', resolved === 'dark');
+          var isDark = resolved === 'dark';
+          document.documentElement.classList.toggle('dark', isDark);
           document.documentElement.style.colorScheme = resolved;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', isDark ? '#15130F' : '#FAFAF7');
         } catch (e) {}
       })();
     </script>
@@ -32,7 +36,6 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <meta name="theme-color" content="#FAFAF7" />
     <meta
       name="description"
       content="One ledger for Indian PGs and hostels — rent dues, UPI verification, streaks, inspections, meters, and kitchen headcount for tenants, owners, and wardens."

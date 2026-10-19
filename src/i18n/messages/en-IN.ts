@@ -81,6 +81,12 @@ export const enIN = {
   "notifications.title": "Notifications",
   "notifications.empty": "No notifications yet",
   "notifications.markAllRead": "Mark all as read",
+
+  // Plurals & Structured Sentences
+  "due.amountOnDate": "{amount} due on {date}",
+  "dues.countPending": "{count, plural, =0 {No dues pending} one {# due pending} other {# dues pending}}",
+  "rooms.countVacant": "{count, plural, =0 {No rooms vacant} one {# room vacant} other {# rooms vacant}}",
+  "dues.daysOverdue": "{count, plural, =0 {Due today} one {# day overdue} other {# days overdue}}",
 };
 
 export type MessageKey = keyof typeof enIN;

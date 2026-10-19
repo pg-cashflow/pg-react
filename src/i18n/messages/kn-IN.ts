@@ -83,4 +83,10 @@ export const knIN: Record<MessageKey, string> = {
   "notifications.title": "ಅಧಿಸೂಚನೆಗಳು",
   "notifications.empty": "ಇನ್ನೂ ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ",
   "notifications.markAllRead": "ಎಲ್ಲವನ್ನೂ ಓದಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ",
+
+  // Plurals & Structured Sentences
+  "due.amountOnDate": "{date} ರಂದು {amount} ಬಾಕಿ ಇದೆ",
+  "dues.countPending": "{count, plural, =0 {ಯಾವುದೇ ಬಾಕಿ ಇಲ್ಲ} one {# ಬಾಕಿ ಇದೆ} other {# ಬಾಕಿಗಳಿವೆ}}",
+  "rooms.countVacant": "{count, plural, =0 {ಯಾವುದೇ ಕೊಠಡಿ ಖಾಲಿ ಇಲ್ಲ} one {# ಕೊಠಡಿ ಖಾಲಿ ಇದೆ} other {# ಕೊಠಡಿಗಳು ಖಾಲಿ ಇವೆ}}",
+  "dues.daysOverdue": "{count, plural, =0 {ಇಂದೇ ಕೊನೆಯ ದಿನ} one {# ದಿನ ತಡವಾಗಿದೆ} other {# ದಿನಗಳು ತಡವಾಗಿವೆ}}",
 };
