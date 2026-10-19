@@ -154,13 +154,14 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-button,
-a,
-input,
-textarea,
-select,
-[data-portal] {
-  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+*,
+*::before,
+*::after {
+  transition: background-color 160ms ease,
+              border-color 160ms ease,
+              color 160ms ease,
+              fill 160ms ease,
+              stroke 160ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -171,6 +172,12 @@ select,
     animation-iteration-count: 1 !important;
     transition: none !important;
   }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 .t-display { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em; }
