@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
-import { enIN } from "@/i18n/messages/en-IN";
+import { enIN } from "../i18n/messages/en-IN";
 
-import { teIN } from "@/i18n/messages/te-IN";
-import { taIN } from "@/i18n/messages/ta-IN";
-import { knIN } from "@/i18n/messages/kn-IN";
-import { isSupportedLocale } from "@/i18n";
-import { getStoredLocale, setStoredLocale } from "@/auth/storage";
-import { formatPaise, formatDate } from "@/lib/utils";
+import { teIN } from "../i18n/messages/te-IN";
+import { taIN } from "../i18n/messages/ta-IN";
+import { knIN } from "../i18n/messages/kn-IN";
+import { isSupportedLocale } from "../i18n";
+import { getStoredLocale, setStoredLocale } from "../auth/storage";
+import { formatPaise, formatDate } from "../lib/utils";
 
 describe("i18n message completeness", () => {
 
@@ -118,10 +118,10 @@ describe("i18n message completeness", () => {
     it("aborts superseded in-flight persist request on rapid setLocale calls", async () => {
       const { createRoot } = await import("react-dom/client");
       const React = await import("react");
-      const { LocaleProvider, useLocale } = await import("@/i18n");
-      const preferencesApi = await import("@/api/preferences");
-      const { queryClient } = await import("@/lib/queryClient");
-      const { QUERY_KEYS } = await import("@/lib/queryKeys");
+      const { LocaleProvider, useLocale } = await import("../i18n");
+      const preferencesApi = await import("../api/preferences");
+      const { queryClient } = await import("../lib/queryClient");
+      const { QUERY_KEYS } = await import("../lib/queryKeys");
 
       let contextValue!: ReturnType<typeof useLocale>;
       function Consumer() {
@@ -190,9 +190,9 @@ describe("i18n message completeness", () => {
     it("does not re-fire attemptSync or cannibalize user clicks when LocaleSync is mounted", async () => {
       const { createRoot } = await import("react-dom/client");
       const React = await import("react");
-      const { LocaleProvider, LocaleSync, useLocale } = await import("@/i18n");
-      const preferencesApi = await import("@/api/preferences");
-      const authModule = await import("@/auth/context");
+      const { LocaleProvider, LocaleSync, useLocale } = await import("../i18n");
+      const preferencesApi = await import("../api/preferences");
+      const authModule = await import("../auth/context");
 
       let currentUser: any = {
         id: "u-999",
@@ -218,6 +218,10 @@ describe("i18n message completeness", () => {
         loginWithGoogle: vi.fn(),
         reExchangeFirebase: vi.fn(),
         logout: vi.fn(),
+        justActivated: false,
+        consumeActivation: vi.fn(),
+        triggerActivation: vi.fn(),
+        applySession: vi.fn(),
       }));
 
       let contextValue!: ReturnType<typeof useLocale>;
@@ -280,8 +284,8 @@ describe("i18n message completeness", () => {
 
   describe("Error Code Registry drift guard", () => {
     it("error-codes.json matches ERROR_CODES and contains valid codes", async () => {
-      const { ERROR_CODES } = await import("@pg/types");
-      const errorCodes = (await import("@/i18n/error-codes.json")).default as string[];
+      const { ERROR_CODES } = await import("../../packages/types");
+      const errorCodes = (await import("../i18n/error-codes.json")).default as string[];
 
       // Length must match (no additions/removals without updating both)
       expect(errorCodes).toHaveLength(ERROR_CODES.length);
