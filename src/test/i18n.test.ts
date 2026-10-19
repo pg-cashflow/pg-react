@@ -13,7 +13,6 @@ import {
   formatPendingDuesCount,
   formatVacantRoomsCount,
   formatDaysOverdue,
-  getDaysOverdue,
 } from "../lib/utils";
 
 describe("i18n message completeness", () => {

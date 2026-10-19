@@ -1,9 +1,11 @@
 import React from "react";
 import { ShieldAlert, LogOut } from "lucide-react";
 import { useAuth } from "@/auth/context";
+import { useLocale } from "@/i18n";
 
 export const AccessDeniedView: React.FC = () => {
   const { logout } = useAuth();
+  const { t } = useLocale();
 
   return (
     <div className="min-h-screen bg-bg flex flex-col items-center justify-center p-4">
@@ -11,16 +13,16 @@ export const AccessDeniedView: React.FC = () => {
         <div className="w-12 h-12 rounded-[14px] bg-danger-tint text-danger flex items-center justify-center mx-auto mb-4">
           <ShieldAlert className="w-6 h-6" />
         </div>
-        <h1 className="t-h1 mb-2">Access denied</h1>
+        <h1 className="t-h1 mb-2">{t("common.accessDenied")}</h1>
         <p className="t-body-sm text-ink-muted mb-6">
-          You're signed in, but no role is set up for your account yet. Ask your PG owner to add you.
+          {t("common.accessDeniedDesc")}
         </p>
         <button
           onClick={logout}
           className="inline-flex items-center justify-center gap-2 px-5 h-11 rounded-[10px] bg-accent text-white font-semibold"
         >
           <LogOut className="w-4 h-4" />
-          Sign out
+          {t("common.logout")}
         </button>
       </div>
     </div>

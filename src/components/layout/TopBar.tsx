@@ -5,6 +5,8 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { LanguageToggle } from "@/components/common/LanguageSelector";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { useLocale } from "@/i18n";
+import { SidebarToggleIcon } from "./Sidebar";
 import type { UserRole } from "@pg/types";
 
 interface TopBarProps {
@@ -15,6 +17,8 @@ interface TopBarProps {
   leading?: React.ReactNode;
   searchRole?: UserRole;
   onAddProperty?: () => void;
+  isSidebarPinned?: boolean;
+  onToggleSidebarPinned?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -25,7 +29,10 @@ export const TopBar: React.FC<TopBarProps> = ({
   leading,
   searchRole,
   onAddProperty,
+  isSidebarPinned,
+  onToggleSidebarPinned,
 }) => {
+  const { t } = useLocale();
   const [pushStatus, setPushStatus] = useState<"idle" | "loading" | "subscribed" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -51,13 +58,26 @@ export const TopBar: React.FC<TopBarProps> = ({
   return (
     <header className="h-16 px-4 lg:px-8 bg-surface/90 backdrop-blur-md border-b border-hairline flex items-center justify-between sticky top-0 z-30 pt-safe transition-colors">
       <div className="flex items-center gap-3">
+        {/* Mobile menu button */}
         <button
           onClick={onOpenMobileMenu}
-          className="p-2 -ml-2 rounded-xl text-ink-muted hover:text-ink hover:bg-accent-tint lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="p-2 -ml-2 rounded-xl text-ink-muted hover:text-ink hover:bg-accent-tint lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center transition active:scale-95"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
         </button>
+
+        {/* Desktop ChatGPT sidebar toggle button */}
+        {onToggleSidebarPinned && (
+          <button
+            onClick={onToggleSidebarPinned}
+            className="hidden lg:flex p-2 -ml-2 rounded-xl text-ink-muted hover:text-ink hover:bg-accent-tint transition active:scale-95 items-center justify-center min-h-[38px] min-w-[38px]"
+            title={isSidebarPinned ? "Collapse sidebar (expand on hover)" : "Pin sidebar open"}
+            aria-label={isSidebarPinned ? "Collapse sidebar" : "Pin sidebar"}
+          >
+            <SidebarToggleIcon className="w-5 h-5" isPinned={isSidebarPinned} />
+          </button>
+        )}
         {leading}
         <div>
           <h2 className="t-h3 text-ink tracking-tight">{title}</h2>
@@ -75,10 +95,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             onClick={onAddProperty}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent-tint text-accent hover:bg-accent hover:text-white border border-accent/20 text-xs font-semibold transition active:scale-95 shadow-sm"
-            title="Add New Property with Floors & Rooms"
+            title={t("topbar.newProperty")}
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">New Property</span>
+            <span className="hidden md:inline">{t("topbar.newProperty")}</span>
           </button>
         )}
         {searchRole && <GlobalSearch role={searchRole} />}
@@ -96,16 +116,16 @@ export const TopBar: React.FC<TopBarProps> = ({
           (pushStatus === "subscribed" ? (
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-success-tint border border-success/30 text-xs font-medium text-success">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Push Active</span>
+            <span className="hidden sm:inline">{t("topbar.pushActive")}</span>
           </span>
         ) : pushStatus === "error" ? (
           <button
             onClick={handleEnablePush}
-            title={errorMessage || "Error enabling push"}
+            title={errorMessage || t("common.error")}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-danger-tint border border-danger/30 text-xs font-medium text-danger hover:bg-danger-tint/80 transition active:scale-95"
           >
             <AlertCircle className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Retry</span>
+            <span className="hidden sm:inline">{t("common.retry")}</span>
           </button>
         ) : (
           <button
@@ -115,7 +135,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           >
             <Bell className="w-3.5 h-3.5 text-accent" />
             <span className="hidden sm:inline">
-              {pushStatus === "loading" ? "Enabling..." : "Enable Push"}
+              {pushStatus === "loading" ? t("topbar.enabling") : t("topbar.enablePush")}
             </span>
           </button>
         ))}

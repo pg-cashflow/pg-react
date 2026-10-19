@@ -6,8 +6,10 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { formatDate } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 export const ReportsView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [note, setNote] = useState("");
   const [rejectId, setRejectId] = useState<string | null>(null);
@@ -85,8 +87,8 @@ export const ReportsView: React.FC = () => {
         e.preventDefault();
         const selected = rows[selectedIndex];
         if (selected && !confirmMutation.isPending) {
-          const tenantName = tenantMap.get(selected.tenant_id) || "Student";
-          if (window.confirm(`Confirm payment report for ${tenantName} (UTR: ${selected.upi_txn_id}) and verify payment status?`)) {
+          const tenantName = tenantMap.get(selected.tenant_id) || t("owner.reports.tenantFallback");
+          if (window.confirm(t("owner.reports.confirmTitle", { tenant: tenantName, utr: selected.upi_txn_id }))) {
             confirmMutation.mutate(selected.id);
           }
         }
@@ -103,28 +105,28 @@ export const ReportsView: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [rows, selectedIndex, confirmMutation, tenantMap]);
+  }, [rows, selectedIndex, confirmMutation, tenantMap, t]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <p className="text-sm text-ink-muted">Confirm a UTR only after you see it in the bank. Cash is a separate action on Dues.</p>
+        <p className="text-sm text-ink-muted">{t("owner.reports.guidance")}</p>
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface border border-hairline rounded-xl text-xs text-ink-muted">
-          <span className="font-semibold text-ink">Keyboard:</span>
+          <span className="font-semibold text-ink">{t("owner.reports.keyboardTitle")}</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">↑</kbd>
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">↓</kbd>
-            <span>Navigate</span>
+            <span>{t("owner.reports.keyNavigate")}</span>
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Enter</kbd>
-            <span>Verify</span>
+            <span>{t("owner.reports.keyVerify")}</span>
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">R</kbd>
-            <span>Reject</span>
+            <span>{t("owner.reports.keyReject")}</span>
           </span>
         </div>
       </div>
@@ -135,7 +137,7 @@ export const ReportsView: React.FC = () => {
           isError={reportsQuery.isError}
           error={reportsQuery.error as Error | null}
           isEmpty={!reportsQuery.isLoading && rows.length === 0}
-          emptyMessage="No UTR reports waiting."
+          emptyMessage={t("owner.reports.empty")}
           onRetry={() => reportsQuery.refetch()}
         >
           <div className="divide-y divide-hairline">
@@ -158,16 +160,16 @@ export const ReportsView: React.FC = () => {
                   <div className="flex justify-between items-start gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-ink">{tenantMap.get(r.tenant_id) || "Student / Tenant"}</p>
+                        <p className="font-medium text-ink">{tenantMap.get(r.tenant_id) || t("owner.reports.tenantFallback")}</p>
                         {isSelected && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-accent text-white">
-                            Active · Press Enter to verify
+                            {t("owner.reports.activeHint")}
                           </span>
                         )}
                       </div>
                       <p className="text-xs font-mono text-ink-muted">UTR: {r.upi_txn_id}</p>
                       <p className="text-xs text-ink-muted">{formatDate(r.created_at)}</p>
-                      {r.has_image && <p className="text-xs text-ink-muted">Screenshot attached</p>}
+                      {r.has_image && <p className="text-xs text-ink-muted">{t("owner.reports.screenshotAttached")}</p>}
                     </div>
                     <AmountBadge amount={r.amount} />
                   </div>
@@ -176,11 +178,11 @@ export const ReportsView: React.FC = () => {
                       disabled={confirmMutation.isPending}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (window.confirm("Confirm this UTR and match the due?")) confirmMutation.mutate(r.id);
+                        if (window.confirm(t("owner.reports.confirmMatchDue"))) confirmMutation.mutate(r.id);
                       }}
                       className="px-3.5 py-2 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success/90 active:scale-95 transition disabled:opacity-50 flex items-center gap-1.5"
                     >
-                      <span>Confirm</span>
+                      <span>{t("common.confirm")}</span>
                       {isSelected && <span className="text-[10px] opacity-80 font-mono">(Enter)</span>}
                     </button>
                     <button
@@ -190,7 +192,7 @@ export const ReportsView: React.FC = () => {
                       }}
                       className="px-3.5 py-2 rounded-xl bg-surface border border-hairline text-danger text-sm hover:bg-danger-tint active:scale-95 transition"
                     >
-                      Reject
+                      {t("common.reject")}
                     </button>
                   </div>
                   {rejectId === r.id && (
@@ -199,20 +201,20 @@ export const ReportsView: React.FC = () => {
                         value={note}
                         autoFocus
                         onChange={(e) => setNote(e.target.value)}
-                        placeholder="Reject note (optional)"
+                        placeholder={t("owner.reports.rejectNotePlaceholder")}
                         className="flex-1 px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink focus:outline-none focus:ring-2 focus:ring-danger/50"
                       />
                       <button
                         onClick={() => rejectMutation.mutate({ id: r.id, n: note })}
                         className="px-3 py-2 rounded-xl bg-danger text-white text-sm font-semibold active:scale-95 transition"
                       >
-                        Send
+                        {t("common.send")}
                       </button>
                       <button
                         onClick={() => setRejectId(null)}
                         className="px-3 py-2 rounded-xl bg-surface border border-hairline text-ink text-sm"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </button>
                     </div>
                   )}

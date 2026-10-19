@@ -11,8 +11,10 @@ import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 
 import { getTenantKYCStatus } from "@/api/kyc";
+import { useLocale } from "@/i18n";
 
 export const TenantProfileView: React.FC = () => {
+  const { t } = useLocale();
   const { logout } = useAuth();
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
   const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
@@ -32,22 +34,22 @@ export const TenantProfileView: React.FC = () => {
       }}
     >
       <div className="space-y-4 pb-4">
-        <h1 className="t-h1">Profile</h1>
+        <h1 className="t-h1">{t("tenant.profile")}</h1>
         <section className="rounded-[14px] border border-hairline bg-surface p-4">
           <div className="t-h3">{profile?.name}</div>
           <div className="t-body-sm text-ink-muted mt-1">{profile?.phone}</div>
         </section>
         <section className="rounded-[14px] border border-hairline bg-surface divide-y divide-hairline">
           <div className="flex items-center justify-between px-4 py-3">
-            <span className="t-caption text-ink-faint">Room</span>
+            <span className="t-caption text-ink-faint">{t("tenant.room")}</span>
             <span className="t-body font-medium">{profile?.room_number ?? "—"}</span>
           </div>
           <div className="flex items-center justify-between px-4 py-3">
-            <span className="t-caption text-ink-faint">Rent due day</span>
+            <span className="t-caption text-ink-faint">{t("tenant.rentDueDay")}</span>
             <span className="t-body font-medium">{profile?.due_day ?? "—"}</span>
           </div>
           <div className="flex items-center justify-between px-4 py-3">
-            <span className="t-caption text-ink-faint">KYC</span>
+            <span className="t-caption text-ink-faint">{t("tenant.kyc")}</span>
             <span
               className={`t-body font-medium flex items-center gap-1 ${
                 isVerified
@@ -59,10 +61,10 @@ export const TenantProfileView: React.FC = () => {
             >
               <BadgeCheck className="h-4 w-4" />
               {isVerified
-                ? `Verified (****${profile?.aadhaar_last4 || ""})`
+                ? t("tenant.kycVerified", { last4: profile?.aadhaar_last4 || "" })
                 : isPendingReview
-                ? "Under Review"
-                : "Verification Required"}
+                ? t("tenant.kycUnderReview")
+                : t("tenant.kycRequired")}
             </span>
           </div>
         </section>
@@ -70,30 +72,30 @@ export const TenantProfileView: React.FC = () => {
         <TenantKYCCard />
 
         <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
-          <h2 className="t-h3">Reminders & Notifications</h2>
+          <h2 className="t-h3">{t("tenant.remindersTitle")}</h2>
           <p className="t-caption text-ink-muted">
-            Receive rent due notifications and UPI payment alerts on your device.
+            {t("tenant.remindersDesc")}
           </p>
           <button
             type="button"
             onClick={async () => {
               try {
                 await subscribeToPush();
-                setMsg("Push notifications enabled");
+                setMsg(t("tenant.pushEnabled"));
               } catch (err) {
-                setMsg(err instanceof Error ? err.message : "Push registration failed");
+                setMsg(err instanceof Error ? err.message : t("tenant.pushFailed"));
               }
             }}
             className="h-11 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold hover:bg-bg transition"
           >
-            Enable rent reminders
+            {t("tenant.enableReminders")}
           </button>
           {msg && <p className="t-caption text-ink-muted">{msg}</p>}
         </section>
 
         <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
-          <h2 className="t-h3">Language / భాష / மொழி / ಭಾಷೆ</h2>
-          <p className="t-caption text-ink-muted">Choose your preferred language</p>
+          <h2 className="t-h3">{t("tenant.languageTitle")}</h2>
+          <p className="t-caption text-ink-muted">{t("tenant.languageDesc")}</p>
           <LanguageSegmentedControl />
         </section>
 
@@ -104,7 +106,7 @@ export const TenantProfileView: React.FC = () => {
           onClick={logout}
           className="w-full h-12 rounded-[10px] border border-hairline text-danger font-semibold"
         >
-          Log out
+          {t("common.logout")}
         </button>
       </div>
     </QueryState>

@@ -3,6 +3,7 @@ import { IntlProvider, useIntl } from "react-intl";
 import type { SupportedLocale } from "@pg/types";
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isSupportedLocale, type LocaleOption } from "./config";
 import { getStoredLocale, setStoredLocale } from "@/auth/storage";
+import { getAccessToken } from "@/auth/tokenStore";
 import { updateMyPreferences } from "@/api/preferences";
 import { useAuth } from "@/auth/context";
 import { queryClient } from "@/lib/queryClient";
@@ -24,7 +25,7 @@ interface LocaleContextValue {
   setLocale: (newLocale: SupportedLocale, persistServer?: boolean) => Promise<boolean>;
   locales: LocaleOption[];
   t: (key: MessageKey, values?: Record<string, any>) => string;
-  registerAuthUpdater: (updater: ((locale: SupportedLocale) => void) | null) => void;
+  registerAuthUpdater: (updater: ((locale: SupportedLocale) => void) | null, isAuthenticated?: boolean) => void;
 }
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -44,9 +45,13 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   const pendingControllerRef = useRef<AbortController | null>(null);
   const requestSeqRef = useRef<number>(0);
   const authUpdaterRef = useRef<((locale: SupportedLocale) => void) | null>(null);
+  const isAuthenticatedRef = useRef<boolean>(false);
 
-  const registerAuthUpdater = useCallback((updater: ((locale: SupportedLocale) => void) | null) => {
+  const registerAuthUpdater = useCallback((updater: ((locale: SupportedLocale) => void) | null, isAuth?: boolean) => {
     authUpdaterRef.current = updater;
+    if (isAuth !== undefined) {
+      isAuthenticatedRef.current = isAuth;
+    }
   }, []);
 
   const setLocale = useCallback(
@@ -59,7 +64,11 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
 
       // Local-only reconcile (e.g. returning user's saved DB pref winning over local cache)
       // must NEVER abort an in-flight server persist.
-      if (!persistServer) {
+      const hasAuth =
+        authUpdaterRef.current === null ||
+        isAuthenticatedRef.current ||
+        Boolean(getAccessToken());
+      if (!persistServer || !hasAuth) {
         return true;
       }
 
@@ -80,11 +89,27 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
           }
           queryClient.setQueryData(QUERY_KEYS.preferences, res);
           authUpdaterRef.current?.(res.locale);
+          return true;
         }
-        return true;
+        return false;
       } catch (err: any) {
         // Silently ignore aborted requests; warn only on genuine network/server errors
         if (!controller.signal.aborted && err?.name !== "AbortError") {
+          const is401 =
+            err?.status === 401 ||
+            err?.statusCode === 401 ||
+            err?.message?.includes("unauthorized") ||
+            err?.message?.includes("Session expired");
+
+          if (is401) {
+            try {
+              localStorage.removeItem(PENDING_LOCALE_KEY);
+            } catch {
+              // ignore
+            }
+            return false;
+          }
+
           console.warn("[i18n] Failed to persist locale preference:", err);
           try {
             localStorage.setItem(PENDING_LOCALE_KEY, newLocale);
@@ -162,12 +187,25 @@ const LocaleInternalProvider: FC<{
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 };
 
+const defaultFallbackContext: LocaleContextValue = {
+  locale: DEFAULT_LOCALE,
+  setLocale: async () => false,
+  locales: SUPPORTED_LOCALES,
+  t: (key: MessageKey, values?: Record<string, any>) => {
+    let msg = enIN[key] || key;
+    if (values) {
+      Object.entries(values).forEach(([k, v]) => {
+        msg = msg.replace(new RegExp(`\\{${k}[^}]*\\}`, "g"), String(v));
+      });
+    }
+    return msg;
+  },
+  registerAuthUpdater: () => {},
+};
+
 export function useLocale(): LocaleContextValue {
   const ctx = useContext(LocaleContext);
-  if (!ctx) {
-    throw new Error("useLocale must be used within a LocaleProvider");
-  }
-  return ctx;
+  return ctx || defaultFallbackContext;
 }
 
 /**
@@ -179,7 +217,7 @@ export function useLocale(): LocaleContextValue {
  *   automatically retries on network reconnect (online event) or tab/PWA refocus (focus event).
  */
 export const LocaleSync: FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAuthenticated, isLoading } = useAuth();
   const { locale, setLocale, registerAuthUpdater } = useLocale();
   const syncInProgressRef = useRef<boolean>(false);
   const initialReconciledUserIdRef = useRef<string | null>(null);
@@ -203,18 +241,20 @@ export const LocaleSync: FC = () => {
       if (user?.id) {
         lastConfirmedRef.current = { userId: user.id, locale: newLocale };
       }
-    });
+    }, isAuthenticated);
     return () => {
-      registerAuthUpdater(null);
+      registerAuthUpdater(null, false);
     };
-  }, [registerAuthUpdater, updateUser, user?.id]);
+  }, [registerAuthUpdater, updateUser, user?.id, isAuthenticated]);
 
   const attemptSync = useCallback(() => {
     const currentLocale = localeRef.current;
-    if (!user?.id) {
-      initialReconciledUserIdRef.current = null;
-      lastConfirmedRef.current = null;
-      syncInProgressRef.current = false;
+    if (isLoading || !isAuthenticated || !user?.id) {
+      if (!isLoading && !isAuthenticated) {
+        initialReconciledUserIdRef.current = null;
+        lastConfirmedRef.current = null;
+        syncInProgressRef.current = false;
+      }
       return;
     }
 
@@ -307,7 +347,7 @@ export const LocaleSync: FC = () => {
           syncInProgressRef.current = false;
         });
     }
-  }, [user?.id, user?.locale, user?.has_saved_preference, setLocale]);
+  }, [user?.id, user?.locale, user?.has_saved_preference, setLocale, isAuthenticated, isLoading]);
 
   useEffect(() => {
     attemptSync();

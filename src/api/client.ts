@@ -261,6 +261,10 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth" || path.startsWith("/api/auth/") || path === "/api/auth";
     if (res.status === 401 && !isAuthEndpoint) {
       const originalToken = getAccessToken();
+      const hasPriorSession = Boolean(originalToken || getStoredUser());
+      if (!hasPriorSession) {
+        throw new ApiError(401, "Session expired or unauthorized");
+      }
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
         const retryRes = await fetch(url, {

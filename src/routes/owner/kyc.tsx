@@ -22,9 +22,11 @@ import {
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import type { OwnerKYCVerificationView } from "@pg/types";
 
 export const OwnerKYCView: React.FC = () => {
+  const { t, locale } = useLocale();
   const queryClient = useQueryClient();
   const [rejectingItem, setRejectingItem] = useState<OwnerKYCVerificationView | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -84,9 +86,7 @@ export const OwnerKYCView: React.FC = () => {
           // Both failed
         }
       }
-      setPreviewError(
-        "No preview document file is currently available for this record. The document may have been submitted on an earlier version or consent was revoked."
-      );
+      setPreviewError(t("kyc.previewUnavailableDesc"));
     } finally {
       setPreviewLoading(false);
     }
@@ -230,7 +230,7 @@ export const OwnerKYCView: React.FC = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 t-caption text-ink-muted">
                     <div>
                       <span className="text-ink-faint block">Submitted</span>
-                      <span>{formatDate(item.created_at)}</span>
+                      <span>{formatDate(item.created_at, locale)}</span>
                     </div>
                     <div>
                       <span className="text-ink-faint block">Method</span>
@@ -294,15 +294,15 @@ export const OwnerKYCView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-accent" />
-                  <h3 className="t-h3">ID Document Preview</h3>
+                  <h3 className="t-h3">{t("kyc.modalTitle")}</h3>
                 </div>
                 <div className="flex items-center gap-2 mt-1 t-caption text-ink-muted flex-wrap">
                   <span className="font-medium text-ink">
-                    {previewItem.tenant_name || "Tenant"}
+                    {previewItem.tenant_name || t("tenant.profile")}
                   </span>
                   {previewItem.room_number && (
                     <span className="px-1.5 py-0.5 rounded bg-bg border border-hairline font-mono text-xs">
-                      Room {previewItem.room_number}
+                      {t("tenant.room")} {previewItem.room_number}
                     </span>
                   )}
                   {previewItem.document_name && (
@@ -327,14 +327,14 @@ export const OwnerKYCView: React.FC = () => {
               {previewLoading ? (
                 <div className="flex flex-col items-center gap-3 py-12 text-ink-muted">
                   <Loader2 className="w-8 h-8 animate-spin text-accent" />
-                  <span className="t-body-sm">Loading document preview...</span>
+                  <span className="t-body-sm">{t("kyc.loadingPreview")}</span>
                 </div>
               ) : previewError ? (
                 <div className="max-w-md text-center p-6 space-y-3">
                   <div className="w-12 h-12 rounded-full bg-warning-tint text-warning flex items-center justify-center mx-auto">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
-                  <h4 className="t-body font-semibold text-ink">Document Preview Unavailable</h4>
+                  <h4 className="t-body font-semibold text-ink">{t("kyc.previewUnavailable")}</h4>
                   <p className="t-caption text-ink-muted">{previewError}</p>
                 </div>
               ) : previewBlobUrl ? (
@@ -365,7 +365,7 @@ export const OwnerKYCView: React.FC = () => {
                     className="inline-flex items-center gap-1.5 text-accent hover:underline t-caption font-semibold"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Open in new tab
+                    {t("kyc.openNewTab")}
                   </a>
                 )}
               </div>
@@ -380,7 +380,7 @@ export const OwnerKYCView: React.FC = () => {
                   className="h-9 px-3 rounded-[10px] border border-hairline text-danger t-caption font-semibold hover:bg-bg transition flex items-center gap-1.5"
                 >
                   <XCircle className="w-4 h-4" />
-                  Reject
+                  {t("kyc.reject")}
                 </button>
                 <button
                   type="button"
@@ -396,7 +396,7 @@ export const OwnerKYCView: React.FC = () => {
                   ) : (
                     <>
                       <CheckCircle className="w-4 h-4" />
-                      Approve
+                      {t("kyc.approve")}
                     </>
                   )}
                 </button>

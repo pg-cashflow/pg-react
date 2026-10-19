@@ -5,7 +5,7 @@ import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
 import { Building2, ArrowRight, Phone, AlertCircle, Loader2, Sparkles, X } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import AuthLayout from "@/components/layout/AuthLayout";
-
+import { useLocale } from "@/i18n";
 import { OtpInput } from "@/components/shared/OtpInput";
 
 const GoogleMark: React.FC = () => (
@@ -30,6 +30,7 @@ const GoogleMark: React.FC = () => (
 );
 
 export const LoginPage: React.FC = () => {
+  const { t } = useLocale();
   const { sendPhoneOtp, confirmPhoneOtp, loginWithGoogle } = useAuth();
   const [invite, setInvite] = useState<string | null>(() => getInviteCode() || null);
   const [step, setStep] = useState<"phone" | "otp">("phone");
@@ -55,19 +56,19 @@ export const LoginPage: React.FC = () => {
     const handleUnauthorized = (e: Event) => {
       const custom = e as CustomEvent<{ reason?: string }>;
       if (custom.detail?.reason === "biometric_failed") {
-        setSessionNotice("Face ID didn't match. Try again or sign in with your phone.");
+        setSessionNotice(t("auth.biometricFailed"));
       } else if (
         custom.detail?.reason === "access_revoked" ||
         custom.detail?.reason === "session_ended"
       ) {
-        setSessionNotice("Your session ended. Sign in again to continue.");
+        setSessionNotice(t("auth.sessionExpired"));
       }
     };
     window.addEventListener("pg:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);
-  }, []);
+  }, [t]);
 
-  const phonePrompt = "Enter your phone number to continue";
+  const phonePrompt = t("auth.loginSubtitle");
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,20 +147,20 @@ export const LoginPage: React.FC = () => {
 
   const subtitle = invite ? (
     <span className="inline-flex items-center gap-1.5 flex-wrap justify-center">
-      <span>Joining with invite <strong className="font-mono text-accent">{invite}</strong></span>
+      <span>{t("auth.inviteCodeNotice", { code: invite })}</span>
       <button
         type="button"
         onClick={handleClearInvite}
         className="inline-flex items-center gap-0.5 text-xs text-ink-muted hover:text-danger transition underline cursor-pointer"
         title="Remove invite code"
       >
-        <X className="w-3 h-3" /> Clear
+        <X className="w-3 h-3" /> {t("auth.clearInvite")}
       </button>
     </span>
   ) : step === "phone" ? (
     phonePrompt
   ) : (
-    `Enter the 6-digit OTP sent to ${phone}`
+    t("auth.codeSentTo", { phone })
   );
 
   return (
@@ -169,7 +170,7 @@ export const LoginPage: React.FC = () => {
       </div>
       <AuthLayout
         icon={Building2}
-        title="Sign in"
+        title={t("auth.loginTitle")}
         subtitle={subtitle}
         footer={
           invite ? (
@@ -178,7 +179,7 @@ export const LoginPage: React.FC = () => {
               onClick={handleClearInvite}
               className="text-xs text-ink-muted hover:text-ink transition underline cursor-pointer"
             >
-              I am an owner — sign in without invite
+              {t("auth.clearInvite")}
             </button>
           ) : undefined
         }
@@ -273,7 +274,7 @@ export const LoginPage: React.FC = () => {
           <form key="phone-form" onSubmit={handleSendOtp} className="space-y-4 animate-step-in">
             <div>
               <label className="block text-xs font-medium text-ink-muted mb-1.5 uppercase tracking-wider">
-                Phone Number
+                {t("auth.phoneLabel")}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-faint">
@@ -289,7 +290,7 @@ export const LoginPage: React.FC = () => {
                 />
               </div>
               <p className="text-[11px] text-ink-faint mt-1.5">
-                Use +91 format or enter a 10-digit Indian mobile number
+                {t("auth.phoneHelper")}
               </p>
             </div>
 
@@ -302,7 +303,7 @@ export const LoginPage: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Send OTP
+                  {t("auth.sendOtp")}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -310,7 +311,7 @@ export const LoginPage: React.FC = () => {
 
             <div className="flex items-center gap-3 py-1">
               <div className="h-px flex-1 bg-hairline" />
-              <span className="text-[11px] uppercase tracking-wider text-ink-faint">or</span>
+              <span className="text-[11px] uppercase tracking-wider text-ink-faint">{t("auth.or")}</span>
               <div className="h-px flex-1 bg-hairline" />
             </div>
 
@@ -321,7 +322,7 @@ export const LoginPage: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-surface text-ink font-semibold text-sm border border-hairline hover:bg-accent-tint transition disabled:opacity-50"
             >
               <GoogleMark />
-              Continue with Google
+              {t("auth.googleSignIn")}
             </button>
 
             <div className="pt-2 text-center">
@@ -330,11 +331,11 @@ export const LoginPage: React.FC = () => {
                 onClick={() => setShowLostPhoneHelp((prev) => !prev)}
                 className="text-xs text-ink-muted hover:text-ink transition underline"
               >
-                Lost access to this number?
+                {t("auth.cantAccessPhone")}
               </button>
               {showLostPhoneHelp && (
                 <div className="mt-2 p-3 rounded-xl bg-surface border border-hairline text-xs text-ink-muted leading-relaxed text-left animate-step-in">
-                  Contact your PG owner directly — they can update your number from the Tenants list.
+                  {t("auth.cantAccessPhoneDesc")}
                 </div>
               )}
             </div>
@@ -343,7 +344,7 @@ export const LoginPage: React.FC = () => {
           <form key="otp-form" onSubmit={(e) => void handleVerifyOtp(e)} className="space-y-4 animate-step-in">
             <div>
               <label className="block text-xs font-medium text-ink-muted mb-2 uppercase tracking-wider text-center">
-                Verification Code
+                {t("auth.enterOtp")}
               </label>
               <OtpInput
                 value={otp}
@@ -364,7 +365,7 @@ export const LoginPage: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Verify & Continue
+                  {t("auth.verifyOtp")}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -377,8 +378,8 @@ export const LoginPage: React.FC = () => {
               className="w-full text-center text-xs text-ink-muted hover:text-ink transition py-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {resendCooldown > 0
-                ? `Resend OTP (0:${resendCooldown < 10 ? `0${resendCooldown}` : resendCooldown})`
-                : "Resend OTP"}
+                ? t("auth.resendIn", { seconds: resendCooldown })
+                : t("auth.resendOtp")}
             </button>
 
             <button
@@ -392,7 +393,7 @@ export const LoginPage: React.FC = () => {
               }}
               className="w-full text-center text-xs text-ink-muted hover:text-ink transition py-1"
             >
-              Change phone number
+              {t("auth.changePhone")}
             </button>
           </form>
         )}

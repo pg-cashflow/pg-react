@@ -5,8 +5,10 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate, formatMatchedBy } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 export const TenantPaymentsView: React.FC = () => {
+  const { t } = useLocale();
   const { data: payments = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.tenantPayments,
     queryFn: getMyPayments,
@@ -24,8 +26,8 @@ export const TenantPaymentsView: React.FC = () => {
         isError={isError}
         error={error as Error | null}
         isEmpty={!isLoading && !isError && sorted.length === 0}
-        loadingMessage="Loading payments..."
-        emptyMessage="No payments yet."
+        loadingMessage={t("tenant.loadingPayments")}
+        emptyMessage={t("tenant.noPayments")}
         onRetry={() => refetch()}
       >
         <div className="divide-y divide-hairline">

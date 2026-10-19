@@ -1,5 +1,7 @@
 import React from "react";
 import { LayoutDashboard, Receipt, CreditCard, Users, MoreHorizontal } from "lucide-react";
+import { useLocale } from "@/i18n";
+import type { MessageKey } from "@/i18n/messages/en-IN";
 
 interface BottomNavProps {
   currentTab: string;
@@ -12,11 +14,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onSelectTab,
   onOpenMore,
 }) => {
-  const tabs = [
-    { id: "dashboard", label: "Home", icon: LayoutDashboard },
-    { id: "dues", label: "Dues", icon: Receipt },
-    { id: "reports", label: "UTRs", icon: CreditCard },
-    { id: "tenants", label: "Tenants", icon: Users },
+  const { t } = useLocale();
+  const tabs: Array<{ id: string; key: MessageKey; icon: any }> = [
+    { id: "dashboard", key: "nav.home", icon: LayoutDashboard },
+    { id: "dues", key: "nav.dues", icon: Receipt },
+    { id: "reports", key: "nav.reports", icon: CreditCard },
+    { id: "tenants", key: "nav.tenants", icon: Users },
   ];
 
   return (
@@ -42,7 +45,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 tracking-tight">{tab.label}</span>
+              <span className="text-[10px] mt-0.5 tracking-tight">{t(tab.key)}</span>
             </button>
           );
         })}

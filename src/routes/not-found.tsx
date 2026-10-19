@@ -3,9 +3,11 @@ import { MapPinOff, ArrowLeft, Home } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/auth/context";
 import { homeForRole } from "@/auth/roles";
+import { useLocale } from "@/i18n";
 
 export const NotFoundView: React.FC = () => {
   const { isAuthenticated, role, isPendingJoin } = useAuth();
+  const { t } = useLocale();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const homeDest = isAuthenticated ? homeForRole(role, isPendingJoin) : "/";
 
@@ -16,9 +18,9 @@ export const NotFoundView: React.FC = () => {
           <MapPinOff className="h-7 w-7" />
         </div>
         <div className="t-display-num text-ink-faint mt-6">404</div>
-        <h1 className="t-h2 mt-2">This page isn't on the ledger</h1>
+        <h1 className="t-h2 mt-2">{t("common.notFoundTitle")}</h1>
         <p className="t-body-sm text-ink-muted mt-2 max-w-sm mx-auto">
-          We couldn't find <span className="font-mono text-ink text-xs bg-surface px-1.5 py-0.5 rounded border border-hairline">{path}</span> in PG Cashflow.
+          {t("common.notFoundDescWithPath", { path })}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
@@ -27,7 +29,7 @@ export const NotFoundView: React.FC = () => {
             className="w-full sm:w-auto inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-6 font-semibold bg-accent text-white hover:bg-accent/90 transition shadow-sm"
           >
             <Home className="w-4 h-4" />
-            Go to {isAuthenticated ? "Dashboard" : "Home"}
+            {isAuthenticated ? t("common.goToDashboard") : t("common.goToHome")}
           </Link>
           <button
             type="button"
@@ -35,7 +37,7 @@ export const NotFoundView: React.FC = () => {
             className="w-full sm:w-auto inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-5 font-semibold border border-hairline bg-surface text-ink hover:bg-bg transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            Go back
+            {t("common.goBack")}
           </button>
         </div>
       </div>

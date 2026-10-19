@@ -12,6 +12,7 @@ import { flushSync } from "react-dom";
 import type { SupportedTheme } from "@pg/types";
 import { updateMyPreferences } from "@/api/preferences";
 import { useAuth } from "@/auth/context";
+import { getAccessToken } from "@/auth/tokenStore";
 import { queryClient } from "@/lib/queryClient";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -53,7 +54,7 @@ export interface ThemeContextType {
   resolvedTheme: ResolvedTheme;
   setTheme: (t: Theme, opts?: { origin?: ThemeChangeOrigin; persistServer?: boolean }) => Promise<boolean>;
   cycleTheme: (origin?: ThemeChangeOrigin) => void;
-  registerAuthUpdater: (updater: ((theme: Theme) => void) | null) => void;
+  registerAuthUpdater: (updater: ((theme: Theme) => void) | null, isAuthenticated?: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
@@ -69,9 +70,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const pendingControllerRef = useRef<AbortController | null>(null);
   const requestSeqRef = useRef(0);
   const authUpdaterRef = useRef<((theme: Theme) => void) | null>(null);
+  const isAuthenticatedRef = useRef<boolean>(false);
 
-  const registerAuthUpdater = useCallback((updater: ((theme: Theme) => void) | null) => {
+  const registerAuthUpdater = useCallback((updater: ((theme: Theme) => void) | null, isAuth?: boolean) => {
     authUpdaterRef.current = updater;
+    if (isAuth !== undefined) {
+      isAuthenticatedRef.current = isAuth;
+    }
   }, []);
 
   const applyWithSingleAnimation = useCallback((apply: () => void, origin?: ThemeChangeOrigin) => {
@@ -156,7 +161,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setThemeState(t);
       }, opts?.origin);
 
-      if (!persistServer) {
+      const hasAuth =
+        authUpdaterRef.current === null ||
+        isAuthenticatedRef.current ||
+        Boolean(getAccessToken());
+      if (!persistServer || !hasAuth) {
         return true;
       }
 
@@ -174,10 +183,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           }
           queryClient.setQueryData(QUERY_KEYS.preferences, res);
           authUpdaterRef.current?.((res.theme as Theme) ?? "system");
+          return true;
         }
-        return true;
+        return false;
       } catch (err: any) {
         if (!controller.signal.aborted && err?.name !== "AbortError") {
+          const is401 =
+            err?.status === 401 ||
+            err?.statusCode === 401 ||
+            err?.message?.includes("unauthorized") ||
+            err?.message?.includes("Session expired");
+
+          if (is401) {
+            try {
+              localStorage.removeItem(PENDING_KEY);
+            } catch {
+              // ignore
+            }
+            return false;
+          }
+
           console.warn("[theme] Failed to persist theme preference:", err);
           try {
             localStorage.setItem(PENDING_KEY, t);
@@ -232,7 +257,7 @@ export function useTheme(): ThemeContextType {
 }
 
 export const ThemeSync: FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAuthenticated, isLoading } = useAuth();
   const { theme, setTheme, registerAuthUpdater } = useTheme();
   const syncInProgressRef = useRef(false);
   const initialReconciledUserIdRef = useRef<string | null>(null);
@@ -254,18 +279,20 @@ export const ThemeSync: FC = () => {
       if (user?.id) {
         lastConfirmedRef.current = { userId: user.id, theme: newTheme };
       }
-    });
+    }, isAuthenticated);
     return () => {
-      registerAuthUpdater(null);
+      registerAuthUpdater(null, false);
     };
-  }, [registerAuthUpdater, updateUser, user?.id]);
+  }, [registerAuthUpdater, updateUser, user?.id, isAuthenticated]);
 
   const attemptSync = useCallback(() => {
     const currentTheme = themeRef.current;
-    if (!user?.id) {
-      initialReconciledUserIdRef.current = null;
-      lastConfirmedRef.current = null;
-      syncInProgressRef.current = false;
+    if (isLoading || !isAuthenticated || !user?.id) {
+      if (!isLoading && !isAuthenticated) {
+        initialReconciledUserIdRef.current = null;
+        lastConfirmedRef.current = null;
+        syncInProgressRef.current = false;
+      }
       return;
     }
 
@@ -357,7 +384,7 @@ export const ThemeSync: FC = () => {
           syncInProgressRef.current = false;
         });
     }
-  }, [user?.id, user?.theme, user?.has_saved_theme, setTheme]);
+  }, [user?.id, user?.theme, user?.has_saved_theme, setTheme, isAuthenticated, isLoading]);
 
   useEffect(() => {
     attemptSync();

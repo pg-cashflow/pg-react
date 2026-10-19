@@ -18,8 +18,10 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Search, Loader2, Phone, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
 import { getOwnerTenantKYC } from "@/api/kyc";
 import type { Tenant } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 const IdPhotoPreview: React.FC<{ tenantId: string }> = ({ tenantId }) => {
+  const { t } = useLocale();
   const [url, setUrl] = useState<string | null>(null);
   React.useEffect(() => {
     let revoked: string | null = null;
@@ -33,25 +35,26 @@ const IdPhotoPreview: React.FC<{ tenantId: string }> = ({ tenantId }) => {
       if (revoked) URL.revokeObjectURL(revoked);
     };
   }, [tenantId]);
-  if (!url) return <p className="text-ink-muted">ID photo on file</p>;
+  if (!url) return <p className="text-ink-muted">{t("owner.tenants.idPhotoOnFile")}</p>;
   return <img src={url} alt="ID photo" className="mt-2 max-h-40 rounded-lg object-contain bg-surface" />;
 };
 
 const TenantKYCStatusBadge: React.FC<{ tenantId: string }> = ({ tenantId }) => {
+  const { t } = useLocale();
   const { data: kyc, isLoading } = useQuery({
     queryKey: QUERY_KEYS.ownerTenantKYC(tenantId),
     queryFn: () => getOwnerTenantKYC(tenantId),
     staleTime: 60000,
   });
 
-  if (isLoading) return <span className="text-ink-faint text-xs">Checking KYC...</span>;
-  if (!kyc || !kyc.status) return <span className="text-ink-faint text-xs">Unverified</span>;
+  if (isLoading) return <span className="text-ink-faint text-xs">{t("owner.tenants.checkingKYC")}</span>;
+  if (!kyc || !kyc.status) return <span className="text-ink-faint text-xs">{t("owner.tenants.unverified")}</span>;
 
   if (kyc.status === "verified") {
     return (
       <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
         <ShieldCheck className="w-3.5 h-3.5" />
-        Verified {kyc.masked_uid ? `(**** ${kyc.masked_uid})` : ""}
+        {t("owner.tenants.verified", { details: kyc.masked_uid ? `(**** ${kyc.masked_uid})` : "" })}
       </span>
     );
   }
@@ -59,7 +62,7 @@ const TenantKYCStatusBadge: React.FC<{ tenantId: string }> = ({ tenantId }) => {
     return (
       <span className="inline-flex items-center gap-1 text-xs font-semibold text-warning">
         <Clock className="w-3.5 h-3.5" />
-        Pending Review
+        {t("owner.tenants.pendingReview")}
       </span>
     );
   }
@@ -67,7 +70,7 @@ const TenantKYCStatusBadge: React.FC<{ tenantId: string }> = ({ tenantId }) => {
     return (
       <span className="inline-flex items-center gap-1 text-xs font-semibold text-danger">
         <AlertTriangle className="w-3.5 h-3.5" />
-        Rejected
+        {t("owner.tenants.rejected")}
       </span>
     );
   }
@@ -75,6 +78,7 @@ const TenantKYCStatusBadge: React.FC<{ tenantId: string }> = ({ tenantId }) => {
 };
 
 export const TenantsView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [selected, setSelected] = useState<Tenant | null>(null);
@@ -123,12 +127,12 @@ export const TenantsView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-ink-muted">Walk-in create is under More. This list is for occupancy changes.</p>
+      <p className="text-xs text-ink-muted">{t("owner.tenants.subtitle")}</p>
       <div className="relative max-w-md">
         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
         <input
           type="text"
-          placeholder="Search by name, room, or phone..."
+          placeholder={t("owner.tenants.searchPlaceholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-2 bg-surface border border-hairline rounded-xl text-ink placeholder:text-ink-muted text-sm"
@@ -147,42 +151,42 @@ export const TenantsView: React.FC = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline">
                 <tr>
-                  <th className="px-6 py-3.5">Name</th>
-                  <th className="px-6 py-3.5">Phone</th>
-                  <th className="px-6 py-3.5">Room</th>
-                  <th className="px-6 py-3.5">Rent</th>
-                  <th className="px-6 py-3.5">Due Day</th>
-                  <th className="px-6 py-3.5">Status</th>
+                  <th className="px-6 py-3.5">{t("owner.tenants.colName")}</th>
+                  <th className="px-6 py-3.5">{t("owner.tenants.colPhone")}</th>
+                  <th className="px-6 py-3.5">{t("owner.tenants.colRoom")}</th>
+                  <th className="px-6 py-3.5">{t("owner.tenants.colRent")}</th>
+                  <th className="px-6 py-3.5">{t("owner.tenants.colDueDay")}</th>
+                  <th className="px-6 py-3.5">{t("owner.tenants.colStatus")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
-                {filteredTenants.map((t) => (
+                {filteredTenants.map((tItem) => (
                   <tr
-                    key={t.id}
+                    key={tItem.id}
                     className="hover:bg-accent-tint cursor-pointer"
-                    onClick={() => open(t)}
+                    onClick={() => open(tItem)}
                   >
-                    <td className="px-6 py-4 font-medium">{t.name}</td>
-                    <td className="px-6 py-4 font-mono text-xs">{t.phone || "cash only"}</td>
-                    <td className="px-6 py-4">{t.room_number || "—"}</td>
-                    <td className="px-6 py-4">{formatPaise(t.rent_amount)}</td>
-                    <td className="px-6 py-4">{t.due_day != null ? `Day ${t.due_day}` : "—"}</td>
+                    <td className="px-6 py-4 font-medium">{tItem.name}</td>
+                    <td className="px-6 py-4 font-mono text-xs">{tItem.phone || t("owner.tenants.cashOnly")}</td>
+                    <td className="px-6 py-4">{tItem.room_number || "—"}</td>
+                    <td className="px-6 py-4">{formatPaise(tItem.rent_amount)}</td>
+                    <td className="px-6 py-4">{tItem.due_day != null ? t("owner.tenants.dayPrefix", { day: tItem.due_day }) : "—"}</td>
                     <td className="px-6 py-4 text-xs">
-                      {t.status === "active" ? (
+                      {tItem.status === "active" ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
-                          Active
+                          {t("common.active")}
                         </span>
-                      ) : t.status === "pending_allocation" ? (
+                      ) : tItem.status === "pending_allocation" ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
-                          Awaiting Room
+                          {t("owner.tenants.awaitingRoom")}
                         </span>
-                      ) : t.status === "vacated" ? (
+                      ) : tItem.status === "vacated" ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline">
-                          Vacated
+                          {t("common.vacated")}
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg text-ink border border-hairline capitalize">
-                          {t.status}
+                          {tItem.status}
                         </span>
                       )}
                     </td>

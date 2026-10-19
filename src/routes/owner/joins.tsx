@@ -7,8 +7,10 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate, rupeesToPaise } from "@/lib/utils";
 import type { JoinRequest } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 export const JoinsView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [active, setActive] = useState<JoinRequest | null>(null);
   const [room, setRoom] = useState("");
@@ -99,13 +101,12 @@ export const JoinsView: React.FC = () => {
   return (
     <div className="space-y-8">
       <p className="text-sm text-ink-muted">
-        Invite code already authorized these people. Assign room, rent, and due day here — pay unlocks after
-        assignment. Reject only incomplete profiles that never finished onboarding.
+        {t("owner.joins.guidance")}
       </p>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-ink uppercase tracking-wider">
-          Awaiting room & rent
+          {t("owner.joins.awaitingTitle")}
         </h2>
         <div className="bg-surface border border-hairline rounded-2xl overflow-hidden">
           <QueryState
@@ -113,7 +114,7 @@ export const JoinsView: React.FC = () => {
             isError={isError}
             error={err}
             isEmpty={!isLoading && awaiting.length === 0}
-            emptyMessage="No tenants waiting for room/rent assignment."
+            emptyMessage={t("owner.joins.emptyAwaiting")}
             onRetry={() => {
               awaitingQuery.refetch();
               incompleteQuery.refetch();
@@ -127,26 +128,26 @@ export const JoinsView: React.FC = () => {
                     <p className="font-medium text-ink">{j.name || "Unnamed"}</p>
                     <p className="text-xs text-ink-muted font-mono">{j.phone}</p>
                     {j.parent_name && (
-                      <p className="text-xs text-ink-muted">Parent: {j.parent_name}</p>
+                      <p className="text-xs text-ink-muted">{t("owner.joins.parent", { name: j.parent_name })}</p>
                     )}
                     {j.emergency_phone && (
-                      <p className="text-xs text-ink-muted font-mono">Emergency: {j.emergency_phone}</p>
+                      <p className="text-xs text-ink-muted font-mono">{t("owner.joins.emergency", { phone: j.emergency_phone })}</p>
                     )}
                     {j.permanent_address && (
-                      <p className="text-xs text-ink-muted truncate">Home: {j.permanent_address}</p>
+                      <p className="text-xs text-ink-muted truncate">{t("owner.joins.home", { address: j.permanent_address })}</p>
                     )}
                     {j.current_address && (
-                      <p className="text-xs text-ink-muted truncate">Current: {j.current_address}</p>
+                      <p className="text-xs text-ink-muted truncate">{t("owner.joins.current", { address: j.current_address })}</p>
                     )}
                     {j.joined_on && (
-                      <p className="text-xs text-ink-muted">Joined {formatDate(j.joined_on)}</p>
+                      <p className="text-xs text-ink-muted">{t("owner.joins.joinedOn", { date: formatDate(j.joined_on) })}</p>
                     )}
                   </div>
                   <button
                     onClick={() => void openAssign(j)}
                     className="px-3 py-2 rounded-xl bg-accent text-white text-sm font-semibold shrink-0"
                   >
-                    Assign room & rent
+                    {t("owner.joins.assignButton")}
                   </button>
                 </div>
               ))}
@@ -158,7 +159,7 @@ export const JoinsView: React.FC = () => {
       {incomplete.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-ink uppercase tracking-wider">
-            Incomplete profiles
+            {t("owner.joins.incompleteTitle")}
           </h2>
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden divide-y divide-hairline">
             {incomplete.map((j) => (
@@ -170,11 +171,11 @@ export const JoinsView: React.FC = () => {
                 </div>
                 <button
                   onClick={() => {
-                    if (window.confirm(`Reject ${j.name || j.phone}?`)) rejectMutation.mutate(j.id);
+                    if (window.confirm(t("owner.joins.rejectConfirm", { name: j.name || j.phone }))) rejectMutation.mutate(j.id);
                   }}
                   className="px-3 py-2 rounded-xl bg-surface text-danger text-sm"
                 >
-                  Reject
+                  {t("common.reject")}
                 </button>
               </div>
             ))}
@@ -192,14 +193,14 @@ export const JoinsView: React.FC = () => {
             className="bg-surface border border-hairline rounded-2xl w-full max-w-md p-6 space-y-3 my-8"
           >
             <h3 className="text-lg font-bold text-ink">
-              Assign terms — {active.name || active.phone}
+              {t("owner.joins.modalTitle", { name: active.name || active.phone })}
             </h3>
             {error && <p className="text-xs text-danger">{error}</p>}
             <div className="text-xs text-ink-muted space-y-1 rounded-xl bg-bg p-3">
-              {active.parent_name && <p>Parent: {active.parent_name}</p>}
-              {active.emergency_phone && <p className="font-mono">Emergency: {active.emergency_phone}</p>}
-              {active.permanent_address && <p>Home: {active.permanent_address}</p>}
-              {active.current_address && <p>Current: {active.current_address}</p>}
+              {active.parent_name && <p>{t("owner.joins.parent", { name: active.parent_name })}</p>}
+              {active.emergency_phone && <p className="font-mono">{t("owner.joins.emergency", { phone: active.emergency_phone })}</p>}
+              {active.permanent_address && <p>{t("owner.joins.home", { address: active.permanent_address })}</p>}
+              {active.current_address && <p>{t("owner.joins.current", { address: active.current_address })}</p>}
             </div>
             {photoUrl && (
               <img src={photoUrl} alt="ID photo" className="w-full max-h-48 object-contain rounded-xl bg-surface" />
@@ -207,13 +208,13 @@ export const JoinsView: React.FC = () => {
             <input
               value={room}
               onChange={(e) => setRoom(e.target.value)}
-              placeholder="Room number"
+              placeholder={t("owner.joins.roomPlaceholder")}
               className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <input
               value={rent}
               onChange={(e) => setRent(e.target.value)}
-              placeholder="Monthly rent (₹)"
+              placeholder={t("owner.joins.rentPlaceholder")}
               type="number"
               min={1}
               required
@@ -231,7 +232,7 @@ export const JoinsView: React.FC = () => {
             <input
               value={deposit}
               onChange={(e) => setDeposit(e.target.value)}
-              placeholder="Deposit (₹, optional — defaults to rent)"
+              placeholder={t("owner.joins.depositPlaceholder")}
               type="number"
               className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
@@ -245,7 +246,7 @@ export const JoinsView: React.FC = () => {
                 }}
                 className="px-3 py-2 text-ink-muted"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -253,7 +254,7 @@ export const JoinsView: React.FC = () => {
                 className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-50"
               >
                 {activateMutation.isPending && <Loader2 className="w-4 h-4 animate-spin inline mr-1" />}
-                Confirm assignment
+                {t("owner.joins.confirmAssignment")}
               </button>
             </div>
           </form>

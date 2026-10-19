@@ -32,7 +32,7 @@ interface DashboardProps {
 }
 
 export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const tenantsQuery = useQuery({ queryKey: QUERY_KEYS.tenants, queryFn: getTenants });
   const duesQuery = useQuery({
     queryKey: QUERY_KEYS.dues(),
@@ -99,7 +99,7 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
         paymentsQuery.refetch();
         reconciliationQuery.refetch();
       }}
-      loadingMessage="Loading dashboard..."
+      loadingMessage={t("common.loading")}
     >
       <div className="space-y-6">
         <button
@@ -108,9 +108,9 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
           className="w-full text-left rounded-[14px] border border-hairline bg-surface px-5 py-4 flex items-center justify-between"
         >
           <div>
-            <div className="t-h3">Rent reminders</div>
+            <div className="t-h3">{t("dashboard.rentReminders")}</div>
             <p className="t-body-sm text-ink-muted mt-1">
-              Open dues are messaged three days before the due date. Send now from the reminders ledger.
+              {t("dashboard.rentRemindersDesc")}
             </p>
           </div>
           <ArrowUpRight className="w-4 h-4 text-accent shrink-0" />
@@ -118,16 +118,16 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-ink-muted uppercase">Rent Collected</span>
+              <span className="text-xs font-semibold text-ink-muted uppercase">{t("dashboard.rentCollected")}</span>
               <TrendingUp className="w-5 h-5 text-success" />
             </div>
             <AmountBadge amount={summary?.rent_collected_paise ?? 0} variant="success" />
-            <p className="text-xs text-ink-muted mt-1">Period {summary?.period ?? "—"}</p>
+            <p className="text-xs text-ink-muted mt-1">{t("dashboard.period", { period: summary?.period ?? "—" })}</p>
           </div>
 
           <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-ink-muted uppercase">Outstanding</span>
+              <span className="text-xs font-semibold text-ink-muted uppercase">{t("dashboard.outstanding")}</span>
               <Clock className="w-5 h-5 text-accent" />
             </div>
             <AmountBadge amount={summary?.outstanding_paise ?? 0} variant="warning" />
@@ -136,16 +136,16 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
 
           <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-ink-muted uppercase">Overdue</span>
+              <span className="text-xs font-semibold text-ink-muted uppercase">{t("dashboard.overdue")}</span>
               <AlertTriangle className="w-5 h-5 text-danger" />
             </div>
             <AmountBadge amount={totalOverduePaise} variant="danger" />
-            <p className="text-xs text-ink-muted mt-1">{overdueCount} overdue dues</p>
+            <p className="text-xs text-ink-muted mt-1">{t("dashboard.overdueCount", { count: overdueCount })}</p>
           </div>
 
           <div className="bg-surface border border-hairline rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-ink-muted uppercase">Active Tenants</span>
+              <span className="text-xs font-semibold text-ink-muted uppercase">{t("dashboard.activeTenants")}</span>
               <Users className="w-5 h-5 text-accent" />
             </div>
             <div className="t-display-num text-ink">{activeTenants.length}</div>
@@ -157,21 +157,21 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-ink flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-accent" />
-                Latest Dues
+                {t("dashboard.latestDues")}
               </h3>
               <button onClick={() => onNavigate("dues")} className="text-xs text-accent hover:underline flex items-center gap-1">
-                View All <ArrowUpRight className="w-3.5 h-3.5" />
+                {t("dashboard.viewAll")} <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
             {recentDues.length === 0 ? (
-              <p className="py-8 text-center text-xs text-ink-muted">No dues yet.</p>
+              <p className="py-8 text-center text-xs text-ink-muted">{t("dashboard.noPayments")}</p>
             ) : (
               <div className="divide-y divide-hairline">
                 {recentDues.map((due) => (
                   <div key={due.id} className="py-3 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-ink">{tenantMap.get(due.tenant_id) || "Tenant"}</p>
-                      <p className="text-xs text-ink-muted">{due.due_code} · Due {formatDate(due.due_date)}</p>
+                      <p className="text-sm font-medium text-ink">{tenantMap.get(due.tenant_id) || t("tenant.profile")}</p>
+                      <p className="text-xs text-ink-muted">{due.due_code} · {t("dashboard.dueOn", { date: formatDate(due.due_date, locale) })}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <AmountBadge amount={due.amount} />
@@ -187,22 +187,22 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-ink flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-success" />
-                Recent Payments
+                {t("dashboard.recentPayments")}
               </h3>
               <button onClick={() => onNavigate("payments")} className="text-xs text-accent hover:underline flex items-center gap-1">
-                View All <ArrowUpRight className="w-3.5 h-3.5" />
+                {t("dashboard.viewAll")} <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
             {recentPayments.length === 0 ? (
-              <p className="py-8 text-center text-xs text-ink-muted">No payments yet.</p>
+              <p className="py-8 text-center text-xs text-ink-muted">{t("dashboard.noPayments")}</p>
             ) : (
               <div className="divide-y divide-hairline">
                 {recentPayments.map((p) => (
                   <div key={p.id} className="py-3 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-ink">{tenantMap.get(p.tenant_id) || "Tenant"}</p>
+                      <p className="text-sm font-medium text-ink">{tenantMap.get(p.tenant_id) || t("tenant.profile")}</p>
                       <p className="text-xs text-ink-muted">
-                        {formatDate(p.matched_at)} · {formatMatchedBy(p.matched_by)}
+                        {formatDate(p.matched_at, locale)} · {formatMatchedBy(p.matched_by)}
                         {p.upi_txn_id ? ` (${p.upi_txn_id})` : ""}
                       </p>
                     </div>

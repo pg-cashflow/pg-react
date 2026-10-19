@@ -9,30 +9,32 @@ import { getProperties } from "@/api/properties";
 import { getReconciliation } from "@/api/payments";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
+import { useLocale } from "@/i18n";
+import type { MessageKey } from "@/i18n/messages/en-IN";
 
-const TITLES: Record<string, string> = {
-  "/owner/joins": "Join requests",
-  "/owner/join-requests": "Join requests",
-  "/owner/kyc": "KYC Review",
-  "/owner/kyc-queue": "KYC Review",
-  "/owner/reports": "UTR reports",
-  "/owner/payment-reports": "UTR reports",
-  "/owner/tenants": "Tenants",
-  "/owner/dues": "Dues",
-  "/owner/billing": "Dues",
-  "/owner/payments": "Payments",
-  "/owner/reconciliation": "Reconciliation",
-  "/owner/finance/tie-out": "Reconciliation",
-  "/owner/tie-out": "Reconciliation",
-  "/owner/events": "Audit log",
-  "/owner/audit": "Audit log",
-  "/owner/facility": "Facility & Operations",
-  "/owner/hazards": "Facility & Operations",
-  "/owner/inspections": "Facility & Operations",
-  "/owner/more": "Settings",
-  "/owner/settings": "Settings",
-  "/owner/dashboard": "Dashboard",
-  "/owner/reminders": "Reminders",
+const ROUTE_KEYS: Record<string, MessageKey> = {
+  "/owner/joins": "nav.joins",
+  "/owner/join-requests": "nav.joins",
+  "/owner/kyc": "nav.kyc",
+  "/owner/kyc-queue": "nav.kyc",
+  "/owner/reports": "nav.reports",
+  "/owner/payment-reports": "nav.reports",
+  "/owner/tenants": "nav.tenants",
+  "/owner/dues": "nav.dues",
+  "/owner/billing": "nav.dues",
+  "/owner/payments": "nav.payments",
+  "/owner/reconciliation": "nav.reconciliation",
+  "/owner/finance/tie-out": "nav.reconciliation",
+  "/owner/tie-out": "nav.reconciliation",
+  "/owner/events": "nav.events",
+  "/owner/audit": "nav.events",
+  "/owner/facility": "nav.facility",
+  "/owner/hazards": "nav.facility",
+  "/owner/inspections": "nav.facility",
+  "/owner/more": "nav.settings",
+  "/owner/settings": "nav.settings",
+  "/owner/dashboard": "nav.dashboard",
+  "/owner/reminders": "nav.reminders",
 };
 
 function normalizeTab(pathname: string): string {
@@ -51,14 +53,39 @@ function normalizeTab(pathname: string): string {
 export const AppShell: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAddPropertyOpen, setIsAddPropertyOpen] = useState(false);
+  const [isSidebarPinned, setIsSidebarPinned] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem("pg_sidebar_pinned");
+      return stored !== null ? stored === "true" : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleSidebarPinned = () => {
+    setIsSidebarPinned((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("pg_sidebar_pinned", String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const tab = normalizeTab(path);
+  const { t } = useLocale();
   const propsQuery = useQuery({ queryKey: QUERY_KEYS.properties, queryFn: getProperties });
   const reconQuery = useQuery({ queryKey: QUERY_KEYS.reconciliation(), queryFn: () => getReconciliation() });
   const propertyName = propsQuery.data?.[0]?.name;
   const period = reconQuery.data?.period;
-  const subtitle = [propertyName || "Owner ledger", period].filter(Boolean).join(" · ");
+  const periodText = period ? t("dashboard.period", { period }) : undefined;
+  const subtitle = [propertyName || t("common.ownerLedger"), periodText].filter(Boolean).join(" · ");
+  const routeKey = ROUTE_KEYS[path];
+  const pageTitle = routeKey ? t(routeKey) : t("common.appName");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-portal", "owner");
@@ -77,20 +104,28 @@ export const AppShell: React.FC = () => {
         }}
         isOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
+        isPinned={isSidebarPinned}
+        onTogglePin={handleToggleSidebarPinned}
       />
 
-      <div className="lg:pl-64 flex flex-col flex-1">
+      <div
+        className={`flex flex-col flex-1 transition-[padding] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isSidebarPinned ? "lg:pl-64" : "lg:pl-[68px]"
+        }`}
+      >
         <TopBar
-          title={TITLES[path] || "PG Cashflow"}
+          title={pageTitle}
           subtitle={subtitle}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           showPush={false}
           searchRole="owner"
           onAddProperty={() => setIsAddPropertyOpen(true)}
+          isSidebarPinned={isSidebarPinned}
+          onToggleSidebarPinned={handleToggleSidebarPinned}
         />
 
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
-          <ErrorBoundary fallbackTitle={`Error loading ${TITLES[path] || "page"}`}>
+          <ErrorBoundary fallbackTitle={`Error loading ${pageTitle}`}>
             <Outlet />
           </ErrorBoundary>
         </main>
