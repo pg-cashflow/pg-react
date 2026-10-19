@@ -13,7 +13,9 @@ import {
   countOverdueDues,
   sumOverdueAmount,
   displayDueStatus,
+  formatPendingDuesCount,
 } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import {
   Users,
   Receipt,
@@ -30,6 +32,7 @@ interface DashboardProps {
 }
 
 export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
+  const { t } = useLocale();
   const tenantsQuery = useQuery({ queryKey: QUERY_KEYS.tenants, queryFn: getTenants });
   const duesQuery = useQuery({
     queryKey: QUERY_KEYS.dues(),
@@ -71,6 +74,7 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
   const activeTenants = tenants.filter((t) => t.status === "active");
   const overdueCount = countOverdueDues(dues);
   const totalOverduePaise = sumOverdueAmount(dues);
+  const pendingCount = dues.filter((d) => d.status === "pending" || d.status === "partial").length;
 
   const recentDues = [...dues]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -127,6 +131,7 @@ export const DashboardView: React.FC<DashboardProps> = ({ onNavigate }) => {
               <Clock className="w-5 h-5 text-accent" />
             </div>
             <AmountBadge amount={summary?.outstanding_paise ?? 0} variant="warning" />
+            <p className="text-xs text-ink-muted mt-1">{formatPendingDuesCount(pendingCount, t)}</p>
           </div>
 
           <div className="bg-surface border border-hairline rounded-2xl p-5">

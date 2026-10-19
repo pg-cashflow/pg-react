@@ -7,7 +7,8 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { QueryState } from "@/components/shared/QueryState";
 import StreakFlame from "@/components/shared/StreakFlame";
-import { countOverdueDues, displayDueStatus, formatDate, formatDueSentence, sumOutstandingFromDues } from "@/lib/utils";
+import { countOverdueDues, displayDueStatus, formatDate, formatDueSentence, formatPendingDuesCount, sumOutstandingFromDues } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import { Flame, ShieldCheck, Clock, ArrowRight } from "lucide-react";
 import { getTenantKYCStatus } from "@/api/kyc";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
@@ -17,6 +18,7 @@ interface TenantDashboardProps {
 }
 
 export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate }) => {
+  const { t, locale } = useLocale();
   const [showKycModal, setShowKycModal] = useState(false);
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
   const duesQuery = useQuery({
@@ -40,6 +42,7 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
   const isKycPendingReview = kyc?.status === "pending_manual_review";
   const outstanding = sumOutstandingFromDues(dues);
   const overdueCount = countOverdueDues(dues);
+  const pendingCount = dues.filter((d) => d.status === "pending" || d.status === "partial").length;
   const current = [...dues]
     .filter((d) => d.status === "pending" || d.status === "partial")
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0];
@@ -136,7 +139,7 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
               onClick={() => onNavigate("dues")}
               className="w-full h-12 rounded-[10px] t-body font-semibold bg-accent text-white"
             >
-              {current ? `Pay current rent (${formatDueSentence(current)})` : "Open passbook"}
+              {current ? `Pay current rent (${formatDueSentence(current, t, locale)})` : "Open passbook"}
             </button>
           </div>
         </section>
@@ -145,6 +148,7 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
           <div className="rounded-[14px] border border-hairline bg-surface p-4">
             <div className="t-caption text-ink-muted">Outstanding</div>
             <AmountBadge amount={outstanding} variant="warning" className="t-amount-lg block mt-1" />
+            <div className="t-caption text-ink-muted mt-1">{formatPendingDuesCount(pendingCount, t)}</div>
           </div>
           <div className="rounded-[14px] border border-hairline bg-surface p-4">
             <div className="t-caption text-ink-muted">Overdue</div>

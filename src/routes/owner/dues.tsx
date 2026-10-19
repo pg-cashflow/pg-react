@@ -8,7 +8,8 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { QRModal } from "@/components/shared/QRModal";
 import { QueryState } from "@/components/shared/QueryState";
-import { displayDueStatus, downloadTextFile, formatDate, isOverdue, paiseToRupeeInput, rupeesToPaise } from "@/lib/utils";
+import { displayDueStatus, downloadTextFile, formatDate, formatDaysOverdue, getDaysOverdue, isOverdue, paiseToRupeeInput, rupeesToPaise } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import { getPayments } from "@/api/payments";
 import { getProperties } from "@/api/properties";
 import { buildLedgerCsv } from "@/lib/exportLedgerCsv";
@@ -17,6 +18,7 @@ import { Link } from "@tanstack/react-router";
 import { CheckCircle, Slash, X, Loader2, IndianRupee, QrCode, Link2 } from "lucide-react";
 
 export const DuesView: React.FC = () => {
+  const { t, locale } = useLocale();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tenantFilter, setTenantFilter] = useState<string>("all");
@@ -376,7 +378,14 @@ export const DuesView: React.FC = () => {
                       <td className="px-6 py-4 font-semibold">
                         <AmountBadge amount={d.amount} />
                       </td>
-                      <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(d.due_date)}</td>
+                      <td className="px-6 py-4 text-xs text-ink-muted">
+                        <div>{formatDate(d.due_date, locale)}</div>
+                        {isOverdue(d) && (
+                          <div className="text-danger font-medium text-[11px] mt-0.5">
+                            {formatDaysOverdue(getDaysOverdue(d.due_date), t)}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-6 py-4">
                         <StatusPill status={displayDueStatus(d)} />
                       </td>

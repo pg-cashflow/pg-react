@@ -6,7 +6,15 @@ import { taIN } from "../i18n/messages/ta-IN";
 import { knIN } from "../i18n/messages/kn-IN";
 import { isSupportedLocale } from "../i18n";
 import { getStoredLocale, setStoredLocale } from "../auth/storage";
-import { formatPaise, formatDate } from "../lib/utils";
+import {
+  formatPaise,
+  formatDate,
+  formatDueSentence,
+  formatPendingDuesCount,
+  formatVacantRoomsCount,
+  formatDaysOverdue,
+  getDaysOverdue,
+} from "../lib/utils";
 
 describe("i18n message completeness", () => {
 
@@ -75,19 +83,53 @@ describe("i18n message completeness", () => {
 
       for (const loc of ["en-IN", "te-IN", "ta-IN", "kn-IN"] as const) {
         const intl = createIntl({ locale: loc, messages: messagesMap[loc] }, cache);
+        const t = (key: any, values?: any) => intl.formatMessage({ id: key }, values);
 
-        const zeroDues = intl.formatMessage({ id: "dues.countPending" }, { count: 0 });
-        const oneDue = intl.formatMessage({ id: "dues.countPending" }, { count: 1 });
-        const threeDues = intl.formatMessage({ id: "dues.countPending" }, { count: 3 });
+        // formatPendingDuesCount
+        const zeroDues = formatPendingDuesCount(0, t);
+        const oneDue = formatPendingDuesCount(1, t);
+        const threeDues = formatPendingDuesCount(3, t);
 
         expect(zeroDues).toBeTruthy();
         expect(oneDue).toContain("1");
         expect(threeDues).toContain("3");
         expect(oneDue).not.toBe(threeDues);
+
+        // formatVacantRoomsCount
+        const zeroRooms = formatVacantRoomsCount(0, t);
+        const oneRoom = formatVacantRoomsCount(1, t);
+        const fourRooms = formatVacantRoomsCount(4, t);
+
+        expect(zeroRooms).toBeTruthy();
+        expect(oneRoom).toContain("1");
+        expect(fourRooms).toContain("4");
+        expect(oneRoom).not.toBe(fourRooms);
+
+        // formatDaysOverdue
+        const dueToday = formatDaysOverdue(0, t);
+        const oneDay = formatDaysOverdue(1, t);
+        const fiveDays = formatDaysOverdue(5, t);
+
+        expect(dueToday).toBeTruthy();
+        expect(oneDay).toContain("1");
+        expect(fiveDays).toContain("5");
       }
+
+      // Fallbacks without translator function
+      expect(formatPendingDuesCount(0)).toBe("No dues pending");
+      expect(formatPendingDuesCount(1)).toBe("1 due pending");
+      expect(formatPendingDuesCount(2)).toBe("2 dues pending");
+
+      expect(formatVacantRoomsCount(0)).toBe("No rooms vacant");
+      expect(formatVacantRoomsCount(1)).toBe("1 room vacant");
+      expect(formatVacantRoomsCount(3)).toBe("3 rooms vacant");
+
+      expect(formatDaysOverdue(0)).toBe("Due today");
+      expect(formatDaysOverdue(1)).toBe("1 day overdue");
+      expect(formatDaysOverdue(4)).toBe("4 days overdue");
     });
 
-    it("respects SOV sentence structure in regional language sentence templates", async () => {
+    it("respects SOV sentence structure in regional language sentence templates via formatDueSentence", async () => {
       const { createIntl, createIntlCache } = await import("react-intl");
       const cache = createIntlCache();
       const messagesMap = {
@@ -97,19 +139,25 @@ describe("i18n message completeness", () => {
         "kn-IN": knIN,
       };
 
-      const amount = "₹8,500";
-      const date = "5 Sep";
+      const testDue = { amount: 850000, due_date: "2026-09-05T00:00:00Z" }; // ₹8,500 on 5 Sep 2026
+
+      // Fallback without translator function emits English template literal
+      const fallback = formatDueSentence(testDue, undefined, "en-IN");
+      expect(fallback).toContain("due on");
+      expect(fallback).toContain("8,500");
 
       // English SVO: amount comes first, then date
       const intlEn = createIntl({ locale: "en-IN", messages: messagesMap["en-IN"] }, cache);
-      const enSentence = intlEn.formatMessage({ id: "due.amountOnDate" }, { amount, date });
-      expect(enSentence.indexOf(amount)).toBeLessThan(enSentence.indexOf(date));
+      const tEn = (key: any, values?: any) => intlEn.formatMessage({ id: key }, values);
+      const enSentence = formatDueSentence(testDue, tEn, "en-IN");
+      expect(enSentence.indexOf("8,500")).toBeLessThan(enSentence.indexOf("2026"));
 
       // Dravidian SOV (Telugu, Tamil, Kannada): date adverbial comes before amount / verb
       for (const loc of ["te-IN", "ta-IN", "kn-IN"] as const) {
         const intl = createIntl({ locale: loc, messages: messagesMap[loc] }, cache);
-        const sentence = intl.formatMessage({ id: "due.amountOnDate" }, { amount, date });
-        expect(sentence.indexOf(date)).toBeLessThan(sentence.indexOf(amount));
+        const t = (key: any, values?: any) => intl.formatMessage({ id: key }, values);
+        const sentence = formatDueSentence(testDue, t, loc);
+        expect(sentence.indexOf("2026")).toBeLessThan(sentence.indexOf("8,500"));
       }
     });
   });

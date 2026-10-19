@@ -7,9 +7,11 @@ import { StatusPill } from "@/components/shared/StatusPill";
 import { QueryState } from "@/components/shared/QueryState";
 import { PayPanel } from "@/components/shared/PayPanel";
 import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
-import { displayDueStatus, formatDate } from "@/lib/utils";
+import { displayDueStatus, formatDate, formatDaysOverdue, getDaysOverdue, isOverdue } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 export const TenantDuesView: React.FC = () => {
+  const { t, locale } = useLocale();
   const [openId, setOpenId] = useState<string | null>(null);
   const [utrIds, setUtrIds] = useState<Record<string, boolean>>({});
 
@@ -47,7 +49,12 @@ export const TenantDuesView: React.FC = () => {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="t-code text-ink-muted">{d.due_code}</p>
-                    <p className="t-date text-ink-muted">{formatDate(d.due_date)}</p>
+                    <p className="t-date text-ink-muted">{formatDate(d.due_date, locale)}</p>
+                    {isOverdue(d) && (
+                      <p className="text-danger text-[11px] font-medium mt-0.5">
+                        {formatDaysOverdue(getDaysOverdue(d.due_date), t)}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <AmountBadge amount={d.amount} />

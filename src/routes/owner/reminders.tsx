@@ -7,6 +7,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { addCalendarDays, formatDate, formatDueSentence, isOpenDue } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import { Send } from "lucide-react";
 
 const SENT_KEY = "pg_reminder_sent";
@@ -20,6 +21,7 @@ function loadSent(): Record<string, string> {
 }
 
 export const OwnerRemindersView: React.FC = () => {
+  const { t, locale } = useLocale();
   const [sent, setSent] = useState(loadSent);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export const OwnerRemindersView: React.FC = () => {
               <div className="min-w-0 flex-1">
                 <div className="t-body font-semibold">{r.tenant?.name ?? r.due.tenant_id}</div>
                 <div className="t-body-sm text-ink-muted">Room {r.tenant?.room_number ?? "—"}</div>
-                <div className="t-caption text-ink-muted">{formatDueSentence(r.due)}</div>
+                <div className="t-caption text-ink-muted">{formatDueSentence(r.due, t, locale)}</div>
                 <div className="t-code text-ink-faint mt-0.5">{r.due.due_code}</div>
               </div>
               <AmountBadge amount={r.due.amount} />
@@ -97,7 +99,7 @@ export const OwnerRemindersView: React.FC = () => {
                   {r.status === "sent" ? "Sent" : "Scheduled"}
                 </span>
                 <div className="t-date text-ink-faint mt-1">
-                  {r.status === "sent" ? "Sent" : `Sends ${formatDate(r.sendOn.toISOString())}`}
+                  {r.status === "sent" ? "Sent" : `Sends ${formatDate(r.sendOn.toISOString(), locale)}`}
                 </div>
               </div>
               {r.status === "scheduled" ? (

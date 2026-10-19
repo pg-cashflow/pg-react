@@ -20,10 +20,12 @@ import {
   revokeSlotInvite,
 } from "@/api/slotInvites";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import { formatPaise, rupeesToPaise } from "@/lib/utils";
+import { formatPaise, formatVacantRoomsCount, rupeesToPaise } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import type { FloorOccupancy, RoomOccupancy, SlotInvite } from "@pg/types";
 
 export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
 
   const [selectedFloorId, setSelectedFloorId] = useState<string>("");
@@ -113,6 +115,12 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
     return map;
   }, [occupancyQuery.data?.floors]);
 
+  const vacantRoomsCount = useMemo(() => {
+    return (occupancyQuery.data?.floors ?? [])
+      .flatMap((f) => f.rooms)
+      .filter((r) => r.vacant_beds > 0).length;
+  }, [occupancyQuery.data?.floors]);
+
   const handleCopy = (code: string) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const joinUrl = `${origin}/join?code=${encodeURIComponent(code)}`;
@@ -150,7 +158,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
             </span>
             <span className="text-hairline">|</span>
             <span className="text-success font-medium">
-              {occupancyQuery.data.vacant_beds} vacant
+              {formatVacantRoomsCount(vacantRoomsCount, t)}
             </span>
           </div>
         )}

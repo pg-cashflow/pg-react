@@ -2,6 +2,8 @@ import { clsx, type ClassValue } from "clsx";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import type { Due, DueStatus, MatchedBy } from "@pg/types";
+import { getStoredLocale } from "@/auth/storage";
+import type { MessageKey } from "@/i18n";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,8 +19,6 @@ export function rupeesToPaise(rupees: string | number): number {
 export function paiseToRupeeInput(paise: number): string {
   return (Number(paise || 0) / 100).toString();
 }
-
-import { getStoredLocale } from "@/auth/storage";
 
 /** Format paise as Indian rupee string, e.g. 150000 -> "₹1,500.00" */
 export function formatPaise(paise: number, locale: string = getStoredLocale()): string {
@@ -101,8 +101,56 @@ export function eventKey(evt: {
 }
 
 /** “₹8,500 due on 5 Sep” — tenant passbook, reminders, pay sheet. */
-export function formatDueSentence(due: Pick<Due, "amount" | "due_date">): string {
-  return `${formatPaise(due.amount)} due on ${formatDate(due.due_date)}`;
+export function formatDueSentence(
+  due: Pick<Due, "amount" | "due_date">,
+  t?: (key: MessageKey, values?: Record<string, any>) => string,
+  locale: string = getStoredLocale()
+): string {
+  const amount = formatPaise(due.amount, locale);
+  const date = formatDate(due.due_date, locale);
+  if (t) {
+    return t("due.amountOnDate", { amount, date });
+  }
+  return `${amount} due on ${date}`;
+}
+
+export function formatPendingDuesCount(
+  count: number,
+  t?: (key: MessageKey, values?: Record<string, any>) => string
+): string {
+  if (t) {
+    return t("dues.countPending", { count });
+  }
+  return count === 0 ? "No dues pending" : count === 1 ? "1 due pending" : `${count} dues pending`;
+}
+
+export function formatVacantRoomsCount(
+  count: number,
+  t?: (key: MessageKey, values?: Record<string, any>) => string
+): string {
+  if (t) {
+    return t("rooms.countVacant", { count });
+  }
+  return count === 0 ? "No rooms vacant" : count === 1 ? "1 room vacant" : `${count} rooms vacant`;
+}
+
+export function getDaysOverdue(dueDayOrIso: string | Date): number {
+  const due = new Date(dueDayOrIso);
+  const now = new Date();
+  const dueUtc = Date.UTC(due.getFullYear(), due.getMonth(), due.getDate());
+  const nowUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((nowUtc - dueUtc) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+export function formatDaysOverdue(
+  days: number,
+  t?: (key: MessageKey, values?: Record<string, any>) => string
+): string {
+  if (t) {
+    return t("dues.daysOverdue", { count: days });
+  }
+  return days === 0 ? "Due today" : days === 1 ? "1 day overdue" : `${days} days overdue`;
 }
 
 export function addCalendarDays(isoDate: string, days: number): Date {
