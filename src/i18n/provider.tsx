@@ -129,6 +129,11 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
 
   const messages = useMemo(() => messagesMap[locale] || messagesMap[DEFAULT_LOCALE], [locale]);
 
+  // Keep the document language in step with the UI language.
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   return (
     <IntlProvider
       locale={locale}

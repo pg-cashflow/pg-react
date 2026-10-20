@@ -56,7 +56,7 @@ export const TenantProfileView: React.FC = () => {
                   ? "text-success"
                   : isPendingReview
                   ? "text-warning"
-                  : "text-amber-500"
+                  : "text-warning"
               }`}
             >
               <BadgeCheck className="h-4 w-4" />

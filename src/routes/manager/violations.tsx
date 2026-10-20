@@ -38,15 +38,16 @@ export const ViolationsView: React.FC = () => {
     onError: (e: Error) => setMsg(e.message),
   });
 
+  const { mutate: logMutate, isPending: logBusy } = mut;
   useEffect(() => {
     setAction({
       label: "Log violation",
-      onClick: () => mut.mutate(),
-      busy: mut.isPending,
+      onClick: () => logMutate(),
+      busy: logBusy,
       disabled: !tenantId.trim() || !ruleCode.trim() || !description.trim(),
     });
     return () => setAction(null);
-  }, [setAction, mut.isPending, tenantId, ruleCode, description]);
+  }, [setAction, logMutate, logBusy, tenantId, ruleCode, description]);
 
   return (
     <div className="space-y-3">

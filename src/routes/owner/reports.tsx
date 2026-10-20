@@ -42,8 +42,11 @@ export const ReportsView: React.FC = () => {
     },
   });
 
-  const tenantMap = new Map((tenantsQuery.data ?? []).map((t) => [t.id, t.name]));
-  const rows = reportsQuery.data ?? [];
+  const tenantMap = React.useMemo(
+    () => new Map((tenantsQuery.data ?? []).map((t) => [t.id, t.name])),
+    [tenantsQuery.data]
+  );
+  const rows = React.useMemo(() => reportsQuery.data ?? [], [reportsQuery.data]);
 
   // Clamp selected index when rows list changes
   React.useEffect(() => {

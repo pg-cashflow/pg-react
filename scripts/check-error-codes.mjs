@@ -17,8 +17,14 @@ if (!existsSync(reactCodesPath)) {
 const reactCodes = JSON.parse(readFileSync(reactCodesPath, 'utf8'));
 
 if (!existsSync(goCodesPath)) {
+  // Fail closed in CI: a missing backend checkout must never look like a passing parity check.
+  if (process.env.CI) {
+    console.error(`[ERROR] pg-go error-codes.json not found at: ${goCodesPath}`);
+    console.error(`CI requires the pg-go checkout for the cross-repo parity gate. Set PG_GO_ERROR_CODES or check out pg-go.`);
+    process.exit(1);
+  }
   console.warn(`[WARN] pg-go error-codes.json not found at: ${goCodesPath}`);
-  console.warn(`Skipping cross-repo diff (isolated workspace build).`);
+  console.warn(`Skipping cross-repo diff locally. CI will fail without the pg-go checkout.`);
   process.exit(0);
 }
 

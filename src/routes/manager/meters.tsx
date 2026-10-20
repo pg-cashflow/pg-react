@@ -76,15 +76,16 @@ export const MetersView: React.FC = () => {
     onError: (e: Error) => setMsg(e.message),
   });
 
+  const { mutate: meterMutate, isPending: meterBusy } = meterMut;
   useEffect(() => {
     setAction({
       label: "Record reading",
-      onClick: () => meterMut.mutate(),
-      busy: meterMut.isPending,
+      onClick: () => meterMutate(),
+      busy: meterBusy,
       disabled: !reading.trim(),
     });
     return () => setAction(null);
-  }, [setAction, meterMut.isPending, reading]);
+  }, [setAction, meterMutate, meterBusy, reading]);
 
   return (
     <div className="space-y-4">

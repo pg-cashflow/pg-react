@@ -193,7 +193,8 @@ export const DuesView: React.FC = () => {
           setPayModalDue(null);
           setWaiveModalDue(null);
           setMatchDueRow(null);
-          closeQrModal();
+          if (qrModal?.qrImageUrl) URL.revokeObjectURL(qrModal.qrImageUrl);
+          setQrModal(null);
         }
         return;
       }

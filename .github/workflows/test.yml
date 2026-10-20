@@ -10,12 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Cross-repo parity gate needs the pg-go backend beside this repo (../pg-go).
+      # Configure repo variable PG_GO_REPO (owner/name) and secret PG_GO_READ_TOKEN.
+      - name: Checkout pg-go for error-code parity
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.PG_GO_REPO }}
+          token: ${{ secrets.PG_GO_READ_TOKEN }}
+          path: ../pg-go
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run check:error-codes
+        env:
+          CI: "true"
       - run: npm test
       - run: npm run build
 
