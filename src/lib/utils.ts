@@ -73,7 +73,10 @@ export function displayDueStatus(due: Due): DueStatus | "overdue" {
   return due.status;
 }
 
-export function formatMatchedBy(matchedBy: MatchedBy | string): string {
+export function formatMatchedBy(matchedBy: MatchedBy | string, t?: (key: MessageKey) => string): string {
+  if (matchedBy === "cashfree") {
+    return t ? t("payment.paidOnline") : "Paid online";
+  }
   return matchedBy.replace(/_/g, " ");
 }
 

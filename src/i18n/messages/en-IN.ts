@@ -315,6 +315,7 @@ export const enIN = {
   "kyc.card.verifiedInstantSuccess": "Identity verified instantly with UIDAI.",
   "kyc.card.docSubmittedSuccess": "Document submitted for manual review by the owner.",
   "kyc.card.consentRevokedSuccess": "KYC consent revoked and verification data marked inactive.",
+  "payment.paidOnline": "Paid online",
 };
 
 export type MessageKey = keyof typeof enIN;

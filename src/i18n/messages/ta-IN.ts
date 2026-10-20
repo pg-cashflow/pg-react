@@ -317,4 +317,5 @@ export const taIN: Record<MessageKey, string> = {
   "kyc.card.verifiedInstantSuccess": "UIDAI மூலம் அடையாளம் உடனடியாக சரிபார்க்கப்பட்டது.",
   "kyc.card.docSubmittedSuccess": "உரிமையாளர் மறுஆய்வுக்கு ஆவணம் சமர்ப்பிக்கப்பட்டது.",
   "kyc.card.consentRevokedSuccess": "KYC ஒப்புதல் திரும்பப் பெறப்பட்டு தரவு செயலிழக்கப்பட்டது.",
+  "payment.paidOnline": "ஆன்லைன் கட்டணம்",
 };

@@ -34,7 +34,7 @@ export const TenantPaymentsView: React.FC = () => {
           {sorted.map((p) => (
             <div key={p.id} className="px-6 py-4 flex items-center justify-between">
               <div>
-                <p className="text-sm text-ink">{formatMatchedBy(p.matched_by)}</p>
+                <p className="text-sm text-ink">{formatMatchedBy(p.matched_by, t)}</p>
                 <p className="text-xs text-ink-muted">{formatDate(p.matched_at)}</p>
               </div>
               <AmountBadge amount={p.amount} variant="success" />

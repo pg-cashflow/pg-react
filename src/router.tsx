@@ -39,6 +39,7 @@ import { TenantPaymentsView } from "@/routes/tenant/payments";
 import { TenantRewardsView } from "@/routes/tenant/rewards";
 import { TenantCommunityView } from "@/routes/tenant/community";
 import { TenantProfileView } from "@/routes/tenant/profile";
+import { TenantPayReturnView } from "@/routes/tenant/pay-return";
 import { KitchenHeadcountView } from "@/routes/manager/kitchen";
 import { InspectionsListView } from "@/routes/manager/inspections";
 import { InspectionNewView } from "@/routes/manager/inspection-new";
@@ -403,6 +404,11 @@ const tenantProfile = createRoute({
   path: "/profile",
   component: TenantProfileView,
 });
+const tenantPayReturn = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/pay-return",
+  component: TenantPayReturnView,
+});
 const tenantKYC = createRoute({
   getParentRoute: () => tenantRoute,
   path: "/kyc",
@@ -585,6 +591,7 @@ const routeTree = rootRoute.addChildren([
     tenantPoints,
     tenantCommunity,
     tenantProfile,
+    tenantPayReturn,
     tenantKYC,
     tenantHazards,
     tenantInspections,

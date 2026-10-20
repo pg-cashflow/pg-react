@@ -317,4 +317,5 @@ export const teIN: Record<MessageKey, string> = {
   "kyc.card.verifiedInstantSuccess": "UIDAI తో గుర్తింపు తక్షణమే ధృవీకరించబడింది.",
   "kyc.card.docSubmittedSuccess": "పత్రం యజమాని సమీక్ష కోసం సమర్పించబడింది.",
   "kyc.card.consentRevokedSuccess": "కేవైసీ సమ్మతి రద్దు చేయబడింది మరియు డేటా నిష్క్రియం చేయబడింది.",
+  "payment.paidOnline": "ఆన్‌లైన్ చెల్లింపు",
 };
