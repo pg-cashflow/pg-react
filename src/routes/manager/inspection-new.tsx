@@ -5,7 +5,8 @@ import { useAuth } from "@/auth/context";
 import { listOwnerFloors, listOwnerRooms, submitManagerInspection } from "@/api/gamification";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useManagerAction } from "@/components/layout/ManagerShell";
-import { Check, Camera } from "lucide-react";
+import { Check, Camera, AlertCircle, Trash2, Loader2 } from "lucide-react";
+import { validateAndProcessImage } from "@/lib/imageValidation";
 
 const ITEMS = [
   { key: "bed_clear", desc: "Bed / desk clear and tidy" },
@@ -21,6 +22,8 @@ type DraftItem = {
   passed: boolean | null;
   notes: string;
   photo: File | null;
+  photoError?: string | null;
+  photoPreview?: string | null;
 };
 
 function fileToB64(file: File): Promise<string> {
@@ -68,14 +71,54 @@ export const InspectionNewView: React.FC = () => {
   const itemIndex = step - 1;
   const current = !isScope && !isReview ? items[itemIndex] : null;
 
+  const [isValidatingPhoto, setIsValidatingPhoto] = useState(false);
+
   const scopeReady =
     insType === "common_bathroom" ||
     (insType === "room" && !!selectedRoomId) ||
     (insType === "floor" && !!selectedFloorId);
   const itemReady = current
-    ? current.passed === true || (current.passed === false && (!!current.photo || !!current.notes.trim()))
+    ? current.passed === true ||
+      (current.passed === false &&
+        !current.photoError &&
+        !isValidatingPhoto &&
+        (!!current.photo || !!current.notes.trim()))
     : false;
   const stepReady = isScope ? scopeReady : isReview ? true : itemReady;
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
+
+    // Reset input value so re-selecting the same file fires onChange
+    e.target.value = "";
+
+    setIsValidatingPhoto(true);
+    setErr(null);
+
+    try {
+      const processed = await validateAndProcessImage(rawFile);
+      const preview = URL.createObjectURL(processed);
+      setItems((prev) =>
+        prev.map((it, i) =>
+          i === itemIndex
+            ? { ...it, photo: processed, photoError: null, photoPreview: preview }
+            : it
+        )
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Invalid image format";
+      setItems((prev) =>
+        prev.map((it, i) =>
+          i === itemIndex
+            ? { ...it, photo: null, photoError: message, photoPreview: null }
+            : it
+        )
+      );
+    } finally {
+      setIsValidatingPhoto(false);
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -214,30 +257,97 @@ export const InspectionNewView: React.FC = () => {
             </button>
           </div>
           {current.passed === false && (
-            <>
-              <label className="flex items-center gap-2 h-12 rounded-[10px] border border-hairline bg-surface px-3">
-                <Camera className="h-4 w-4 text-ink-muted" />
-                <span className="t-body-sm">{current.photo ? current.photo.name : "Add photo"}</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setItems((prev) => prev.map((it, i) => (i === itemIndex ? { ...it, photo: file } : it)));
-                  }}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1.5">
+                  Photo Evidence (JPEG, PNG, WebP · Max 500 KB)
+                </label>
+                {current.photoPreview ? (
+                  <div className="rounded-[12px] border border-hairline bg-surface p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img
+                        src={current.photoPreview}
+                        alt="Evidence preview"
+                        className="w-12 h-12 rounded-[8px] object-cover border border-hairline flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-ink truncate">{current.photo?.name}</p>
+                        <p className="text-[11px] text-success font-medium">
+                          ✓ Validated ({(Number(current.photo?.size || 0) / 1024).toFixed(0)} KB)
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setItems((prev) =>
+                          prev.map((it, i) =>
+                            i === itemIndex
+                              ? { ...it, photo: null, photoError: null, photoPreview: null }
+                              : it
+                          )
+                        )
+                      }
+                      className="p-2 text-danger hover:bg-danger-tint rounded-lg transition"
+                      title="Remove photo"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    className={`flex items-center justify-center gap-2 h-14 rounded-[12px] border-2 border-dashed px-4 cursor-pointer transition ${
+                      current.photoError
+                        ? "border-danger bg-danger-tint/20 text-danger"
+                        : "border-hairline bg-surface hover:bg-hairline/20 text-ink"
+                    }`}
+                  >
+                    {isValidatingPhoto ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-accent" />
+                        <span className="text-xs font-medium">Checking file...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="h-4 w-4 text-ink-muted" />
+                        <span className="text-xs font-semibold">Attach photo evidence</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      capture="environment"
+                      className="sr-only"
+                      disabled={isValidatingPhoto}
+                      onChange={handlePhotoUpload}
+                    />
+                  </label>
+                )}
+
+                {current.photoError && (
+                  <div className="p-2.5 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs font-medium mt-1.5 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>{current.photoError}</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1.5">
+                  Failure Notes {current.photo ? "(Optional)" : "(Required if no photo)"}
+                </label>
+                <textarea
+                  value={current.notes}
+                  onChange={(e) =>
+                    setItems((prev) =>
+                      prev.map((it, i) => (i === itemIndex ? { ...it, notes: e.target.value } : it))
+                    )
+                  }
+                  placeholder="Explain why this item failed..."
+                  className="w-full min-h-[88px] rounded-[10px] border border-hairline bg-surface px-3 py-2 text-xs text-ink placeholder:text-ink-muted focus:outline-none focus:border-accent"
                 />
-              </label>
-              <textarea
-                value={current.notes}
-                onChange={(e) =>
-                  setItems((prev) => prev.map((it, i) => (i === itemIndex ? { ...it, notes: e.target.value } : it)))
-                }
-                placeholder="What failed? Required if no photo."
-                className="w-full min-h-[88px] rounded-[10px] border border-hairline bg-surface px-3 py-2 t-body"
-              />
-            </>
+              </div>
+            </div>
           )}
         </div>
       )}

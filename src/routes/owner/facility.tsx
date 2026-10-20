@@ -6,10 +6,13 @@ import {
   listOwnerRooms,
   createOwnerRoom,
   createOwnerManager,
+  listOwnerManagers,
+  updateOwnerManagerCapabilities,
   getOwnerGamificationSettings,
   updateOwnerGamificationSettings,
 } from "@/api/gamification";
-import { getProperties } from "@/api/properties";
+import { getProperties, switchProperty } from "@/api/properties";
+import { getStoredUser } from "@/auth/storage";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import {
   Building2,
@@ -23,6 +26,7 @@ import {
   Loader2,
   Award,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import type { PropertyGamificationSettings } from "@pg/types";
 import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
@@ -40,10 +44,26 @@ export const OwnerFacilityView: React.FC = () => {
   const [propertyId, setPropertyId] = useState<string>("");
 
   React.useEffect(() => {
-    if (!propertyId && properties && properties.length > 0 && properties[0]?.id) {
-      setPropertyId(properties[0].id);
+    if (!propertyId && properties && properties.length > 0) {
+      const stored = getStoredUser();
+      const match = properties.find((p) => p.id === stored?.property_id);
+      setPropertyId(match ? match.id : properties[0].id);
     }
   }, [properties, propertyId]);
+
+  const handlePropertyChange = async (newId: string) => {
+    setPropertyId(newId);
+    setMsg(null);
+    try {
+      await switchProperty(newId);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.properties });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerFloors(newId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerRooms(newId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerGamificationSettings(newId) });
+    } catch {
+      // non-fatal
+    }
+  };
 
   const propertyList = properties ?? [];
 
@@ -89,6 +109,13 @@ export const OwnerFacilityView: React.FC = () => {
     enabled: !!propertyId,
   });
 
+  const managersQuery = useQuery({
+    queryKey: QUERY_KEYS.ownerManagers(propertyId),
+    queryFn: () => listOwnerManagers(propertyId),
+    enabled: !!propertyId,
+  });
+  const managers = managersQuery.data ?? [];
+
   // Settings local state
   const [settings, setSettings] = useState<PropertyGamificationSettings | null>(null);
 
@@ -132,11 +159,34 @@ export const OwnerFacilityView: React.FC = () => {
     onError: (err: Error) => setMsg({ type: "err", text: err.message }),
   });
 
+  const ALL_DELEGABLE_CAPS = [
+    "slot_invites.create",
+    "tenants.view",
+    "dues.view",
+    "attendance.mark",
+    "inspections.write",
+    "meters.write",
+    "kitchen.headcount",
+    "expenses.post",
+    "expenses.void",
+  ];
+
+  const updateCapsMutation = useMutation({
+    mutationFn: ({ managerId, grant }: { managerId: string; grant: string[] }) =>
+      updateOwnerManagerCapabilities(propertyId, managerId, grant),
+    onSuccess: () => {
+      setMsg({ type: "ok", text: "Manager permissions updated successfully!" });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerManagers(propertyId) });
+    },
+    onError: (err: Error) => setMsg({ type: "err", text: err.message }),
+  });
+
   const addManagerMutation = useMutation({
     mutationFn: () => createOwnerManager({ property_id: propertyId, phone: managerPhone.trim() }),
     onSuccess: () => {
-      setMsg({ type: "ok", text: "Warden / Manager provisioned! They can now log in via OTP." });
+      setMsg({ type: "ok", text: "Warden / Manager provisioned! All operational permissions granted." });
       setManagerPhone("");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerManagers(propertyId) });
     },
     onError: (err: Error) => setMsg({ type: "err", text: err.message }),
   });
@@ -174,7 +224,7 @@ export const OwnerFacilityView: React.FC = () => {
           {propertyList.length > 0 && (
             <select
               value={propertyId}
-              onChange={(e) => setPropertyId(e.target.value)}
+              onChange={(e) => handlePropertyChange(e.target.value)}
               className="px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink font-medium"
             >
               {propertyList.map((p) => (
@@ -235,7 +285,7 @@ export const OwnerFacilityView: React.FC = () => {
           }`}
         >
           <UserCheck className="w-4 h-4" />
-          <span>Wardens / Managers</span>
+          <span>Wardens / Managers ({managers.length})</span>
         </button>
         <button
           onClick={() => setTab("gamification")}
@@ -428,30 +478,103 @@ export const OwnerFacilityView: React.FC = () => {
 
       {/* 3. Wardens / Managers */}
       {tab === "wardens" && (
-        <div className="max-w-md bg-surface border border-hairline rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-accent" /> Provision Warden Account
-          </h3>
-          <p className="text-xs text-ink-muted">
-            Grant warden privileges scoped strictly to this property. They will sign in using Phone OTP.
-          </p>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-ink mb-1">Phone Number (E.164)</label>
-              <input
-                value={managerPhone}
-                onChange={(e) => setManagerPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink font-mono"
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-surface border border-hairline rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-accent" /> Provision Warden Account
+            </h3>
+            <p className="text-xs text-ink-muted">
+              Grant warden privileges scoped strictly to this property. They will sign in using Phone OTP.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-ink mb-1">Phone Number (10 digits or E.164)</label>
+                <input
+                  value={managerPhone}
+                  onChange={(e) => setManagerPhone(e.target.value)}
+                  placeholder="e.g. 9876543210 or +919876543210"
+                  className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink font-mono"
+                />
+                <span className="text-[10px] text-ink-muted mt-1 block">
+                  Standard 10-digit Indian mobile number or international + format.
+                </span>
+              </div>
+              <button
+                onClick={() => addManagerMutation.mutate()}
+                disabled={addManagerMutation.isPending || !managerPhone.trim()}
+                className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
+              >
+                {addManagerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Assign Warden"}
+              </button>
             </div>
-            <button
-              onClick={() => addManagerMutation.mutate()}
-              disabled={addManagerMutation.isPending || !managerPhone.trim()}
-              className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
-            >
-              {addManagerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Assign Warden"}
-            </button>
+          </div>
+
+          <div className="bg-surface border border-hairline rounded-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-accent" /> Active Property Wardens ({managers.length})
+              </h3>
+              {managersQuery.isLoading && <Loader2 className="w-4 h-4 animate-spin text-ink-muted" />}
+            </div>
+
+            {managers.length === 0 ? (
+              <div className="p-6 text-center text-xs text-ink-muted border border-dashed border-hairline rounded-xl">
+                No wardens provisioned for this property yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {managers.map((m) => {
+                  const hasAll = ALL_DELEGABLE_CAPS.every((c) => m.capabilities?.includes(c));
+                  return (
+                    <div key={m.id} className="p-4 rounded-xl border border-hairline bg-bg space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-ink font-mono">{m.phone}</div>
+                          <div className="text-[10px] text-ink-muted">
+                            Active Warden · Added {new Date(m.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                        {hasAll ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success bg-success-tint px-2 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3" /> Full Access
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => updateCapsMutation.mutate({ managerId: m.id, grant: ALL_DELEGABLE_CAPS })}
+                            disabled={updateCapsMutation.isPending}
+                            className="text-[11px] font-semibold text-accent hover:underline flex items-center gap-1"
+                          >
+                            {updateCapsMutation.isPending ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              "Grant All Permissions"
+                            )}
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {ALL_DELEGABLE_CAPS.map((cap) => {
+                          const isGranted = m.capabilities?.includes(cap);
+                          return (
+                            <span
+                              key={cap}
+                              className={`text-[10px] px-2 py-0.5 rounded-md font-mono ${
+                                isGranted
+                                  ? "bg-accent-tint text-accent font-semibold"
+                                  : "bg-surface border border-hairline text-ink-muted line-through opacity-60"
+                              }`}
+                            >
+                              {cap}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

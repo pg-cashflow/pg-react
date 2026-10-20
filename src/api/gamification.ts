@@ -152,15 +152,23 @@ export interface SubmitInspectionPayload {
   }>;
 }
 
-export const submitManagerInspection = (body: SubmitInspectionPayload): Promise<{ inspection: Inspection }> =>
-  apiFetch<{ inspection: Inspection }>("/manager/inspections", {
+export const submitManagerInspection = (body: SubmitInspectionPayload): Promise<{ inspection: Inspection }> => {
+  const url = body.property_id
+    ? `/manager/inspections?property_id=${encodeURIComponent(body.property_id)}`
+    : "/manager/inspections";
+  return apiFetch<{ inspection: Inspection }>(url, {
     method: "POST",
+    headers: body.property_id ? { "X-Property-ID": body.property_id } : undefined,
     body: JSON.stringify(body),
   });
+};
 
 export const listManagerInspections = async (propertyId: string): Promise<Inspection[]> => {
   const data = await apiFetch<{ inspections: Inspection[] }>(
-    `/manager/inspections?property_id=${encodeURIComponent(propertyId)}`
+    `/manager/inspections?property_id=${encodeURIComponent(propertyId)}`,
+    {
+      headers: { "X-Property-ID": propertyId },
+    }
   );
   return data.inspections || [];
 };
@@ -182,11 +190,16 @@ export const recordManagerMeterReading = (body: {
   reading_value: number;
   meter_replaced?: boolean;
   confirm_anomaly?: boolean;
-}): Promise<{ result: MeterReadingResult }> =>
-  apiFetch<{ result: MeterReadingResult }>("/manager/meter-readings", {
+}): Promise<{ result: MeterReadingResult }> => {
+  const url = body.property_id
+    ? `/manager/meter-readings?property_id=${encodeURIComponent(body.property_id)}`
+    : "/manager/meter-readings";
+  return apiFetch<{ result: MeterReadingResult }>(url, {
     method: "POST",
+    headers: body.property_id ? { "X-Property-ID": body.property_id } : undefined,
     body: JSON.stringify(body),
   });
+};
 
 export const listManagerHazards = async (
   propertyId: string,
@@ -194,7 +207,9 @@ export const listManagerHazards = async (
 ): Promise<HazardReport[]> => {
   const q = new URLSearchParams({ property_id: propertyId });
   if (status) q.append("status", status);
-  const data = await apiFetch<{ hazards: HazardReport[] }>(`/manager/hazards?${q.toString()}`);
+  const data = await apiFetch<{ hazards: HazardReport[] }>(`/manager/hazards?${q.toString()}`, {
+    headers: { "X-Property-ID": propertyId },
+  });
   return data.hazards || [];
 };
 
@@ -226,11 +241,16 @@ export const submitManagerVendorInspection = (body: {
   notes: string;
   penalty_paise: number;
   photo_base64?: string;
-}): Promise<{ vendor_inspection: VendorInspection }> =>
-  apiFetch<{ vendor_inspection: VendorInspection }>("/manager/vendor-inspections", {
+}): Promise<{ vendor_inspection: VendorInspection }> => {
+  const url = body.property_id
+    ? `/manager/vendor-inspections?property_id=${encodeURIComponent(body.property_id)}`
+    : "/manager/vendor-inspections";
+  return apiFetch<{ vendor_inspection: VendorInspection }>(url, {
     method: "POST",
+    headers: body.property_id ? { "X-Property-ID": body.property_id } : undefined,
     body: JSON.stringify(body),
   });
+};
 
 // ==========================================
 // --- Owner Facility & Gamification Settings ---
@@ -245,11 +265,16 @@ export const getOwnerGamificationSettings = (
 
 export const updateOwnerGamificationSettings = (
   body: PropertyGamificationSettings
-): Promise<{ settings: PropertyGamificationSettings }> =>
-  apiFetch<{ settings: PropertyGamificationSettings }>("/owner/gamification/settings", {
+): Promise<{ settings: PropertyGamificationSettings }> => {
+  const url = body.property_id
+    ? `/owner/gamification/settings?property_id=${encodeURIComponent(body.property_id)}`
+    : "/owner/gamification/settings";
+  return apiFetch<{ settings: PropertyGamificationSettings }>(url, {
     method: "PATCH",
+    headers: body.property_id ? { "X-Property-ID": body.property_id } : undefined,
     body: JSON.stringify(body),
   });
+};
 
 export const listOwnerFloors = async (propertyId: string): Promise<Floor[]> => {
   const data = await apiFetch<{ floors: Floor[] }>(
@@ -263,8 +288,9 @@ export const createOwnerFloor = (body: {
   floor_number: number;
   name: string;
 }): Promise<{ floor: Floor }> =>
-  apiFetch<{ floor: Floor }>("/owner/floors", {
+  apiFetch<{ floor: Floor }>(`/owner/floors?property_id=${encodeURIComponent(body.property_id)}`, {
     method: "POST",
+    headers: { "X-Property-ID": body.property_id },
     body: JSON.stringify(body),
   });
 
@@ -282,8 +308,9 @@ export const createOwnerRoom = (body: {
   capacity: number;
   included_units: number;
 }): Promise<{ room: Room }> =>
-  apiFetch<{ room: Room }>("/owner/rooms", {
+  apiFetch<{ room: Room }>(`/owner/rooms?property_id=${encodeURIComponent(body.property_id)}`, {
     method: "POST",
+    headers: { "X-Property-ID": body.property_id },
     body: JSON.stringify(body),
   });
 
@@ -304,17 +331,60 @@ export interface BulkGenerateFloorsRoomsInput {
 
 export const bulkGenerateFloorsRooms = (
   body: BulkGenerateFloorsRoomsInput
-): Promise<{ ok: boolean; floors_created: number; rooms_created: number }> =>
-  apiFetch<{ ok: boolean; floors_created: number; rooms_created: number }>("/owner/floors/bulk", {
+): Promise<{ ok: boolean; floors_created: number; rooms_created: number }> => {
+  const url = body.property_id
+    ? `/owner/floors/bulk?property_id=${encodeURIComponent(body.property_id)}`
+    : "/owner/floors/bulk";
+  return apiFetch<{ ok: boolean; floors_created: number; rooms_created: number }>(url, {
     method: "POST",
+    headers: body.property_id ? { "X-Property-ID": body.property_id } : undefined,
     body: JSON.stringify(body),
   });
+};
 
 export const createOwnerManager = (body: {
   property_id?: string;
   phone: string;
-}): Promise<{ manager: User }> =>
-  apiFetch<{ manager: User }>("/owner/managers", {
+}): Promise<{ manager: User }> => {
+  const url = body.property_id
+    ? `/owner/managers?property_id=${encodeURIComponent(body.property_id)}`
+    : "/owner/managers";
+  return apiFetch<{ manager: User }>(url, {
     method: "POST",
+    headers: body.property_id ? { "X-Property-ID": body.property_id } : undefined,
     body: JSON.stringify(body),
   });
+};
+
+export interface OwnerManagerItem {
+  id: string;
+  phone: string;
+  created_at: string;
+  capabilities?: string[];
+}
+
+export const listOwnerManagers = async (propertyId: string): Promise<OwnerManagerItem[]> => {
+  const data = await apiFetch<{ managers: OwnerManagerItem[] }>(
+    `/owner/managers?property_id=${encodeURIComponent(propertyId)}`,
+    {
+      headers: { "X-Property-ID": propertyId },
+    }
+  );
+  return data.managers || [];
+};
+
+export const updateOwnerManagerCapabilities = (
+  propertyId: string,
+  managerId: string,
+  grant: string[],
+  revoke: string[] = []
+): Promise<{ capabilities: string[] }> =>
+  apiFetch<{ capabilities: string[] }>(
+    `/owner/managers/${managerId}/capabilities?property_id=${encodeURIComponent(propertyId)}`,
+    {
+      method: "PUT",
+      headers: { "X-Property-ID": propertyId },
+      body: JSON.stringify({ grant, revoke }),
+    }
+  );
+

@@ -44,6 +44,7 @@ export const QUERY_KEYS = {
     ["owner", "gamification-settings", propertyId] as const,
   ownerFloors: (propertyId: string) => ["owner", "floors", propertyId] as const,
   ownerRooms: (propertyId: string) => ["owner", "rooms", propertyId] as const,
+  ownerManagers: (propertyId: string) => ["owner", "managers", propertyId] as const,
 
   // Settlement Balancer
   settlementEOD: (date?: string) =>
