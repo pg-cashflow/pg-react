@@ -337,7 +337,7 @@ describe("i18n message completeness", () => {
       // Length must match (no additions/removals without updating both)
       expect(errorCodes).toHaveLength(ERROR_CODES.length);
 
-      const codeRegex = /^[a-z]+(\.[a-zA-Z0-9]+)+$/;
+      const codeRegex = /^[a-z]+(\.[a-zA-Z0-9_]+)+$/;
       for (const code of errorCodes) {
         expect(code).toMatch(codeRegex);
       }

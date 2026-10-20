@@ -22,7 +22,27 @@ export const setStoredLocale = (locale: string): void => {
 
 export const getStoredUser = (): User | null => {
   try {
-    const raw = localStorage.getItem(USER_KEY);
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(USER_KEY);
+    } catch {
+      // sessionStorage unavailable
+    }
+    if (!raw) {
+      try {
+        raw = localStorage.getItem(USER_KEY);
+        if (raw) {
+          localStorage.removeItem(USER_KEY);
+          try {
+            sessionStorage.setItem(USER_KEY, raw);
+          } catch {
+            // ignore
+          }
+        }
+      } catch {
+        // localStorage unavailable
+      }
+    }
     return raw ? (JSON.parse(raw) as User) : null;
   } catch {
     return null;
@@ -30,11 +50,20 @@ export const getStoredUser = (): User | null => {
 };
 
 export const setStoredUser = (user: User | null): void => {
-  if (!user) {
+  try {
     localStorage.removeItem(USER_KEY);
-    return;
+  } catch {
+    // ignore
   }
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  try {
+    if (!user) {
+      sessionStorage.removeItem(USER_KEY);
+      return;
+    }
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch {
+    // ignore
+  }
 };
 
 export const getInviteCode = (): string => localStorage.getItem(INVITE_KEY) || "";
