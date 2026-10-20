@@ -22,16 +22,34 @@ import { getAccessToken } from "@/auth/tokenStore";
 import { getInviteCode } from "@/auth/storage";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 
+const DRAFT_KEY = "pg_join_draft";
+
+interface JoinDraft {
+  name?: string;
+  personalPhone?: string;
+  permanentAddress?: string;
+  currentAddress?: string;
+  sameAsPermanent?: boolean;
+  parentName?: string;
+  parentRelation?: string;
+  emergencyPhone?: string;
+  consent?: boolean;
+}
+
+function getStoredDraft(): JoinDraft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const JoinWaitingPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout, user, triggerActivation, applySession } = useAuth();
   const inviteCode = getInviteCode();
-
-  const [name, setName] = useState("");
-  const [permanentAddress, setPermanentAddress] = useState("");
-  const [currentAddress, setCurrentAddress] = useState("");
-  const [parentName, setParentName] = useState("");
-  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const draft = getStoredDraft();
 
   const meQuery = useQuery({
     queryKey: QUERY_KEYS.joinMe,
@@ -52,10 +70,15 @@ export const JoinWaitingPage: React.FC = () => {
     (user?.phone && !user.phone.startsWith("+G") ? user.phone : null) ||
     (meQuery.data?.user?.phone && !meQuery.data.user.phone.startsWith("+G") ? meQuery.data.user.phone : "");
 
-  const [personalPhone, setPersonalPhone] = useState(fixedPhone || "");
-  const [sameAsPermanent, setSameAsPermanent] = useState(false);
-  const [parentRelation, setParentRelation] = useState("Father");
-  const [consent, setConsent] = useState(false);
+  const [name, setName] = useState(() => draft?.name || "");
+  const [permanentAddress, setPermanentAddress] = useState(() => draft?.permanentAddress || "");
+  const [currentAddress, setCurrentAddress] = useState(() => draft?.currentAddress || "");
+  const [parentName, setParentName] = useState(() => draft?.parentName || "");
+  const [emergencyPhone, setEmergencyPhone] = useState(() => draft?.emergencyPhone || "");
+  const [personalPhone, setPersonalPhone] = useState(() => draft?.personalPhone || fixedPhone || "");
+  const [sameAsPermanent, setSameAsPermanent] = useState(() => draft?.sameAsPermanent ?? false);
+  const [parentRelation, setParentRelation] = useState(() => draft?.parentRelation || "Father");
+  const [consent, setConsent] = useState(() => draft?.consent ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,21 +88,56 @@ export const JoinWaitingPage: React.FC = () => {
     year: "numeric",
   });
 
+  // Save draft on every change
   useEffect(() => {
-    if (meQuery.data?.join?.name) {
-      setName(meQuery.data.join.name);
+    try {
+      const data: JoinDraft = {
+        name,
+        personalPhone,
+        permanentAddress,
+        currentAddress,
+        sameAsPermanent,
+        parentName,
+        parentRelation,
+        emergencyPhone,
+        consent,
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    } catch {
+      // Storage unavailable or quota exceeded
+    }
+  }, [
+    name,
+    personalPhone,
+    permanentAddress,
+    currentAddress,
+    sameAsPermanent,
+    parentName,
+    parentRelation,
+    emergencyPhone,
+    consent,
+  ]);
+
+  useEffect(() => {
+    const j = meQuery.data?.join;
+    if (j) {
+      if (j.name && !name) setName(j.name);
+      if (j.permanent_address && !permanentAddress) setPermanentAddress(j.permanent_address);
+      if (j.current_address && !currentAddress) setCurrentAddress(j.current_address);
+      if (j.parent_name && !parentName) setParentName(j.parent_name);
+      if (j.emergency_phone && !emergencyPhone) setEmergencyPhone(j.emergency_phone);
     }
     if (fixedPhone && !personalPhone) {
       setPersonalPhone(fixedPhone);
     }
-  }, [meQuery.data?.join?.name, fixedPhone, personalPhone]);
+  }, [meQuery.data?.join, fixedPhone, personalPhone, name, permanentAddress, currentAddress, parentName, emergencyPhone]);
 
   const handleSubmitProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     const trimmedName = name.trim();
-    const trimmedPhone = isPhoneFixed ? fixedPhone : personalPhone.trim();
+    const trimmedPhone = (personalPhone.trim() || fixedPhone).trim();
     const permanent = permanentAddress.trim();
     const current = (sameAsPermanent ? permanent : currentAddress).trim();
     const parent = parentName.trim();
@@ -140,6 +198,9 @@ export const JoinWaitingPage: React.FC = () => {
         }
       }
 
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
       await meQuery.refetch();
       triggerActivation();
       navigate({ to: "/tenant" });
@@ -186,8 +247,7 @@ export const JoinWaitingPage: React.FC = () => {
               Tenant Registration
             </h1>
             <p className="text-xs text-ink-muted mt-1 leading-relaxed">
-              Upload your ID and fill your details. You will enter the tenant portal right after — the owner
-              assigns room and rent separately.
+              Fill in your details to register. You will complete KYC verification right after before entering the dashboard.
             </p>
           </div>
 
@@ -418,7 +478,12 @@ export const JoinWaitingPage: React.FC = () => {
           <div className="flex items-center justify-center pt-1">
             <button
               type="button"
-              onClick={logout}
+              onClick={() => {
+                try {
+                  localStorage.removeItem(DRAFT_KEY);
+                } catch {}
+                logout();
+              }}
               className="text-xs text-danger hover:text-danger flex items-center gap-1"
             >
               <LogOut className="w-3.5 h-3.5" />

@@ -51,10 +51,16 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
     queryFn: () => getSlotInvites("open"),
   });
 
+  const floors: FloorOccupancy[] = occupancyQuery.data?.floors ?? [];
+  const effectiveFloorId = selectedFloorId || floors[0]?.floor_id || "";
+  const activeFloor = floors.find((f) => f.floor_id === effectiveFloorId) ?? floors[0];
+  const activeRooms = activeFloor?.rooms ?? [];
+
   // Mutations
   const createMutation = useMutation({
     mutationFn: () => {
-      if (!selectedRoom || !selectedFloorId) {
+      const targetFloorId = selectedFloorId || effectiveFloorId;
+      if (!selectedRoom || !targetFloorId) {
         throw new Error("Select a floor and room to generate an invite.");
       }
       const rentPaise = rupeesToPaise(rentRupees);
@@ -70,7 +76,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
       }
 
       return createSlotInvite({
-        floor_id: selectedFloorId,
+        floor_id: targetFloorId,
         room_id: selectedRoom.id,
         rent_paise: rentPaise,
         deposit_paise: depositPaise,
@@ -100,10 +106,6 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
       setErrorMsg(err instanceof Error ? err.message : "Failed to revoke invite");
     },
   });
-
-  const floors: FloorOccupancy[] = occupancyQuery.data?.floors ?? [];
-  const activeFloor = floors.find((f) => f.floor_id === selectedFloorId) ?? floors[0];
-  const activeRooms = activeFloor?.rooms ?? [];
 
   const roomMap = useMemo(() => {
     const map = new Map<string, RoomOccupancy>();
@@ -191,7 +193,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
             {/* Floor tabs */}
             <div className="flex flex-wrap gap-1.5">
               {floors.map((fl) => {
-                const isSelected = (selectedFloorId || floors[0]?.floor_id) === fl.floor_id;
+                const isSelected = effectiveFloorId === fl.floor_id;
                 return (
                   <button
                     key={fl.floor_id}
@@ -199,6 +201,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                     onClick={() => {
                       setSelectedFloorId(fl.floor_id);
                       setSelectedRoom(null);
+                      setErrorMsg(null);
                     }}
                     className={`px-3 py-1.5 text-xs font-medium rounded-xl border transition ${
                       isSelected
@@ -221,9 +224,11 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                   <div
                     key={rm.id}
                     onClick={() => {
+                      setSelectedFloorId(effectiveFloorId);
                       setSelectedRoom(rm);
                       setAllowOverCapacity(false);
                       setOverCapacityReason("");
+                      setErrorMsg(null);
                     }}
                     className={`p-3 rounded-xl border cursor-pointer transition text-left relative ${
                       isRoomSelected
@@ -285,7 +290,10 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                 type="number"
                 min="0"
                 value={rentRupees}
-                onChange={(e) => setRentRupees(e.target.value)}
+                onChange={(e) => {
+                  setRentRupees(e.target.value);
+                  setErrorMsg(null);
+                }}
                 className="w-full px-3 py-2 text-sm rounded-xl border border-hairline bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </div>
@@ -298,7 +306,10 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                 type="number"
                 min="0"
                 value={depositRupees}
-                onChange={(e) => setDepositRupees(e.target.value)}
+                onChange={(e) => {
+                  setDepositRupees(e.target.value);
+                  setErrorMsg(null);
+                }}
                 className="w-full px-3 py-2 text-sm rounded-xl border border-hairline bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </div>
@@ -312,7 +323,10 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                 min="1"
                 max="28"
                 value={dueDay}
-                onChange={(e) => setDueDay(Number(e.target.value))}
+                onChange={(e) => {
+                  setDueDay(Number(e.target.value));
+                  setErrorMsg(null);
+                }}
                 className="w-full px-3 py-2 text-sm rounded-xl border border-hairline bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </div>
