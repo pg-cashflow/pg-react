@@ -6,6 +6,8 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { LanguageToggle } from "@/components/common/LanguageSelector";
+import { useLocale } from "@/i18n";
 
 /**
  * Hard onboarding gate: a tenant may not reach the dashboard (or any other
@@ -25,6 +27,7 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
  * RequireKYC* middleware independent of this screen).
  */
 export const TenantKYCOnboardingGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useLocale();
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: QUERY_KEYS.tenantKYCStatus,
     queryFn: getTenantKYCStatus,
@@ -39,13 +42,13 @@ export const TenantKYCOnboardingGate: React.FC<{ children: React.ReactNode }> = 
     return (
       <div className="min-h-screen grid place-items-center bg-bg p-4">
         <div className="max-w-sm w-full text-center space-y-3">
-          <p className="t-body text-ink-muted">Couldn't check your verification status.</p>
+          <p className="t-body text-ink-muted">{t("kyc.onboarding.checkError")}</p>
           <button
             type="button"
             onClick={() => refetch()}
             className="h-10 px-4 rounded-[10px] bg-accent text-white t-body-sm font-semibold"
           >
-            Retry
+            {t("common.retry")}
           </button>
         </div>
       </div>
@@ -64,17 +67,19 @@ export const TenantKYCOnboardingGate: React.FC<{ children: React.ReactNode }> = 
           <div className="p-1.5 rounded-lg bg-accent-tint text-accent">
             <ShieldCheck className="w-4 h-4" />
           </div>
-          <span className="t-body font-semibold">One quick step</span>
+          <span className="t-body font-semibold">{t("kyc.onboarding.step")}</span>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
       </header>
 
       <main className="flex-1 px-4 pb-10 sm:px-6 max-w-2xl w-full mx-auto">
         <div className="pb-5">
-          <h1 className="t-h2 font-bold">Verify your identity to continue</h1>
+          <h1 className="t-h2 font-bold">{t("kyc.onboarding.title")}</h1>
           <p className="t-body-sm text-ink-muted mt-1">
-            Your room is allocated — complete identity verification to unlock your dashboard, dues,
-            and payments. Choose whichever is faster for you.
+            {t("kyc.onboarding.desc")}
           </p>
         </div>
         <TenantKYCCard defaultTab="otp" onSuccess={() => refetch()} />

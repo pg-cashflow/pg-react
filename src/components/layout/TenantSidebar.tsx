@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { useAuth } from "@/auth/context";
+import { useLocale } from "@/i18n";
 
 interface TenantSidebarProps {
   currentTab: string;
@@ -23,14 +24,15 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
   onCloseMobile,
 }) => {
   const { logout } = useAuth();
+  const { t } = useLocale();
 
   const navItems = [
-    { id: "dashboard", label: "Home", icon: LayoutDashboard },
-    { id: "dues", label: "My Dues", icon: Receipt },
-    { id: "payments", label: "Passbook", icon: CreditCard },
-    { id: "rewards", label: "Perks & Points", icon: Sparkles },
-    { id: "community", label: "Community & Meals", icon: UtensilsCrossed },
-    { id: "profile", label: "Profile", icon: Building2 },
+    { id: "dashboard", label: t("nav.home"), icon: LayoutDashboard },
+    { id: "dues", label: t("nav.myDues"), icon: Receipt },
+    { id: "payments", label: t("nav.passbook"), icon: CreditCard },
+    { id: "rewards", label: t("nav.perksAndPoints"), icon: Sparkles },
+    { id: "community", label: t("nav.communityMeals"), icon: UtensilsCrossed },
+    { id: "profile", label: t("tenant.profile"), icon: Building2 },
   ];
 
   return (
@@ -52,8 +54,8 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
             <Building2 className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="font-bold text-ink text-sm leading-tight">Tenant Portal</h1>
-            <p className="text-[11px] text-ink-muted">My rent & payments</p>
+            <h1 className="font-bold text-ink text-sm leading-tight">{t("tenant.portal")}</h1>
+            <p className="text-[11px] text-ink-muted">{t("tenant.portalSubtitle")}</p>
           </div>
         </div>
 
@@ -87,7 +89,7 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-danger hover:bg-danger-tint transition"
           >
             <LogOut className="w-4 h-4" />
-            <span>Logout</span>
+            <span>{t("common.logout")}</span>
           </button>
         </div>
       </aside>

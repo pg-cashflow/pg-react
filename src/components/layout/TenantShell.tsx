@@ -4,18 +4,21 @@ import { TenantSidebar } from "./TenantSidebar";
 import { TenantBottomNav } from "./TenantBottomNav";
 import { TopBar } from "./TopBar";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { useLocale } from "@/i18n";
+import type { MessageKey } from "@/i18n";
 
-const TITLES: Record<string, string> = {
-  "/tenant": "My Dashboard",
-  "/tenant/": "My Dashboard",
-  "/tenant/dues": "My Dues",
-  "/tenant/payments": "Passbook",
-  "/tenant/rewards": "Perks & Points Store",
-  "/tenant/community": "Community & Meals",
-  "/tenant/profile": "Profile",
+const TITLE_KEYS: Record<string, MessageKey> = {
+  "/tenant": "nav.myDashboard",
+  "/tenant/": "nav.myDashboard",
+  "/tenant/dues": "nav.myDues",
+  "/tenant/payments": "nav.passbook",
+  "/tenant/rewards": "nav.perksStore",
+  "/tenant/community": "nav.communityMeals",
+  "/tenant/profile": "tenant.profile",
 };
 
 export const TenantShell: React.FC = () => {
+  const { t } = useLocale();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -27,6 +30,8 @@ export const TenantShell: React.FC = () => {
       document.documentElement.removeAttribute("data-portal");
     };
   }, []);
+
+  const pageTitle = TITLE_KEYS[path] ? t(TITLE_KEYS[path]) : t("tenant.portal");
 
   return (
     <div data-portal="tenant" className="min-h-screen flex flex-col bg-bg text-ink transition-colors">
@@ -42,14 +47,14 @@ export const TenantShell: React.FC = () => {
 
       <div className="lg:pl-64 flex flex-col flex-1">
         <TopBar
-          title={TITLES[path] || "Tenant Portal"}
+          title={pageTitle}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           showPush
           searchRole="tenant"
         />
 
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
-          <ErrorBoundary fallbackTitle={`Error loading ${TITLES[path] || "page"}`}>
+          <ErrorBoundary fallbackTitle={t("common.errorLoadingPage", { page: pageTitle })}>
             <Outlet />
           </ErrorBoundary>
         </main>

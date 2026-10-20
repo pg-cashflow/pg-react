@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { LanguageToggle } from "@/components/common/LanguageSelector";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { useLocale } from "@/i18n";
 
 interface AuthLayoutProps {
   icon?: React.ComponentType<{ className?: string }>;
@@ -12,6 +13,8 @@ interface AuthLayoutProps {
 }
 
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }: AuthLayoutProps) {
+  const { t } = useLocale();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg px-4 py-10 relative">
       <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
@@ -21,7 +24,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/landing" className="block t-caption font-semibold text-accent">
-            PG Cashflow
+            {t("common.appName")}
           </Link>
           {Icon && (
             <div className="mx-auto mt-4 flex items-center justify-center w-14 h-14 rounded-[14px] bg-accent text-white">

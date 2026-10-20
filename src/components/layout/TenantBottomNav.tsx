@@ -1,5 +1,6 @@
 import React from "react";
 import { LayoutDashboard, Receipt, CreditCard, Sparkles, UtensilsCrossed } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 interface TenantBottomNavProps {
   currentTab: string;
@@ -10,12 +11,14 @@ export const TenantBottomNav: React.FC<TenantBottomNavProps> = ({
   currentTab,
   onSelectTab,
 }) => {
+  const { t } = useLocale();
+
   const tabs = [
-    { id: "dashboard", label: "Home", icon: LayoutDashboard },
-    { id: "dues", label: "Dues", icon: Receipt },
-    { id: "payments", label: "Passbook", icon: CreditCard },
-    { id: "rewards", label: "Perks", icon: Sparkles },
-    { id: "community", label: "Meals", icon: UtensilsCrossed },
+    { id: "dashboard", label: t("nav.home"), icon: LayoutDashboard },
+    { id: "dues", label: t("nav.duesShort"), icon: Receipt },
+    { id: "payments", label: t("nav.passbook"), icon: CreditCard },
+    { id: "rewards", label: t("nav.perks"), icon: Sparkles },
+    { id: "community", label: t("nav.meals"), icon: UtensilsCrossed },
   ];
 
   return (

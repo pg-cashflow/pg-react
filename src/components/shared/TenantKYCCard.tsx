@@ -22,6 +22,7 @@ import {
 } from "@/api/kyc";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { formatDate } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 export interface TenantKYCCardProps {
   isModal?: boolean;
@@ -36,6 +37,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   onSuccess,
   defaultTab = "otp",
 }) => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"otp" | "upload">(defaultTab);
 
@@ -85,7 +87,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     },
     onSuccess: (res) => {
       setOtpRefId(res.ref_id);
-      setSuccessMsg("OTP sent to your Aadhaar-linked mobile phone.");
+      setSuccessMsg(t("kyc.card.otpSentSuccess"));
     },
     onError: (err: unknown) => {
       setUiError(err instanceof Error ? err.message : "Failed to send OTP");
@@ -99,7 +101,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       return verifyAadhaarOTP(otpRefId, otpCode.trim());
     },
     onSuccess: () => {
-      setSuccessMsg("Identity verified instantly with UIDAI.");
+      setSuccessMsg(t("kyc.card.verifiedInstantSuccess"));
       setOtpRefId(null);
       setOtpCode("");
       setAadhaarInput("");
@@ -119,7 +121,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       return uploadKYCDocument(file);
     },
     onSuccess: () => {
-      setSuccessMsg("Document submitted for manual review by the owner.");
+      setSuccessMsg(t("kyc.card.docSubmittedSuccess"));
       setUploadFile(null);
       refreshKYC();
       onSuccess?.();
@@ -133,7 +135,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     mutationFn: revokeKYCConsent,
     onSuccess: () => {
       setShowRevokeConfirm(false);
-      setSuccessMsg("KYC consent revoked and verification data marked inactive.");
+      setSuccessMsg(t("kyc.card.consentRevokedSuccess"));
       refreshKYC();
     },
     onError: (err: unknown) => {
@@ -143,7 +145,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
 
   const formatAadhaarNumber = (val: string) => {
     const digits = val.replace(/\D/g, "").slice(0, 12);
-    const parts = [];
+    const parts: string[] = [];
     for (let i = 0; i < digits.length; i += 4) {
       parts.push(digits.slice(i, i + 4));
     }
@@ -158,7 +160,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setUiError("Document exceeds 5MB limit.");
+        setUiError(t("kyc.card.docSizeExceeded"));
         return;
       }
       setUploadFile(file);
@@ -177,13 +179,13 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   if (isError) {
     return (
       <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-2">
-        <p className="t-body-sm text-danger">Unable to load verification status.</p>
+        <p className="t-body-sm text-danger">{t("kyc.card.unableToLoad")}</p>
         <button
           type="button"
           onClick={() => refetch()}
           className="t-caption font-semibold text-accent hover:underline"
         >
-          Retry
+          {t("common.retry")}
         </button>
       </section>
     );
@@ -198,27 +200,27 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             <Lock className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="t-h3">Identity Verification (KYC)</h2>
-            <p className="t-caption text-ink-muted">Mandatory tenant authenticity and occupancy record</p>
+            <h2 className="t-h3">{t("kyc.card.title")}</h2>
+            <p className="t-caption text-ink-muted">{t("kyc.card.subtitle")}</p>
           </div>
         </div>
 
         {isVerified && (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success-tint text-success t-caption font-semibold">
             <ShieldCheck className="w-3.5 h-3.5" />
-            Verified
+            {t("kyc.card.verifiedBadge")}
           </span>
         )}
         {isPendingReview && (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-warning-tint text-warning t-caption font-semibold">
             <Clock className="w-3.5 h-3.5" />
-            Under Review
+            {t("kyc.card.underReviewBadge")}
           </span>
         )}
         {isRejected && (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-danger-tint text-danger t-caption font-semibold">
             <AlertTriangle className="w-3.5 h-3.5" />
-            Rejected
+            {t("kyc.card.rejectedBadge")}
           </span>
         )}
       </div>
@@ -228,31 +230,31 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
         <div className="rounded-[10px] bg-bg border border-hairline p-3.5 space-y-2.5">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="t-caption text-ink-faint block">Aadhaar / ID Record</span>
+              <span className="t-caption text-ink-faint block">{t("kyc.card.idRecord")}</span>
               <p className="t-code font-semibold text-ink">
-                {kyc?.masked_uid ? `**** **** ${kyc.masked_uid}` : "UIDAI Verified"}
+                {kyc?.masked_uid ? `**** **** ${kyc.masked_uid}` : t("kyc.card.uidaiVerified")}
               </p>
             </div>
             <div className="text-right space-y-1">
-              <span className="t-caption text-ink-faint block">Method</span>
+              <span className="t-caption text-ink-faint block">{t("kyc.card.method")}</span>
               <span className="t-caption font-medium uppercase tracking-wider text-ink-muted">
                 {kyc?.method === "aadhaar_otp"
-                  ? "Direct Aadhaar OTP"
+                  ? t("kyc.card.methodDirectOtp")
                   : kyc?.method === "digilocker"
-                  ? "DigiLocker"
+                  ? t("kyc.card.methodDigilocker")
                   : kyc?.method === "ocr"
-                  ? "Manual ID Review"
-                  : "Secure QR"}
+                  ? t("kyc.card.methodManual")
+                  : t("kyc.card.methodQr")}
               </span>
             </div>
           </div>
 
           {kyc?.verified_at && (
             <div className="flex items-center justify-between pt-2 border-t border-hairline t-caption text-ink-muted">
-              <span>Verified on {formatDate(kyc.verified_at)}</span>
+              <span>{t("kyc.card.verifiedOn", { date: formatDate(kyc.verified_at) })}</span>
               <span className="flex items-center gap-1 text-success">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                DPDP Act Compliant
+                {t("kyc.card.dpdpCompliant")}
               </span>
             </div>
           )}
@@ -263,7 +265,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               onClick={() => setShowRevokeConfirm(true)}
               className="t-caption text-ink-faint hover:text-danger transition"
             >
-              Revoke Consent / Manage Privacy
+              {t("kyc.card.revokePrivacy")}
             </button>
           </div>
         </div>
@@ -274,14 +276,13 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
         <div className="rounded-[10px] bg-warning-tint/30 border border-warning/20 p-3.5 space-y-2">
           <div className="flex items-center gap-2 text-warning">
             <Clock className="w-4 h-4 shrink-0" />
-            <h3 className="t-body font-semibold">Document Pending Owner Approval</h3>
+            <h3 className="t-body font-semibold">{t("kyc.card.pendingTitle")}</h3>
           </div>
           <p className="t-caption text-ink-muted leading-relaxed">
-            Your uploaded identity document was received and queued for review. Your property manager
-            will verify the document details shortly. Rent payment will unlock immediately upon approval.
+            {t("kyc.card.pendingDesc")}
           </p>
           {kyc?.created_at && (
-            <p className="t-caption text-ink-faint">Submitted on {formatDate(kyc.created_at)}</p>
+            <p className="t-caption text-ink-faint">{t("kyc.card.submittedOn", { date: formatDate(kyc.created_at) })}</p>
           )}
         </div>
       )}
@@ -291,15 +292,15 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
         <div className="rounded-[10px] bg-danger-tint/30 border border-danger/20 p-3.5 space-y-2">
           <div className="flex items-center gap-2 text-danger">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <h3 className="t-body font-semibold">Document Verification Rejected</h3>
+            <h3 className="t-body font-semibold">{t("kyc.card.rejectedTitle")}</h3>
           </div>
           {kyc?.rejection_reason && (
             <p className="t-body-sm text-ink font-medium bg-bg/80 p-2.5 rounded-lg border border-hairline">
-              Reason: {kyc.rejection_reason}
+              {t("kyc.card.rejectionReason", { reason: kyc.rejection_reason })}
             </p>
           )}
           <p className="t-caption text-ink-muted">
-            Please re-submit your verification using direct Aadhaar OTP or upload a clear, legible photo.
+            {t("kyc.card.rejectedHelp")}
           </p>
         </div>
       )}
@@ -322,7 +323,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               }`}
             >
               <KeyRound className="w-4 h-4" />
-              <span>Verify via Aadhaar OTP</span>
+              <span>{t("kyc.card.tabOtp")}</span>
             </button>
             <button
               type="button"
@@ -337,7 +338,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               }`}
             >
               <Upload className="w-4 h-4" />
-              <span>Upload ID Document</span>
+              <span>{t("kyc.card.tabUpload")}</span>
             </button>
           </div>
 
@@ -347,17 +348,17 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <div>
                 <span className="t-caption font-semibold text-ink flex items-center gap-1">
                   <ShieldCheck className="w-4 h-4 text-accent" />
-                  Instant Automatic UIDAI Verification
+                  {t("kyc.card.otpHeading")}
                 </span>
                 <p className="t-caption text-ink-muted mt-0.5">
-                  Direct government OTP verification. No human review required; verifies instantly.
+                  {t("kyc.card.otpSubtitle")}
                 </p>
               </div>
 
               {!otpRefId ? (
                 <div className="space-y-2">
                   <label className="t-caption font-medium text-ink-muted block">
-                    12-Digit Aadhaar Number
+                    {t("kyc.card.aadhaarLabel")}
                   </label>
                   <input
                     type="text"
@@ -381,7 +382,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     {requestOtpMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      "Send OTP to Linked Mobile"
+                      t("kyc.card.sendOtpBtn")
                     )}
                   </button>
                 </div>
@@ -389,14 +390,14 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="t-caption font-medium text-ink-muted">
-                      Enter 6-Digit UIDAI OTP
+                      {t("kyc.card.enterOtpLabel")}
                     </label>
                     <button
                       type="button"
                       onClick={() => setOtpRefId(null)}
                       className="t-caption text-accent hover:underline"
                     >
-                      Change Number
+                      {t("kyc.card.changeNumber")}
                     </button>
                   </div>
                   <input
@@ -417,7 +418,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     {verifyOtpMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      "Verify & Confirm Identity"
+                      t("kyc.card.verifyConfirmBtn")
                     )}
                   </button>
                 </div>
@@ -433,7 +434,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   }}
                   className="t-caption text-ink-muted hover:text-accent underline transition"
                 >
-                  Aadhaar OTP not working? Upload your ID document instead →
+                  {t("kyc.card.otpFallbackLink")}
                 </button>
               </div>
             </div>
@@ -445,11 +446,10 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <div>
                 <span className="t-caption font-semibold text-ink flex items-center gap-1">
                   <FileText className="w-4 h-4 text-ink-muted" />
-                  Manual ID Photo Upload (Direct Fallback)
+                  {t("kyc.card.uploadHeading")}
                 </span>
                 <p className="t-caption text-ink-muted mt-0.5">
-                  Attach an Aadhaar Card, Passport, or Driving Licence photo (JPG, PNG, PDF up to 5MB).
-                  Once submitted, you can immediately access your dashboard while the owner reviews it.
+                  {t("kyc.card.uploadSubtitle")}
                 </p>
               </div>
 
@@ -457,11 +457,11 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 <div className="flex items-center gap-2 text-ink truncate min-w-0 pr-2">
                   <Upload className="w-4 h-4 text-ink-muted shrink-0" />
                   <span className="t-caption text-ink-muted truncate">
-                    {uploadFile ? uploadFile.name : "Choose document image or PDF"}
+                    {uploadFile ? uploadFile.name : t("kyc.card.chooseDoc")}
                   </span>
                 </div>
                 <label className="px-3 py-1.5 rounded-lg bg-surface border border-hairline text-ink t-caption font-semibold cursor-pointer shrink-0 hover:bg-surface/80 transition">
-                  {uploadFile ? "Change" : "Browse"}
+                  {uploadFile ? t("kyc.card.change") : t("kyc.card.browse")}
                   <input
                     type="file"
                     accept="image/*,application/pdf"
@@ -480,7 +480,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 {uploadMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Submit Document for Review"
+                  t("kyc.card.submitReviewBtn")
                 )}
               </button>
             </div>
@@ -495,8 +495,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               className="mt-0.5 rounded border-hairline text-accent focus:ring-accent"
             />
             <span className="t-caption text-ink-muted leading-tight">
-              I consent to the PG collecting and storing my identity verification details for residency
-              compliance under the DPDP Act.
+              {t("kyc.card.consentText")}
             </span>
           </label>
         </div>
@@ -511,7 +510,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <p className="t-caption font-semibold text-danger">{uiError}</p>
               {activeTab === "otp" && (
                 <p className="t-caption text-ink-muted">
-                  Aadhaar OTP service is unavailable or in sandbox mode. You can instantly proceed by uploading your ID document instead.
+                  {t("kyc.card.sandboxFallback")}
                 </p>
               )}
             </div>
@@ -526,7 +525,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               className="w-full py-2 px-3 rounded-lg bg-surface border border-hairline hover:bg-hairline/20 t-caption font-semibold text-ink flex items-center justify-center gap-1.5 transition"
             >
               <Upload className="w-4 h-4 text-accent" />
-              <span>Upload ID Document Instead →</span>
+              <span>{t("kyc.card.uploadInsteadBtn")}</span>
             </button>
           )}
         </div>
@@ -537,10 +536,9 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       {showRevokeConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-surface border border-hairline rounded-2xl p-5 max-w-sm w-full space-y-3">
-            <h3 className="t-h3 text-danger">Revoke KYC Consent</h3>
+            <h3 className="t-h3 text-danger">{t("kyc.card.revokeTitle")}</h3>
             <p className="t-body-sm text-ink-muted">
-              Revoking consent marks your verification status as revoked under the DPDP Act. You may
-              need to re-verify your identity before next month's rent cycle.
+              {t("kyc.card.revokeDesc")}
             </p>
             <div className="flex gap-2 justify-end pt-2">
               <button
@@ -548,7 +546,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 onClick={() => setShowRevokeConfirm(false)}
                 className="h-10 px-3 rounded-[10px] border border-hairline t-caption font-semibold"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -556,7 +554,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 onClick={() => revokeMutation.mutate()}
                 className="h-10 px-4 rounded-[10px] bg-danger text-white t-caption font-semibold flex items-center gap-1.5"
               >
-                {revokeMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Revoke"}
+                {revokeMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : t("kyc.card.revokeBtn")}
               </button>
             </div>
           </div>

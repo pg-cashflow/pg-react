@@ -3,6 +3,9 @@ import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { TopBar } from "./TopBar";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { useAuth } from "@/auth/context";
+import { useLocale } from "@/i18n";
+import type { MessageKey } from "@/i18n";
+import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 import {
   UtensilsCrossed,
   ClipboardCheck,
@@ -12,6 +15,7 @@ import {
   ShieldCheck,
   User,
   ArrowLeft,
+  Languages,
 } from "lucide-react";
 
 export type ManagerAction = {
@@ -26,21 +30,23 @@ export type ManagerAction = {
 const ActionCtx = createContext<(a: ManagerAction) => void>(() => {});
 export const useManagerAction = () => useContext(ActionCtx);
 
-const TITLES: Record<string, string> = {
-  "/manager": "Kitchen headcount",
-  "/manager/kitchen": "Kitchen headcount",
-  "/manager/inspections": "Inspections",
-  "/manager/inspections/new": "New inspection",
-  "/manager/meters": "Meter readings",
-  "/manager/hazards": "Hazard reports",
-  "/manager/profile": "Profile",
-  "/manager/violations": "Violations",
+const TITLE_KEYS: Record<string, MessageKey> = {
+  "/manager": "manager.titleKitchen",
+  "/manager/kitchen": "manager.titleKitchen",
+  "/manager/inspections": "manager.titleInspections",
+  "/manager/inspections/new": "manager.titleNewInspection",
+  "/manager/meters": "manager.titleMeters",
+  "/manager/hazards": "manager.titleHazards",
+  "/manager/profile": "tenant.profile",
+  "/manager/violations": "manager.titleViolations",
 };
 
 export const ManagerShell: React.FC = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { t, locale, setLocale } = useLocale();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [action, setAction] = useState<ManagerAction>(null);
+  const [showLanguagePrompt, setShowLanguagePrompt] = useState(false);
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isInspectionSub = /^\/manager\/inspections\/(new|[^/]+)$/.test(path);
@@ -50,14 +56,42 @@ export const ManagerShell: React.FC = () => {
     return () => document.documentElement.removeAttribute("data-portal");
   }, []);
 
+  // Manager first-access language preference prompt
+  useEffect(() => {
+    try {
+      const alreadyPrompted = sessionStorage.getItem("pg_manager_lang_prompt_seen") === "true";
+      if (!alreadyPrompted && !user?.has_saved_preference) {
+        setShowLanguagePrompt(true);
+      }
+    } catch {
+      // ignore storage access errors
+    }
+  }, [user?.has_saved_preference]);
+
+  const handleDismissLangPrompt = async () => {
+    try {
+      sessionStorage.setItem("pg_manager_lang_prompt_seen", "true");
+    } catch {
+      // ignore
+    }
+    await setLocale(locale, true);
+    setShowLanguagePrompt(false);
+  };
+
   const navItems = [
-    { id: "kitchen", label: "Kitchen", icon: UtensilsCrossed, to: "/manager/kitchen" },
-    { id: "inspections", label: "Inspections", icon: ClipboardCheck, to: "/manager/inspections" },
-    { id: "meters", label: "Meters", icon: Gauge, to: "/manager/meters" },
-    { id: "hazards", label: "Hazards", icon: AlertTriangle, to: "/manager/hazards" },
-    { id: "violations", label: "Violations", icon: AlertTriangle, to: "/manager/violations" },
-    { id: "profile", label: "Profile", icon: User, to: "/manager/profile" },
+    { id: "kitchen", label: t("manager.navKitchen"), icon: UtensilsCrossed, to: "/manager/kitchen" },
+    { id: "inspections", label: t("manager.navInspections"), icon: ClipboardCheck, to: "/manager/inspections" },
+    { id: "meters", label: t("manager.navMeters"), icon: Gauge, to: "/manager/meters" },
+    { id: "hazards", label: t("manager.navHazards"), icon: AlertTriangle, to: "/manager/hazards" },
+    { id: "violations", label: t("manager.navViolations"), icon: AlertTriangle, to: "/manager/violations" },
+    { id: "profile", label: t("tenant.profile"), icon: User, to: "/manager/profile" },
   ];
+
+  const pageTitle = TITLE_KEYS[path]
+    ? t(TITLE_KEYS[path])
+    : path.startsWith("/manager/inspections/")
+    ? t("manager.titleInspectionSingle")
+    : t("manager.titleWarden");
 
   return (
     <div data-portal="manager" className="min-h-screen flex flex-col bg-bg text-ink">
@@ -72,8 +106,8 @@ export const ManagerShell: React.FC = () => {
         <div className="h-16 px-6 flex items-center gap-3 border-b border-hairline">
           <ShieldCheck className="w-6 h-6 text-accent" />
           <div>
-            <h1 className="t-h3">PG Cashflow</h1>
-            <p className="t-caption text-ink-muted">Warden portal</p>
+            <h1 className="t-h3">{t("common.appName")}</h1>
+            <p className="t-caption text-ink-muted">{t("manager.portalSubtitle")}</p>
           </div>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -102,22 +136,22 @@ export const ManagerShell: React.FC = () => {
             onClick={logout}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-[10px] t-body font-medium text-danger"
           >
-            <LogOut className="w-4 h-4" /> Log out
+            <LogOut className="w-4 h-4" /> {t("common.logout")}
           </button>
         </div>
       </aside>
 
       <div className="lg:pl-64 flex flex-col flex-1">
         <TopBar
-          title={TITLES[path] || (path.startsWith("/manager/inspections/") ? "Inspection" : "Warden")}
-          subtitle="Daily ops"
+          title={pageTitle}
+          subtitle={t("manager.subtitleOps")}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           searchRole="manager"
           leading={
             isInspectionSub ? (
               <button
                 type="button"
-                aria-label="Back"
+                aria-label={t("common.back")}
                 onClick={() => navigate({ to: "/manager/inspections" })}
                 className="grid h-10 w-10 place-items-center rounded-[10px] hover:bg-accent-tint lg:hidden"
               >
@@ -127,7 +161,7 @@ export const ManagerShell: React.FC = () => {
           }
         />
         <main className="flex-1 p-4 lg:p-8 max-w-[720px] w-full mx-auto pb-28 lg:pb-8">
-          <ErrorBoundary fallbackTitle="Error loading warden portal">
+          <ErrorBoundary fallbackTitle={t("manager.errorLoading")}>
             <ActionCtx.Provider value={setAction}>
               <Outlet />
             </ActionCtx.Provider>
@@ -152,9 +186,40 @@ export const ManagerShell: React.FC = () => {
               onClick={action.onClick}
               className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold disabled:opacity-40"
             >
-              {action.busy ? action.busyLabel || "Working…" : action.label}
+              {action.busy ? action.busyLabel || t("common.working") : action.label}
             </button>
           )}
+        </div>
+      )}
+
+      {/* Manager First-Access Language Preference Prompt */}
+      {showLanguagePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl bg-surface border border-hairline p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-accent-tint text-accent">
+                <Languages className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="t-h3">{t("manager.langPromptTitle")}</h3>
+                <p className="t-caption text-ink-muted mt-0.5">{t("manager.langPromptSubtitle")}</p>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <LanguageSegmentedControl />
+            </div>
+
+            <div className="pt-3">
+              <button
+                type="button"
+                onClick={handleDismissLangPrompt}
+                className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold transition hover:bg-accent/90"
+              >
+                {t("common.continue")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
