@@ -1,12 +1,53 @@
-import React from "react";
+import React, { act } from "react";
+import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
-import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { usePayDue } from "@/lib/usePayDue";
 import { API_BASE } from "@/lib/constants";
 import * as cashfreeModule from "@/lib/cashfree";
+
+function renderHook<T>(callback: () => T, options?: { wrapper?: React.ComponentType<{ children: React.ReactNode }> }) {
+  const result = { current: undefined as unknown as T };
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  const TestComponent = () => {
+    result.current = callback();
+    return null;
+  };
+
+  const Wrapper = options?.wrapper || (({ children }: { children: React.ReactNode }) => <>{children}</>);
+
+  act(() => {
+    root.render(
+      <Wrapper>
+        <TestComponent />
+      </Wrapper>
+    );
+  });
+
+  return {
+    result,
+    rerender: () => {
+      act(() => {
+        root.render(
+          <Wrapper>
+            <TestComponent />
+          </Wrapper>
+        );
+      });
+    },
+    unmount: () => {
+      act(() => {
+        root.unmount();
+      });
+      container.remove();
+    },
+  };
+}
 
 const dueId = "due-test-123";
 
@@ -109,7 +150,7 @@ describe("usePayDue State Machine", () => {
     dueStatus = "paid";
 
     await act(async () => {
-      vi.advanceTimersByTime(2500);
+      await vi.advanceTimersByTimeAsync(2500);
     });
 
     expect(result.current.state).toBe("PAID");
@@ -134,7 +175,7 @@ describe("usePayDue State Machine", () => {
 
     // Advance through 10s quiet checking deadline
     await act(async () => {
-      vi.advanceTimersByTime(11000);
+      await vi.advanceTimersByTimeAsync(11000);
     });
 
     // Returns to READY with no error banner

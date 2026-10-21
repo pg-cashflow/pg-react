@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { formatMatchedBy } from "@/lib/utils";
-import { startCashfreeCheckout } from "@/lib/cashfree";
+import { formatMatchedBy } from "../lib/utils";
+import { startCashfreeCheckout, _resetCashfreeInstanceForTests } from "../lib/cashfree";
 
 describe("Cashfree checkout precedence and result mapping", () => {
   beforeEach(() => {
+    _resetCashfreeInstanceForTests();
     vi.stubGlobal("window", {
       Cashfree: vi.fn(),
     });

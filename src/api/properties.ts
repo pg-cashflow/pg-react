@@ -46,3 +46,27 @@ export const switchProperty = async (
     body: "{}",
   });
 };
+
+export interface CashfreeReadiness {
+  ready: boolean;
+  payment_mode: PaymentMode;
+  reason: string;
+  env: string;
+}
+
+export const getCashfreeReadiness = async (): Promise<CashfreeReadiness> => {
+  return apiFetch<CashfreeReadiness>("/owner/settings/cashfree-readiness");
+};
+
+export const updatePropertyPaymentMode = async (
+  propertyId: string,
+  paymentMode: PaymentMode
+): Promise<{ ok: boolean; property_id: string; payment_mode: PaymentMode }> => {
+  return apiFetch<{ ok: boolean; property_id: string; payment_mode: PaymentMode }>(
+    `/owner/properties/${propertyId}/payment-mode`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ payment_mode: paymentMode }),
+    }
+  );
+};

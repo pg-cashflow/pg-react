@@ -27,10 +27,12 @@ import {
   Award,
   Sparkles,
   ShieldCheck,
+  CreditCard,
 } from "lucide-react";
 import type { PropertyGamificationSettings } from "@pg/types";
 import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
 import { QuickLayoutModal } from "@/components/owner/QuickLayoutModal";
+import { PaymentGatewaySettingsCard } from "@/components/owner/PaymentGatewaySettingsCard";
 
 export const OwnerFacilityView: React.FC = () => {
   const queryClient = useQueryClient();
@@ -67,8 +69,8 @@ export const OwnerFacilityView: React.FC = () => {
 
   const propertyList = properties ?? [];
 
-  // Tab: floors | rooms | wardens | gamification
-  const [tab, setTab] = useState<"floors" | "rooms" | "wardens" | "gamification">("floors");
+  // Tab: floors | rooms | wardens | gamification | gateway
+  const [tab, setTab] = useState<"floors" | "rooms" | "wardens" | "gamification" | "gateway">("floors");
 
   // Add Floor state
   const [floorNumber, setFloorNumber] = useState("");
@@ -295,6 +297,15 @@ export const OwnerFacilityView: React.FC = () => {
         >
           <Sliders className="w-4 h-4" />
           <span>Gamification Rules</span>
+        </button>
+        <button
+          onClick={() => setTab("gateway")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
+            tab === "gateway" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Payment Gateway</span>
         </button>
       </div>
 
@@ -663,6 +674,11 @@ export const OwnerFacilityView: React.FC = () => {
             {updateSettingsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Save Gamification Rules"}
           </button>
         </div>
+      )}
+
+      {/* 5. Payment Gateway */}
+      {tab === "gateway" && (
+        <PaymentGatewaySettingsCard propertyId={propertyId} />
       )}
 
       {/* Modals */}

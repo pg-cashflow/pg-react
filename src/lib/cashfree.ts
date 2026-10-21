@@ -38,6 +38,11 @@ declare global {
 let cachedCashfreeInstance: CashfreeInstance | null = null;
 let cachedCashfreeMode: string | null = null;
 
+export function _resetCashfreeInstanceForTests(): void {
+  cachedCashfreeInstance = null;
+  cachedCashfreeMode = null;
+}
+
 function loadSdk(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.Cashfree) return Promise.resolve();

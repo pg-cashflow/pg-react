@@ -10,6 +10,7 @@ import { ThemeSegmentedControl } from "@/components/common/ThemeToggle";
 import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 import { SlotInviteCard } from "@/components/owner/SlotInviteCard";
+import { PaymentGatewaySettingsCard } from "@/components/owner/PaymentGatewaySettingsCard";
 
 export const MoreView: React.FC = () => {
   const queryClient = useQueryClient();
@@ -73,6 +74,9 @@ export const MoreView: React.FC = () => {
         </div>
         <LanguageSegmentedControl />
       </section>
+
+      {/* Payment Gateway & Rent Collection Mode */}
+      <PaymentGatewaySettingsCard />
 
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
         <h3 className="font-semibold text-ink">Notifications</h3>

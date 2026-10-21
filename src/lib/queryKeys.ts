@@ -14,6 +14,7 @@ export const QUERY_KEYS = {
   ownerOccupancy: ["owner", "occupancy"] as const,
   paymentReports: ["owner", "payment-reports"] as const,
   properties: ["owner", "properties"] as const,
+  cashfreeReadiness: ["owner", "settings", "cashfree-readiness"] as const,
   tenantDues: ["tenant", "dues"] as const,
   tenantPayments: ["tenant", "payments"] as const,
   tenantProfile: ["tenant", "me"] as const,

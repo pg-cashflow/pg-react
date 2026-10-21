@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { getTenantDuePay, verifyTenantDuePay } from "@/api/pay";
+import { getMyDues } from "@/api/tenant";
 import { startCashfreeCheckout } from "@/lib/cashfree";
 import type { Due, PayIntent } from "@pg/types";
 
@@ -51,12 +52,13 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   // Check if target due is paid from query client cache or server
   const checkDueStatus = useCallback(async (): Promise<boolean> => {
     try {
-      const data = await queryClient.fetchQuery<{ dues: Due[] }>({
+      const data = await queryClient.fetchQuery<Due[]>({
         queryKey: QUERY_KEYS.tenantDues,
+        queryFn: getMyDues,
         staleTime: 0,
       });
-      const dues = data?.dues || [];
-      const match = dues.find((d) => d.id === dueId);
+      const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
+      const match = dues.find((d: Due) => d.id === dueId);
       if (match && (match.status === "paid" || match.status === "waived")) {
         markPaid();
         return true;
