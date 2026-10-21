@@ -13,10 +13,13 @@ import {
   Plus,
   Minus,
   Settings2,
+  CreditCard,
+  QrCode,
+  ShieldCheck,
 } from "lucide-react";
 import { createProperty, switchProperty, type CreatePropertyInput, type CustomFloorInput } from "@/api/properties";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import type { Property } from "@pg/types";
+import type { Property, PaymentMode } from "@pg/types";
 
 interface AddPropertyModalProps {
   isOpen: boolean;
@@ -41,6 +44,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
   // Basic Details
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>("cashfree");
 
   // Quick Layout Generator state
   const [enableQuickLayout, setEnableQuickLayout] = useState(true);
@@ -113,6 +117,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
       const payload: CreatePropertyInput = {
         name: name.trim(),
         address: address.trim() || undefined,
+        payment_mode: paymentMode,
       };
 
       if (enableQuickLayout && activeFloors.length > 0) {
@@ -464,6 +469,83 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* 3. Rent Collection Platform */}
+          <div className="space-y-3 pt-3 border-t border-hairline">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-accent" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-ink">
+                3. Rent Collection & Payment Mode
+              </h3>
+            </div>
+            <p className="text-[11px] text-ink-muted">
+              Select how tenants will pay dues for this property. You can change this anytime later in Settings.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              {/* Cashfree */}
+              <button
+                type="button"
+                onClick={() => setPaymentMode("cashfree")}
+                className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                  paymentMode === "cashfree"
+                    ? "bg-accent/10 border-accent ring-1 ring-accent"
+                    : "bg-surface border-hairline hover:border-ink/20"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5 font-semibold text-xs text-ink">
+                      <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+                      Cashfree Checkout
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent text-white">
+                      Primary
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-ink-muted leading-relaxed">
+                    Automated modal checkout (UPI apps, Cards, Netbanking). Instant ledger settlement with zero manual UTR verification.
+                  </p>
+                </div>
+                <div className="mt-2.5 pt-2 border-t border-hairline/60 text-[10px] font-medium">
+                  <span className={paymentMode === "cashfree" ? "text-accent font-semibold" : "text-ink-muted"}>
+                    {paymentMode === "cashfree" ? "● Selected" : "Select"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Manual UPI */}
+              <button
+                type="button"
+                onClick={() => setPaymentMode("manual")}
+                className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                  paymentMode === "manual"
+                    ? "bg-accent/10 border-accent ring-1 ring-accent"
+                    : "bg-surface border-hairline hover:border-ink/20"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5 font-semibold text-xs text-ink">
+                      <QrCode className="w-3.5 h-3.5 text-ink-muted" />
+                      Manual UPI QR
+                    </span>
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-bg-muted border border-hairline text-ink-muted">
+                      Fallback
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-ink-muted leading-relaxed">
+                    Tenants scan the property UPI QR code and submit a 12-digit UTR reference number for manual owner verification.
+                  </p>
+                </div>
+                <div className="mt-2.5 pt-2 border-t border-hairline/60 text-[10px] font-medium">
+                  <span className={paymentMode === "manual" ? "text-accent font-semibold" : "text-ink-muted"}>
+                    {paymentMode === "manual" ? "● Selected" : "Select"}
+                  </span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 

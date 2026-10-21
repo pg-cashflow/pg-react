@@ -49,8 +49,18 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
     options.onPaid?.();
   }, [clearTimer, queryClient, options]);
 
-  // Check if target due is paid from query client cache or server
+  // Check if target due is paid from server via verify endpoint or query client cache
   const checkDueStatus = useCallback(async (): Promise<boolean> => {
+    try {
+      const verifyRes = await verifyTenantDuePay(dueId);
+      if (verifyRes.paid) {
+        markPaid();
+        return true;
+      }
+    } catch {
+      // transient network blip or manual mode intent; fall through to query dues
+    }
+
     try {
       const data = await queryClient.fetchQuery<Due[]>({
         queryKey: QUERY_KEYS.tenantDues,
@@ -68,6 +78,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
     }
     return false;
   }, [dueId, markPaid, queryClient]);
+
 
   // Poll loop: polls checkDueStatus every intervalMs until deadline is reached
   const startPolling = useCallback(

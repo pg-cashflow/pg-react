@@ -14,6 +14,7 @@ import {
   getCashfreeReadiness,
   getProperties,
   updatePropertyPaymentMode,
+  switchProperty,
 } from "@/api/properties";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import type { PaymentMode } from "@pg/types";
@@ -97,9 +98,17 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
         {properties.length > 1 && !propIdProp && (
           <select
             value={activePropertyId}
-            onChange={(e) => {
-              setSelectedPropertyId(e.target.value);
+            onChange={async (e) => {
+              const newId = e.target.value;
+              setSelectedPropertyId(newId);
               setFeedback(null);
+              try {
+                await switchProperty(newId);
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.properties });
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cashfreeReadiness });
+              } catch {
+                // non-fatal
+              }
             }}
             className="px-3 py-1.5 bg-bg border border-hairline rounded-xl text-xs text-ink font-medium self-start sm:self-auto"
           >

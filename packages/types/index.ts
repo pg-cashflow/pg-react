@@ -250,6 +250,8 @@ export interface PayIntent {
   qr_png_url: string;
   payable: boolean;
   payment_session_id?: string;
+  /** Set when property is Cashfree but backend fell back to manual. Values: "missing_phone" | "gateway_down" */
+  fallback_reason?: "missing_phone" | "gateway_down";
 }
 
 export interface JoinRequest {
