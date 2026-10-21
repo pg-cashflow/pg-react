@@ -10,45 +10,91 @@ import {
 } from "@tanstack/react-router";
 import { useAuth } from "@/auth/context";
 import { TenantKYCOnboardingGate } from "@/components/shared/TenantKYCOnboardingGate";
-import { InvitePage } from "@/routes/invite";
-import { LoginPage } from "@/routes/login";
-import { JoinWaitingPage } from "@/routes/join";
-import { AccessDeniedView } from "@/routes/access-denied";
-import { LandingPage } from "@/routes/landing";
-import { NotFoundView } from "@/routes/not-found";
-import { ActivationPage } from "@/routes/activation";
-import { AppShell } from "@/components/layout/AppShell";
-import { TenantShell } from "@/components/layout/TenantShell";
-import { ManagerShell } from "@/components/layout/ManagerShell";
 import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
-import { JoinsView } from "@/routes/owner/joins";
-import { OwnerKYCView } from "@/routes/owner/kyc";
-import { ReportsView } from "@/routes/owner/reports";
-import { TenantsView } from "@/routes/owner/tenants";
-import { DuesView } from "@/routes/owner/dues";
-import { PaymentsView } from "@/routes/owner/payments";
-import { ReconciliationView } from "@/routes/owner/reconciliation";
-import { EventsView } from "@/routes/owner/events";
-import { MoreView } from "@/routes/owner/more";
-import { DashboardView } from "@/routes/owner/dashboard";
-import { OwnerFacilityView } from "@/routes/owner/facility";
-import { OwnerRemindersView } from "@/routes/owner/reminders";
-import { TenantDashboardView } from "@/routes/tenant/dashboard";
-import { TenantDuesView } from "@/routes/tenant/dues";
-import { TenantPaymentsView } from "@/routes/tenant/payments";
-import { TenantRewardsView } from "@/routes/tenant/rewards";
-import { TenantCommunityView } from "@/routes/tenant/community";
-import { TenantProfileView } from "@/routes/tenant/profile";
-import { TenantPayReturnView } from "@/routes/tenant/pay-return";
-import { KitchenHeadcountView } from "@/routes/manager/kitchen";
-import { InspectionsListView } from "@/routes/manager/inspections";
-import { InspectionNewView } from "@/routes/manager/inspection-new";
-import { InspectionDetailView } from "@/routes/manager/inspection-detail";
-import { MetersView } from "@/routes/manager/meters";
-import { HazardsView } from "@/routes/manager/hazards";
-import { ManagerProfileView } from "@/routes/manager/profile";
-import { ViolationsView } from "@/routes/manager/violations";
 import { homeForRole } from "@/auth/roles";
+
+// Helper for code-splitting route views with automatic Suspense boundary
+function lazyView<T extends React.ComponentType<any>>(
+  loader: () => Promise<any>,
+  exportName?: string
+) {
+  const LazyComponent = React.lazy(async () => {
+    const mod = await loader();
+    const comp = exportName ? mod[exportName] : (mod.default ?? Object.values(mod)[0]);
+    return { default: comp };
+  });
+
+  return function LazyWrapper(props: React.ComponentProps<T>) {
+    return (
+      <React.Suspense fallback={<AppLoadingScreen />}>
+        <LazyComponent {...props} />
+      </React.Suspense>
+    );
+  };
+}
+
+// Lazy-loaded Portal Layout Shells
+const LazyAppShell = React.lazy(() =>
+  import("@/components/layout/AppShell").then((m) => ({ default: m.AppShell }))
+);
+const LazyTenantShell = React.lazy(() =>
+  import("@/components/layout/TenantShell").then((m) => ({ default: m.TenantShell }))
+);
+const LazyManagerShell = React.lazy(() =>
+  import("@/components/layout/ManagerShell").then((m) => ({ default: m.ManagerShell }))
+);
+
+// Lazy-loaded Onboarding & Auth Pages
+const LazyJoinWaitingPage = React.lazy(() =>
+  import("@/routes/join").then((m) => ({ default: m.JoinWaitingPage }))
+);
+const LazyActivationPage = React.lazy(() =>
+  import("@/routes/activation").then((m) => ({ default: m.ActivationPage }))
+);
+const LandingPage = lazyView(() => import("@/routes/landing"), "LandingPage");
+const InvitePage = lazyView(() => import("@/routes/invite"), "InvitePage");
+const LoginPage = lazyView(() => import("@/routes/login"), "LoginPage");
+const AccessDeniedView = lazyView(() => import("@/routes/access-denied"), "AccessDeniedView");
+const NotFoundView = lazyView(() => import("@/routes/not-found"), "NotFoundView");
+
+// Lazy-loaded Owner Views
+const JoinsView = lazyView(() => import("@/routes/owner/joins"), "JoinsView");
+const OwnerKYCView = lazyView(() => import("@/routes/owner/kyc"), "OwnerKYCView");
+const ReportsView = lazyView(() => import("@/routes/owner/reports"), "ReportsView");
+const TenantsView = lazyView(() => import("@/routes/owner/tenants"), "TenantsView");
+const DuesView = lazyView(() => import("@/routes/owner/dues"), "DuesView");
+const PaymentsView = lazyView(() => import("@/routes/owner/payments"), "PaymentsView");
+const ReconciliationView = lazyView(() => import("@/routes/owner/reconciliation"), "ReconciliationView");
+const EventsView = lazyView(() => import("@/routes/owner/events"), "EventsView");
+const MoreView = lazyView(() => import("@/routes/owner/more"), "MoreView");
+const DashboardView = lazyView<React.ComponentType<{ onNavigate: (tab: string) => void }>>(
+  () => import("@/routes/owner/dashboard"),
+  "DashboardView"
+);
+const OwnerFacilityView = lazyView(() => import("@/routes/owner/facility"), "OwnerFacilityView");
+const OwnerRemindersView = lazyView(() => import("@/routes/owner/reminders"), "OwnerRemindersView");
+
+// Lazy-loaded Tenant Views
+const TenantDashboardView = lazyView<React.ComponentType<{ onNavigate: (tab: string) => void }>>(
+  () => import("@/routes/tenant/dashboard"),
+  "TenantDashboardView"
+);
+const TenantDuesView = lazyView(() => import("@/routes/tenant/dues"), "TenantDuesView");
+const TenantPaymentsView = lazyView(() => import("@/routes/tenant/payments"), "TenantPaymentsView");
+const TenantRewardsView = lazyView(() => import("@/routes/tenant/rewards"), "TenantRewardsView");
+const TenantCommunityView = lazyView(() => import("@/routes/tenant/community"), "TenantCommunityView");
+const TenantProfileView = lazyView(() => import("@/routes/tenant/profile"), "TenantProfileView");
+const TenantPayReturnView = lazyView(() => import("@/routes/tenant/pay-return"), "TenantPayReturnView");
+
+// Lazy-loaded Manager Views
+const KitchenHeadcountView = lazyView(() => import("@/routes/manager/kitchen"), "KitchenHeadcountView");
+const InspectionsListView = lazyView(() => import("@/routes/manager/inspections"), "InspectionsListView");
+const InspectionNewView = lazyView(() => import("@/routes/manager/inspection-new"), "InspectionNewView");
+const InspectionDetailView = lazyView(() => import("@/routes/manager/inspection-detail"), "InspectionDetailView");
+const MetersView = lazyView(() => import("@/routes/manager/meters"), "MetersView");
+const HazardsView = lazyView(() => import("@/routes/manager/hazards"), "HazardsView");
+const ManagerProfileView = lazyView(() => import("@/routes/manager/profile"), "ManagerProfileView");
+const ViolationsView = lazyView(() => import("@/routes/manager/violations"), "ViolationsView");
 
 export const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading, role, isPendingJoin, justActivated } = useAuth();
@@ -86,7 +132,11 @@ export function RequireOwner() {
     else if (role !== "owner") navigate({ to: "/denied", replace: true });
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
   if (isLoading || role !== "owner") return <AppLoadingScreen />;
-  return <AppShell />;
+  return (
+    <React.Suspense fallback={<AppLoadingScreen />}>
+      <LazyAppShell />
+    </React.Suspense>
+  );
 }
 
 export function RequireTenant() {
@@ -103,7 +153,9 @@ export function RequireTenant() {
   if (isLoading || role !== "tenant" || isPendingJoin) return <AppLoadingScreen />;
   return (
     <TenantKYCOnboardingGate>
-      <TenantShell />
+      <React.Suspense fallback={<AppLoadingScreen />}>
+        <LazyTenantShell />
+      </React.Suspense>
     </TenantKYCOnboardingGate>
   );
 }
@@ -118,7 +170,11 @@ export function RequireManager() {
     else if (role !== "manager" && role !== "owner") navigate({ to: "/denied", replace: true });
   }, [isAuthenticated, isLoading, role, navigate]);
   if (isLoading || (role !== "manager" && role !== "owner")) return <AppLoadingScreen />;
-  return <ManagerShell />;
+  return (
+    <React.Suspense fallback={<AppLoadingScreen />}>
+      <LazyManagerShell />
+    </React.Suspense>
+  );
 }
 
 export function RequireJoin() {
@@ -132,7 +188,11 @@ export function RequireJoin() {
     else if (!isPendingJoin) navigate({ to: "/tenant", replace: true });
   }, [isAuthenticated, isLoading, isPendingJoin, role, navigate]);
   if (isLoading || !isPendingJoin) return <AppLoadingScreen />;
-  return <JoinWaitingPage />;
+  return (
+    <React.Suspense fallback={<AppLoadingScreen />}>
+      <LazyJoinWaitingPage />
+    </React.Suspense>
+  );
 }
 
 export function RequireActivation() {
@@ -143,7 +203,11 @@ export function RequireActivation() {
     if (!isAuthenticated) navigate({ to: "/landing", replace: true });
   }, [isAuthenticated, isLoading, navigate]);
   if (isLoading || !isAuthenticated) return <AppLoadingScreen />;
-  return <ActivationPage />;
+  return (
+    <React.Suspense fallback={<AppLoadingScreen />}>
+      <LazyActivationPage />
+    </React.Suspense>
+  );
 }
 
 function WaitingJoinListener() {
@@ -161,7 +225,9 @@ const rootRoute = createRootRoute({
   component: () => (
     <>
       <WaitingJoinListener />
-      <Outlet />
+      <React.Suspense fallback={<AppLoadingScreen />}>
+        <Outlet />
+      </React.Suspense>
     </>
   ),
 });

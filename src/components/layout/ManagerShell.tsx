@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { TopBar } from "./TopBar";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { AppLoadingScreen } from "./AppLoadingScreen";
 import { useAuth } from "@/auth/context";
 import { useLocale } from "@/i18n";
 import type { MessageKey } from "@/i18n";
@@ -163,7 +164,9 @@ export const ManagerShell: React.FC = () => {
         <main className="flex-1 p-4 lg:p-8 max-w-[720px] w-full mx-auto pb-28 lg:pb-8">
           <ErrorBoundary fallbackTitle={t("manager.errorLoading")}>
             <ActionCtx.Provider value={setAction}>
-              <Outlet />
+              <React.Suspense fallback={<AppLoadingScreen />}>
+                <Outlet />
+              </React.Suspense>
             </ActionCtx.Provider>
           </ErrorBoundary>
         </main>
