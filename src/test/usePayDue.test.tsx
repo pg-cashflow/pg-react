@@ -158,6 +158,7 @@ describe("usePayDue State Machine", () => {
   });
 
   it("enters CHECKING and quietly returns to READY on modal dismiss if unpaid", async () => {
+    verifyShouldSucceed = false;
     vi.useFakeTimers({ shouldAdvanceTime: true });
 
     vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({

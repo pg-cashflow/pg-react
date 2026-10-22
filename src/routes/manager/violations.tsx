@@ -26,6 +26,12 @@ export const ViolationsView: React.FC = () => {
   const [isValidatingPhoto, setIsValidatingPhoto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
+
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawFile = e.target.files?.[0];
     e.target.value = "";
@@ -36,6 +42,7 @@ export const ViolationsView: React.FC = () => {
 
     try {
       const processed = await validateAndProcessImage(rawFile);
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
       setPhoto(processed);
       setPhotoPreview(URL.createObjectURL(processed));
       setPhotoError(null);

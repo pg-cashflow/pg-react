@@ -23,29 +23,36 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
   });
 
   useEffect(() => {
-    let revoked: string | null = null;
+    let active = true;
+    let createdUrl: string | null = null;
     setInitialError(null);
 
     getTenantDuePay(dueId)
       .then(async (p) => {
+        if (!active) return;
         setPay(p);
         if (p.mode === "manual" && p.payable && p.qr_png_url) {
           try {
             const blob = await getPayQrBlob(p.qr_png_url);
+            if (!active) return;
             const url = URL.createObjectURL(blob);
-            revoked = url;
+            createdUrl = url;
             setQrUrl(url);
           } catch (err) {
+            if (!active) return;
             if (err instanceof ApiError && err.status === 409) {
               setInitialError("Personal UPI QR replaced by Cashfree checkout");
             }
           }
         }
       })
-      .catch((err: Error) => setInitialError(err.message));
+      .catch((err: Error) => {
+        if (active) setInitialError(err.message);
+      });
 
     return () => {
-      if (revoked) URL.revokeObjectURL(revoked);
+      active = false;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
   }, [dueId]);
 

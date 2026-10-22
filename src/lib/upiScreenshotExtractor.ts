@@ -26,12 +26,15 @@ export async function extractUtrFromScreenshot(file: File): Promise<string | nul
     // 2. Load image onto canvas with contrast enhancement
     const imageUrl = URL.createObjectURL(file);
     const img = new Image();
-    img.src = imageUrl;
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-    });
-    URL.revokeObjectURL(imageUrl);
+    try {
+      img.src = imageUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+    } finally {
+      URL.revokeObjectURL(imageUrl);
+    }
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getDues, markCashPaid, waiveDue, createDueToken, getDueQR, matchDue } from "@/api/dues";
 import { getOwnerDuePay } from "@/api/pay";
@@ -29,6 +29,12 @@ export const DuesView: React.FC = () => {
     waMe?: string;
     loading?: boolean;
   } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (qrModal?.qrImageUrl) URL.revokeObjectURL(qrModal.qrImageUrl);
+    };
+  }, [qrModal?.qrImageUrl]);
   const [payModalDue, setPayModalDue] = useState<Due | null>(null);
   const [waiveModalDue, setWaiveModalDue] = useState<Due | null>(null);
   const [matchDueRow, setMatchDueRow] = useState<Due | null>(null);

@@ -52,6 +52,14 @@ export const InspectionNewView: React.FC = () => {
     ITEMS.map((i) => ({ ...i, passed: null, notes: "", photo: null }))
   );
 
+  useEffect(() => {
+    return () => {
+      items.forEach((it) => {
+        if (it.photoPreview) URL.revokeObjectURL(it.photoPreview);
+      });
+    };
+  }, [items]);
+
   const roomsQuery = useQuery({
     queryKey: QUERY_KEYS.ownerRooms(propertyId),
     queryFn: () => listOwnerRooms(propertyId),
@@ -100,20 +108,24 @@ export const InspectionNewView: React.FC = () => {
       const processed = await validateAndProcessImage(rawFile);
       const preview = URL.createObjectURL(processed);
       setItems((prev) =>
-        prev.map((it, i) =>
-          i === itemIndex
-            ? { ...it, photo: processed, photoError: null, photoPreview: preview }
-            : it
-        )
+        prev.map((it, i) => {
+          if (i === itemIndex) {
+            if (it.photoPreview) URL.revokeObjectURL(it.photoPreview);
+            return { ...it, photo: processed, photoError: null, photoPreview: preview };
+          }
+          return it;
+        })
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Invalid image format";
       setItems((prev) =>
-        prev.map((it, i) =>
-          i === itemIndex
-            ? { ...it, photo: null, photoError: message, photoPreview: null }
-            : it
-        )
+        prev.map((it, i) => {
+          if (i === itemIndex) {
+            if (it.photoPreview) URL.revokeObjectURL(it.photoPreview);
+            return { ...it, photo: null, photoError: message, photoPreview: null };
+          }
+          return it;
+        })
       );
     } finally {
       setIsValidatingPhoto(false);
@@ -279,15 +291,16 @@ export const InspectionNewView: React.FC = () => {
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
+                        if (current.photoPreview) URL.revokeObjectURL(current.photoPreview);
                         setItems((prev) =>
                           prev.map((it, i) =>
                             i === itemIndex
                               ? { ...it, photo: null, photoError: null, photoPreview: null }
                               : it
                           )
-                        )
-                      }
+                        );
+                      }}
                       className="p-2 text-danger hover:bg-danger-tint rounded-lg transition"
                       title="Remove photo"
                     >

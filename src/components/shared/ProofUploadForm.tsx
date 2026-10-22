@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Upload, Image as ImageIcon, AlertCircle, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { submitUtrReport } from "@/api/tenant";
@@ -30,9 +30,16 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    };
+  }, [imagePreviewUrl]);
+
   const handleScreenshotChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
     setImage(file);
     setImagePreviewUrl(URL.createObjectURL(file));
     setExtractingUtr(true);

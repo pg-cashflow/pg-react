@@ -335,12 +335,15 @@ export async function extractAadhaarFromFile(file: File): Promise<ScanResult> {
       const svgBlob = new Blob([text], { type: "image/svg+xml;charset=utf-8" });
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
-      img.src = url;
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-      URL.revokeObjectURL(url);
+      try {
+        img.src = url;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      } finally {
+        URL.revokeObjectURL(url);
+      }
 
       const { payload, canvas } = await multiPassCanvasScan(img);
       if (payload) {
@@ -364,12 +367,15 @@ export async function extractAadhaarFromFile(file: File): Promise<ScanResult> {
   try {
     const url = URL.createObjectURL(file);
     const img = new Image();
-    img.src = url;
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-    });
-    URL.revokeObjectURL(url);
+    try {
+      img.src = url;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
 
     const { payload, canvas } = await multiPassCanvasScan(img);
     if (payload) {

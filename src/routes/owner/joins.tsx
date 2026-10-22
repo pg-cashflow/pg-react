@@ -20,6 +20,12 @@ export const JoinsView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    return () => {
+      if (photoUrl) URL.revokeObjectURL(photoUrl);
+    };
+  }, [photoUrl]);
+
   const awaitingQuery = useQuery({
     queryKey: [...QUERY_KEYS.joinRequests, "approved"],
     queryFn: () => getJoinRequests("approved"),

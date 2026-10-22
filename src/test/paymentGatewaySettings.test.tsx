@@ -98,6 +98,7 @@ describe("PaymentGatewaySettingsCard Component", () => {
         </QueryClientProvider>
       );
     });
+    await flushQueries();
 
     // Find the Cashfree button and click it
     const buttons = container?.querySelectorAll("button");
@@ -109,6 +110,7 @@ describe("PaymentGatewaySettingsCard Component", () => {
     await act(async () => {
       cashfreeBtn?.click();
     });
+    await flushQueries();
 
     expect(updateSpy).toHaveBeenCalledWith("prop-123", "cashfree");
     expect(container?.textContent).toContain("Cashfree Web Checkout activated");
@@ -132,6 +134,7 @@ describe("PaymentGatewaySettingsCard Component", () => {
         </QueryClientProvider>
       );
     });
+    await flushQueries();
 
     expect(container?.textContent).toContain("Gateway Inactive (Cashfree credentials missing on server)");
 

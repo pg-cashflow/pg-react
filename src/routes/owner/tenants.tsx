@@ -24,15 +24,20 @@ const IdPhotoPreview: React.FC<{ tenantId: string }> = ({ tenantId }) => {
   const { t } = useLocale();
   const [url, setUrl] = useState<string | null>(null);
   React.useEffect(() => {
-    let revoked: string | null = null;
+    let active = true;
+    let createdUrl: string | null = null;
     getTenantIdPhotoBlob(tenantId)
       .then((blob) => {
-        revoked = URL.createObjectURL(blob);
-        setUrl(revoked);
+        if (!active) return;
+        createdUrl = URL.createObjectURL(blob);
+        setUrl(createdUrl);
       })
-      .catch(() => setUrl(null));
+      .catch(() => {
+        if (active) setUrl(null);
+      });
     return () => {
-      if (revoked) URL.revokeObjectURL(revoked);
+      active = false;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
   }, [tenantId]);
   if (!url) return <p className="text-ink-muted">{t("owner.tenants.idPhotoOnFile")}</p>;
