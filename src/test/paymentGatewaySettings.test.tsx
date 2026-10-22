@@ -4,7 +4,7 @@ import { createRoot, Root } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PaymentGatewaySettingsCard } from "../components/owner/PaymentGatewaySettingsCard";
 import * as propertiesApi from "../api/properties";
-import type { Property } from "..pg/types";
+import type { Property } from "@pg/types";
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
