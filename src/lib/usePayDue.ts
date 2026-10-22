@@ -27,6 +27,9 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const [intent, setIntent] = useState<PayIntent | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const optionsRef = useRef<UsePayDueOptions>(options);
+  optionsRef.current = options;
+
   const stateRef = useRef<PayDueState>(state);
   stateRef.current = state;
 
@@ -46,8 +49,8 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantDues });
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantPayments });
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantProfile });
-    options.onPaid?.();
-  }, [clearTimer, queryClient, options]);
+    optionsRef.current.onPaid?.();
+  }, [clearTimer, queryClient]);
 
   // Check if target due is paid from server via verify endpoint or query client cache
   const checkDueStatus = useCallback(async (): Promise<boolean> => {
@@ -162,7 +165,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       } else if (result.kind === "redirect") {
         clearTimer();
         setState("REDIRECTING");
-        options.onRedirect?.();
+        optionsRef.current.onRedirect?.();
       } else if (result.kind === "error") {
         enterChecking();
       }
@@ -171,7 +174,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       setState("READY");
       setError(err instanceof Error ? err.message : "Payment initialization failed");
     }
-  }, [clearTimer, dueId, enterChecking, enterConfirming, markPaid, options]);
+  }, [clearTimer, dueId, enterChecking, enterConfirming, markPaid]);
 
   // Explicit re-verify triggered from STILL_PENDING ("Check again")
   const checkAgain = useCallback(async () => {

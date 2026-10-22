@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { signOut } from "firebase/auth";
 import type { User, UserRole, AuthTokenPayload } from "@pg/types";
 import { getStoredUser, setStoredUser, getInviteCode } from "./storage";
@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const completeWithIdToken = async (idToken: string) => {
+  const completeWithIdToken = useCallback(async (idToken: string) => {
     const priorUser = getStoredUser();
     const isFirstEntry = !priorUser;
     const res = await exchangeFirebaseToken(idToken, getInviteCode() || undefined);
@@ -171,32 +171,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setJustActivated(true);
     }
     applySession(res.token, res.user, payload);
-  };
+  }, [applySession]);
 
-  const handleSendPhoneOtp = async (phone: string) => {
+  const handleSendPhoneOtp = useCallback(async (phone: string) => {
     await sendFirebasePhoneOtp(toE164IndianPhone(phone));
-  };
+  }, []);
 
-  const handleConfirmPhoneOtp = async (otp: string) => {
+  const handleConfirmPhoneOtp = useCallback(async (otp: string) => {
     const idToken = await confirmFirebasePhoneOtp(otp);
     await completeWithIdToken(idToken);
-  };
+  }, [completeWithIdToken]);
 
-  const handleGoogleLogin = async (): Promise<"ok" | "needs-phone"> => {
+  const handleGoogleLogin = useCallback(async (): Promise<"ok" | "needs-phone"> => {
     const result = await signInWithGoogle();
     if (result.needsPhone) return "needs-phone";
     await completeWithIdToken(result.idToken);
     return "ok";
-  };
+  }, [completeWithIdToken]);
 
-  const reExchangeFirebase = async () => {
+  const reExchangeFirebase = useCallback(async () => {
     const current = firebaseAuth.currentUser;
     if (!current) {
       throw new Error("Sign in again to refresh your session");
     }
     const idToken = await current.getIdToken(true);
     await completeWithIdToken(idToken);
-  };
+  }, [completeWithIdToken]);
 
   const consumeActivation = useCallback(() => {
     setJustActivated(false);
@@ -207,30 +207,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isPendingJoin = role === "tenant" && !tenantId;
+  const isAuthenticated = !!token && !!role && !isLoading;
+
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      token,
+      user,
+      role,
+      userId,
+      tenantId,
+      isPendingJoin,
+      isAuthenticated,
+      isLoading,
+      justActivated,
+      consumeActivation,
+      triggerActivation,
+      applySession,
+      sendPhoneOtp: handleSendPhoneOtp,
+      confirmPhoneOtp: handleConfirmPhoneOtp,
+      loginWithGoogle: handleGoogleLogin,
+      reExchangeFirebase,
+      updateUser,
+      logout,
+    }),
+    [
+      token,
+      user,
+      role,
+      userId,
+      tenantId,
+      isPendingJoin,
+      isAuthenticated,
+      isLoading,
+      justActivated,
+      consumeActivation,
+      triggerActivation,
+      applySession,
+      handleSendPhoneOtp,
+      handleConfirmPhoneOtp,
+      handleGoogleLogin,
+      reExchangeFirebase,
+      updateUser,
+      logout,
+    ]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        role,
-        userId,
-        tenantId,
-        isPendingJoin,
-        isAuthenticated: !!token && !!role && !isLoading,
-        isLoading,
-        justActivated,
-        consumeActivation,
-        triggerActivation,
-        applySession,
-        sendPhoneOtp: handleSendPhoneOtp,
-        confirmPhoneOtp: handleConfirmPhoneOtp,
-        loginWithGoogle: handleGoogleLogin,
-        reExchangeFirebase,
-        updateUser,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

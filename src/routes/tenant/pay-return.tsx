@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { verifyTenantDuePay } from "@/api/pay";
+import { getMyDues } from "@/api/tenant";
 import type { Due } from "@pg/types";
 
 export const TenantPayReturnView: React.FC = () => {
@@ -31,11 +32,13 @@ export const TenantPayReturnView: React.FC = () => {
 
   const checkStatus = useCallback(async (): Promise<boolean> => {
     try {
-      const data = await queryClient.fetchQuery<{ dues: Due[] }>({
+      const data = await queryClient.fetchQuery<Due[]>({
         queryKey: QUERY_KEYS.tenantDues,
+        queryFn: getMyDues,
         staleTime: 0,
       });
-      const match = data?.dues?.find((d) => d.id === dueId);
+      const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
+      const match = dues.find((d: Due) => d.id === dueId);
       if (match && (match.status === "paid" || match.status === "waived")) {
         markPaid();
         return true;
@@ -66,6 +69,17 @@ export const TenantPayReturnView: React.FC = () => {
     // 2. Polling backstop
     const poll = async () => {
       if (!active) return;
+      if (dueId) {
+        try {
+          const res = await verifyTenantDuePay(dueId);
+          if (active && res.paid) {
+            markPaid();
+            return;
+          }
+        } catch {
+          // ignore error; proceed to dues polling
+        }
+      }
       const isPaid = await checkStatus();
       if (isPaid || !active) return;
 

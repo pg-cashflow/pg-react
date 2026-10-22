@@ -464,7 +464,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   {uploadFile ? t("kyc.card.change") : t("kyc.card.browse")}
                   <input
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept=".pdf,application/pdf,.jpg,.jpeg,image/jpeg,.png,image/png"
                     onChange={handleFileChange}
                     className="hidden"
                   />

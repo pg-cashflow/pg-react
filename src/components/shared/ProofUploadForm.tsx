@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Upload, Image as ImageIcon, AlertCircle, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { submitUtrReport } from "@/api/tenant";
+import { submitUtrReport, getMyDues } from "@/api/tenant";
 import { extractUtrFromScreenshot } from "@/lib/upiScreenshotExtractor";
 import { ApiError } from "@/api/client";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -39,6 +39,10 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
   const handleScreenshotChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Screenshot image is too large (maximum 2MB).");
+      return;
+    }
     if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
     setImage(file);
     setImagePreviewUrl(URL.createObjectURL(file));
@@ -78,11 +82,13 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
 
         // If "already recorded", query ledger before declaring paid
         try {
-          const data = await queryClient.fetchQuery<{ dues: Due[] }>({
+          const data = await queryClient.fetchQuery<Due[]>({
             queryKey: QUERY_KEYS.tenantDues,
+            queryFn: getMyDues,
             staleTime: 0,
           });
-          const match = data?.dues?.find((d) => d.id === dueId);
+          const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
+          const match = dues.find((d: Due) => d.id === dueId);
           if (match && (match.status === "paid" || match.status === "waived")) {
             onSuccess();
             return;
