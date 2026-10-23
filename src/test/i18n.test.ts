@@ -327,6 +327,44 @@ describe("i18n message completeness", () => {
       authSpy.mockRestore();
       prefSpy.mockRestore();
     });
+
+    it("asynchronously loads regional messages when switching to a non-default locale", async () => {
+      const { createRoot } = await import("react-dom/client");
+      const React = await import("react");
+      const { LocaleProvider, useLocale } = await import("../i18n");
+
+      let contextValue!: ReturnType<typeof useLocale>;
+      function Consumer() {
+        contextValue = useLocale();
+        return React.createElement("div", { "data-testid": "translated" }, contextValue.t("common.save"));
+      }
+
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = createRoot(container);
+
+      await React.act(async () => {
+        root.render(
+          React.createElement(LocaleProvider, null, React.createElement(Consumer))
+        );
+      });
+
+      // Initially en-IN
+      expect(contextValue.t("common.save")).toBe("Save");
+
+      // Switch to te-IN
+      await React.act(async () => {
+        await contextValue.setLocale("te-IN", false);
+      });
+
+      // After async load resolves, common.save in Telugu is rendered
+      expect(contextValue.t("common.save")).toBe("భద్రపరచు");
+
+      await React.act(async () => {
+        root.unmount();
+        container.remove();
+      });
+    });
   });
 
   describe("Error Code Registry drift guard", () => {

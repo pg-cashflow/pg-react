@@ -9,15 +9,25 @@ import { useAuth } from "@/auth/context";
 import { queryClient } from "@/lib/queryClient";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { enIN, type MessageKey } from "./messages/en-IN";
-import { teIN } from "./messages/te-IN";
-import { taIN } from "./messages/ta-IN";
-import { knIN } from "./messages/kn-IN";
 
-const messagesMap: Record<SupportedLocale, Record<string, string>> = {
+const localeLoaders: Record<SupportedLocale, () => Promise<Record<string, string>>> = {
+  "en-IN": async () => enIN,
+  "te-IN": async () => {
+    const mod = await import("./messages/te-IN");
+    return { ...enIN, ...mod.teIN };
+  },
+  "ta-IN": async () => {
+    const mod = await import("./messages/ta-IN");
+    return { ...enIN, ...mod.taIN };
+  },
+  "kn-IN": async () => {
+    const mod = await import("./messages/kn-IN");
+    return { ...enIN, ...mod.knIN };
+  },
+};
+
+const loadedMessages: Partial<Record<SupportedLocale, Record<string, string>>> = {
   "en-IN": enIN,
-  "te-IN": { ...enIN, ...teIN },
-  "ta-IN": { ...enIN, ...taIN },
-  "kn-IN": { ...enIN, ...knIN },
 };
 
 interface LocaleContextValue {
@@ -127,7 +137,35 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     []
   );
 
-  const messages = useMemo(() => messagesMap[locale] || messagesMap[DEFAULT_LOCALE], [locale]);
+  const [messages, setMessages] = useState<Record<string, string>>(
+    () => loadedMessages[locale] || enIN
+  );
+
+  useEffect(() => {
+    if (loadedMessages[locale]) {
+      setMessages(loadedMessages[locale]!);
+      return;
+    }
+    let isMounted = true;
+    const loader = localeLoaders[locale] || localeLoaders[DEFAULT_LOCALE];
+    loader()
+      .then((msgs) => {
+        loadedMessages[locale] = msgs;
+        if (isMounted) {
+          setMessages(msgs);
+        }
+      })
+      .catch((err) => {
+        console.warn(`[i18n] Failed to load messages for ${locale}:`, err);
+        if (isMounted) {
+          setMessages(enIN);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [locale]);
 
   // Keep the document language in step with the UI language.
   useEffect(() => {
