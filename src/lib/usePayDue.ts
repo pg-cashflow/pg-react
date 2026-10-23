@@ -35,6 +35,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
 
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deadlineRef = useRef<number>(0);
+  const isCheckingRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (pollTimerRef.current) {
@@ -54,32 +55,39 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
 
   // Check if target due is paid from server via verify endpoint or query client cache
   const checkDueStatus = useCallback(async (): Promise<boolean> => {
-    try {
-      const verifyRes = await verifyTenantDuePay(dueId);
-      if (verifyRes.paid) {
-        markPaid();
-        return true;
-      }
-    } catch {
-      // transient network blip or manual mode intent; fall through to query dues
-    }
+    if (isCheckingRef.current) return false;
+    isCheckingRef.current = true;
 
     try {
-      const data = await queryClient.fetchQuery<Due[]>({
-        queryKey: QUERY_KEYS.tenantDues,
-        queryFn: getMyDues,
-        staleTime: 0,
-      });
-      const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
-      const match = dues.find((d: Due) => d.id === dueId);
-      if (match && (match.status === "paid" || match.status === "waived")) {
-        markPaid();
-        return true;
+      try {
+        const verifyRes = await verifyTenantDuePay(dueId);
+        if (verifyRes.paid) {
+          markPaid();
+          return true;
+        }
+      } catch {
+        // transient network blip or manual mode intent; fall through to query dues
       }
-    } catch {
-      // transient network blip; keep trying
+
+      try {
+        const data = await queryClient.fetchQuery<Due[]>({
+          queryKey: QUERY_KEYS.tenantDues,
+          queryFn: getMyDues,
+          staleTime: 0,
+        });
+        const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
+        const match = dues.find((d: Due) => d.id === dueId);
+        if (match && (match.status === "paid" || match.status === "waived")) {
+          markPaid();
+          return true;
+        }
+      } catch {
+        // transient network blip; keep trying
+      }
+      return false;
+    } finally {
+      isCheckingRef.current = false;
     }
-    return false;
   }, [dueId, markPaid, queryClient]);
 
 

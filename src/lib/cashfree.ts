@@ -37,31 +37,64 @@ declare global {
 
 let cachedCashfreeInstance: CashfreeInstance | null = null;
 let cachedCashfreeMode: string | null = null;
+let sdkPromise: Promise<void> | null = null;
 
 export function _resetCashfreeInstanceForTests(): void {
   cachedCashfreeInstance = null;
   cachedCashfreeMode = null;
+  sdkPromise = null;
 }
 
 function loadSdk(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.Cashfree) return Promise.resolve();
+  if (sdkPromise) return sdkPromise;
 
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector("script[data-pg-cashfree]");
+  sdkPromise = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      sdkPromise = null;
+      reject(new Error("Cashfree SDK failed to load (timeout)"));
+    }, 10000);
+
+    const cleanup = () => {
+      clearTimeout(timeout);
+    };
+
+    const existing = document.querySelector<HTMLScriptElement>("script[data-pg-cashfree]");
     if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Cashfree SDK failed to load")));
+      if ((existing as any).readyState === "complete" || (existing as any).readyState === "loaded" || window.Cashfree) {
+        cleanup();
+        resolve();
+        return;
+      }
+      existing.addEventListener("load", () => {
+        cleanup();
+        resolve();
+      }, { once: true });
+      existing.addEventListener("error", () => {
+        cleanup();
+        sdkPromise = null;
+        reject(new Error("Cashfree SDK failed to load"));
+      }, { once: true });
       return;
     }
     const s = document.createElement("script");
     s.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
     s.async = true;
     s.dataset.pgCashfree = "1";
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Cashfree SDK failed to load"));
+    s.onload = () => {
+      cleanup();
+      resolve();
+    };
+    s.onerror = () => {
+      cleanup();
+      sdkPromise = null;
+      reject(new Error("Cashfree SDK failed to load"));
+    };
     document.head.appendChild(s);
   });
+
+  return sdkPromise;
 }
 
 function getCashfreeInstance(): CashfreeInstance {

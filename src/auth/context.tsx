@@ -142,7 +142,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Refresh cookie absent or expired
     }
 
-    logout();
+    const storedUser = getStoredUser();
+    if (!storedUser) {
+      logout();
+    }
     setIsLoading(false);
   }, [applySession, logout]);
 

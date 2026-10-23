@@ -188,6 +188,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       // Runtime callers can bypass TypeScript; reject invalid values before mutating state.
       if (!isTheme(t)) return false;
 
+      // Apply data-theme attribute immediately to initiate CSS repaint without waiting for React re-render.
+      const resolved = resolve(t);
+      document.documentElement.setAttribute("data-theme", resolved);
+
       applyWithSingleAnimation(() => {
         writeStoredTheme(t);
         setThemeState(t);

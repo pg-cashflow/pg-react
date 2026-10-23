@@ -72,14 +72,16 @@ export async function executeRefresh(failedToken: string | null): Promise<string
     });
 
     if (!res.ok) {
-      const hadPriorSession = Boolean(currentToken || getStoredUser());
-      setAccessToken(null);
-      setStoredUser(null);
-      stopProactiveRefresh();
-      if (hadPriorSession) {
-        window.dispatchEvent(
-          new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
-        );
+      if (res.status === 401 || res.status === 403) {
+        const hadPriorSession = Boolean(currentToken || getStoredUser());
+        setAccessToken(null);
+        setStoredUser(null);
+        stopProactiveRefresh();
+        if (hadPriorSession) {
+          window.dispatchEvent(
+            new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+          );
+        }
       }
       return null;
     }
@@ -93,20 +95,11 @@ export async function executeRefresh(failedToken: string | null): Promise<string
       scheduleProactiveRefresh();
       return data.token;
     }
+    return null;
   } catch {
-    // network or other failure
+    // network or other transient failure: keep token and retry later
+    return null;
   }
-
-  const hadPriorSession = Boolean(currentToken || getStoredUser());
-  setAccessToken(null);
-  setStoredUser(null);
-  stopProactiveRefresh();
-  if (hadPriorSession) {
-    window.dispatchEvent(
-      new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
-    );
-  }
-  return null;
 }
 
 export async function requestTokenRefresh(failedToken: string | null): Promise<string | null> {
