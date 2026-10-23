@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getDues, markCashPaid, waiveDue, createDueToken, getDueQR, matchDue } from "@/api/dues";
 import { getOwnerDuePay } from "@/api/pay";
@@ -16,6 +16,136 @@ import { buildLedgerCsv } from "@/lib/exportLedgerCsv";
 import type { Due, Paise, PayIntent } from "@pg/types";
 import { Link } from "@tanstack/react-router";
 import { CheckCircle, Slash, X, Loader2, IndianRupee, QrCode, Link2 } from "lucide-react";
+
+interface DueTableRowProps {
+  due: Due;
+  isSelected: boolean;
+  tenantName: string;
+  locale: string;
+  t: (key: string, values?: Record<string, any>) => string;
+  onSelect: () => void;
+  onShowQR: (due: Due) => void;
+  onOpenPay: (due: Due) => void;
+  onOpenMatch: (due: Due) => void;
+  onOpenWaive: (due: Due) => void;
+  rowRef: (el: HTMLTableRowElement | null) => void;
+}
+
+const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
+  due,
+  isSelected,
+  tenantName,
+  locale,
+  t,
+  onSelect,
+  onShowQR,
+  onOpenPay,
+  onOpenMatch,
+  onOpenWaive,
+  rowRef,
+}) {
+  const isPayable = due.status !== "paid" && due.status !== "waived";
+
+  return (
+    <tr
+      ref={rowRef}
+      onClick={onSelect}
+      tabIndex={0}
+      className={`transition cursor-pointer outline-none ${
+        isSelected
+          ? "bg-accent-tint/60 ring-2 ring-accent ring-inset"
+          : "hover:bg-accent-tint/30"
+      }`}
+    >
+      <td className="px-6 py-4 font-medium text-ink">
+        <div className="flex items-center gap-2">
+          <span>{tenantName}</span>
+          {isSelected && (
+            <span className="inline-flex items-center text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-white">
+              Active
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 font-mono text-xs text-ink-muted">
+        <Link to="/owner/events" className="underline decoration-hairline hover:text-accent">
+          {due.due_code}
+        </Link>
+      </td>
+      <td className="px-6 py-4 font-semibold">
+        <AmountBadge amount={due.amount} />
+      </td>
+      <td className="px-6 py-4 text-xs text-ink-muted">
+        <div>{formatDate(due.due_date, locale)}</div>
+        {isOverdue(due) && (
+          <div className="text-danger font-medium text-[11px] mt-0.5">
+            {formatDaysOverdue(getDaysOverdue(due.due_date), t)}
+          </div>
+        )}
+      </td>
+      <td className="px-6 py-4">
+        <StatusPill status={displayDueStatus(due)} />
+      </td>
+      <td className="px-6 py-4 text-right">
+        <div className="flex items-center justify-end gap-2">
+          {isSelected && isPayable && (
+            <span className="hidden sm:inline-flex items-center text-[11px] font-mono text-accent bg-surface border border-accent/40 px-1.5 py-0.5 rounded shadow-xs font-semibold mr-1">
+              ↵ Enter to Pay
+            </span>
+          )}
+          {isPayable && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowQR(due);
+              }}
+              title="Show Payment QR / Link"
+              className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink hover:text-white transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+            >
+              <QrCode className="w-4 h-4" />
+            </button>
+          )}
+          {isPayable && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenPay(due);
+              }}
+              title="Record Cash Payment"
+              className="p-1.5 rounded-lg bg-success-tint hover:bg-success/20 text-success transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+            >
+              <CheckCircle className="w-4 h-4" />
+            </button>
+          )}
+          {isPayable && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenMatch(due);
+              }}
+              title="Match UTR"
+              className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+            >
+              <Link2 className="w-4 h-4" />
+            </button>
+          )}
+          {isPayable && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenWaive(due);
+              }}
+              title="Waive Due"
+              className="p-1.5 rounded-lg bg-surface hover:bg-danger-tint text-ink-muted hover:text-danger transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
+            >
+              <Slash className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+});
 
 export const DuesView: React.FC = () => {
   const { t, locale } = useLocale();
@@ -106,7 +236,7 @@ export const DuesView: React.FC = () => {
     onError: (err: Error) => setModalError(err.message || "Match failed"),
   });
 
-  const handleShowQR = async (due: Due) => {
+  const handleShowQR = useCallback(async (due: Due) => {
     setQrModal({ loading: true });
     setModalError(null);
     try {
@@ -136,12 +266,32 @@ export const DuesView: React.FC = () => {
       setModalError(err instanceof Error ? err.message : "Failed to load payment QR");
       setQrModal(null);
     }
-  };
+  }, []);
 
-  const closeQrModal = () => {
-    if (qrModal?.qrImageUrl) URL.revokeObjectURL(qrModal.qrImageUrl);
-    setQrModal(null);
-  };
+  const closeQrModal = useCallback(() => {
+    setQrModal((prev) => {
+      if (prev?.qrImageUrl) URL.revokeObjectURL(prev.qrImageUrl);
+      return null;
+    });
+  }, []);
+
+  const handleOpenPay = useCallback((due: Due) => {
+    setPayModalDue(due);
+    setPayAmountRupees(paiseToRupeeInput(due.amount));
+    setPayNotes("");
+    setModalError(null);
+  }, []);
+
+  const handleOpenMatch = useCallback((due: Due) => {
+    setMatchDueRow(due);
+    setMatchUtr("");
+    setModalError(null);
+  }, []);
+
+  const handleOpenWaive = useCallback((due: Due) => {
+    setWaiveModalDue(due);
+    setModalError(null);
+  }, []);
 
   const handlePaySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,16 +310,18 @@ export const DuesView: React.FC = () => {
     });
   };
 
-  const tenantMap = React.useMemo(() => new Map(tenants.map((t) => [t.id, t.name])), [tenants]);
+  const tenantMap = useMemo(() => new Map(tenants.map((t) => [t.id, t.name])), [tenants]);
 
   const [selectedRowIndex, setSelectedRowIndex] = useState<number>(0);
   const tableRowRefs = React.useRef<(HTMLTableRowElement | null)[]>([]);
 
-  const filteredDues = dues.filter((d) => {
-    if (statusFilter === "overdue") return isOverdue(d);
-    if (statusFilter !== "all" && d.status !== statusFilter) return false;
-    return true;
-  });
+  const filteredDues = useMemo(() => {
+    return dues.filter((d) => {
+      if (statusFilter === "overdue") return isOverdue(d);
+      if (statusFilter !== "all" && d.status !== statusFilter) return false;
+      return true;
+    });
+  }, [dues, statusFilter]);
 
   // Clamp selected row index when filtered dues change
   React.useEffect(() => {
@@ -351,111 +503,24 @@ export const DuesView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
-                {filteredDues.map((d, idx) => {
-                  const isSelected = selectedRowIndex === idx;
-                  return (
-                    <tr
-                      key={d.id}
-                      ref={(el) => {
-                        tableRowRefs.current[idx] = el;
-                      }}
-                      onClick={() => setSelectedRowIndex(idx)}
-                      tabIndex={0}
-                      className={`transition cursor-pointer outline-none ${
-                        isSelected
-                          ? "bg-accent-tint/60 ring-2 ring-accent ring-inset"
-                          : "hover:bg-accent-tint/30"
-                      }`}
-                    >
-                      <td className="px-6 py-4 font-medium text-ink">
-                        <div className="flex items-center gap-2">
-                          <span>{tenantMap.get(d.tenant_id) || "Student / Tenant"}</span>
-                          {isSelected && (
-                            <span className="inline-flex items-center text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-white">
-                              Active
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-mono text-xs text-ink-muted">
-                        <Link to="/owner/events" className="underline decoration-hairline hover:text-accent">
-                          {d.due_code}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 font-semibold">
-                        <AmountBadge amount={d.amount} />
-                      </td>
-                      <td className="px-6 py-4 text-xs text-ink-muted">
-                        <div>{formatDate(d.due_date, locale)}</div>
-                        {isOverdue(d) && (
-                          <div className="text-danger font-medium text-[11px] mt-0.5">
-                            {formatDaysOverdue(getDaysOverdue(d.due_date), t)}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusPill status={displayDueStatus(d)} />
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {isSelected && d.status !== "paid" && d.status !== "waived" && (
-                            <span className="hidden sm:inline-flex items-center text-[11px] font-mono text-accent bg-surface border border-accent/40 px-1.5 py-0.5 rounded shadow-xs font-semibold mr-1">
-                              ↵ Enter to Pay
-                            </span>
-                          )}
-                        {d.status !== "paid" && d.status !== "waived" && (
-                          <button
-                            onClick={() => handleShowQR(d)}
-                            title="Show Payment QR / Link"
-                            className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink hover:text-white transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
-                          >
-                            <QrCode className="w-4 h-4" />
-                          </button>
-                        )}
-                        {d.status !== "paid" && d.status !== "waived" && (
-                          <button
-                            onClick={() => {
-                              setPayModalDue(d);
-                              setPayAmountRupees(paiseToRupeeInput(d.amount));
-                              setPayNotes("");
-                              setModalError(null);
-                            }}
-                            title="Record Cash Payment"
-                            className="p-1.5 rounded-lg bg-success-tint hover:bg-success/20 text-success transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                        {d.status !== "paid" && d.status !== "waived" && (
-                          <button
-                            onClick={() => {
-                              setMatchDueRow(d);
-                              setMatchUtr("");
-                              setModalError(null);
-                            }}
-                            title="Match UTR"
-                            className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
-                          >
-                            <Link2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        {d.status !== "paid" && d.status !== "waived" && (
-                          <button
-                            onClick={() => {
-                              setWaiveModalDue(d);
-                              setModalError(null);
-                            }}
-                            title="Waive Due"
-                            className="p-1.5 rounded-lg bg-surface hover:bg-danger-tint text-ink-muted hover:text-danger transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
-                          >
-                            <Slash className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  );
-                })}
+                {filteredDues.map((d, idx) => (
+                  <DueTableRow
+                    key={d.id}
+                    due={d}
+                    isSelected={selectedRowIndex === idx}
+                    tenantName={tenantMap.get(d.tenant_id) || "Student / Tenant"}
+                    locale={locale}
+                    t={t}
+                    onSelect={() => setSelectedRowIndex(idx)}
+                    onShowQR={handleShowQR}
+                    onOpenPay={handleOpenPay}
+                    onOpenMatch={handleOpenMatch}
+                    onOpenWaive={handleOpenWaive}
+                    rowRef={(el) => {
+                      tableRowRefs.current[idx] = el;
+                    }}
+                  />
+                ))}
               </tbody>
             </table>
           </div>

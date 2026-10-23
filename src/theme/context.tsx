@@ -4,6 +4,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
   useRef,
   type ReactNode,
   type FC,
@@ -267,8 +268,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mql.removeEventListener("change", onChange);
   }, [theme]);
 
+  const value = useMemo<ThemeContextType>(
+    () => ({
+      theme,
+      resolvedTheme,
+      setTheme,
+      cycleTheme,
+      registerAuthUpdater,
+    }),
+    [theme, resolvedTheme, setTheme, cycleTheme, registerAuthUpdater]
+  );
+
   return (
-    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, cycleTheme, registerAuthUpdater }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
