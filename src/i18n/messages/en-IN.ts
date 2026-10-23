@@ -23,6 +23,7 @@ export const enIN = {
   "nav.tenants": "Tenants",
   "nav.dues": "Dues & Billing",
   "nav.payments": "Payments",
+  "nav.payouts": "Money Out",
   "nav.reconciliation": "Reconciliation",
   "nav.reminders": "Reminders",
   "nav.facility": "Facility & Rules",

@@ -700,3 +700,97 @@ export interface Referral {
   created_at: string;
   rewarded_at?: string | null;
 }
+
+// --- M7 Money Out / Payout Models ---
+export type PayeeType = "staff" | "vendor" | "tenant_deposit" | "guardian_deposit";
+
+export interface PayoutPayee {
+  id: string;
+  property_id: string;
+  payee_type: PayeeType;
+  name: string;
+  phone?: string | null;
+  account_number_last4?: string | null;
+  ifsc?: string | null;
+  bank_name?: string | null;
+  upi_vpa?: string | null;
+  key_version: number;
+  is_verified: boolean;
+  verified_by?: string | null;
+  verified_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PayoutBatchStatus =
+  | "draft"
+  | "approved"
+  | "processing"
+  | "dispatch_unknown"
+  | "completed"
+  | "partially_failed"
+  | "failed"
+  | "cancelled";
+
+export interface PayoutBatch {
+  id: string;
+  property_id: string;
+  batch_number: string;
+  format_type: string;
+  status: PayoutBatchStatus;
+  total_amount_paise: number;
+  item_count: number;
+  created_by: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  file_checksum?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PayoutItemStatus =
+  | "pending"
+  | "processing"
+  | "cashfree_approval_pending"
+  | "succeeded"
+  | "failed"
+  | "retriable_failed"
+  | "rejected"
+  | "reversed"
+  | "cancelled";
+
+export interface PayoutItem {
+  id: string;
+  batch_id?: string | null;
+  payee_id: string;
+  departure_id?: string | null;
+  reference_number: string;
+  amount_paise: number;
+  purpose: string;
+  period_label: string;
+  status: PayoutItemStatus;
+  utr?: string | null;
+  settled_at?: string | null;
+  failure_reason?: string | null;
+  cf_transfer_id?: string | null;
+  retry_of?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApprovePayoutBatchInput {
+  expected_item_count: number;
+  expected_total_paise: number;
+  otp?: string;
+  firebase_id_token?: string;
+  reauth_confirmation?: string;
+}
+
+export interface RequestPayoutBatchOTPResponse {
+  message: string;
+  channel: string;
+  destination: string;
+  phone: string;
+}
+

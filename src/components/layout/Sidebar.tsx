@@ -10,6 +10,7 @@ import {
   Building2,
   Sliders,
   ShieldCheck,
+  Send,
 } from "lucide-react";
 import { useAuth } from "@/auth/context";
 import { useQuery } from "@tanstack/react-query";
@@ -81,6 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "tenants", key: "nav.tenants", icon: Users },
     { id: "dues", key: "nav.dues", icon: Scale },
     { id: "payments", key: "nav.payments", icon: CreditCard },
+    { id: "payouts", key: "nav.payouts", icon: Send },
     { id: "reconciliation", key: "nav.reconciliation", icon: Scale },
     { id: "reminders", key: "nav.reminders", icon: Bell },
     { id: "facility", key: "nav.facility", icon: Sliders },

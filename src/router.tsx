@@ -64,6 +64,7 @@ const ReportsView = lazyView(() => import("@/routes/owner/reports"), "ReportsVie
 const TenantsView = lazyView(() => import("@/routes/owner/tenants"), "TenantsView");
 const DuesView = lazyView(() => import("@/routes/owner/dues"), "DuesView");
 const PaymentsView = lazyView(() => import("@/routes/owner/payments"), "PaymentsView");
+const PayoutsView = lazyView(() => import("@/routes/owner/payouts"), "PayoutsView");
 const ReconciliationView = lazyView(() => import("@/routes/owner/reconciliation"), "ReconciliationView");
 const EventsView = lazyView(() => import("@/routes/owner/events"), "EventsView");
 const MoreView = lazyView(() => import("@/routes/owner/more"), "MoreView");
@@ -328,6 +329,7 @@ const ownerBilling = createRoute({
   },
 });
 const ownerPayments = createRoute({ getParentRoute: () => ownerRoute, path: "/payments", component: PaymentsView });
+const ownerPayouts = createRoute({ getParentRoute: () => ownerRoute, path: "/payouts", component: PayoutsView });
 const ownerRecon = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/reconciliation",
@@ -632,6 +634,7 @@ const routeTree = rootRoute.addChildren([
     ownerDues,
     ownerBilling,
     ownerPayments,
+    ownerPayouts,
     ownerRecon,
     ownerTieOut,
     ownerTieOutShort,

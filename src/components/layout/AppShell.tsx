@@ -24,6 +24,7 @@ const ROUTE_KEYS: Record<string, MessageKey> = {
   "/owner/dues": "nav.dues",
   "/owner/billing": "nav.dues",
   "/owner/payments": "nav.payments",
+  "/owner/payouts": "nav.payouts",
   "/owner/reconciliation": "nav.reconciliation",
   "/owner/finance/tie-out": "nav.reconciliation",
   "/owner/tie-out": "nav.reconciliation",

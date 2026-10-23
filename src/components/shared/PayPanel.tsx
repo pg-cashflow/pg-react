@@ -7,7 +7,7 @@ import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { ProofUploadForm } from "@/components/shared/ProofUploadForm";
 import { usePayDue } from "@/lib/usePayDue";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import type { PayIntent } from "@pg/types";
 
 export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ dueId, onDone }) => {

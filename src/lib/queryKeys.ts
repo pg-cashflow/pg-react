@@ -56,5 +56,11 @@ export const QUERY_KEYS = {
   tenantKYCStatus: ["tenant", "kyc", "status"] as const,
   ownerKYCQueue: ["owner", "kyc", "queue"] as const,
   ownerTenantKYC: (tenantId: string) => ["owner", "tenants", tenantId, "kyc"] as const,
+
+  // Payouts & Money Out
+  payoutPayees: ["owner", "payouts", "payees"] as const,
+  unbatchedPayoutItems: ["owner", "payouts", "items", "unbatched"] as const,
+  payoutBatches: ["owner", "payouts", "batches"] as const,
+  payoutBatch: (id: string) => ["owner", "payouts", "batches", id] as const,
 };
 

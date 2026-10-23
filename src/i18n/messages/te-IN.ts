@@ -25,6 +25,7 @@ export const teIN: Record<MessageKey, string> = {
   "nav.tenants": "అద్దెదారులు",
   "nav.dues": "బకాయిలు & బిల్లింగ్",
   "nav.payments": "చెల్లింపులు",
+  "nav.payouts": "చెల్లింపులు (బయటకు)",
   "nav.reconciliation": "సమన్వయం",
   "nav.reminders": "రిమైండర్లు",
   "nav.facility": "సౌకర్యాలు & నియమాలు",
