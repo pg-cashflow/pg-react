@@ -1,17 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
-import { signOut } from "firebase/auth";
 import type { User, UserRole, AuthTokenPayload } from "@pg/types";
 import { getStoredUser, setStoredUser, getInviteCode } from "./storage";
 import { getAccessToken, setAccessToken, onAccessTokenChange } from "./tokenStore";
 import { exchangeFirebaseToken, refreshSession, logoutSession } from "@/api/auth";
-import { scheduleProactiveRefresh, stopProactiveRefresh } from "@/api/client";
-import {
-  sendFirebasePhoneOtp,
-  confirmFirebasePhoneOtp,
-  resetFirebasePhoneAuth,
-} from "@/auth/firebasePhone";
-import { signInWithGoogle } from "@/auth/firebaseGoogle";
-import { firebaseAuth } from "@/lib/firebase";
+import { scheduleProactiveRefresh, stopProactiveRefresh, ApiError } from "@/api/client";
 import { queryClient } from "@/lib/queryClient";
 import { clearServiceWorkerCaches } from "@/lib/session";
 import { toE164IndianPhone } from "@/lib/utils";
@@ -35,6 +27,7 @@ interface AuthContextType {
   reExchangeFirebase: () => Promise<void>;
   updateUser: (patch: Partial<User>) => void;
   logout: () => void;
+  clearLocalSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,13 +68,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [justActivated, setJustActivated] = useState<boolean>(false);
 
+  const clearLocalSession = useCallback(() => {
+    stopProactiveRefresh();
+    import("@/auth/firebasePhone").then((m) => m.resetFirebasePhoneAuth()).catch(() => {});
+    setAccessToken(null);
+    setStoredUser(null);
+    setTokenState(null);
+    setUser(null);
+    setRole(null);
+    setUserId(null);
+    setTenantId(null);
+    setJustActivated(false);
+  }, []);
+
   const logout = useCallback(() => {
     stopProactiveRefresh();
     logoutSession().catch(() => {});
     queryClient.clear();
     clearServiceWorkerCaches().catch(() => {});
-    resetFirebasePhoneAuth();
-    signOut(firebaseAuth).catch(() => {});
+    import("@/auth/firebasePhone")
+      .then((m) => m.resetFirebasePhoneAuth())
+      .catch(() => {});
+    import("@/lib/firebase")
+      .then(({ firebaseAuth }) =>
+        import("firebase/auth").then(({ signOut }) => signOut(firebaseAuth))
+      )
+      .catch(() => {});
     setAccessToken(null);
     setStoredUser(null);
     setTokenState(null);
@@ -138,23 +150,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
       }
-    } catch {
-      // Refresh cookie absent or expired
+    } catch (err: unknown) {
+      // Differentiate transient errors from terminal auth errors
+      if (err instanceof ApiError) {
+        if (err.status === 429 || err.status >= 500) {
+          // Transient failure (rate limit or server unavailable).
+          // Server explicitly allows retry; do not revoke session or log out.
+          setIsLoading(false);
+          return;
+        }
+      } else if (err instanceof TypeError && /failed to fetch|networkerror|load failed/i.test(err.message)) {
+        // Network offline: retain session without revoking
+        setIsLoading(false);
+        return;
+      }
+
+      // Terminal auth error (401, 403, or no refresh cookie):
+      // Only clear local state if there was a prior stored user.
+      // Never trigger server-side logoutSession() or cache purge for anonymous visitors!
+      if (stored) {
+        clearLocalSession();
+      }
     }
 
-    const storedUser = getStoredUser();
-    if (!storedUser) {
-      logout();
-    }
     setIsLoading(false);
-  }, [applySession, logout]);
+  }, [applySession, clearLocalSession]);
 
   useEffect(() => {
     void evaluateStored();
-    const handleUnauthorized = () => logout();
+    const handleUnauthorized = () => clearLocalSession();
     window.addEventListener("pg:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);
-  }, [evaluateStored, logout]);
+  }, [evaluateStored, clearLocalSession]);
 
   useEffect(() => {
     return onAccessTokenChange((t) => {
@@ -177,15 +204,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [applySession]);
 
   const handleSendPhoneOtp = useCallback(async (phone: string) => {
+    const { sendFirebasePhoneOtp } = await import("@/auth/firebasePhone");
     await sendFirebasePhoneOtp(toE164IndianPhone(phone));
   }, []);
 
   const handleConfirmPhoneOtp = useCallback(async (otp: string) => {
+    const { confirmFirebasePhoneOtp } = await import("@/auth/firebasePhone");
     const idToken = await confirmFirebasePhoneOtp(otp);
     await completeWithIdToken(idToken);
   }, [completeWithIdToken]);
 
   const handleGoogleLogin = useCallback(async (): Promise<"ok" | "needs-phone"> => {
+    const { signInWithGoogle } = await import("@/auth/firebaseGoogle");
     const result = await signInWithGoogle();
     if (result.needsPhone) return "needs-phone";
     await completeWithIdToken(result.idToken);
@@ -193,6 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [completeWithIdToken]);
 
   const reExchangeFirebase = useCallback(async () => {
+    const { firebaseAuth } = await import("@/lib/firebase");
     const current = firebaseAuth.currentUser;
     if (!current) {
       throw new Error("Sign in again to refresh your session");
@@ -232,6 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       reExchangeFirebase,
       updateUser,
       logout,
+      clearLocalSession,
     }),
     [
       token,
@@ -252,6 +284,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       reExchangeFirebase,
       updateUser,
       logout,
+      clearLocalSession,
     ]
   );
 

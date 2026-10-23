@@ -34,7 +34,7 @@ export const FinanceCapitalView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">Owner Capital</h1>
+          <h1 className="t-h1 tracking-tight text-ink">Owner Capital</h1>
           <p className="text-sm text-ink-muted">
             Track equity contributions, property renovations, and capital drawings.
           </p>
@@ -57,7 +57,7 @@ export const FinanceCapitalView: React.FC = () => {
             Total Capital Injected
           </span>
           <div>
-            <AmountBadge amount={totalInjectedPaise} className="text-2xl font-bold text-ink" />
+            <AmountBadge amount={totalInjectedPaise} className="t-amount-lg text-ink" />
           </div>
           <p className="text-xs text-ink-muted">Initial equity + subsequent injections</p>
         </div>
@@ -67,7 +67,7 @@ export const FinanceCapitalView: React.FC = () => {
             Total Capital Withdrawn
           </span>
           <div>
-            <AmountBadge amount={totalWithdrawnPaise} className="text-2xl font-bold text-ink" />
+            <AmountBadge amount={totalWithdrawnPaise} className="t-amount-lg text-ink" />
           </div>
           <p className="text-xs text-ink-muted">Owner distributions and drawings</p>
         </div>
@@ -80,7 +80,7 @@ export const FinanceCapitalView: React.FC = () => {
             <AmountBadge
               amount={netDeployedPaise}
               variant={netDeployedPaise >= 0 ? "success" : "danger"}
-              className="text-2xl font-bold"
+              className="t-amount-lg"
             />
           </div>
           <p className="text-xs text-ink-muted">Net equity currently committed</p>

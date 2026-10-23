@@ -9,7 +9,7 @@ import { StatusPill } from "@/components/shared/StatusPill";
 import { QRModal } from "@/components/shared/QRModal";
 import { QueryState } from "@/components/shared/QueryState";
 import { displayDueStatus, downloadTextFile, formatDate, formatDaysOverdue, getDaysOverdue, isOverdue, paiseToRupeeInput, rupeesToPaise } from "@/lib/utils";
-import { useLocale } from "@/i18n";
+import { useLocale, type MessageKey } from "@/i18n";
 import { getPayments } from "@/api/payments";
 import { getProperties } from "@/api/properties";
 import { buildLedgerCsv } from "@/lib/exportLedgerCsv";
@@ -22,7 +22,7 @@ interface DueTableRowProps {
   isSelected: boolean;
   tenantName: string;
   locale: string;
-  t: (key: string, values?: Record<string, any>) => string;
+  t: (key: MessageKey, values?: Record<string, any>) => string;
   onSelect: () => void;
   onShowQR: (due: Due) => void;
   onOpenPay: (due: Due) => void;

@@ -47,7 +47,7 @@ export const FinanceCloseView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">Month Close &amp; Tie-Out</h1>
+          <h1 className="t-h1 tracking-tight text-ink">Month Close &amp; Tie-Out</h1>
           <p className="text-sm text-ink-muted">
             Formal accounting period lock, collection tie-out, and audited reopening.
           </p>
@@ -133,7 +133,7 @@ export const FinanceCloseView: React.FC = () => {
                     Reconciliation Collections Total
                   </span>
                   <div>
-                    <AmountBadge amount={tieOut.recon_total_paise} className="text-xl font-bold" />
+                    <AmountBadge amount={tieOut.recon_total_paise} className="t-h2 font-mono" />
                   </div>
                 </div>
 
@@ -142,7 +142,7 @@ export const FinanceCloseView: React.FC = () => {
                     Journal Ledger Total
                   </span>
                   <div>
-                    <AmountBadge amount={tieOut.ledger_total_paise} className="text-xl font-bold" />
+                    <AmountBadge amount={tieOut.ledger_total_paise} className="t-h2 font-mono" />
                   </div>
                 </div>
 
@@ -159,7 +159,7 @@ export const FinanceCloseView: React.FC = () => {
                     <AmountBadge
                       amount={tieOut.difference_paise}
                       variant={isBalanced ? "success" : "danger"}
-                      className="text-xl font-bold"
+                      className="t-h2 font-mono"
                     />
                   </div>
                 </div>

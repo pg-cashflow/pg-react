@@ -14,51 +14,7 @@ import {
 } from "lucide-react";
 import { PwaInstallPrompt } from "@/components/common/PwaInstallPrompt";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
-
-const ROLES = [
-  {
-    icon: Home,
-    title: "Tenants",
-    tagline: "Move in with dignity, not paper registers",
-    description: "Scan your room-bound code, complete instant Aadhaar verification, and pay rent with UPI.",
-    benefits: [
-      "Room & floor-bound invite code",
-      "UIDAI Aadhaar OTP verification in 20 seconds",
-      "Pay dues via UPI QR or deep link with instant UTR slip",
-      "Keep your on-time streak flame burning to earn perks",
-    ],
-    ctaText: "Join with room code",
-    ctaLink: "/",
-  },
-  {
-    icon: KeyRound,
-    title: "Property Owners",
-    tagline: "One single ledger for every rupee and room",
-    description: "Track dues across all properties, reconcile bank statements, and stop chasing payments on WhatsApp.",
-    benefits: [
-      "Consolidated live dues ledger across all rooms",
-      "Automated bank statement CSV and 12-digit UTR reconciliation",
-      "Every tenant identity-checked via Aadhaar before move-in",
-      "Provision wardens with restricted property-level access",
-    ],
-    ctaText: "Open owner portal",
-    ctaLink: "/login",
-  },
-  {
-    icon: ClipboardList,
-    title: "Wardens & Managers",
-    tagline: "Hallway-ready ops from your phone",
-    description: "Log in with owner-issued credentials to manage the floor: inspections, daily headcount, and meters.",
-    benefits: [
-      "Owner-provisioned credentials scoped to assigned property",
-      "Room inspection audits with mandatory photo failure proof",
-      "Daily kitchen meal headcount forecast for breakfast, lunch, and dinner",
-      "Log electricity sub-meters and resolve safety hazards",
-    ],
-    ctaText: "Manager sign in",
-    ctaLink: "/login",
-  },
-];
+import { useLocale } from "@/i18n";
 
 const FUNDAMENTALS = [
   {
@@ -107,6 +63,53 @@ const VERIFICATION_STEPS = [
 ];
 
 export const LandingPage: React.FC = () => {
+  const { t } = useLocale();
+
+  const roles = [
+    {
+      icon: Home,
+      title: t("landing.tenantsTitle"),
+      tagline: t("landing.tenantsTagline"),
+      description: t("landing.tenantsDesc"),
+      benefits: [
+        "Room & floor-bound invite code",
+        "UIDAI Aadhaar OTP verification in 20 seconds",
+        "Pay dues via UPI QR or deep link with instant UTR slip",
+        "Keep your on-time streak flame burning to earn perks",
+      ],
+      ctaText: t("landing.joinWithCode"),
+      ctaLink: "/",
+    },
+    {
+      icon: KeyRound,
+      title: t("landing.ownersTitle"),
+      tagline: t("landing.ownersTagline"),
+      description: t("landing.ownersDesc"),
+      benefits: [
+        "Consolidated live dues ledger across all rooms",
+        "Automated bank statement CSV and 12-digit UTR reconciliation",
+        "Every tenant identity-checked via Aadhaar before move-in",
+        "Provision wardens with restricted property-level access",
+      ],
+      ctaText: t("landing.ownerLogin"),
+      ctaLink: "/login",
+    },
+    {
+      icon: ClipboardList,
+      title: t("landing.wardensTitle"),
+      tagline: t("landing.wardensTagline"),
+      description: t("landing.wardensDesc"),
+      benefits: [
+        "Owner-provisioned credentials scoped to assigned property",
+        "Room inspection audits with mandatory photo failure proof",
+        "Daily kitchen meal headcount forecast for breakfast, lunch, and dinner",
+        "Log electricity sub-meters and resolve safety hazards",
+      ],
+      ctaText: t("landing.ownerLogin"),
+      ctaLink: "/login",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-bg text-ink selection:bg-accent-tint selection:text-accent">
       {/* Top Navigation */}
@@ -138,13 +141,13 @@ export const LandingPage: React.FC = () => {
               to="/"
               className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-[10px] border border-hairline bg-surface t-caption font-semibold text-ink hover:bg-bg transition-colors"
             >
-              Join with code
+              {t("landing.joinWithCode")}
             </Link>
             <Link
               to="/login"
               className="inline-flex items-center h-9 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold hover:opacity-95 transition-opacity"
             >
-              Sign in
+              {t("landing.ownerLogin")}
             </Link>
           </div>
         </nav>
@@ -159,11 +162,11 @@ export const LandingPage: React.FC = () => {
           </div> */}
 
           <h1 className="t-display sm:leading-tight font-bold tracking-tight text-ink max-w-[22ch] mx-auto">
-            Run your PG, not your paperwork.
+            {t("landing.heroHeadline")}
           </h1>
 
           <p className="t-body sm:t-h3 text-ink-muted mt-4 max-w-[56ch] mx-auto leading-relaxed">
-            One ledger for rent, rooms, and real identity verification — built for PG and hostel owners who are done chasing payments on WhatsApp.
+            {t("landing.heroSubtitle")}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
@@ -179,7 +182,7 @@ export const LandingPage: React.FC = () => {
               className="h-11 inline-flex items-center justify-center rounded-[10px] border border-hairline bg-surface px-5 t-body font-semibold text-ink hover:bg-bg gap-2"
             >
               <QrCode className="w-4 h-4 text-ink-muted" />
-              <span>Join with a room code</span>
+              <span>{t("landing.joinWithCode")}</span>
             </Link>
           </div>
 
@@ -287,7 +290,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
-            {ROLES.map((role) => {
+            {roles.map((role) => {
               const Icon = role.icon;
               return (
                 <div
@@ -464,8 +467,8 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-6 t-caption font-medium text-ink-muted">
-            <Link to="/" className="hover:text-ink transition-colors">Join Property</Link>
-            <Link to="/login" className="hover:text-ink transition-colors">Owner Sign In</Link>
+            <Link to="/" className="hover:text-ink transition-colors">{t("join.pageTitle")}</Link>
+            <Link to="/login" className="hover:text-ink transition-colors">{t("landing.ownerLogin")}</Link>
             <a href="#roles" className="hover:text-ink transition-colors">Portals</a>
             <a href="#security" className="hover:text-ink transition-colors">Security</a>
           </div>

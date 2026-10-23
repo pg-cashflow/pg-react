@@ -21,6 +21,7 @@ import { useAuth } from "@/auth/context";
 import { getAccessToken } from "@/auth/tokenStore";
 import { getInviteCode } from "@/auth/storage";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { useLocale, formatApiError } from "@/i18n";
 
 const DRAFT_KEY = "pg_join_draft";
 
@@ -48,6 +49,7 @@ function getStoredDraft(): JoinDraft | null {
 export const JoinWaitingPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout, user, triggerActivation, applySession } = useAuth();
+  const { t, locale } = useLocale();
   const inviteCode = getInviteCode();
   const draft = getStoredDraft();
 
@@ -82,7 +84,7 @@ export const JoinWaitingPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const joinDateLabel = new Date().toLocaleDateString("en-IN", {
+  const joinDateLabel = new Date().toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -144,19 +146,19 @@ export const JoinWaitingPage: React.FC = () => {
     const emergency = emergencyPhone.trim();
 
     if (!trimmedName || !trimmedPhone || !permanent || !current || !parent || !emergency) {
-      setError("Please fill all required fields.");
+      setError(t("error.join.profileIncomplete"));
       return;
     }
     if (!/^\+?[0-9\s-]{10,15}$/.test(trimmedPhone)) {
-      setError("Please enter a valid personal mobile number.");
+      setError(t("join.phoneHelper"));
       return;
     }
     if (!/^\+?[0-9\s-]{10,15}$/.test(emergency)) {
-      setError("Please enter a valid emergency / parent phone number.");
+      setError(t("join.emergencyPhone"));
       return;
     }
     if (!consent) {
-      setError("Consent is required to store your details for PG records.");
+      setError(t("error.join.consentRequired"));
       return;
     }
 
@@ -205,7 +207,7 @@ export const JoinWaitingPage: React.FC = () => {
       triggerActivation();
       navigate({ to: "/tenant" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to submit profile. Please try again.");
+      setError(formatApiError(err, t));
     } finally {
       setSaving(false);
     }
@@ -244,17 +246,17 @@ export const JoinWaitingPage: React.FC = () => {
           <div>
             <h1 className="t-h1 flex items-center gap-2">
               <User className="w-5 h-5 text-accent" />
-              Tenant Registration
+              {t("join.pageTitle")}
             </h1>
             <p className="text-xs text-ink-muted mt-1 leading-relaxed">
-              Fill in your details to register. You will complete KYC verification right after before entering the dashboard.
+              {t("join.pageSubtitle")}
             </p>
           </div>
 
           <form onSubmit={handleSubmitProfile} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                Full Name *
+                {t("join.fullName")} *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -264,7 +266,7 @@ export const JoinWaitingPage: React.FC = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder={t("join.fullNamePlaceholder")}
                   className={inputClass}
                 />
               </div>
@@ -272,7 +274,7 @@ export const JoinWaitingPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                Personal Mobile Number *
+                {t("join.personalPhone")} *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -297,14 +299,14 @@ export const JoinWaitingPage: React.FC = () => {
               </div>
               {!isPhoneFixed && (
                 <p className="text-[11px] text-ink-faint mt-1">
-                  Enter your active mobile number for PG communication and rent receipts
+                  {t("join.phoneHelper")}
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                Permanent / Home Address *
+                {t("join.permanentAddress")} *
               </label>
               <div className="relative">
                 <div className="absolute top-3 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -321,7 +323,7 @@ export const JoinWaitingPage: React.FC = () => {
                       setCurrentAddress(val);
                     }
                   }}
-                  placeholder="Home address, hometown, city & state"
+                  placeholder={t("join.permanentAddressPlaceholder")}
                   className="w-full pl-10 pr-4 py-2 bg-surface/80 border border-hairline/80 rounded-xl text-ink placeholder:text-ink-muted text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition"
                 />
               </div>
@@ -330,7 +332,7 @@ export const JoinWaitingPage: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
                 <label className="text-xs font-medium text-ink uppercase tracking-wider">
-                  Current Staying Address *
+                  {t("join.currentAddress")} *
                 </label>
                 <label className="inline-flex items-center gap-1.5 text-xs text-accent cursor-pointer select-none font-medium">
                   <input
@@ -345,7 +347,7 @@ export const JoinWaitingPage: React.FC = () => {
                     }}
                     className="rounded border-hairline text-accent focus:ring-accent"
                   />
-                  <span>Same as permanent address</span>
+                  <span>{t("join.sameAddress")}</span>
                 </label>
               </div>
               <div className="relative">
@@ -358,7 +360,7 @@ export const JoinWaitingPage: React.FC = () => {
                   disabled={sameAsPermanent}
                   value={sameAsPermanent ? permanentAddress : currentAddress}
                   onChange={(e) => setCurrentAddress(e.target.value)}
-                  placeholder={sameAsPermanent ? "Matches permanent address" : "Where you are staying now"}
+                  placeholder={sameAsPermanent ? t("join.sameAddress") : t("join.currentAddressPlaceholder")}
                   className={`w-full pl-10 pr-4 py-2 border rounded-xl text-ink text-sm transition ${
                     sameAsPermanent
                       ? "bg-surface/30 border-hairline/40 text-ink-muted cursor-not-allowed"
@@ -371,7 +373,7 @@ export const JoinWaitingPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                  Parent / Guardian Name *
+                  {t("join.parentName")} *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -381,7 +383,7 @@ export const JoinWaitingPage: React.FC = () => {
                     required
                     value={parentName}
                     onChange={(e) => setParentName(e.target.value)}
-                    placeholder="Parent / guardian full name"
+                    placeholder={t("join.parentNamePlaceholder")}
                     className={inputClass}
                   />
                 </div>
@@ -389,7 +391,7 @@ export const JoinWaitingPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                  Relation *
+                  {t("join.relation")} *
                 </label>
                 <div className="relative">
                   <select
@@ -397,11 +399,11 @@ export const JoinWaitingPage: React.FC = () => {
                     onChange={(e) => setParentRelation(e.target.value)}
                     className="w-full pl-3.5 pr-8 py-2.5 bg-bg border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition appearance-none cursor-pointer"
                   >
-                    <option value="Father">Father</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Guardian">Guardian</option>
-                    <option value="Spouse">Spouse</option>
-                    <option value="Other">Other</option>
+                    <option value="Father">{t("join.relationFather")}</option>
+                    <option value="Mother">{t("join.relationMother")}</option>
+                    <option value="Guardian">{t("join.relationGuardian")}</option>
+                    <option value="Spouse">{t("join.relationSpouse")}</option>
+                    <option value="Other">{t("join.relationOther")}</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-ink-muted">
                     <ChevronDown className="w-4 h-4" />
@@ -412,7 +414,7 @@ export const JoinWaitingPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                Emergency / Parent Phone *
+                {t("join.emergencyPhone")} *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -423,7 +425,7 @@ export const JoinWaitingPage: React.FC = () => {
                   type="tel"
                   value={emergencyPhone}
                   onChange={(e) => setEmergencyPhone(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  placeholder={t("join.emergencyPhonePlaceholder")}
                   className={inputClass}
                 />
               </div>
@@ -431,7 +433,7 @@ export const JoinWaitingPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-medium text-ink mb-1.5 uppercase tracking-wider">
-                Join Date
+                {t("join.joinDate")}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -443,7 +445,7 @@ export const JoinWaitingPage: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2.5 bg-surface/40 border border-hairline/50 rounded-xl text-ink-muted text-sm cursor-not-allowed"
                 />
               </div>
-              <p className="text-[11px] text-ink-muted mt-1">Defaults to today (the day you register).</p>
+              <p className="text-[11px] text-ink-muted mt-1">{t("join.joinDateHelper")}</p>
             </div>
 
             <label className="flex items-start gap-2.5 text-xs text-ink cursor-pointer pt-2">
@@ -455,7 +457,7 @@ export const JoinWaitingPage: React.FC = () => {
                 className="mt-0.5 rounded border-hairline text-accent focus:ring-accent"
               />
               <span>
-                I agree to the PG storing my details for occupancy records under DPDP Act compliance.
+                {t("join.consentCheckbox")}
               </span>
             </label>
 
@@ -468,7 +470,7 @@ export const JoinWaitingPage: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  <span>Save Profile & Continue</span>
+                  <span>{t("join.submitButton")}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -487,7 +489,7 @@ export const JoinWaitingPage: React.FC = () => {
               className="text-xs text-danger hover:text-danger flex items-center gap-1"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Sign out
+              {t("common.logout")}
             </button>
           </div>
         </div>

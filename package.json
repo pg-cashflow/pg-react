@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/prerender-landing.mjs",
     "lint": "oxlint && node scripts/check-palette.mjs && node scripts/check-typography.mjs",
     "lint:palette": "node scripts/check-palette.mjs",
     "lint:type": "node scripts/check-typography.mjs",

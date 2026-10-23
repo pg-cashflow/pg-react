@@ -133,7 +133,7 @@ export const PayoutsView: React.FC = () => {
       {/* View Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-ink tracking-tight flex items-center gap-2.5">
+          <h1 className="t-h1 text-ink tracking-tight flex items-center gap-2.5">
             <Send className="w-5 h-5 text-accent" />
             Money Out & Payroll
           </h1>
@@ -209,7 +209,7 @@ export const PayoutsView: React.FC = () => {
           <Clock className="w-4 h-4" />
           Pending Items
           {unbatchedItems.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full text-xs bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold">
+            <span className="px-1.5 py-0.2 rounded-full text-xs bg-warning-tint text-warning font-bold">
               {unbatchedItems.length}
             </span>
           )}
@@ -276,7 +276,7 @@ export const PayoutsView: React.FC = () => {
                               : b.status === "approved"
                               ? "bg-accent-tint text-accent"
                               : b.status === "processing"
-                              ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                              ? "bg-warning-tint text-warning"
                               : b.status === "failed"
                               ? "bg-danger/10 text-danger"
                               : "bg-bg text-ink-muted border border-hairline"
@@ -346,14 +346,14 @@ export const PayoutsView: React.FC = () => {
       {/* Tab 2: Pending Unbatched Items */}
       {activeTab === "unbatched" && (
         <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-warning-tint/30 border border-warning/20 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <Clock className="w-5 h-5 text-warning shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                <p className="text-sm font-semibold text-warning">
                   {unbatchedItems.length} pending items ready for batching
                 </p>
-                <p className="text-xs text-amber-700 dark:text-amber-300">
+                <p className="text-xs text-ink-muted">
                   Total disbursement volume: {formatPaise(unbatchedTotalPaise)}
                 </p>
               </div>
@@ -486,7 +486,7 @@ export const PayoutsView: React.FC = () => {
                             Verified
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-tint text-warning">
                             <Clock className="w-3.5 h-3.5" />
                             Pending Verification
                           </span>

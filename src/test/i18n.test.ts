@@ -396,7 +396,37 @@ describe("i18n message completeness", () => {
       expect(jsonSet.size).toBe(ERROR_CODES.length);
     });
   });
+
+  describe("formatApiError localized mapping", () => {
+    it("maps ApiError with code to localized string and falls back gracefully", async () => {
+      const { formatApiError } = await import("../i18n");
+      const { ApiError } = await import("../api/client");
+
+      const tMock = (key: any) => {
+        return (enIN as any)[key] || key;
+      };
+
+      // 1. ApiError with known error code
+      const apiErr = new ApiError(400, "Invalid OTP provided", "auth.invalidOtp");
+      expect(formatApiError(apiErr, tMock)).toBe("Invalid OTP. Please check the digits and try again.");
+
+      // 2. ApiError with unknown error code falls back to err.message
+      const unknownApiErr = new ApiError(400, "Custom server message", "custom.unknownCode");
+      expect(formatApiError(unknownApiErr, tMock)).toBe("Custom server message");
+
+      // 3. Plain Error falls back to err.message
+      const standardErr = new Error("Network timeout");
+      expect(formatApiError(standardErr, tMock)).toBe("Network timeout");
+
+      // 4. Raw string
+      expect(formatApiError("Something went wrong", tMock)).toBe("Something went wrong");
+
+      // 5. Unknown value falls back to common.error
+      expect(formatApiError(null, tMock)).toBe("An error occurred");
+    });
+  });
 });
+
 
 
 

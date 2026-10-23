@@ -36,7 +36,7 @@
   --hairline: var(--raw-hairline);
   --danger: var(--raw-red);         --danger-tint: var(--raw-red-tint);
   --success: var(--raw-green);      --success-tint: var(--raw-green-tint);
-  --warning-tint: var(--raw-marigold-tint);
+  --warning: var(--raw-marigold-pressed); --warning-tint: var(--raw-marigold-tint);
   --accent: var(--raw-teal);        /* public pages (login/invite) default to brand teal */
   --accent-pressed: var(--raw-teal-pressed);
   --accent-tint: var(--raw-teal-tint);
@@ -72,7 +72,7 @@
   --hairline: var(--raw-hairline-dark);
   --danger: var(--raw-red-dark-mode);   --danger-tint: var(--raw-red-tint-dark);
   --success: var(--raw-green-dark-mode); --success-tint: var(--raw-green-tint-dark);
-  --warning-tint: var(--raw-marigold-tint-dark);
+  --warning: var(--raw-marigold-dark-mode); --warning-tint: var(--raw-marigold-tint-dark);
 
   /* Financial status tokens (Dark) */
   --status-paid-bg: var(--success-tint);
@@ -135,6 +135,7 @@
   --color-accent-tint: var(--accent-tint);
   --color-danger: var(--danger);
   --color-danger-tint: var(--danger-tint);
+  --color-warning: var(--warning);
   --color-warning-tint: var(--warning-tint);
   --color-success: var(--success);
   --color-success-tint: var(--success-tint);
@@ -267,3 +268,32 @@ html.theme-transition [data-theme-surface] {
 .animate-shake {
   animation: pg-shake 120ms ease-in-out 2;
 }
+
+/* Indic script typography adjustments (Telugu, Tamil, Kannada) */
+:lang(te-IN),
+:lang(ta-IN),
+:lang(kn-IN) {
+  line-height: 1.6;
+}
+
+:lang(te-IN) .t-body,
+:lang(ta-IN) .t-body,
+:lang(kn-IN) .t-body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+:lang(te-IN) .t-body-sm,
+:lang(ta-IN) .t-body-sm,
+:lang(kn-IN) .t-body-sm {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+:lang(te-IN) .t-caption,
+:lang(ta-IN) .t-caption,
+:lang(kn-IN) .t-caption {
+  font-size: 13px;
+  line-height: 1.6;
+}
+

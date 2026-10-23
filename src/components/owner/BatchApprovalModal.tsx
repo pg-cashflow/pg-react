@@ -89,7 +89,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-hairline flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-xl bg-warning-tint text-warning">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
@@ -117,11 +117,11 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
           <div className="p-4 rounded-xl bg-bg border border-hairline grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">Total Items</p>
-              <p className="text-xl font-bold text-ink mt-0.5">{batch.item_count}</p>
+              <p className="t-h2 text-ink mt-0.5">{batch.item_count}</p>
             </div>
             <div>
               <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">Total Amount</p>
-              <p className="text-xl font-bold text-ink mt-0.5">{formatPaise(batch.total_amount_paise)}</p>
+              <p className="t-h2 font-mono text-ink mt-0.5">{formatPaise(batch.total_amount_paise)}</p>
             </div>
           </div>
 

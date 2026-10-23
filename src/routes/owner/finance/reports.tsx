@@ -47,7 +47,7 @@ export const FinanceReportsView: React.FC = () => {
     <div className="space-y-8 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">Integrity & Audit Reports</h1>
+          <h1 className="t-h1 tracking-tight text-ink">Integrity & Audit Reports</h1>
           <p className="text-sm text-ink-muted">
             Bank reserve compliance, clearing drift, capital recovery, and ledger variance.
           </p>

@@ -41,7 +41,7 @@ export const FinanceOverviewView: React.FC = () => {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">Finance & Ledger</h1>
+          <h1 className="t-h1 tracking-tight text-ink">Finance & Ledger</h1>
           <p className="text-sm text-ink-muted">
             Double-entry financial health, operational cash flow, and ledger integrity.
           </p>
@@ -96,7 +96,7 @@ export const FinanceOverviewView: React.FC = () => {
                   <AmountBadge
                     amount={op.ocf_paise}
                     variant={isOcfPositive ? "success" : "danger"}
-                    className="text-2xl font-bold"
+                    className="t-amount-lg"
                   />
                 </div>
                 <p className="text-xs text-ink-muted">
@@ -115,7 +115,7 @@ export const FinanceOverviewView: React.FC = () => {
                     <Coins size={18} />
                   </div>
                 </div>
-                <AmountBadge amount={col.rent_collected_paise} className="text-2xl font-bold text-ink" />
+                <AmountBadge amount={col.rent_collected_paise} className="t-amount-lg text-ink" />
                 <p className="text-xs text-ink-muted">
                   Outstanding rent:{" "}
                   <AmountBadge
@@ -136,7 +136,7 @@ export const FinanceOverviewView: React.FC = () => {
                     <CreditCard size={18} />
                   </div>
                 </div>
-                <AmountBadge amount={op.opex_paise} className="text-2xl font-bold text-ink" />
+                <AmountBadge amount={op.opex_paise} className="t-amount-lg text-ink" />
                 <p className="text-xs text-ink-muted">
                   Includes TDR: <AmountBadge amount={op.tdr_expense_paise} className="text-xs font-semibold" />
                   {op.tdr_is_estimated && " (est.)"}

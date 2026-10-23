@@ -136,7 +136,7 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
             </span>
           </div>
         ) : (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-warning-tint border border-warning/20 text-warning">
             <AlertCircle className="w-3.5 h-3.5" />
             <span>Gateway Inactive ({readiness?.reason || "Credentials Required"})</span>
           </div>

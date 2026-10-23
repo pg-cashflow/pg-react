@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Copy, Check, ExternalLink, Loader2, Download, AlertCircle, CheckCircle2, RefreshCw, Phone } from "lucide-react";
 import { getTenantDuePay, getPayQrBlob } from "@/api/pay";
 import { formatPaise } from "@/lib/utils";
-import { ApiError } from "@/api/client";
 import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { ProofUploadForm } from "@/components/shared/ProofUploadForm";
 import { usePayDue } from "@/lib/usePayDue";
 import { Link } from "@tanstack/react-router";
 import type { PayIntent } from "@pg/types";
+import { useLocale, formatApiError } from "@/i18n";
 
 export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ dueId, onDone }) => {
+  const { t } = useLocale();
   const [pay, setPay] = useState<PayIntent | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [initialError, setInitialError] = useState<string | null>(null);
@@ -40,14 +41,12 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
             setQrUrl(url);
           } catch (err) {
             if (!active) return;
-            if (err instanceof ApiError && err.status === 409) {
-              setInitialError("Personal UPI QR replaced by Cashfree checkout");
-            }
+            setInitialError(formatApiError(err, t));
           }
         }
       })
       .catch((err: Error) => {
-        if (active) setInitialError(err.message);
+        if (active) setInitialError(formatApiError(err, t));
       });
 
     return () => {
@@ -70,10 +69,10 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
       <div className="p-4 rounded-[14px] bg-success-tint border border-success/20 text-success space-y-3">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-          <p className="t-h3 text-success">Already paid or waived</p>
+          <p className="t-h3 text-success">{t("paypanel.alreadyPaidTitle")}</p>
         </div>
         <p className="t-body-sm text-ink-muted">
-          Your rent payment is settled on the property ledger.
+          {t("paypanel.alreadyPaidDesc")}
         </p>
       </div>
     );
@@ -113,7 +112,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
     <div className="space-y-4">
       {/* Due Summary Card */}
       <div className="rounded-[14px] border border-hairline bg-bg p-4">
-        <p className="t-caption text-ink-muted">Amount due</p>
+        <p className="t-caption text-ink-muted">{t("paypanel.amountToPay")}</p>
         <p className="t-amount-lg mt-1">{formatPaise(pay.amount_paise)}</p>
         {pay.note && (
           <div className="mt-3 flex items-center justify-between gap-2">
@@ -128,19 +127,19 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
 
       {/* ── Cashfree Fallback Banner ─────────────────────────────── */}
       {pay.mode === "manual" && pay.fallback_reason === "missing_phone" && (
-        <div className="p-3.5 rounded-[12px] bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
-          <Phone className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-[12px] bg-warning-tint/30 border border-warning/20 flex items-start gap-3">
+          <Phone className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="t-body-sm font-semibold text-amber-700 dark:text-amber-300">
+            <p className="t-body-sm font-semibold text-warning">
               Cashfree checkout requires your phone number
             </p>
-            <p className="t-caption text-amber-600 dark:text-amber-400 mt-0.5">
+            <p className="t-caption text-ink-muted mt-0.5">
               Your owner enabled Cashfree online checkout, but your profile has no phone number yet.
               Add one to unlock instant UPI&nbsp;/ card payment.
             </p>
             <Link
               to="/tenant/profile"
-              className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-amber-700 dark:text-amber-300 underline underline-offset-2"
+              className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-warning underline underline-offset-2"
             >
               Update profile →
             </Link>
@@ -149,13 +148,13 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
       )}
 
       {pay.mode === "manual" && pay.fallback_reason === "gateway_down" && (
-        <div className="p-3.5 rounded-[12px] bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
-          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-[12px] bg-warning-tint/30 border border-warning/20 flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="t-body-sm font-semibold text-amber-700 dark:text-amber-300">
+            <p className="t-body-sm font-semibold text-warning">
               Online checkout temporarily unavailable
             </p>
-            <p className="t-caption text-amber-600 dark:text-amber-400 mt-0.5">
+            <p className="t-caption text-ink-muted mt-0.5">
               The Cashfree gateway is unreachable right now. Pay manually below — your payment
               will be credited once the owner verifies your UTR.
             </p>
@@ -349,15 +348,15 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                     className="px-3 py-1.5 rounded-[10px] border border-hairline t-caption"
                   >
                     {copied === "vpa" ? <Check className="w-3.5 h-3.5 inline text-success" /> : <Copy className="w-3.5 h-3.5 inline" />}{" "}
-                    Copy VPA
+                    {copied === "vpa" ? t("paypanel.copied") : t("paypanel.copyUPI")}
                   </button>
                 )}
                 <a href={qrUrl} download={`rent-${pay.due_code}.png`} className="px-3 py-1.5 rounded-[10px] border border-hairline t-caption">
-                  <Download className="w-3.5 h-3.5 inline" /> Save QR
+                  <Download className="w-3.5 h-3.5 inline" /> {t("paypanel.downloadQR")}
                 </a>
                 {pay.upi_link && (
                   <a href={pay.upi_link} className="px-3 py-1.5 rounded-[10px] bg-accent text-white t-caption font-semibold">
-                    Open UPI <ExternalLink className="w-3.5 h-3.5 inline" />
+                    {t("paypanel.openUPIApp")} <ExternalLink className="w-3.5 h-3.5 inline" />
                   </a>
                 )}
               </div>
@@ -365,7 +364,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
           )}
 
           <div className="rounded-[14px] border border-hairline bg-surface p-4">
-            <p className="t-caption font-semibold text-ink mb-3">Submit UTR or Receipt</p>
+            <p className="t-caption font-semibold text-ink mb-3">{t("paypanel.submitUTR")}</p>
             <ProofUploadForm
               dueId={dueId}
               dueCode={pay.due_code}

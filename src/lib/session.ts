@@ -3,7 +3,7 @@ export async function clearServiceWorkerCaches(): Promise<void> {
   const names = await caches.keys();
   await Promise.all(
     names
-      .filter((n) => n === "api-cache" || n.startsWith("workbox-"))
+      .filter((n) => n === "api-cache")
       .map((n) => caches.delete(n))
   );
 }

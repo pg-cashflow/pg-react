@@ -46,7 +46,7 @@ export const FinanceBudgetsView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">Budgets</h1>
+          <h1 className="t-h1 tracking-tight text-ink">Budgets</h1>
           <p className="text-sm text-ink-muted">
             Set and allocate monthly spending targets per operational category.
           </p>
@@ -93,7 +93,7 @@ export const FinanceBudgetsView: React.FC = () => {
             {budgets.length} {budgets.length === 1 ? "category target" : "category targets"} configured
           </p>
         </div>
-        <AmountBadge amount={totalBudgetPaise} className="text-2xl font-bold" />
+        <AmountBadge amount={totalBudgetPaise} className="t-amount-lg" />
       </div>
 
       <QueryState
