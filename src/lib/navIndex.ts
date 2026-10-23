@@ -17,6 +17,7 @@ const OWNER_NAV: NavIndexItem[] = [
   { id: "nav-dues", title: "Dues", path: "/owner/dues", keywords: "rent billing" },
   { id: "nav-payments", title: "Payments", path: "/owner/payments", keywords: "collections upi" },
   { id: "nav-recon", title: "Reconciliation", path: "/owner/reconciliation", keywords: "ledger period" },
+  { id: "nav-finance", title: "Finance & Ledger", path: "/owner/finance", keywords: "accounting expenses budgets statements capital p&l balance sheet close tie-out" },
   { id: "nav-events", title: "Audit log", path: "/owner/events", keywords: "events history" },
   { id: "nav-facility", title: "Facility & Operations", path: "/owner/facility", keywords: "gamification floors" },
   { id: "nav-reminders", title: "Reminders", path: "/owner/reminders", keywords: "sms nudge" },

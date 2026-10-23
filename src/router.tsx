@@ -74,6 +74,13 @@ const DashboardView = lazyView<React.ComponentType<{ onNavigate: (tab: string) =
 );
 const OwnerFacilityView = lazyView(() => import("@/routes/owner/facility"), "OwnerFacilityView");
 const OwnerRemindersView = lazyView(() => import("@/routes/owner/reminders"), "OwnerRemindersView");
+const FinanceOverviewView = lazyView(() => import("@/routes/owner/finance/index"), "FinanceOverviewView");
+const FinanceExpensesView = lazyView(() => import("@/routes/owner/finance/expenses"), "FinanceExpensesView");
+const FinanceBudgetsView = lazyView(() => import("@/routes/owner/finance/budgets"), "FinanceBudgetsView");
+const FinanceCapitalView = lazyView(() => import("@/routes/owner/finance/capital"), "FinanceCapitalView");
+const FinanceStatementsView = lazyView(() => import("@/routes/owner/finance/statements"), "FinanceStatementsView");
+const FinanceReportsView = lazyView(() => import("@/routes/owner/finance/reports"), "FinanceReportsView");
+const FinanceCloseView = lazyView(() => import("@/routes/owner/finance/close"), "FinanceCloseView");
 
 // Lazy-loaded Tenant Views
 const TenantDashboardView = lazyView<React.ComponentType<{ onNavigate: (tab: string) => void }>>(
@@ -335,18 +342,25 @@ const ownerRecon = createRoute({
   path: "/reconciliation",
   component: ReconciliationView,
 });
+const ownerFinance = createRoute({ getParentRoute: () => ownerRoute, path: "/finance", component: FinanceOverviewView });
+const ownerFinanceExpenses = createRoute({ getParentRoute: () => ownerRoute, path: "/finance/expenses", component: FinanceExpensesView });
+const ownerFinanceBudgets = createRoute({ getParentRoute: () => ownerRoute, path: "/finance/budgets", component: FinanceBudgetsView });
+const ownerFinanceCapital = createRoute({ getParentRoute: () => ownerRoute, path: "/finance/capital", component: FinanceCapitalView });
+const ownerFinanceStatements = createRoute({ getParentRoute: () => ownerRoute, path: "/finance/statements", component: FinanceStatementsView });
+const ownerFinanceReports = createRoute({ getParentRoute: () => ownerRoute, path: "/finance/reports", component: FinanceReportsView });
+const ownerFinanceClose = createRoute({ getParentRoute: () => ownerRoute, path: "/finance/close", component: FinanceCloseView });
 const ownerTieOut = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/finance/tie-out",
   beforeLoad: () => {
-    throw redirect({ to: "/owner/reconciliation" });
+    throw redirect({ to: "/owner/finance/close" });
   },
 });
 const ownerTieOutShort = createRoute({
   getParentRoute: () => ownerRoute,
   path: "/tie-out",
   beforeLoad: () => {
-    throw redirect({ to: "/owner/reconciliation" });
+    throw redirect({ to: "/owner/finance/close" });
   },
 });
 const ownerEvents = createRoute({ getParentRoute: () => ownerRoute, path: "/events", component: EventsView });
@@ -636,6 +650,13 @@ const routeTree = rootRoute.addChildren([
     ownerPayments,
     ownerPayouts,
     ownerRecon,
+    ownerFinance,
+    ownerFinanceExpenses,
+    ownerFinanceBudgets,
+    ownerFinanceCapital,
+    ownerFinanceStatements,
+    ownerFinanceReports,
+    ownerFinanceClose,
     ownerTieOut,
     ownerTieOutShort,
     ownerEvents,

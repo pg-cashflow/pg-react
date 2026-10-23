@@ -27,6 +27,7 @@ export const teIN: Record<MessageKey, string> = {
   "nav.payments": "చెల్లింపులు",
   "nav.payouts": "చెల్లింపులు (బయటకు)",
   "nav.reconciliation": "సమన్వయం",
+  "nav.finance": "ఆర్థిక & లెడ్జర్",
   "nav.reminders": "రిమైండర్లు",
   "nav.facility": "సౌకర్యాలు & నియమాలు",
   "nav.events": "ఆడిట్ & ఈవెంట్‌లు",

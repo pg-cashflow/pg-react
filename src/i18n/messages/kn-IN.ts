@@ -27,6 +27,7 @@ export const knIN: Record<MessageKey, string> = {
   "nav.payments": "ಪಾವತಿಗಳು",
   "nav.payouts": "ಪಾವತಿ ನಿರ್ಗಮನ",
   "nav.reconciliation": "ಹೊಂದಾಣಿಕೆ",
+  "nav.finance": "ಹಣಕಾಸು & ಲೆಡ್ಜರ್",
   "nav.reminders": "ಜ್ಞಾಪನೆಗಳು",
   "nav.facility": "ಸೌಲಭ್ಯಗಳು & ನಿಯಮಗಳು",
   "nav.events": "ಆಡಿಟ್ & ಈವೆಂಟ್‌ಗಳು",

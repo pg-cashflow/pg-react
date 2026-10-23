@@ -25,6 +25,7 @@ export const enIN = {
   "nav.payments": "Payments",
   "nav.payouts": "Money Out",
   "nav.reconciliation": "Reconciliation",
+  "nav.finance": "Finance & Ledger",
   "nav.reminders": "Reminders",
   "nav.facility": "Facility & Rules",
   "nav.events": "Audit & Events",

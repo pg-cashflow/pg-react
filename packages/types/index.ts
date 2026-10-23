@@ -794,3 +794,240 @@ export interface RequestPayoutBatchOTPResponse {
   phone: string;
 }
 
+// --- M6 Finance & Ledger Models ---
+
+export type CapitalKind = "initial" | "additional" | "withdrawal";
+
+export interface CapitalTransaction {
+  id: string;
+  property_id: string;
+  owner_user_id: string;
+  kind: CapitalKind;
+  amount_paise: number;
+  purpose?: string;
+  reference: string;
+  occurred_at: string;
+  created_at: string;
+}
+
+export interface CreateCapitalInput {
+  kind: CapitalKind;
+  amount_paise: number;
+  purpose: string;
+}
+
+export type ExpenseStatus = "draft" | "pending_approval" | "approved" | "paid" | "cancelled";
+
+export interface Expense {
+  id: string;
+  property_id: string;
+  category_code: string;
+  vendor_name?: string;
+  description?: string;
+  amount_paise: number;
+  status: ExpenseStatus;
+  emergency: boolean;
+  is_recurring: boolean;
+  room_id?: string | null;
+  created_by: string;
+  created_by_role: string;
+  occurred_at: string;
+  created_at: string;
+  paid_paise?: number;
+}
+
+export interface CreateExpenseInput {
+  category_code: string;
+  vendor_name?: string;
+  description: string;
+  amount_paise: number;
+  emergency?: boolean;
+  is_recurring?: boolean;
+  room_id?: string | null;
+  occurred_at?: string;
+}
+
+export interface ExpensePaymentInput {
+  amount_paise: number;
+  method: string;
+}
+
+export interface Budget {
+  id: string;
+  property_id: string;
+  category_code: string;
+  period_month: string;
+  amount_paise: number;
+}
+
+export interface SaveBudgetInput {
+  category_code: string;
+  period_month: string;
+  amount_paise: number;
+}
+
+export interface OperatingSummary {
+  period_month: string;
+  collections_rent_paise: number;
+  operating_revenue_paise: number;
+  opex_paise: number;
+  ocf_paise: number;
+  manager_advance_outstanding_paise: number;
+  tdr_expense_paise: number;
+  tdr_is_estimated: boolean;
+  loyalty_issued_paise: number;
+  label_collections: string;
+  label_operating: string;
+}
+
+export interface ReconciliationSummary {
+  period: string;
+  rent_collected_paise: number;
+  by_channel: Record<string, number>;
+  outstanding_paise: number;
+  credits_held_paise: number;
+  deposits_held_paise: number;
+  deposits_refunded_paise: number;
+}
+
+export interface FinanceSummaryResponse {
+  period: string;
+  collections: ReconciliationSummary;
+  operating: OperatingSummary;
+  query_keys: string[];
+  invalidate_with: string[];
+}
+
+export interface TieOutItem {
+  category: string;
+  amount_paise: number;
+  source_id?: string;
+  note?: string;
+  unresolved_months?: number;
+}
+
+export interface PeriodTieOut {
+  id: string;
+  property_id: string;
+  period_month: string;
+  recon_total_paise: number;
+  ledger_total_paise: number;
+  difference_paise: number;
+  items: TieOutItem[];
+  status: string;
+  closed_at?: string | null;
+}
+
+export interface ReopenTieOutInput {
+  period: string;
+  reason: string;
+  otp?: string;
+  firebase_id_token?: string;
+  reauth_confirmation?: string;
+}
+
+export interface StatementLine {
+  section: string;
+  account_code?: string;
+  amount_paise: number;
+  sort_order: number;
+}
+
+export interface IncomeStatementResponse {
+  period: string;
+  from: string;
+  to: string;
+  lines: StatementLine[];
+}
+
+export interface BalanceSheetResponse {
+  as_of: string;
+  lines: StatementLine[];
+}
+
+export interface CashFlowLine {
+  section: string;
+  label?: string;
+  amount_paise: number;
+  sort_order: number;
+}
+
+export interface CashFlowStatementResponse {
+  period: string;
+  from: string;
+  to: string;
+  lines: CashFlowLine[];
+}
+
+export interface TrialBalanceLine {
+  account_code: string;
+  account_class: string;
+  debit_paise: number;
+  credit_paise: number;
+  balance_paise: number;
+}
+
+export interface TrialBalanceResponse {
+  as_of: string;
+  lines: TrialBalanceLine[];
+}
+
+export interface VarianceLine {
+  driver: string;
+  amount_paise: number;
+  kind: string;
+}
+
+export interface VarianceBridge {
+  period_month: string;
+  budgeted_ocf_paise: number;
+  actual_ocf_paise: number;
+  lines: VarianceLine[];
+  residual_paise: number;
+}
+
+export interface ClearingDriftReport {
+  property_id: string;
+  as_of: string;
+  total_gross_collected_paise: number;
+  total_gross_settled_paise: number;
+  total_refunded_paise: number;
+  net_uncleared_paise: number;
+  aging_past_3_days_paise: number;
+  has_drift_breach: boolean;
+}
+
+export interface DepositReserveReport {
+  property_id: string;
+  as_of: string;
+  total_deposit_liability_paise: number;
+  bank_cash_balance_paise: number;
+  reserve_surplus_deficit_paise: number;
+  is_deficit: boolean;
+  coverage_percentage_bps: number;
+}
+
+export interface CapitalPaybackReport {
+  property_id: string;
+  as_of: string;
+  total_invested_paise: number;
+  total_withdrawn_paise: number;
+  net_capital_deployed_paise: number;
+  cumulative_ocf_paise: number;
+  unrecovered_capital_paise: number;
+  is_breakeven_achieved: boolean;
+  payback_percentage_bps: number;
+}
+
+export interface ReconcilingItem {
+  item_type: string;
+  property_id: string;
+  ref: string;
+  amount_paise?: number;
+  originated_on: string;
+  age_days: number;
+  age_bucket: string;
+  category: string;
+  escalation: string;
+}
+

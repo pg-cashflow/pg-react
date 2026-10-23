@@ -62,5 +62,33 @@ export const QUERY_KEYS = {
   unbatchedPayoutItems: ["owner", "payouts", "items", "unbatched"] as const,
   payoutBatches: ["owner", "payouts", "batches"] as const,
   payoutBatch: (id: string) => ["owner", "payouts", "batches", id] as const,
+
+  // Finance & Ledger (M6)
+  financeSummary: (period?: string) =>
+    period ? (["owner", "finance", "summary", period] as const) : (["owner", "finance", "summary"] as const),
+  financeLedger: (period?: string, from?: string, to?: string, account?: string) =>
+    ["owner", "finance", "ledger", period || "", from || "", to || "", account || ""] as const,
+  financeExpenses: (beforeOccurredAt?: string, beforeId?: string) =>
+    ["owner", "finance", "expenses", beforeOccurredAt || "", beforeId || ""] as const,
+  financeCapital: ["owner", "finance", "capital"] as const,
+  financeBudgets: (period?: string) =>
+    period ? (["owner", "finance", "budgets", period] as const) : (["owner", "finance", "budgets"] as const),
+  financeTieOut: (period?: string) =>
+    period ? (["owner", "finance", "tie-out", period] as const) : (["owner", "finance", "tie-out"] as const),
+  financeIncomeStatement: (period?: string) =>
+    ["owner", "finance", "statements", "income", period || ""] as const,
+  financeBalanceSheet: (period?: string) =>
+    ["owner", "finance", "statements", "balance-sheet", period || ""] as const,
+  financeCashFlow: (period?: string) =>
+    ["owner", "finance", "statements", "cash-flow", period || ""] as const,
+  financeTrialBalance: (period?: string) =>
+    ["owner", "finance", "statements", "trial-balance", period || ""] as const,
+  financeVarianceBridge: (period?: string) =>
+    ["owner", "finance", "variance-bridge", period || ""] as const,
+  financeClearingDrift: ["owner", "finance", "reports", "clearing-drift"] as const,
+  financeDepositReserve: ["owner", "finance", "reports", "deposit-reserve"] as const,
+  financeCapitalPayback: ["owner", "finance", "reports", "capital-payback"] as const,
+  financeReconcilingItems: (asOf?: string) =>
+    ["owner", "finance", "reconciling-items", asOf || ""] as const,
 };
 

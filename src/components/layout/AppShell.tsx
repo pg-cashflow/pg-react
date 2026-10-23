@@ -26,8 +26,15 @@ const ROUTE_KEYS: Record<string, MessageKey> = {
   "/owner/payments": "nav.payments",
   "/owner/payouts": "nav.payouts",
   "/owner/reconciliation": "nav.reconciliation",
-  "/owner/finance/tie-out": "nav.reconciliation",
-  "/owner/tie-out": "nav.reconciliation",
+  "/owner/finance": "nav.finance",
+  "/owner/finance/expenses": "nav.finance",
+  "/owner/finance/budgets": "nav.finance",
+  "/owner/finance/capital": "nav.finance",
+  "/owner/finance/statements": "nav.finance",
+  "/owner/finance/reports": "nav.finance",
+  "/owner/finance/close": "nav.finance",
+  "/owner/finance/tie-out": "nav.finance",
+  "/owner/tie-out": "nav.finance",
   "/owner/events": "nav.events",
   "/owner/audit": "nav.events",
   "/owner/facility": "nav.facility",
@@ -43,7 +50,7 @@ function normalizeTab(pathname: string): string {
   const segment = pathname.replace("/owner/", "").split("/")[0] || "dashboard";
   if (segment === "join-requests") return "joins";
   if (segment === "payment-reports") return "reports";
-  if (segment === "finance" || segment === "tie-out") return "reconciliation";
+  if (segment === "finance" || segment === "tie-out") return "finance";
   if (segment === "hazards" || segment === "inspections") return "facility";
   if (segment === "audit" || segment === "logs") return "events";
   if (segment === "billing") return "dues";
