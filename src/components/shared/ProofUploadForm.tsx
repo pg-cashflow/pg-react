@@ -72,7 +72,8 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
     setError(null);
 
     try {
-      await submitUtrReport(dueId, finalUtr || `IMG-${Date.now().toString().slice(-6)}`, image);
+      const syntheticUtr = typeof crypto !== "undefined" && crypto.randomUUID ? `IMG-${crypto.randomUUID()}` : `IMG-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      await submitUtrReport(dueId, finalUtr || syntheticUtr, image);
       onSuccess();
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status === 409) {

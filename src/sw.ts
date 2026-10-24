@@ -2,8 +2,13 @@
 import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute, NavigationRoute } from "workbox-routing";
 import { CacheFirst } from "workbox-strategies";
+import { clientsClaim } from "workbox-core";
 
 declare let self: ServiceWorkerGlobalScope;
+
+// Activate new service worker immediately without waiting for existing tabs to close
+self.skipWaiting();
+clientsClaim();
 
 // Cleanup old cache versions automatically
 cleanupOutdatedCaches();

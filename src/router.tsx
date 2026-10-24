@@ -13,13 +13,31 @@ import { TenantKYCOnboardingGate } from "@/components/shared/TenantKYCOnboarding
 import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { homeForRole } from "@/auth/roles";
 
+// Helper to catch chunk loading errors after new deployments and refresh once
+function safeImport<T>(loader: () => Promise<T>): Promise<T> {
+  return loader().catch((error: any) => {
+    const isChunkLoadFailed =
+      error?.name === "ChunkLoadError" ||
+      /loading chunk/i.test(error?.message || "") ||
+      /failed to fetch dynamically imported module/i.test(error?.message || "");
+    if (isChunkLoadFailed && typeof window !== "undefined") {
+      const reloadKey = "pg_chunk_reload";
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, "1");
+        window.location.reload();
+      }
+    }
+    throw error;
+  });
+}
+
 // Helper for code-splitting route views with automatic Suspense boundary
 function lazyView<T extends React.ComponentType<any>>(
   loader: () => Promise<any>,
   exportName?: string
 ) {
   const LazyComponent = React.lazy(async () => {
-    const mod = await loader();
+    const mod = await safeImport(loader);
     const comp = exportName ? mod[exportName] : (mod.default ?? Object.values(mod)[0]);
     return { default: comp };
   });
@@ -35,21 +53,21 @@ function lazyView<T extends React.ComponentType<any>>(
 
 // Lazy-loaded Portal Layout Shells
 const LazyAppShell = React.lazy(() =>
-  import("@/components/layout/AppShell").then((m) => ({ default: m.AppShell }))
+  safeImport(() => import("@/components/layout/AppShell").then((m) => ({ default: m.AppShell })))
 );
 const LazyTenantShell = React.lazy(() =>
-  import("@/components/layout/TenantShell").then((m) => ({ default: m.TenantShell }))
+  safeImport(() => import("@/components/layout/TenantShell").then((m) => ({ default: m.TenantShell })))
 );
 const LazyManagerShell = React.lazy(() =>
-  import("@/components/layout/ManagerShell").then((m) => ({ default: m.ManagerShell }))
+  safeImport(() => import("@/components/layout/ManagerShell").then((m) => ({ default: m.ManagerShell })))
 );
 
 // Lazy-loaded Onboarding & Auth Pages
 const LazyJoinWaitingPage = React.lazy(() =>
-  import("@/routes/join").then((m) => ({ default: m.JoinWaitingPage }))
+  safeImport(() => import("@/routes/join").then((m) => ({ default: m.JoinWaitingPage })))
 );
 const LazyActivationPage = React.lazy(() =>
-  import("@/routes/activation").then((m) => ({ default: m.ActivationPage }))
+  safeImport(() => import("@/routes/activation").then((m) => ({ default: m.ActivationPage })))
 );
 const LandingPage = lazyView(() => import("@/routes/landing"), "LandingPage");
 const InvitePage = lazyView(() => import("@/routes/invite"), "InvitePage");
