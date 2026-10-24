@@ -90,5 +90,14 @@ export const QUERY_KEYS = {
   financeCapitalPayback: ["owner", "finance", "reports", "capital-payback"] as const,
   financeReconcilingItems: (asOf?: string) =>
     ["owner", "finance", "reconciling-items", asOf || ""] as const,
+
+  // Staff Attendance & Payroll (Track M)
+  staffProfiles: (activeOnly?: boolean) =>
+    ["owner", "staff", activeOnly ? "active" : "all"] as const,
+  leavePolicy: ["owner", "attendance", "leave-policy"] as const,
+  monthlyAttendance: (month?: string) =>
+    ["owner", "attendance", "monthly", month || "current"] as const,
+  payrollPreview: (cycleMonth?: string) =>
+    ["owner", "payroll", "preview", cycleMonth || "current"] as const,
 };
 

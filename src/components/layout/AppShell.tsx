@@ -25,6 +25,9 @@ const ROUTE_KEYS: Record<string, MessageKey> = {
   "/owner/billing": "nav.dues",
   "/owner/payments": "nav.payments",
   "/owner/payouts": "nav.payouts",
+  "/owner/attendance": "nav.attendance",
+  "/owner/staff": "nav.attendance",
+  "/owner/payroll": "nav.attendance",
   "/owner/reconciliation": "nav.reconciliation",
   "/owner/finance": "nav.finance",
   "/owner/finance/expenses": "nav.finance",
@@ -50,6 +53,7 @@ function normalizeTab(pathname: string): string {
   const segment = pathname.replace("/owner/", "").split("/")[0] || "dashboard";
   if (segment === "join-requests") return "joins";
   if (segment === "payment-reports") return "reports";
+  if (segment === "staff" || segment === "payroll") return "attendance";
   if (segment === "finance" || segment === "tie-out") return "finance";
   if (segment === "hazards" || segment === "inspections") return "facility";
   if (segment === "audit" || segment === "logs") return "events";

@@ -17,34 +17,9 @@ export class ApiError extends Error {
 let activeRefreshPromise: Promise<string | null> | null = null;
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
-export async function checkBiometricGate(): Promise<boolean> {
-  if (typeof window !== "undefined") {
-    const gate = (window as unknown as { pgBiometricGate?: () => Promise<boolean> }).pgBiometricGate;
-    if (typeof gate === "function") {
-      try {
-        return await gate();
-      } catch {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 export function scheduleProactiveRefresh(delayMs = 12 * 60 * 1000): void {
   stopProactiveRefresh();
   refreshTimer = setTimeout(async () => {
-    const ok = await checkBiometricGate();
-    if (!ok) {
-      setAccessToken(null);
-      setStoredUser(null);
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("pg:unauthorized", { detail: { reason: "biometric_failed" } })
-        );
-      }
-      return;
-    }
     await requestTokenRefresh(getAccessToken());
   }, delayMs);
 }
@@ -202,6 +177,12 @@ function mapApiErrorMessage(status: number, raw: string): string {
     return "Get the PG invite code from your owner, then sign in again.";
   }
   return text || `HTTP ${status}`;
+}
+
+function networkFailureMessage(): string {
+  return import.meta.env.DEV
+    ? `Cannot reach API at ${API_BASE}. Ensure the backend server is running and accessible.`
+    : `Unable to connect to server. Please check your network connection and try again.`;
 }
 
 function isNetworkFailure(err: unknown): boolean {

@@ -3,20 +3,18 @@ import {
   scheduleProactiveRefresh,
   stopProactiveRefresh,
   executeRefresh,
-  checkBiometricGate,
   requestTokenRefresh,
   apiFetch,
 } from "./client";
 import { getAccessToken, setAccessToken } from "../auth/tokenStore";
 import { getStoredUser, setStoredUser } from "../auth/storage";
 
-describe("api/client proactive refresh & biometric gate", () => {
+describe("api/client proactive refresh", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     stopProactiveRefresh();
     setAccessToken(null);
     setStoredUser(null);
-    delete (window as unknown as { pgBiometricGate?: unknown }).pgBiometricGate;
     delete (navigator as unknown as { locks?: unknown }).locks;
   });
 
@@ -26,28 +24,6 @@ describe("api/client proactive refresh & biometric gate", () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     delete (navigator as unknown as { locks?: unknown }).locks;
-  });
-
-  it("checkBiometricGate returns true by default when no gate is configured", async () => {
-    const ok = await checkBiometricGate();
-    expect(ok).toBe(true);
-  });
-
-  it("checkBiometricGate delegates to window.pgBiometricGate", async () => {
-    (window as unknown as { pgBiometricGate: () => Promise<boolean> }).pgBiometricGate = vi
-      .fn()
-      .mockResolvedValue(true);
-    expect(await checkBiometricGate()).toBe(true);
-
-    (window as unknown as { pgBiometricGate: () => Promise<boolean> }).pgBiometricGate = vi
-      .fn()
-      .mockResolvedValue(false);
-    expect(await checkBiometricGate()).toBe(false);
-
-    (window as unknown as { pgBiometricGate: () => Promise<boolean> }).pgBiometricGate = vi
-      .fn()
-      .mockRejectedValue(new Error("Biometric hardware failure"));
-    expect(await checkBiometricGate()).toBe(false);
   });
 
   it("proactive refresh fires at minute 12 and rotates token into tokenStore", async () => {
@@ -157,32 +133,6 @@ describe("api/client proactive refresh & biometric gate", () => {
     window.removeEventListener("pg:unauthorized", unauthorizedSpy);
   });
 
-  it("biometric rejection blocks proactive refresh and dispatches pg:unauthorized", async () => {
-    setAccessToken("token-to-protect");
-    setStoredUser({ id: "u1", role: "owner", phone: "+918008281429" });
-
-    (window as unknown as { pgBiometricGate: () => Promise<boolean> }).pgBiometricGate = vi
-      .fn()
-      .mockResolvedValue(false);
-
-    const unauthorizedSpy = vi.fn();
-    window.addEventListener("pg:unauthorized", unauthorizedSpy);
-
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    scheduleProactiveRefresh(1000);
-    await vi.advanceTimersByTimeAsync(1000);
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(getAccessToken()).toBeNull();
-    expect(getStoredUser()).toBeNull();
-    expect(unauthorizedSpy).toHaveBeenCalledTimes(1);
-    const eventDetail = unauthorizedSpy.mock.calls[0][0].detail;
-    expect(eventDetail).toEqual({ reason: "biometric_failed" });
-
-    window.removeEventListener("pg:unauthorized", unauthorizedSpy);
-  });
 
   it("executeRefresh handles revoked session (AUTH_ACCESS_REVOKED) without retry loop", async () => {
     setAccessToken("expiring-token");

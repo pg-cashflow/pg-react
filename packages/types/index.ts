@@ -1031,3 +1031,115 @@ export interface ReconcilingItem {
   escalation: string;
 }
 
+// --- Track M: Staff Attendance & Wages / Payroll Models ---
+
+export type StaffProfileStatus = "active" | "inactive";
+
+export interface StaffProfile {
+  id: string;
+  property_id: string;
+  payee_id: string;
+  name: string;
+  role: string;
+  phone?: string | null;
+  base_monthly_wage_paise: number;
+  effective_from: string;
+  effective_to?: string | null;
+  status: StaffProfileStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export type WorkingDaysBasis =
+  | "calendar_days"
+  | "fixed_30"
+  | "working_days_excluding_sundays";
+
+export interface LeavePolicy {
+  id: string;
+  property_id: string;
+  monthly_free_leave_days: number;
+  paid_holidays: string[];
+  working_days_basis: WorkingDaysBasis;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AttendanceStatus =
+  | "present"
+  | "absent"
+  | "paid_leave"
+  | "half_day"
+  | "holiday";
+
+export interface AttendanceRecord {
+  id: string;
+  property_id: string;
+  staff_id: string;
+  work_date: string;
+  status: AttendanceStatus;
+  notes?: string | null;
+  recorded_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type WageCalculationStatus = "calculated" | "batched" | "cancelled";
+
+export interface WageCalculation {
+  id: string;
+  property_id: string;
+  staff_id: string;
+  cycle_month: string;
+  base_monthly_wage_paise: number;
+  prorated_base_wage_paise: number;
+  total_basis_days: number;
+  employed_basis_days: number;
+  days_present: number;
+  days_paid_leave: number;
+  days_holiday: number;
+  days_absent: number;
+  days_unrecorded: number;
+  free_leave_days_allowed: number;
+  excess_absent_days: number;
+  per_day_rate_paise: number;
+  total_deduction_paise: number;
+  net_wage_paise: number;
+  payout_item_id?: string | null;
+  status: WageCalculationStatus;
+  calculated_at: string;
+  finalized_by: string;
+}
+
+export interface CreateStaffInput {
+  payee_id: string;
+  name: string;
+  role: string;
+  phone?: string;
+  base_monthly_wage_paise: number;
+  effective_from: string;
+}
+
+export interface UpdateStaffStatusInput {
+  status: StaffProfileStatus;
+  effective_to?: string;
+}
+
+export interface DailyAttendanceEntryInput {
+  staff_id: string;
+  status: AttendanceStatus;
+  notes?: string;
+}
+
+export interface MarkDailyAttendanceInput {
+  work_date: string;
+  entries: DailyAttendanceEntryInput[];
+}
+
+export interface LeavePolicyUpdateInput {
+  monthly_free_leave_days: number;
+  paid_holidays: string[];
+  working_days_basis: WorkingDaysBasis;
+}
+
+
