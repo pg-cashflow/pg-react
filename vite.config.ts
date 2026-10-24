@@ -15,7 +15,15 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        globPatterns: [
+          'index.html',
+          'manifest.webmanifest',
+          'favicon.svg',
+          'icons.svg',
+          'pwa-*.png',
+          'assets/index-*.js',
+          'assets/index-*.css',
+        ],
       },
       manifest: {
         name: 'PG Cashflow',

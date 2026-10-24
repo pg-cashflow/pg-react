@@ -214,5 +214,6 @@ const updatedHtml = currentHtml.replace(
   `<div id="root">${landingHtml}</div>`
 );
 
-fs.writeFileSync(distHtmlPath, updatedHtml, "utf-8");
-console.log("✓ Pre-rendered static landing page shell injected into dist/index.html");
+const landingHtmlPath = path.resolve(__dirname, "../dist/landing.html");
+fs.writeFileSync(landingHtmlPath, updatedHtml, "utf-8");
+console.log("✓ Pre-rendered static landing page written to dist/landing.html (dist/index.html preserved clean)");

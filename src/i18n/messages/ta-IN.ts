@@ -539,4 +539,51 @@ export const taIN: Record<MessageKey, string> = {
   "owner.payouts.pendingVerification": "சரிபார்ப்பு நிலுவையில் உள்ளது",
   "owner.payouts.verifyPayeeAction": "பெறுநரைச் சரிபார்",
   "owner.payouts.noPaymentInfo": "கட்டணத் தகவல் இல்லை",
+
+  // PayPanel extended
+  "paypanel.utrSubmitted": "UTR சமர்ப்பிக்கப்பட்டது — உரிமையாளர் சரிபார்ப்பிற்காக காத்திருக்கிறது",
+  "paypanel.utrSubmittedDesc": "உரிமையாளர் உறுதிப்படுத்தும் வரை இது செலுத்தியதாகக் குறிக்கப்படாது. ஸ்கிரீன்ஷாட்டை வைத்திருக்கவும்.",
+  "paypanel.gatewayDownTitle": "ஆன்லைன் கட்டணம் தற்காலிகமாக கிடைக்கவில்லை",
+  "paypanel.gatewayDownDesc": "கேஷ்ஃப்ரீ கேட்வே தற்போது செயல்படவில்லை. கீழே நேரடியாக செலுத்தவும் — சரிபார்த்த பின் வரவு வைக்கப்படும்.",
+  "paypanel.submitProof": "கட்டண ஆதாரத்தைச் சமர்ப்பிக்கவும்",
+  "paypanel.submitProofDesc": "பணம் பிடித்தம் செய்யப்பட்டு கேட்வே தாமதமானால், UPI ரசீதை இங்கே பதிவேற்றவும்.",
+  "paypanel.bankConfirming": "வங்கியிடம் உறுதிப்படுத்தப்படுகிறது…",
+  "paypanel.bankConfirmingDesc": "வழக்கமாக 10 வினாடிகளுக்குள் முடியும். இந்தத் திரையிலேயே இருக்கவும்.",
+  "paypanel.alreadyPaidCheckNow": "ஏற்கனவே செலுத்திவிட்டேன் — சரிபார்க்கவும்",
+  "paypanel.uploadProofBtn": "ஆதாரத்தைப் பதிவேற்றவும்",
+  "paypanel.bankDelayedTitle": "வங்கி உறுதிப்படுத்தல் வழக்கத்தை விட அதிக நேரம் எடுக்கிறது",
+  "paypanel.bankDelayedDesc": "உங்கள் வங்கி இன்னும் உறுதிப்படுத்தவில்லை. UPI செயலியில் பணம் கழிக்கப்படாவிட்டால் கட்டணம் வசூலிக்கப்படவில்லை.",
+  "paypanel.checkAgainBtn": "மீண்டும் சரிபார்க்கவும்",
+  "paypanel.submitScreenshotBtn": "ஸ்கிரீன்ஷாட்டைச் சமர்ப்பிக்கவும்",
+  "paypanel.autoUpdateNotice": "வங்கி உறுதிப்படுத்தியதும் தானாகவே புதுப்பிக்கப்படும்.",
+  "paypanel.startingCheckout": "தொடங்குகிறது…",
+  "paypanel.payViaCashfree": "Cashfree மூலம் {amount} செலுத்தவும்",
+  "paypanel.paidNotShowing": "செலுத்தியும் காட்டவில்லையா? ஸ்கிரீன்ஷாட்டை அனுப்பவும் →",
+  "paypanel.fallbackReceiptTitle": "மாற்று வழி: ரசீது அல்லது UTR-ஐச் சமர்ப்பிக்கவும்",
+  "paypanel.fallbackReceiptDesc": "பணம் கழிக்கப்பட்டு நிலை புதுப்பிக்கப்படவில்லை என்றால், UTR எண்ணை இங்கே உள்ளிடவும்.",
+
+  // ProofUploadForm
+  "proof.screenshotLabel": "கட்டண ஸ்கிரீன்ஷாட்",
+  "proof.scanningUtr": "UTR எண்ணை ஸ்கேன் செய்கிறது…",
+  "proof.receiptPlaceholder": "GPay / PhonePe / Paytm ரசீது",
+  "proof.browse": "தேர்வு செய்க",
+  "proof.utrLabel": "12-இலக்க UPI எண் (UTR)",
+  "proof.utrPlaceholder": "எ.கா. 423456789012",
+  "proof.submitting": "சமர்ப்பிக்கப்படுகிறது…",
+  "proof.submitBtn": "ஆதாரத்தைச் சமர்ப்பிக்கவும்",
+
+  // QRModal
+  "qrmodal.title": "கட்டண QR & இணைப்பு",
+  "qrmodal.qrUnavailable": "QR கிடைக்கவில்லை",
+  "qrmodal.scanInstructions": "உடனடியாக செலுத்த எந்தவொரு UPI செயலியிலும் ஸ்கேன் செய்யவும்.",
+  "qrmodal.copyLink": "இணைப்பை நகலெடுக்கவும்",
+  "qrmodal.openPaymentPage": "கட்டணப் பக்கத்தைத் திறக்கவும்",
+  "qrmodal.shareWhatsapp": "வாட்ஸ்அப்பில் பகிரவும்",
+
+  // QueryState
+  "query.loadingLedger": "ஏடு ஏற்றப்படுகிறது…",
+  "query.emptyLedger": "இன்னும் பதிவுகள் இல்லை.",
+  "query.couldNotLoad": "பக்கத்தை ஏற்ற முடியவில்லை",
+  "query.checkConnection": "இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+  "query.refetching": "மீண்டும் ஏற்றுகிறது…",
 };

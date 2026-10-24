@@ -6,6 +6,7 @@ import { extractUtrFromScreenshot } from "@/lib/upiScreenshotExtractor";
 import { ApiError } from "@/api/client";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import type { Due } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 interface ProofUploadFormProps {
   dueId: string;
@@ -22,6 +23,7 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
   onSuccess,
   onCancel,
 }) => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [utr, setUtr] = useState("");
   const [image, setImage] = useState<File | undefined>();
@@ -109,7 +111,7 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block t-caption text-ink-muted mb-1.5">Payment Screenshot</label>
+        <label className="block t-caption text-ink-muted mb-1.5">{t("proof.screenshotLabel")}</label>
         <div className="border border-dashed border-hairline rounded-[14px] p-3.5 flex items-center gap-3 bg-surface">
           {imagePreviewUrl ? (
             <img
@@ -123,10 +125,10 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
             </div>
           )}
           <span className="t-body-sm text-ink-muted flex-1 truncate">
-            {extractingUtr ? "Scanning screenshot for UTR…" : image ? image.name : "GPay / PhonePe / Paytm receipt"}
+            {extractingUtr ? t("proof.scanningUtr") : image ? image.name : t("proof.receiptPlaceholder")}
           </span>
           <label className="px-3 py-1.5 rounded-[10px] border border-hairline t-caption font-semibold cursor-pointer bg-bg hover:bg-surface transition-colors">
-            <Upload className="w-3.5 h-3.5 inline mr-1" /> Browse
+            <Upload className="w-3.5 h-3.5 inline mr-1" /> {t("proof.browse")}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -138,11 +140,11 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
       </div>
 
       <div>
-        <label className="block t-caption text-ink-muted mb-1.5">12-Digit UPI Reference (UTR)</label>
+        <label className="block t-caption text-ink-muted mb-1.5">{t("proof.utrLabel")}</label>
         <input
           value={utr}
           onChange={(e) => setUtr(e.target.value)}
-          placeholder="e.g. 423456789012"
+          placeholder={t("proof.utrPlaceholder")}
           maxLength={18}
           className="w-full h-12 px-4 rounded-[10px] border border-hairline bg-surface t-code text-base"
         />
@@ -163,7 +165,7 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
             disabled={busy}
             className="flex-1 h-12 rounded-[10px] border border-hairline bg-surface text-ink font-semibold t-body-sm"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
         )}
         <button
@@ -174,10 +176,10 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
           {busy ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Submitting proof…
+              {t("proof.submitting")}
             </>
           ) : (
-            "Submit Proof"
+            t("proof.submitBtn")
           )}
         </button>
       </div>

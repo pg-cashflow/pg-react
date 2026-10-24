@@ -540,4 +540,51 @@ export const knIN: Record<MessageKey, string> = {
   "owner.payouts.pendingVerification": "ಪರಿಶೀಲನೆ ಬಾಕಿ ಇದೆ",
   "owner.payouts.verifyPayeeAction": "ಸ್ವೀಕೃತಿದಾರರನ್ನು ಪರಿಶೀಲಿಸಿ",
   "owner.payouts.noPaymentInfo": "ಯಾವುದೇ ಪಾವತಿ ವಿವರಗಳಿಲ್ಲ",
+
+  // PayPanel extended
+  "paypanel.utrSubmitted": "UTR ಸಲ್ಲಿಸಲಾಗಿದೆ — ಮಾಲೀಕರ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ",
+  "paypanel.utrSubmittedDesc": "ಮಾಲೀಕರು ದೃಢೀಕರಿಸುವವರೆಗೆ ಇದನ್ನು ಪಾವತಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲಾಗುವುದಿಲ್ಲ. ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಇರಿಸಿಕೊಳ್ಳಿ.",
+  "paypanel.gatewayDownTitle": "ಆನ್‌ಲೈನ್ ಪಾವತಿ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ",
+  "paypanel.gatewayDownDesc": "ಕ್ಯಾಶ್‌ಫ್ರೀ ಗೇಟ್‌ವೇ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ. ಕೆಳಗೆ ಹಸ್ತಚಾಲಿತವಾಗಿ ಪಾವತಿಸಿ — ಪರಿಶೀಲಿಸಿದ ನಂತರ ಜಮಾ ಮಾಡಲಾಗುತ್ತದೆ.",
+  "paypanel.submitProof": "ಪಾವತಿ ಪುರಾವೆ ಸಲ್ಲಿಸಿ",
+  "paypanel.submitProofDesc": "ಹಣ ಕಡಿತಗೊಂಡು ಗೇಟ್‌ವೇ ವಿಫಲವಾದರೆ, UPI ರಸೀದಿಯನ್ನು ಇಲ್ಲಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+  "paypanel.bankConfirming": "ಬ್ಯಾಂಕ್‌ನೊಂದಿಗೆ ದೃಢೀಕರಿಸಲಾಗುತ್ತಿದೆ…",
+  "paypanel.bankConfirmingDesc": "ಸಾಮಾನ್ಯವಾಗಿ 10 ಸೆಕೆಂಡುಗಳ ಒಳಗೆ ಮುಗಿಯುತ್ತದೆ. ಈ ಪರದೆಯಲ್ಲೇ ಇರಿ.",
+  "paypanel.alreadyPaidCheckNow": "ಈಗಾಗಲೇ ಪಾವತಿಸಿದ್ದೇನೆ — ಈಗ ಪರಿಶೀಲಿಸಿ",
+  "paypanel.uploadProofBtn": "ಪುರಾವೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+  "paypanel.bankDelayedTitle": "ಬ್ಯಾಂಕ್ ದೃಢೀಕರಣವು ಸಾಮಾನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿದೆ",
+  "paypanel.bankDelayedDesc": "ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ಇನ್ನೂ ದೃಢೀಕರಿಸಿಲ್ಲ. UPI ಆ್ಯಪ್‌ನಲ್ಲಿ ಡೆಬಿಟ್ ಆಗದಿದ್ದರೆ ಹಣ ಕಡಿತಗೊಂಡಿಲ್ಲ.",
+  "paypanel.checkAgainBtn": "ಮತ್ತೊಮ್ಮೆ ಪರಿಶೀಲಿಸಿ",
+  "paypanel.submitScreenshotBtn": "ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸಲ್ಲಿಸಿ",
+  "paypanel.autoUpdateNotice": "ಬ್ಯಾಂಕ್ ದೃಢೀಕರಿಸಿದ ನಂತರ ಬಾಕಿ ಮೊತ್ತವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅಪ್‌ಡೇಟ್ ಆಗುತ್ತದೆ.",
+  "paypanel.startingCheckout": "ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ…",
+  "paypanel.payViaCashfree": "ಕ್ಯಾಶ್‌ಫ್ರೀ ಮೂಲಕ {amount} ಪಾವತಿಸಿ",
+  "paypanel.paidNotShowing": "ಪಾವತಿಸಿದರೂ ಕಾಣಿಸುತ್ತಿಲ್ಲವೇ? ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸಲ್ಲಿಸಿ →",
+  "paypanel.fallbackReceiptTitle": "ಪರ್ಯಾಯ: ರಸೀದಿ ಅಥವಾ UTR ಸಲ್ಲಿಸಿ",
+  "paypanel.fallbackReceiptDesc": "ಹಣ ಕಡಿತಗೊಂಡು ಸ್ಥಿತಿ ನವೀಕರಣಗೊಳ್ಳದಿದ್ದರೆ, ಮಾಲೀಕರ ಪರಿಶೀಲನೆಗಾಗಿ UTR ಸಲ್ಲಿಸಿ.",
+
+  // ProofUploadForm
+  "proof.screenshotLabel": "ಪಾವತಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್",
+  "proof.scanningUtr": "UTR ಗಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+  "proof.receiptPlaceholder": "GPay / PhonePe / Paytm ರಸೀದಿ",
+  "proof.browse": "ಆಯ್ಕೆಮಾಡಿ",
+  "proof.utrLabel": "12-ಅಂಕಿಯ UPI ಸಂಖ್ಯೆ (UTR)",
+  "proof.utrPlaceholder": "ಉದಾ. 423456789012",
+  "proof.submitting": "ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ…",
+  "proof.submitBtn": "ಪುರಾವೆ ಸಲ್ಲಿಸಿ",
+
+  // QRModal
+  "qrmodal.title": "ಪಾವತಿ QR ಮತ್ತು ಲಿಂಕ್",
+  "qrmodal.qrUnavailable": "QR ಲಭ್ಯವಿಲ್ಲ",
+  "qrmodal.scanInstructions": "ತಕ್ಷಣ ಪಾವತಿಸಲು ಯಾವುದೇ UPI ಆ್ಯಪ್‌ನೊಂದಿಗೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.",
+  "qrmodal.copyLink": "ಲಿಂಕ್ ನಕಲಿಸಿ",
+  "qrmodal.openPaymentPage": "ಪಾವತಿ ಪುಟ ತೆರೆಯಿರಿ",
+  "qrmodal.shareWhatsapp": "ವಾಟ್ಸಾಪ್‌ನಲ್ಲಿ ಹಂಚಿಕೊಳ್ಳಿ",
+
+  // QueryState
+  "query.loadingLedger": "ಲೆಡ್ಜರ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+  "query.emptyLedger": "ಇನ್ನೂ ಯಾವುದೇ ದಾಖಲೆಗಳಿಲ್ಲ.",
+  "query.couldNotLoad": "ಪುಟವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+  "query.checkConnection": "ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "query.refetching": "ಮತ್ತೆ ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
 };

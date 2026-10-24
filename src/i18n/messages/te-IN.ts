@@ -539,4 +539,51 @@ export const teIN: Record<MessageKey, string> = {
   "owner.payouts.pendingVerification": "ధృవీకరణ పెండింగ్‌లో ఉంది",
   "owner.payouts.verifyPayeeAction": "గ్రహీతను ధృవీకరించండి",
   "owner.payouts.noPaymentInfo": "చెల్లింపు సమాచారం లేదు",
+
+  // PayPanel extended
+  "paypanel.utrSubmitted": "UTR సమర్పించబడింది — యజమాని ధృవీకరణ కోసం వేచి ఉంది",
+  "paypanel.utrSubmittedDesc": "యజమాని UTRను నిర్ధారించే వరకు ఇది చెల్లించినట్లు గుర్తించబడదు. మీ స్క్రీన్‌షాట్‌ను ఉంచండి.",
+  "paypanel.gatewayDownTitle": "ఆన్‌లైన్ చెల్లింపు తాత్కాలికంగా అందుబాటులో లేదు",
+  "paypanel.gatewayDownDesc": "క్యాష్‌ఫ్రీ గేట్‌వే ప్రస్తుతం అందుబాటులో లేదు. క్రింద మాన్యువల్‌గా చెల్లించండి — యజమాని UTRని ధృవీకరించిన తర్వాత జమ చేయబడుతుంది.",
+  "paypanel.submitProof": "చెల్లింపు రుజువును సమర్పించండి",
+  "paypanel.submitProofDesc": "డబ్బు డెబిట్ అయ్యి గేట్‌వే టైమౌట్ అయితే, మీ UPI రశీదును ఇక్కడ అప్‌లోడ్ చేయండి.",
+  "paypanel.bankConfirming": "మీ బ్యాంకుతో నిర్ధారిస్తోంది…",
+  "paypanel.bankConfirmingDesc": "సాధారణంగా 10 సెకన్ల కంటే తక్కువ సమయం పడుతుంది. ఈ స్క్రీన్‌పైనే ఉండండి.",
+  "paypanel.alreadyPaidCheckNow": "నేను ఇప్పటికే చెల్లించాను — ఇప్పుడే తనిఖీ చేయండి",
+  "paypanel.uploadProofBtn": "రుజువును అప్‌లోడ్ చేయండి",
+  "paypanel.bankDelayedTitle": "బ్యాంకు నిర్ధారణ సాధారణం కంటే ఎక్కువ సమయం తీసుకుంటోంది",
+  "paypanel.bankDelayedDesc": "మీ బ్యాంకు ఇంకా ధృవీకరించలేదు. మీ UPI యాప్ డెబిట్ చూపించకపోతే మీకు ఛార్జ్ కాలేదు.",
+  "paypanel.checkAgainBtn": "మళ్లీ తనిఖీ చేయండి",
+  "paypanel.submitScreenshotBtn": "స్క్రీన్‌షాట్ సమర్పించండి",
+  "paypanel.autoUpdateNotice": "బ్యాంకు ధృవీకరించిన తర్వాత బకాయి స్వయంచాలకంగా అప్‌డేట్ అవుతుంది.",
+  "paypanel.startingCheckout": "చెక్‌అవుట్ ప్రారంభమవుతోంది…",
+  "paypanel.payViaCashfree": "క్యాష్‌ఫ్రీ ద్వారా {amount} చెల్లించండి",
+  "paypanel.paidNotShowing": "చెల్లించినా కనిపించలేదా? స్క్రీన్‌షాట్ సమర్పించండి →",
+  "paypanel.fallbackReceiptTitle": "ప్రత్యామ్నాయం: రసీదు లేదా UTR సమర్పించండి",
+  "paypanel.fallbackReceiptDesc": "క్యాష్‌ఫ్రీ డబ్బు కట్ చేసి స్టేటస్ అప్‌డేట్ కాకపోతే, యజమాని ధృవీకరణ కోసం UTRని సమర్పించండి.",
+
+  // ProofUploadForm
+  "proof.screenshotLabel": "చెల్లింపు స్క్రీన్‌షాట్",
+  "proof.scanningUtr": "UTR కోసం స్క్రీన్‌షాట్ స్కాన్ చేస్తోంది…",
+  "proof.receiptPlaceholder": "GPay / PhonePe / Paytm రశీదు",
+  "proof.browse": "ఎంచుకోండి",
+  "proof.utrLabel": "12-అంకెల UPI రిఫరెన్స్ (UTR)",
+  "proof.utrPlaceholder": "ఉదా. 423456789012",
+  "proof.submitting": "సమర్పిస్తోంది…",
+  "proof.submitBtn": "రుజువు సమర్పించండి",
+
+  // QRModal
+  "qrmodal.title": "చెల్లింపు QR & లింక్",
+  "qrmodal.qrUnavailable": "QR అందుబాటులో లేదు",
+  "qrmodal.scanInstructions": "వెంటనే చెల్లించడానికి ఏదైనా UPI యాప్‌తో స్కాన్ చేయండి.",
+  "qrmodal.copyLink": "లింక్ కాపీ చేయండి",
+  "qrmodal.openPaymentPage": "చెల్లింపు పేజీని తెరవండి",
+  "qrmodal.shareWhatsapp": "వాట్సాప్‌లో పంపండి",
+
+  // QueryState
+  "query.loadingLedger": "లెడ్జర్‌ను లోడ్ చేస్తోంది…",
+  "query.emptyLedger": "ఇంకా ఏమీ నమోదు కాలేదు.",
+  "query.couldNotLoad": "పేజీని లోడ్ చేయడం సాధ్యపడలేదు",
+  "query.checkConnection": "మీ ఇంటర్నెట్ కనెక్షన్‌ని తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
+  "query.refetching": "మళ్లీ లోడ్ చేస్తోంది…",
 };

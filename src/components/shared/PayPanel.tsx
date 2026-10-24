@@ -82,9 +82,9 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
   if (submittedManual) {
     return (
       <div className="p-4 rounded-[14px] bg-success-tint border border-success/20 text-success space-y-3">
-        <p className="t-h3">UTR submitted — waiting for owner verification</p>
+        <p className="t-h3">{t("paypanel.utrSubmitted")}</p>
         <p className="t-body-sm text-ink-muted">
-          This is not marked paid until the owner confirms the UTR. Keep your screenshot.
+          {t("paypanel.utrSubmittedDesc")}
         </p>
         <DuePaymentTimeline
           due={{
@@ -152,11 +152,10 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
           <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="t-body-sm font-semibold text-warning">
-              Online checkout temporarily unavailable
+              {t("paypanel.gatewayDownTitle")}
             </p>
             <p className="t-caption text-ink-muted mt-0.5">
-              The Cashfree gateway is unreachable right now. Pay manually below — your payment
-              will be credited once the owner verifies your UTR.
+              {t("paypanel.gatewayDownDesc")}
             </p>
           </div>
         </div>
@@ -167,9 +166,9 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
         <div className="space-y-4">
           {showFallbackForm ? (
             <div className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
-              <p className="t-h3">Submit Payment Proof</p>
+              <p className="t-h3">{t("paypanel.submitProof")}</p>
               <p className="t-caption text-ink-muted">
-                If your payment was debited but the gateway timed out, upload your UPI receipt here.
+                {t("paypanel.submitProofDesc")}
               </p>
               <ProofUploadForm
                 dueId={dueId}
@@ -187,9 +186,9 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
               <div className="flex items-center gap-3">
                 <Loader2 className="w-6 h-6 animate-spin text-accent shrink-0" />
                 <div>
-                  <p className="t-h3 font-semibold text-ink">Confirming with your bank…</p>
+                  <p className="t-h3 font-semibold text-ink">{t("paypanel.bankConfirming")}</p>
                   <p className="t-caption text-ink-muted mt-0.5">
-                    Usually under 10 seconds. Stay on this screen.
+                    {t("paypanel.bankConfirmingDesc")}
                   </p>
                 </div>
               </div>
@@ -224,14 +223,14 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                   className="flex-1 h-11 rounded-[10px] border border-hairline bg-surface text-ink font-semibold t-body-sm flex items-center justify-center gap-2 hover:bg-bg transition"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  I already paid — check now
+                  {t("paypanel.alreadyPaidCheckNow")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowFallbackForm(true)}
                   className="px-4 h-11 rounded-[10px] border border-hairline text-ink-muted t-caption hover:text-ink transition"
                 >
-                  Upload proof
+                  {t("paypanel.uploadProofBtn")}
                 </button>
               </div>
             </div>
@@ -240,11 +239,9 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                 <div>
-                  <p className="t-h3 font-semibold text-ink">Bank confirmation taking longer than usual</p>
+                  <p className="t-h3 font-semibold text-ink">{t("paypanel.bankDelayedTitle")}</p>
                   <p className="t-body-sm text-ink-muted mt-1">
-                    Your bank hasn't confirmed yet.{" "}
-                    <strong>You were not charged</strong> unless your UPI app showed a successful
-                    debit notification.
+                    {t("paypanel.bankDelayedDesc")}
                   </p>
                 </div>
               </div>
@@ -255,19 +252,19 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                   onClick={checkAgain}
                   className="flex-1 h-12 rounded-[10px] border border-hairline bg-surface text-ink font-semibold t-body-sm flex items-center justify-center gap-2 hover:bg-bg transition"
                 >
-                  <RefreshCw className="w-4 h-4" /> Check again
+                  <RefreshCw className="w-4 h-4" /> {t("paypanel.checkAgainBtn")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowFallbackForm(true)}
                   className="flex-1 h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm hover:bg-accent/90 transition"
                 >
-                  Submit screenshot
+                  {t("paypanel.submitScreenshotBtn")}
                 </button>
               </div>
 
               <p className="t-caption text-ink-muted text-center">
-                Your due will auto-update once the bank confirms. You can safely close this.
+                {t("paypanel.autoUpdateNotice")}
               </p>
             </div>
           ) : (
@@ -280,10 +277,10 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
               >
                 {gatewayState === "OPENING" ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Starting checkout…
+                    <Loader2 className="w-4 h-4 animate-spin" /> {t("paypanel.startingCheckout")}
                   </>
                 ) : (
-                  `Pay ${formatPaise(pay.amount_paise)} via Cashfree`
+                  t("paypanel.payViaCashfree", { amount: formatPaise(pay.amount_paise) })
                 )}
               </button>
 
@@ -293,7 +290,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                   onClick={() => setShowFallbackForm(true)}
                   className="t-caption text-ink-muted hover:text-ink min-h-[44px] inline-flex items-center"
                 >
-                  Paid but not showing? Submit screenshot →
+                  {t("paypanel.paidNotShowing")}
                 </button>
               </div>
             </div>
@@ -310,17 +307,17 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
           {showFallbackForm && (
             <div className="mt-4 p-4 rounded-[14px] border border-hairline bg-bg space-y-3">
               <div className="flex justify-between items-center">
-                <p className="t-caption font-semibold text-ink">Fallback: Submit Receipt or UTR</p>
+                <p className="t-caption font-semibold text-ink">{t("paypanel.fallbackReceiptTitle")}</p>
                 <button
                   type="button"
                   onClick={() => setShowFallbackForm(false)}
                   className="t-caption text-ink-muted hover:text-ink min-h-[44px] min-w-[44px] flex items-center justify-end"
                 >
-                  Close
+                  {t("common.cancel")}
                 </button>
               </div>
               <p className="t-caption text-ink-muted">
-                If Cashfree took your money but the status hasn't updated, submit the UTR/bank reference here for owner verification.
+                {t("paypanel.fallbackReceiptDesc")}
               </p>
               <ProofUploadForm
                 dueId={dueId}

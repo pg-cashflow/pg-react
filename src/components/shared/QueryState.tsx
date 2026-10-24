@@ -1,5 +1,6 @@
 import React from "react";
 import { AlertCircle, RotateCcw } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 interface QueryStateProps {
   isLoading: boolean;
@@ -29,17 +30,21 @@ export const QueryState: React.FC<QueryStateProps> = ({
   isError,
   error,
   isEmpty = false,
-  loadingMessage = "Loading the ledger…",
-  emptyMessage = "Nothing on this ledger yet.",
+  loadingMessage,
+  emptyMessage,
   emptyAction,
   onRetry,
   isFetching,
   children,
 }) => {
+  const { t } = useLocale();
+  const effectiveLoadingMsg = loadingMessage || t("query.loadingLedger");
+  const effectiveEmptyMsg = emptyMessage || t("query.emptyLedger");
+
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <p className="sr-only">{loadingMessage}</p>
+        <p className="sr-only">{effectiveLoadingMsg}</p>
         <SkeletonList />
       </div>
     );
@@ -49,9 +54,9 @@ export const QueryState: React.FC<QueryStateProps> = ({
     return (
       <div className="py-12 px-4 flex flex-col items-center justify-center gap-3 text-center">
         <AlertCircle className="w-8 h-8 text-danger" />
-        <p className="t-h3 text-ink">Couldn’t load this page</p>
+        <p className="t-h3 text-ink">{t("query.couldNotLoad")}</p>
         <p className="t-body-sm text-ink-muted max-w-sm">
-          {error?.message || "Check your connection and try again."}
+          {error?.message || t("query.checkConnection")}
         </p>
         {onRetry && (
           <button
@@ -60,7 +65,7 @@ export const QueryState: React.FC<QueryStateProps> = ({
             className="inline-flex items-center gap-2 h-11 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold text-accent hover:bg-accent-tint"
           >
             <RotateCcw className="w-4 h-4" />
-            Retry
+            {t("common.retry")}
           </button>
         )}
       </div>
@@ -70,7 +75,7 @@ export const QueryState: React.FC<QueryStateProps> = ({
   if (isEmpty) {
     return (
       <div className="py-12 px-4 text-center space-y-3">
-        <p className="t-h3 text-ink">{emptyMessage}</p>
+        <p className="t-h3 text-ink">{effectiveEmptyMsg}</p>
         {emptyAction}
       </div>
     );

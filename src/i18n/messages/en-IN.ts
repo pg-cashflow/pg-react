@@ -537,6 +537,53 @@ export const enIN = {
   "owner.payouts.pendingVerification": "Pending Verification",
   "owner.payouts.verifyPayeeAction": "Verify Payee",
   "owner.payouts.noPaymentInfo": "No payment info",
+
+  // PayPanel extended
+  "paypanel.utrSubmitted": "UTR submitted — waiting for owner verification",
+  "paypanel.utrSubmittedDesc": "This is not marked paid until the owner confirms the UTR. Keep your screenshot.",
+  "paypanel.gatewayDownTitle": "Online checkout temporarily unavailable",
+  "paypanel.gatewayDownDesc": "The Cashfree gateway is unreachable right now. Pay manually below — your payment will be credited once the owner verifies your UTR.",
+  "paypanel.submitProof": "Submit Payment Proof",
+  "paypanel.submitProofDesc": "If your payment was debited but the gateway timed out, upload your UPI receipt here.",
+  "paypanel.bankConfirming": "Confirming with your bank…",
+  "paypanel.bankConfirmingDesc": "Usually under 10 seconds. Stay on this screen.",
+  "paypanel.alreadyPaidCheckNow": "I already paid — check now",
+  "paypanel.uploadProofBtn": "Upload proof",
+  "paypanel.bankDelayedTitle": "Bank confirmation taking longer than usual",
+  "paypanel.bankDelayedDesc": "Your bank hasn't confirmed yet. You were not charged unless your UPI app showed a successful debit notification.",
+  "paypanel.checkAgainBtn": "Check again",
+  "paypanel.submitScreenshotBtn": "Submit screenshot",
+  "paypanel.autoUpdateNotice": "Your due will auto-update once the bank confirms. You can safely close this.",
+  "paypanel.startingCheckout": "Starting checkout…",
+  "paypanel.payViaCashfree": "Pay {amount} via Cashfree",
+  "paypanel.paidNotShowing": "Paid but not showing? Submit screenshot →",
+  "paypanel.fallbackReceiptTitle": "Fallback: Submit Receipt or UTR",
+  "paypanel.fallbackReceiptDesc": "If Cashfree took your money but the status hasn't updated, submit the UTR/bank reference here for owner verification.",
+
+  // ProofUploadForm
+  "proof.screenshotLabel": "Payment Screenshot",
+  "proof.scanningUtr": "Scanning screenshot for UTR…",
+  "proof.receiptPlaceholder": "GPay / PhonePe / Paytm receipt",
+  "proof.browse": "Browse",
+  "proof.utrLabel": "12-Digit UPI Reference (UTR)",
+  "proof.utrPlaceholder": "e.g. 423456789012",
+  "proof.submitting": "Submitting proof…",
+  "proof.submitBtn": "Submit Proof",
+
+  // QRModal
+  "qrmodal.title": "Payment QR & Link",
+  "qrmodal.qrUnavailable": "QR unavailable",
+  "qrmodal.scanInstructions": "Scan with any UPI app (GPay, PhonePe, Paytm) to pay immediately.",
+  "qrmodal.copyLink": "Copy link",
+  "qrmodal.openPaymentPage": "Open Payment Page",
+  "qrmodal.shareWhatsapp": "Share on WhatsApp",
+
+  // QueryState
+  "query.loadingLedger": "Loading the ledger…",
+  "query.emptyLedger": "Nothing on this ledger yet.",
+  "query.couldNotLoad": "Couldn’t load this page",
+  "query.checkConnection": "Check your connection and try again.",
+  "query.refetching": "Refetching…",
 };
 
 export type MessageKey = keyof typeof enIN;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { X, Copy, Check, ExternalLink, QrCode, Loader2, MessageCircle } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 interface QRModalProps {
   paymentUrl?: string;
@@ -17,9 +18,11 @@ export const QRModal: React.FC<QRModalProps> = ({
   waMe,
   isOpen,
   onClose,
-  title = "Payment QR & Link",
+  title,
   isLoading = false,
 }) => {
+  const { t } = useLocale();
+  const modalTitle = title || t("qrmodal.title");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export const QRModal: React.FC<QRModalProps> = ({
           <div className="p-2 rounded-lg bg-accent-tint text-accent">
             <QrCode className="w-5 h-5" />
           </div>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <h3 className="text-lg font-semibold text-white">{modalTitle}</h3>
         </div>
 
         <div className="bg-white p-3 rounded-xl flex items-center justify-center mx-auto my-3 shadow-inner max-w-[240px] min-h-[240px]">
@@ -62,12 +65,12 @@ export const QRModal: React.FC<QRModalProps> = ({
           ) : qrImageUrl ? (
             <img src={qrImageUrl} alt="Payment QR Code" className="w-48 h-48 rounded" />
           ) : (
-            <p className="text-xs text-ink-muted text-center px-2">QR unavailable</p>
+            <p className="text-xs text-ink-muted text-center px-2">{t("qrmodal.qrUnavailable")}</p>
           )}
         </div>
 
         <p className="text-xs text-center text-ink-muted mb-4">
-          Scan with any UPI app (GPay, PhonePe, Paytm) to pay immediately.
+          {t("qrmodal.scanInstructions")}
         </p>
 
         {paymentUrl && (
@@ -77,7 +80,7 @@ export const QRModal: React.FC<QRModalProps> = ({
               <button
                 onClick={handleCopy}
                 className="p-1.5 rounded-md hover:bg-surface text-ink hover:text-white transition flex-shrink-0"
-                title="Copy link"
+                title={t("qrmodal.copyLink")}
               >
                 {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
               </button>
@@ -89,7 +92,7 @@ export const QRModal: React.FC<QRModalProps> = ({
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent/90 transition shadow-md"
             >
-              Open Payment Page
+              {t("qrmodal.openPaymentPage")}
               <ExternalLink className="w-4 h-4" />
             </a>
 
@@ -100,7 +103,7 @@ export const QRModal: React.FC<QRModalProps> = ({
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-emerald-600 text-white font-medium text-sm hover:bg-success transition shadow-md"
               >
-                Share on WhatsApp
+                {t("qrmodal.shareWhatsapp")}
                 <MessageCircle className="w-4 h-4" />
               </a>
             )}
