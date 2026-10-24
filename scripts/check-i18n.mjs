@@ -1,11 +1,16 @@
-import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const ROOT = join(process.cwd(), "src");
 const MESSAGES_DIR = join(ROOT, "i18n", "messages");
 const LOCALES = ["en-IN", "te-IN", "ta-IN", "kn-IN"];
 
-let hits = 0;
+// Ratchet baseline ceiling: build fails if detected literal strings exceed this limit.
+// As files are converted to t(), decrease this number to prevent future regressions.
+const BASELINE_LITERAL_CEILING = 249;
+
+let parityHits = 0;
 
 // 1. Check Key Parity across all 4 locales
 function extractKeys(filePath) {
@@ -46,7 +51,7 @@ for (const loc of LOCALES.slice(1)) {
     if (extra.length > 0) {
       console.error(`  Extra ${extra.length} keys: ${extra.slice(0, 10).join(", ")}${extra.length > 10 ? "..." : ""}`);
     }
-    hits++;
+    parityHits++;
   } else {
     console.log(`[i18n] ${loc} has 100% key parity with en-IN (${locKeys.size} keys).`);
   }
@@ -78,6 +83,9 @@ const files = walk(join(ROOT, "routes")).concat(walk(join(ROOT, "components")));
 // Regex for JSX literal text between tags: >Text<
 const JSX_TEXT_REGEX = />([^<>{}\r\n]+)</g;
 
+let literalHits = 0;
+const hitsByFile = new Map();
+
 for (const f of files) {
   const content = readFileSync(f, "utf8");
   const lines = content.split(/\r?\n/);
@@ -99,14 +107,44 @@ for (const f of files) {
         // Exclude common HTML entity / code strings
         if (/^(div|span|button|svg|path|class|className|id|src|href)$/i.test(text)) continue;
         console.warn(`[i18n LITERAL] ${f}:${i + 1} -> "${text}"`);
+        literalHits++;
+        hitsByFile.set(f, (hitsByFile.get(f) || 0) + 1);
       }
     }
   });
 }
 
-if (hits > 0) {
-  console.error(`\n[FAIL] i18n check found ${hits} key mismatch error(s).`);
+console.log(`\n[i18n SCAN] Found ${literalHits} literal strings across ${hitsByFile.size} files.`);
+console.log(`[i18n RATCHET] Current baseline ceiling: ${BASELINE_LITERAL_CEILING}`);
+
+// Check if user requested updating the baseline ceiling
+if (process.argv.includes("--update-baseline")) {
+  const selfPath = fileURLToPath(import.meta.url);
+  const selfContent = readFileSync(selfPath, "utf8");
+  const updatedContent = selfContent.replace(
+    /const BASELINE_LITERAL_CEILING = \d+;/,
+    `const BASELINE_LITERAL_CEILING = ${literalHits};`
+  );
+  writeFileSync(selfPath, updatedContent, "utf8");
+  console.log(`[i18n RATCHET] Updated BASELINE_LITERAL_CEILING to ${literalHits}.`);
+  process.exit(0);
+}
+
+let ratchetViolation = false;
+if (literalHits > BASELINE_LITERAL_CEILING) {
+  const delta = literalHits - BASELINE_LITERAL_CEILING;
+  console.error(`\n[FAIL] i18n ratchet tripped: ${literalHits} literal strings found (+${delta} above limit of ${BASELINE_LITERAL_CEILING}).`);
+  console.error(`New hardcoded strings are blocked. Wrap user-facing text in t() or add inline /* lint-allow-i18n */.`);
+  ratchetViolation = true;
+} else if (literalHits < BASELINE_LITERAL_CEILING) {
+  const reduction = BASELINE_LITERAL_CEILING - literalHits;
+  console.log(`\n[RATCHET PROGRESS] Literal strings decreased by ${reduction} (now ${literalHits}, baseline was ${BASELINE_LITERAL_CEILING}).`);
+  console.log(`Run 'node scripts/check-i18n.mjs --update-baseline' to lock in this progress.`);
+}
+
+if (parityHits > 0 || ratchetViolation) {
+  console.error(`\n[FAIL] i18n check failed: parityErrors=${parityHits}, ratchetViolation=${ratchetViolation}`);
   process.exit(1);
 } else {
-  console.log("\n[OK] i18n parity check passed.");
+  console.log("\n[OK] i18n check passed (parity intact, ratchet within limit).");
 }

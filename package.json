@@ -10,6 +10,7 @@
     "lint:palette": "node scripts/check-palette.mjs",
     "lint:type": "node scripts/check-typography.mjs",
     "lint:i18n": "node scripts/check-i18n.mjs",
+    "lint:i18n:ratchet": "node scripts/check-i18n.mjs --update-baseline",
     "preview": "vite preview",
     "test": "vitest run",
     "check:error-codes": "node scripts/check-error-codes.mjs"

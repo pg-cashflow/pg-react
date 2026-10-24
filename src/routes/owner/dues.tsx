@@ -99,7 +99,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
                 e.stopPropagation();
                 onShowQR(due);
               }}
-              title="QR"
+              title={t("owner.dues.keyQR")}
               className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink hover:text-white transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
             >
               <QrCode className="w-4 h-4" />
@@ -603,10 +603,11 @@ export const DuesView: React.FC = () => {
               <X className="w-5 h-5" />
             </button>
             <h3 className="text-lg font-bold text-ink mb-4">{t("owner.dues.waiveTitle")}</h3>
-            <p className="text-xs text-ink-muted mb-4">
-              Waive <AmountBadge amount={waiveModalDue.amount} /> for{" "}
-              {tenantMap.get(waiveModalDue.tenant_id)}?
-            </p>
+            <div className="text-xs text-ink-muted mb-4 flex items-center gap-1.5 flex-wrap">
+              <span>{t("owner.dues.waiveTitle")}</span>
+              <AmountBadge amount={waiveModalDue.amount} />
+              <span>{tenantMap.get(waiveModalDue.tenant_id)}?</span>
+            </div>
             {modalError && (
               <div className="mb-4 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs">
                 {modalError}
@@ -653,7 +654,7 @@ export const DuesView: React.FC = () => {
             </button>
             <h3 className="text-lg font-bold text-ink">{t("owner.dues.matchTitle")}</h3>
             {modalError && <p className="text-xs text-danger">{modalError}</p>}
-            <p className="text-xs text-ink-muted">Amount {paiseToRupeeInput(matchDueRow.amount)} (remaining)</p>
+            <p className="text-xs text-ink-muted">{t("owner.dues.thAmount")}: ₹{paiseToRupeeInput(matchDueRow.amount)}</p>
             <input
               value={matchUtr}
               onChange={(e) => setMatchUtr(e.target.value)}
