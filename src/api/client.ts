@@ -184,10 +184,10 @@ async function handleResponse<T>(
     return await parse();
   } catch (err) {
     if (err instanceof SyntaxError) {
-      throw new ApiError(
-        res.status,
-        `Server returned an invalid response (expected JSON, received HTML or malformed body). Ensure pg-go is running with the latest routes.`
-      );
+      const msg = import.meta.env.DEV
+        ? `Server returned an invalid response (expected JSON, received HTML or malformed body). Ensure pg-go is running with the latest routes.`
+        : `Server returned an invalid response. Please try again later.`;
+      throw new ApiError(res.status, msg);
     }
     throw err;
   }
@@ -210,10 +210,6 @@ function isNetworkFailure(err: unknown): boolean {
     return msg.includes("failed to fetch") || msg.includes("networkerror") || msg.includes("load failed");
   }
   return false;
-}
-
-function networkFailureMessage(): string {
-  return `Cannot reach API at ${API_BASE}. Start pg-go on :8080, open the PWA at http://127.0.0.1:5173 (not a mismatched localhost origin), and allow that origin in CORS_ALLOWED_ORIGINS.`;
 }
 
 function authHeaders(options: RequestInit): Record<string, string> {

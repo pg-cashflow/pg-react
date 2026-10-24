@@ -66,13 +66,75 @@ export const setStoredUser = (user: User | null): void => {
   }
 };
 
-export const getInviteCode = (): string => localStorage.getItem(INVITE_KEY) || "";
+const PENDING_LOGOUT_KEY = "pg_pending_logout";
+
+export const getInviteCode = (): string => {
+  try {
+    return localStorage.getItem(INVITE_KEY) || "";
+  } catch {
+    return "";
+  }
+};
 
 export const setInviteCode = (code: string): void => {
-  const trimmed = code.trim().toUpperCase();
-  if (!trimmed) {
-    localStorage.removeItem(INVITE_KEY);
-    return;
+  try {
+    const trimmed = code.trim().toUpperCase();
+    if (!trimmed) {
+      localStorage.removeItem(INVITE_KEY);
+      return;
+    }
+    localStorage.setItem(INVITE_KEY, trimmed);
+  } catch {
+    // storage disabled or quota exceeded
   }
-  localStorage.setItem(INVITE_KEY, trimmed);
 };
+
+export const isPendingLogout = (): boolean => {
+  try {
+    return localStorage.getItem(PENDING_LOGOUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+export const setPendingLogout = (pending: boolean): void => {
+  try {
+    if (pending) {
+      localStorage.setItem(PENDING_LOGOUT_KEY, "1");
+    } else {
+      localStorage.removeItem(PENDING_LOGOUT_KEY);
+    }
+  } catch {
+    // ignore
+  }
+};
+
+const SESSION_HINT_KEY = "pg_has_session";
+
+export interface SessionHint {
+  hasSession: boolean;
+  role?: string;
+}
+
+export const getSessionHint = (): SessionHint | null => {
+  try {
+    const raw = localStorage.getItem(SESSION_HINT_KEY);
+    return raw ? (JSON.parse(raw) as SessionHint) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const setSessionHint = (hint: SessionHint | null): void => {
+  try {
+    if (!hint) {
+      localStorage.removeItem(SESSION_HINT_KEY);
+      return;
+    }
+    localStorage.setItem(SESSION_HINT_KEY, JSON.stringify(hint));
+  } catch {
+    // ignore
+  }
+};
+
+

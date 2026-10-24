@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { getTenantDuePay, verifyTenantDuePay } from "@/api/pay";
 import { getMyDues } from "@/api/tenant";
-import { startCashfreeCheckout } from "@/lib/cashfree";
+import { startCashfreeCheckout, preloadCashfreeSdk } from "@/lib/cashfree";
 import type { Due, PayIntent } from "@pg/types";
 
 export type PayDueState =
@@ -26,6 +26,10 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const [state, setState] = useState<PayDueState>("READY");
   const [intent, setIntent] = useState<PayIntent | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    preloadCashfreeSdk().catch(() => {});
+  }, []);
 
   const optionsRef = useRef<UsePayDueOptions>(options);
   optionsRef.current = options;
@@ -91,23 +95,30 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   }, [dueId, markPaid, queryClient]);
 
 
-  // Poll loop: polls checkDueStatus every intervalMs until deadline is reached
+  // Poll loop: polls checkDueStatus with backoff until deadline is reached
   const startPolling = useCallback(
     (durationMs: number, onTimeoutState: PayDueState) => {
       clearTimer();
       deadlineRef.current = Date.now() + durationMs;
+      const baseDelays = [2000, 2000, 3000, 4000, 5000];
+      let attempt = 0;
 
       const tick = async () => {
         const isPaid = await checkDueStatus();
         if (isPaid) return;
 
-        if (Date.now() >= deadlineRef.current) {
+        const now = Date.now();
+        if (now >= deadlineRef.current) {
           clearTimer();
           setState(onTimeoutState);
           return;
         }
 
-        pollTimerRef.current = setTimeout(tick, 2000);
+        const plannedDelay = baseDelays[attempt] ?? 5000;
+        attempt++;
+        const remaining = deadlineRef.current - now;
+        const delay = Math.min(plannedDelay, Math.max(500, remaining));
+        pollTimerRef.current = setTimeout(tick, delay);
       };
 
       // Initial tick after 1s

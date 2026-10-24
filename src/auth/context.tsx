@@ -1,12 +1,14 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import type { User, UserRole, AuthTokenPayload } from "@pg/types";
-import { getStoredUser, setStoredUser, getInviteCode } from "./storage";
+import { getStoredUser, setStoredUser, getInviteCode, isPendingLogout, setPendingLogout, getSessionHint, setSessionHint } from "./storage";
 import { getAccessToken, setAccessToken, onAccessTokenChange } from "./tokenStore";
 import { exchangeFirebaseToken, refreshSession, logoutSession } from "@/api/auth";
 import { scheduleProactiveRefresh, stopProactiveRefresh, ApiError } from "@/api/client";
 import { queryClient } from "@/lib/queryClient";
 import { clearServiceWorkerCaches } from "@/lib/session";
 import { toE164IndianPhone } from "@/lib/utils";
+
+export type SessionStatus = "online" | "degraded" | "anon";
 
 interface AuthContextType {
   token: string | null;
@@ -17,6 +19,8 @@ interface AuthContextType {
   isPendingJoin: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
+  sessionStatus: SessionStatus;
+  isDegraded: boolean;
   justActivated: boolean;
   consumeActivation: () => void;
   triggerActivation: () => void;
@@ -68,27 +72,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [justActivated, setJustActivated] = useState<boolean>(false);
 
-  const clearLocalSession = useCallback(() => {
-    stopProactiveRefresh();
-    import("@/auth/firebasePhone").then((m) => m.resetFirebasePhoneAuth()).catch(() => {});
-    setAccessToken(null);
-    setStoredUser(null);
-    setTokenState(null);
-    setUser(null);
-    setRole(null);
-    setUserId(null);
-    setTenantId(null);
-    setJustActivated(false);
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>(() =>
+    initialStored ? "degraded" : "anon"
+  );
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearRetryTimer = useCallback(() => {
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
   }, []);
 
-  const logout = useCallback(() => {
+  const endSession = useCallback((callServerLogout = false) => {
     stopProactiveRefresh();
-    logoutSession().catch(() => {});
+    clearRetryTimer();
     queryClient.clear();
     clearServiceWorkerCaches().catch(() => {});
-    import("@/auth/firebasePhone")
-      .then((m) => m.resetFirebasePhoneAuth())
-      .catch(() => {});
+    import("@/auth/firebasePhone").then((m) => m.resetFirebasePhoneAuth()).catch(() => {});
     import("@/lib/firebase")
       .then(({ firebaseAuth }) =>
         import("firebase/auth").then(({ signOut }) => signOut(firebaseAuth))
@@ -102,9 +103,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserId(null);
     setTenantId(null);
     setJustActivated(false);
-  }, []);
+    setSessionStatus("anon");
+    setSessionHint(null);
+
+    if (callServerLogout) {
+      setPendingLogout(true);
+      logoutSession()
+        .then(() => setPendingLogout(false))
+        .catch(() => {
+          // Retry will occur on reconnect
+        });
+    }
+  }, [clearRetryTimer]);
+
+  const clearLocalSession = useCallback(() => {
+    endSession(false);
+  }, [endSession]);
+
+  const logout = useCallback(() => {
+    endSession(true);
+  }, [endSession]);
 
   const applySession = useCallback((rawToken: string, sessionUser: User, payload?: AuthTokenPayload) => {
+    clearRetryTimer();
     const jwtPayload = payload ?? parseJwt(rawToken);
     const resolvedRole = sessionUser.role ?? jwtPayload?.role;
     const tid = sessionUser.tenant_id || jwtPayload?.tenant_id || null;
@@ -113,13 +134,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(sessionUser);
     if (isValidRole(resolvedRole)) {
       setRole(resolvedRole);
+      setSessionHint({ hasSession: true, role: resolvedRole });
     }
     setUserId(sessionUser.id || jwtPayload?.user_id || jwtPayload?.sub || null);
     setTenantId(resolvedRole === "tenant" ? tid : null);
     setStoredUser(sessionUser);
+    setSessionStatus("online");
     scheduleProactiveRefresh();
     setIsLoading(false);
-  }, []);
+  }, [clearRetryTimer]);
 
   const updateUser = useCallback((patch: Partial<User>) => {
     setUser((prev) => {
@@ -131,14 +154,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const evaluateStored = useCallback(async () => {
+    if (isPendingLogout()) {
+      endSession(true);
+      setIsLoading(false);
+      return;
+    }
+
     const stored = getStoredUser();
+    const hint = getSessionHint();
+
+    // Anonymous visitor with no prior session: render public routes immediately without waiting on refresh 401
+    if (!stored && !hint?.hasSession) {
+      setIsLoading(false);
+      setSessionStatus("anon");
+      return;
+    }
+
     if (stored) {
       setUser(stored);
       if (isValidRole(stored.role)) {
         setRole(stored.role);
         setUserId(stored.id || null);
         setTenantId(stored.role === "tenant" ? stored.tenant_id || null : null);
+        setSessionStatus("degraded");
       }
+    } else if (hint?.role && isValidRole(hint.role)) {
+      setRole(hint.role);
+      setSessionStatus("degraded");
     }
 
     try {
@@ -155,33 +197,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (err instanceof ApiError) {
         if (err.status === 429 || err.status >= 500) {
           // Transient failure (rate limit or server unavailable).
-          // Server explicitly allows retry; do not revoke session or log out.
-          setIsLoading(false);
-          return;
+          // Retain degraded session from stored hints and retry with backoff.
+          if (stored) {
+            setSessionStatus("degraded");
+            setIsLoading(false);
+            clearRetryTimer();
+            retryTimeoutRef.current = setTimeout(() => {
+              void evaluateStored();
+            }, 10000);
+            return;
+          }
         }
       } else if (err instanceof TypeError && /failed to fetch|networkerror|load failed/i.test(err.message)) {
         // Network offline: retain session without revoking
-        setIsLoading(false);
-        return;
+        if (stored) {
+          setSessionStatus("degraded");
+          setIsLoading(false);
+          return;
+        }
       }
 
-      // Terminal auth error (401, 403, or no refresh cookie):
-      // Only clear local state if there was a prior stored user.
-      // Never trigger server-side logoutSession() or cache purge for anonymous visitors!
+      // Terminal auth error (401, 403, or invalid refresh cookie):
       if (stored) {
         clearLocalSession();
+      } else {
+        setSessionStatus("anon");
       }
     }
 
     setIsLoading(false);
-  }, [applySession, clearLocalSession]);
+  }, [applySession, clearLocalSession, endSession, clearRetryTimer]);
 
   useEffect(() => {
     void evaluateStored();
+
     const handleUnauthorized = () => clearLocalSession();
+    const handleOnline = () => {
+      if (isPendingLogout()) {
+        logoutSession().then(() => setPendingLogout(false)).catch(() => {});
+      } else {
+        void evaluateStored();
+      }
+    };
+
     window.addEventListener("pg:unauthorized", handleUnauthorized);
-    return () => window.removeEventListener("pg:unauthorized", handleUnauthorized);
-  }, [evaluateStored, clearLocalSession]);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("pg:unauthorized", handleUnauthorized);
+      window.removeEventListener("online", handleOnline);
+      clearRetryTimer();
+    };
+  }, [evaluateStored, clearLocalSession, clearRetryTimer]);
 
   useEffect(() => {
     return onAccessTokenChange((t) => {
@@ -241,7 +307,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isPendingJoin = role === "tenant" && !tenantId;
-  const isAuthenticated = !!token && !!role && !isLoading;
+  const isDegraded = sessionStatus === "degraded";
+  const isAuthenticated = !isLoading && !!role && (!!token || isDegraded);
 
   const contextValue = useMemo<AuthContextType>(
     () => ({
@@ -253,6 +320,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isPendingJoin,
       isAuthenticated,
       isLoading,
+      sessionStatus,
+      isDegraded,
       justActivated,
       consumeActivation,
       triggerActivation,
@@ -274,6 +343,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isPendingJoin,
       isAuthenticated,
       isLoading,
+      sessionStatus,
+      isDegraded,
       justActivated,
       consumeActivation,
       triggerActivation,

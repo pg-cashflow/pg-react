@@ -45,6 +45,10 @@ export function _resetCashfreeInstanceForTests(): void {
   sdkPromise = null;
 }
 
+export function preloadCashfreeSdk(): Promise<void> {
+  return loadSdk();
+}
+
 function loadSdk(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.Cashfree) return Promise.resolve();
