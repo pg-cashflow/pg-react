@@ -90,7 +90,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
         <div className="flex items-center justify-end gap-2">
           {isSelected && isPayable && (
             <span className="hidden sm:inline-flex items-center text-[11px] font-mono text-accent bg-surface border border-accent/40 px-1.5 py-0.5 rounded shadow-xs font-semibold mr-1">
-              ↵ Enter to Pay
+              {t("owner.dues.keyEnterToPay")}
             </span>
           )}
           {isPayable && (
@@ -99,7 +99,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
                 e.stopPropagation();
                 onShowQR(due);
               }}
-              title="Show Payment QR / Link"
+              title="QR"
               className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink hover:text-white transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
             >
               <QrCode className="w-4 h-4" />
@@ -111,7 +111,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
                 e.stopPropagation();
                 onOpenPay(due);
               }}
-              title="Record Cash Payment"
+              title={t("owner.dues.recordCashTitle")}
               className="p-1.5 rounded-lg bg-success-tint hover:bg-success/20 text-success transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
             >
               <CheckCircle className="w-4 h-4" />
@@ -123,7 +123,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
                 e.stopPropagation();
                 onOpenMatch(due);
               }}
-              title="Match UTR"
+              title={t("owner.dues.matchTitle")}
               className="p-1.5 rounded-lg bg-surface hover:bg-surface text-ink transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
             >
               <Link2 className="w-4 h-4" />
@@ -135,7 +135,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
                 e.stopPropagation();
                 onOpenWaive(due);
               }}
-              title="Waive Due"
+              title={t("owner.dues.waiveTitle")}
               className="p-1.5 rounded-lg bg-surface hover:bg-danger-tint text-ink-muted hover:text-danger transition active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
             >
               <Slash className="w-4 h-4" />
@@ -411,12 +411,12 @@ export const DuesView: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="overdue">Overdue</option>
-            <option value="partial">Partial</option>
-            <option value="paid">Paid</option>
-            <option value="waived">Waived</option>
+            <option value="all">{t("owner.dues.filterAllStatuses")}</option>
+            <option value="pending">{t("owner.dues.filterPending")}</option>
+            <option value="overdue">{t("owner.dues.filterOverdue")}</option>
+            <option value="partial">{t("owner.dues.filterPartial")}</option>
+            <option value="paid">{t("owner.dues.filterPaid")}</option>
+            <option value="waived">{t("owner.dues.filterWaived")}</option>
           </select>
 
           <select
@@ -424,7 +424,7 @@ export const DuesView: React.FC = () => {
             onChange={(e) => setTenantFilter(e.target.value)}
             className="px-3.5 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
           >
-            <option value="all">All Tenants</option>
+            <option value="all">{t("owner.dues.filterAllTenants")}</option>
             {tenants.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
@@ -442,31 +442,31 @@ export const DuesView: React.FC = () => {
             }
             className="h-10 px-4 rounded-[10px] border border-hairline bg-surface t-body font-semibold hover:bg-surface/80 active:scale-95 transition"
           >
-            Export CSV
+            {t("owner.dues.exportCsv")}
           </button>
         </div>
 
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface border border-hairline rounded-xl text-xs text-ink-muted">
-          <span className="font-semibold text-ink">Keyboard:</span>
+          <span className="font-semibold text-ink">{t("owner.reports.keyboardTitle")}</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">↑</kbd>
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">↓</kbd>
-            <span>Navigate</span>
+            <span>{t("owner.dues.keyNavigate")}</span>
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Enter</kbd>
-            <span>Verify Cash</span>
+            <span>{t("owner.dues.keyVerifyCash")}</span>
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">M</kbd>
-            <span>Match</span>
+            <span>{t("owner.dues.keyMatch")}</span>
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Q</kbd>
-            <span>QR</span>
+            <span>{t("owner.dues.keyQR")}</span>
           </span>
         </div>
       </div>
@@ -483,8 +483,8 @@ export const DuesView: React.FC = () => {
           isError={duesError || tenantsError}
           error={(duesQueryError as Error | null) ?? null}
           isEmpty={!isLoading && !duesError && filteredDues.length === 0}
-          loadingMessage="Loading dues..."
-          emptyMessage="No dues match criteria. Dues are created automatically when tenants are onboarded and billing runs."
+          loadingMessage={t("owner.dues.loadingDues")}
+          emptyMessage={t("owner.dues.emptyDues")}
           onRetry={() => {
             refetchDues();
             refetchTenants();
@@ -494,12 +494,12 @@ export const DuesView: React.FC = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase tracking-wider border-b border-hairline">
                 <tr>
-                  <th className="px-6 py-3.5">Tenant</th>
-                  <th className="px-6 py-3.5">Due Code</th>
-                  <th className="px-6 py-3.5">Amount</th>
-                  <th className="px-6 py-3.5">Due Date</th>
-                  <th className="px-6 py-3.5">Status</th>
-                  <th className="px-6 py-3.5 text-right">Actions</th>
+                  <th className="px-6 py-3.5">{t("owner.dues.thTenant")}</th>
+                  <th className="px-6 py-3.5">{t("owner.dues.thDueCode")}</th>
+                  <th className="px-6 py-3.5">{t("owner.dues.thAmount")}</th>
+                  <th className="px-6 py-3.5">{t("owner.dues.thDueDate")}</th>
+                  <th className="px-6 py-3.5">{t("owner.dues.thStatus")}</th>
+                  <th className="px-6 py-3.5 text-right">{t("owner.dues.thActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
@@ -545,7 +545,7 @@ export const DuesView: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-ink mb-4">Record Cash Payment</h3>
+            <h3 className="text-lg font-bold text-ink mb-4">{t("owner.dues.recordCashTitle")}</h3>
             {modalError && (
               <div className="mb-4 p-3 rounded-xl bg-danger-tint border border-danger/20 text-danger text-xs">
                 {modalError}
@@ -554,7 +554,7 @@ export const DuesView: React.FC = () => {
             <form onSubmit={handlePaySubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-ink mb-1">
-                  Cash Amount (₹) — locked to remaining due (all-or-nothing)
+                  {t("owner.dues.cashAmountLabel")}
                 </label>
                 <div className="relative">
                   <IndianRupee className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
@@ -567,7 +567,7 @@ export const DuesView: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-ink mb-1">Note (optional)</label>
+                <label className="block text-xs font-medium text-ink mb-1">{t("owner.dues.noteOptional")}</label>
                 <input
                   type="text"
                   value={payNotes}
@@ -577,7 +577,7 @@ export const DuesView: React.FC = () => {
               </div>
               <div className="flex justify-end gap-3">
                 <button type="button" onClick={() => setPayModalDue(null)} className="px-4 py-2 text-ink-muted">
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -585,7 +585,7 @@ export const DuesView: React.FC = () => {
                   className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-success text-white font-semibold text-sm disabled:opacity-50"
                 >
                   {payMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Confirm Payment
+                  {t("owner.dues.confirmPayment")}
                 </button>
               </div>
             </form>
@@ -602,7 +602,7 @@ export const DuesView: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-ink mb-4">Waive Due</h3>
+            <h3 className="text-lg font-bold text-ink mb-4">{t("owner.dues.waiveTitle")}</h3>
             <p className="text-xs text-ink-muted mb-4">
               Waive <AmountBadge amount={waiveModalDue.amount} /> for{" "}
               {tenantMap.get(waiveModalDue.tenant_id)}?
@@ -614,17 +614,17 @@ export const DuesView: React.FC = () => {
             )}
             <div className="flex justify-end gap-3">
               <button type="button" onClick={() => setWaiveModalDue(null)} className="px-4 py-2 text-ink-muted">
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 onClick={() => {
-                  if (window.confirm("Waive this due?")) waiveMutation.mutate(waiveModalDue.id);
+                  if (window.confirm(t("owner.dues.waiveConfirm"))) waiveMutation.mutate(waiveModalDue.id);
                 }}
                 disabled={waiveMutation.isPending}
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-danger text-white font-semibold text-sm disabled:opacity-50"
               >
                 {waiveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                Waive Due
+                {t("owner.dues.waiveTitle")}
               </button>
             </div>
           </div>
@@ -636,10 +636,10 @@ export const DuesView: React.FC = () => {
             onSubmit={(e) => {
               e.preventDefault();
               if (!matchUtr.trim()) {
-                setModalError("UTR is required");
+                setModalError(t("owner.dues.utrRequired"));
                 return;
               }
-              if (!window.confirm("Match this UTR to the due?")) return;
+              if (!window.confirm(t("owner.dues.matchConfirm"))) return;
               matchMutation.mutate({
                 dueId: matchDueRow.id,
                 amount: matchDueRow.amount,
@@ -651,25 +651,25 @@ export const DuesView: React.FC = () => {
             <button type="button" onClick={() => setMatchDueRow(null)} className="absolute top-4 right-4 text-ink-muted">
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-ink">Match UTR</h3>
+            <h3 className="text-lg font-bold text-ink">{t("owner.dues.matchTitle")}</h3>
             {modalError && <p className="text-xs text-danger">{modalError}</p>}
             <p className="text-xs text-ink-muted">Amount {paiseToRupeeInput(matchDueRow.amount)} (remaining)</p>
             <input
               value={matchUtr}
               onChange={(e) => setMatchUtr(e.target.value)}
-              placeholder="UPI transaction ID"
+              placeholder={t("owner.dues.upiTxnPlaceholder")}
               className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink"
             />
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setMatchDueRow(null)} className="px-3 py-2 text-ink-muted">
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={matchMutation.isPending}
                 className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-50"
               >
-                Match
+                {t("owner.dues.keyMatch")}
               </button>
             </div>
           </form>

@@ -26,9 +26,11 @@ import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { BatchApprovalModal } from "@/components/owner/BatchApprovalModal";
 import { CreatePayeeModal } from "@/components/owner/CreatePayeeModal";
+import { useLocale } from "@/i18n";
 import type { PayoutBatch } from "@pg/types";
 
 export const PayoutsView: React.FC = () => {
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"batches" | "unbatched" | "payees">("batches");
   const [selectedBatchForApproval, setSelectedBatchForApproval] = useState<PayoutBatch | null>(null);
   const [isCreatePayeeOpen, setIsCreatePayeeOpen] = useState(false);
@@ -135,10 +137,10 @@ export const PayoutsView: React.FC = () => {
         <div>
           <h1 className="t-h1 text-ink tracking-tight flex items-center gap-2.5">
             <Send className="w-5 h-5 text-accent" />
-            Money Out & Payroll
+            {t("owner.payouts.title")}
           </h1>
           <p className="text-sm text-ink-muted mt-0.5">
-            Manage staff salaries, vendor expenses, and deposit refunds with dual-control step-up authorization.
+            {t("owner.payouts.subtitle")}
           </p>
         </div>
 
@@ -148,7 +150,7 @@ export const PayoutsView: React.FC = () => {
             className="px-3.5 py-2 rounded-xl border border-hairline text-ink hover:bg-surface font-medium text-sm flex items-center gap-2 transition shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Add Payee
+            {t("owner.payouts.addPayee")}
           </button>
           {unbatchedItems.length > 0 && (
             <button
@@ -159,12 +161,12 @@ export const PayoutsView: React.FC = () => {
               {createBatchMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating...
+                  {t("owner.payouts.generating")}
                 </>
               ) : (
                 <>
                   <Layers className="w-4 h-4" />
-                  Generate Batch ({unbatchedItems.length})
+                  {t("owner.payouts.generateBatch", { count: unbatchedItems.length })}
                 </>
               )}
             </button>
@@ -190,7 +192,7 @@ export const PayoutsView: React.FC = () => {
           }`}
         >
           <Layers className="w-4 h-4" />
-          Payout Batches
+          {t("owner.payouts.tabBatches")}
           {batches.length > 0 && (
             <span className="px-1.5 py-0.2 rounded-full text-xs bg-accent-tint text-accent">
               {batches.length}
@@ -207,7 +209,7 @@ export const PayoutsView: React.FC = () => {
           }`}
         >
           <Clock className="w-4 h-4" />
-          Pending Items
+          {t("owner.payouts.tabUnbatched")}
           {unbatchedItems.length > 0 && (
             <span className="px-1.5 py-0.2 rounded-full text-xs bg-warning-tint text-warning font-bold">
               {unbatchedItems.length}
@@ -224,7 +226,7 @@ export const PayoutsView: React.FC = () => {
           }`}
         >
           <UserCheck className="w-4 h-4" />
-          Registered Payees
+          {t("owner.payouts.tabPayees")}
           {payees.length > 0 && (
             <span className="px-1.5 py-0.2 rounded-full text-xs bg-bg text-ink-muted">
               {payees.length}
@@ -241,20 +243,20 @@ export const PayoutsView: React.FC = () => {
             isError={isBatchesError}
             error={batchesError as Error | null}
             isEmpty={!isBatchesLoading && !isBatchesError && batches.length === 0}
-            loadingMessage="Loading payout batches..."
-            emptyMessage="No payout batches created yet. Generate one from pending items."
+            loadingMessage={t("owner.payouts.loadingBatches")}
+            emptyMessage={t("owner.payouts.emptyBatches")}
             onRetry={() => refetchBatches()}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline">
                   <tr>
-                    <th className="px-6 py-3.5">Batch Details</th>
-                    <th className="px-6 py-3.5">Count</th>
-                    <th className="px-6 py-3.5">Total Amount</th>
-                    <th className="px-6 py-3.5">Status</th>
-                    <th className="px-6 py-3.5">Created Date</th>
-                    <th className="px-6 py-3.5 text-right">Actions</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thBatchDetails")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thCount")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thTotalAmount")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thStatus")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thCreatedDate")}</th>
+                    <th className="px-6 py-3.5 text-right">{t("owner.payouts.thActions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-hairline text-ink">
@@ -298,7 +300,7 @@ export const PayoutsView: React.FC = () => {
                               onClick={() => setSelectedBatchForApproval(b)}
                               className="px-3 py-1.5 rounded-xl bg-accent text-white font-semibold text-xs hover:opacity-90 transition shadow-sm"
                             >
-                              Review & Approve
+                              {t("owner.payouts.reviewApprove")}
                             </button>
                           )}
 
@@ -309,7 +311,7 @@ export const PayoutsView: React.FC = () => {
                                 disabled={dispatchBatchMutation.isPending}
                                 className="px-3 py-1.5 rounded-xl bg-success text-white font-semibold text-xs hover:opacity-90 transition shadow-sm disabled:opacity-50"
                               >
-                                {dispatchBatchMutation.isPending ? "Dispatching..." : "Dispatch Transfer"}
+                                {dispatchBatchMutation.isPending ? t("owner.payouts.dispatching") : t("owner.payouts.dispatchTransfer")}
                               </button>
                               <button
                                 onClick={() => handleExportCSV(b)}
@@ -317,7 +319,7 @@ export const PayoutsView: React.FC = () => {
                                 className="px-3 py-1.5 rounded-xl border border-hairline text-ink hover:bg-bg font-medium text-xs inline-flex items-center gap-1.5 transition"
                               >
                                 <Download className="w-3.5 h-3.5" />
-                                {exportingBatchId === b.id ? "Exporting..." : "CSV"}
+                                {exportingBatchId === b.id ? t("owner.payouts.exporting") : "CSV"}
                               </button>
                             </>
                           )}
@@ -329,7 +331,7 @@ export const PayoutsView: React.FC = () => {
                               className="px-3 py-1.5 rounded-xl border border-hairline text-ink-muted hover:text-ink hover:bg-bg font-medium text-xs inline-flex items-center gap-1.5 transition"
                             >
                               <Download className="w-3.5 h-3.5" />
-                              Export
+                              {exportingBatchId === b.id ? t("owner.payouts.exporting") : t("owner.payouts.export")}
                             </button>
                           )}
                         </div>
@@ -351,10 +353,10 @@ export const PayoutsView: React.FC = () => {
               <Clock className="w-5 h-5 text-warning shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-warning">
-                  {unbatchedItems.length} pending items ready for batching
+                  {t("owner.payouts.pendingBanner", { count: unbatchedItems.length })}
                 </p>
                 <p className="text-xs text-ink-muted">
-                  Total disbursement volume: {formatPaise(unbatchedTotalPaise)}
+                  {t("owner.payouts.pendingVolume", { amount: formatPaise(unbatchedTotalPaise) })}
                 </p>
               </div>
             </div>
@@ -364,7 +366,7 @@ export const PayoutsView: React.FC = () => {
                 disabled={createBatchMutation.isPending}
                 className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 transition shadow-sm"
               >
-                Create Batch
+                {t("owner.payouts.createBatch")}
               </button>
             )}
           </div>
@@ -375,19 +377,19 @@ export const PayoutsView: React.FC = () => {
               isError={isUnbatchedError}
               error={unbatchedError as Error | null}
               isEmpty={!isUnbatchedLoading && !isUnbatchedError && unbatchedItems.length === 0}
-              loadingMessage="Loading pending payout items..."
-              emptyMessage="No pending payout items to batch."
+              loadingMessage={t("owner.payouts.loadingUnbatched")}
+              emptyMessage={t("owner.payouts.emptyUnbatched")}
               onRetry={() => refetchUnbatched()}
             >
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline">
                     <tr>
-                      <th className="px-6 py-3.5">Payee</th>
-                      <th className="px-6 py-3.5">Purpose / Label</th>
-                      <th className="px-6 py-3.5">Reference Number</th>
-                      <th className="px-6 py-3.5">Amount</th>
-                      <th className="px-6 py-3.5">Date Created</th>
+                      <th className="px-6 py-3.5">{t("owner.payouts.thPayee")}</th>
+                      <th className="px-6 py-3.5">{t("owner.payouts.thPurpose")}</th>
+                      <th className="px-6 py-3.5">{t("owner.payouts.thReference")}</th>
+                      <th className="px-6 py-3.5">{t("owner.payouts.thAmount")}</th>
+                      <th className="px-6 py-3.5">{t("owner.payouts.thDateCreated")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-hairline text-ink">
@@ -439,19 +441,19 @@ export const PayoutsView: React.FC = () => {
             isError={isPayeesError}
             error={payeesError as Error | null}
             isEmpty={!isPayeesLoading && !isPayeesError && payees.length === 0}
-            loadingMessage="Loading registered payees..."
-            emptyMessage="No payees registered yet. Add staff or vendor bank accounts."
+            loadingMessage={t("owner.payouts.loadingPayees")}
+            emptyMessage={t("owner.payouts.emptyPayees")}
             onRetry={() => refetchPayees()}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline">
                   <tr>
-                    <th className="px-6 py-3.5">Payee Name</th>
-                    <th className="px-6 py-3.5">Type</th>
-                    <th className="px-6 py-3.5">Payment Details</th>
-                    <th className="px-6 py-3.5">Verification</th>
-                    <th className="px-6 py-3.5 text-right">Actions</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thPayeeName")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thType")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thPaymentDetails")}</th>
+                    <th className="px-6 py-3.5">{t("owner.payouts.thVerification")}</th>
+                    <th className="px-6 py-3.5 text-right">{t("owner.payouts.thActions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-hairline text-ink">
@@ -476,19 +478,19 @@ export const PayoutsView: React.FC = () => {
                         ) : p.upi_vpa ? (
                           <div className="font-mono text-ink">UPI: {p.upi_vpa}</div>
                         ) : (
-                          "No payment info"
+                          t("owner.payouts.noPaymentInfo")
                         )}
                       </td>
                       <td className="px-6 py-4">
                         {p.is_verified ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success">
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            Verified
+                            {t("owner.payouts.verified")}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-tint text-warning">
                             <Clock className="w-3.5 h-3.5" />
-                            Pending Verification
+                            {t("owner.payouts.pendingVerification")}
                           </span>
                         )}
                       </td>
@@ -499,7 +501,7 @@ export const PayoutsView: React.FC = () => {
                             disabled={verifyPayeeMutation.isPending}
                             className="px-3 py-1.5 rounded-xl border border-hairline text-ink hover:bg-bg font-medium text-xs transition"
                           >
-                            Verify Payee
+                            {t("owner.payouts.verifyPayeeAction")}
                           </button>
                         )}
                       </td>
