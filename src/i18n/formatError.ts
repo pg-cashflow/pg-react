@@ -32,3 +32,30 @@ export function formatApiError(
 
   return t(fallbackKey);
 }
+
+/**
+ * Translates KYC failure reason codes (e.g. WRONG_OTP, MOBILE_NOT_LINKED)
+ * into localized user-friendly messages.
+ */
+export function formatKYCError(
+  err: unknown,
+  t: (key: MessageKey, values?: Record<string, any>) => string,
+  fallbackKey: MessageKey = "common.error"
+): string {
+  if (err instanceof ApiError && err.details) {
+    const reasonCode = (err.details as any).reason_code;
+    if (reasonCode && typeof reasonCode === "string") {
+      const reasonKey = `kyc.reason.${reasonCode}` as MessageKey;
+      try {
+        const msg = t(reasonKey);
+        if (msg && msg !== reasonKey) {
+          return msg;
+        }
+      } catch {
+        // fallback below
+      }
+    }
+  }
+  return formatApiError(err, t, fallbackKey);
+}
+

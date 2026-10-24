@@ -8,7 +8,8 @@ import type {
 export interface KYCConsentPayload {
   purpose: string;
   consent_version: string;
-  consent_text: string;
+  consent_text?: string;
+  locale?: string;
 }
 
 export interface AadhaarOTPRequestPayload {
@@ -20,14 +21,6 @@ export interface AadhaarOTPVerifyPayload {
   otp: string;
 }
 
-export interface DigiLockerInitiatePayload {
-  return_url?: string;
-}
-
-export interface DigiLockerInitiateResponse {
-  verification_url?: string;
-  verification_id?: string;
-}
 
 export interface RejectKYCPayload {
   reason: string;
@@ -61,22 +54,6 @@ export const verifyAadhaarOTP = (
     body: JSON.stringify({ ref_id: refId, otp }),
   });
 
-export const initiateDigiLockerKYC = (
-  returnUrl?: string
-): Promise<DigiLockerInitiateResponse> =>
-  apiFetch<DigiLockerInitiateResponse>("/tenant/kyc/initiate", {
-    method: "POST",
-    body: JSON.stringify(returnUrl ? { return_url: returnUrl } : {}),
-  });
-
-export const getTenantKYCReturn = (
-  vendorRefId?: string
-): Promise<KYCVerification> =>
-  apiFetch<KYCVerification>(
-    vendorRefId
-      ? `/tenant/kyc/return?vendor_ref_id=${encodeURIComponent(vendorRefId)}`
-      : "/tenant/kyc/return"
-  );
 
 export const uploadKYCDocument = (file: File): Promise<KYCVerification> => {
   const fd = new FormData();

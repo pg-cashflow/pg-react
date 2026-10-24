@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ShieldCheck,
@@ -20,9 +20,10 @@ import {
   uploadKYCDocument,
   revokeKYCConsent,
 } from "@/api/kyc";
+import { ApiError } from "@/api/client";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { formatDate } from "@/lib/utils";
-import { useLocale } from "@/i18n";
+import { useLocale, formatKYCError } from "@/i18n";
 
 export interface TenantKYCCardProps {
   isModal?: boolean;
@@ -37,7 +38,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   onSuccess,
   defaultTab = "otp",
 }) => {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"otp" | "upload">(defaultTab);
 
@@ -45,11 +46,21 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   const [aadhaarInput, setAadhaarInput] = useState("");
   const [otpRefId, setOtpRefId] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState("");
-  const [consentChecked, setConsentChecked] = useState(true);
+  const [consentChecked, setConsentChecked] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uiError, setUiError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setCooldownSeconds((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldownSeconds]);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: QUERY_KEYS.tenantKYCStatus,
@@ -72,8 +83,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       submitKYCConsent({
         purpose: "residency_verification_and_kyc",
         consent_version: "v1.0",
-        consent_text:
-          "I agree to my identity details being verified and stored for PG occupancy records in compliance with the DPDP Act.",
+        locale,
       }),
   });
 
@@ -88,9 +98,17 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     onSuccess: (res) => {
       setOtpRefId(res.ref_id);
       setSuccessMsg(t("kyc.card.otpSentSuccess"));
+      setCooldownSeconds(0);
+      setAttemptsRemaining(null);
     },
     onError: (err: unknown) => {
-      setUiError(err instanceof Error ? err.message : "Failed to send OTP");
+      if (err instanceof ApiError && err.details) {
+        const details = err.details as { cooldown_seconds?: number };
+        if (typeof details.cooldown_seconds === "number" && details.cooldown_seconds > 0) {
+          setCooldownSeconds(details.cooldown_seconds);
+        }
+      }
+      setUiError(formatKYCError(err, t, "kyc.card.unableToLoad"));
     },
   });
 
@@ -100,16 +118,39 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       setUiError(null);
       return verifyAadhaarOTP(otpRefId, otpCode.trim());
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
+      if (res && (res as any).status === "failed") {
+        setUiError(t("kyc.card.otpFailed") || "Verification failed");
+        return;
+      }
       setSuccessMsg(t("kyc.card.verifiedInstantSuccess"));
       setOtpRefId(null);
       setOtpCode("");
       setAadhaarInput("");
+      setCooldownSeconds(0);
+      setAttemptsRemaining(null);
       refreshKYC();
       onSuccess?.();
     },
     onError: (err: unknown) => {
-      setUiError(err instanceof Error ? err.message : "Invalid or expired OTP");
+      let remainingSuffix = "";
+      if (err instanceof ApiError && err.details) {
+        const details = err.details as {
+          reason_code?: string;
+          cooldown_seconds?: number;
+          attempts_remaining?: number;
+          retryable?: boolean;
+        };
+        if (typeof details.cooldown_seconds === "number" && details.cooldown_seconds > 0) {
+          setCooldownSeconds(details.cooldown_seconds);
+        }
+        if (typeof details.attempts_remaining === "number") {
+          setAttemptsRemaining(details.attempts_remaining);
+          remainingSuffix = ` (${details.attempts_remaining} attempts remaining)`;
+        }
+      }
+      const formatted = formatKYCError(err, t, "kyc.card.unableToLoad");
+      setUiError(`${formatted}${remainingSuffix}`);
     },
   });
 
@@ -409,9 +450,26 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     maxLength={6}
                     className="w-full h-11 px-3 rounded-[10px] border border-hairline bg-surface t-code text-center tracking-widest text-ink focus:outline-none focus:ring-1 focus:ring-accent"
                   />
+                  {cooldownSeconds > 0 && (
+                    <p className="t-caption text-warning font-medium">
+                      Cooldown active: please wait {cooldownSeconds}s before retrying.
+                    </p>
+                  )}
+                  {attemptsRemaining !== null && attemptsRemaining <= 1 && (
+                    <p className="t-caption text-danger font-medium">
+                      {attemptsRemaining === 0
+                        ? "No attempts remaining. Please use document upload."
+                        : "Warning: only 1 attempt remaining!"}
+                    </p>
+                  )}
                   <button
                     type="button"
-                    disabled={otpCode.length !== 6 || verifyOtpMutation.isPending}
+                    disabled={
+                      otpCode.length !== 6 ||
+                      verifyOtpMutation.isPending ||
+                      cooldownSeconds > 0 ||
+                      attemptsRemaining === 0
+                    }
                     onClick={() => verifyOtpMutation.mutate()}
                     className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
                   >
@@ -421,6 +479,16 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                       t("kyc.card.verifyConfirmBtn")
                     )}
                   </button>
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="button"
+                      disabled={cooldownSeconds > 0 || requestOtpMutation.isPending}
+                      onClick={() => requestOtpMutation.mutate(aadhaarInput)}
+                      className="t-caption text-ink-muted hover:text-accent disabled:opacity-50 transition"
+                    >
+                      {cooldownSeconds > 0 ? `Resend OTP (${cooldownSeconds}s)` : "Resend OTP"}
+                    </button>
+                  </div>
                 </div>
               )}
 

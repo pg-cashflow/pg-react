@@ -585,6 +585,28 @@ export const enIN = {
   "query.couldNotLoad": "Couldn’t load this page",
   "query.checkConnection": "Check your connection and try again.",
   "query.refetching": "Refetching…",
+
+  // KYC Error & Reason Codes
+  "error.kyc.aadhaar_verify_failed": "Aadhaar verification failed. Please try again.",
+  "error.kyc.no_consent": "DPDP consent is required before identity verification.",
+  "error.kyc.already_verified": "Your identity is already verified.",
+  "error.kyc.in_flight": "Verification is already in progress. Please wait.",
+  "error.kyc.consent_revoked": "Consent was revoked. Please grant consent to continue.",
+  "error.kyc.qr_invalid": "Invalid Aadhaar QR code signature.",
+  "error.kyc.qr_incomplete": "Incomplete data in Aadhaar QR code.",
+  "error.kyc.cashfree_unavailable": "Identity verification service is temporarily unavailable.",
+  "error.kyc.not_found": "Verification record not found.",
+  "error.kyc.not_pending": "Verification session is no longer pending.",
+  "kyc.reason.MOBILE_NOT_LINKED": "Mobile number is not linked to your Aadhaar card. Please upload ID document instead.",
+  "kyc.reason.OTP_EXPIRED": "Aadhaar OTP expired. Please request a new code.",
+  "kyc.reason.SESSION_EXPIRED": "Aadhaar session expired. Please enter Aadhaar number again.",
+  "kyc.reason.WRONG_OTP": "Incorrect OTP entered. Please check digits and try again.",
+  "kyc.reason.COOLDOWN_ACTIVE": "Too many requests. Please wait for cooldown before requesting another OTP.",
+  "kyc.reason.INVALID_AADHAAR": "Invalid Aadhaar number entered. Please check the 12 digits.",
+  "kyc.reason.PROVIDER_BALANCE": "Verification service provider issue. Please upload ID document instead.",
+  "kyc.reason.PROVIDER_ERROR": "UIDAI service temporarily unreachable. Please try later or upload document.",
+  "kyc.reason.UNKNOWN": "Verification failed. Please try again or upload ID document.",
+  "kyc.reason.INVALID_DOB_FORMAT": "Date of birth from Aadhaar could not be verified.",
 };
 
 export type MessageKey = keyof typeof enIN;

@@ -9,7 +9,6 @@ import {
   type ReactNode,
   type FC,
 } from "react";
-import { flushSync } from "react-dom";
 import type { SupportedTheme } from "@pg/types";
 import { updateMyPreferences } from "@/api/preferences";
 import { useAuth } from "@/auth/context";
@@ -70,6 +69,7 @@ function resolve(theme: Theme): ResolvedTheme {
 
 function applyToDocument(resolved: ResolvedTheme) {
   document.documentElement.classList.toggle("dark", resolved === "dark");
+  document.documentElement.setAttribute("data-theme", resolved);
   document.documentElement.style.colorScheme = resolved;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", resolved === "dark" ? "#15130F" : "#FAFAF7");
@@ -94,8 +94,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(readStoredTheme);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolve(theme));
 
-  const activeTransitionRef = useRef<ReturnType<Document["startViewTransition"]> | null>(null);
-  const fallbackTimerRef = useRef<number | null>(null);
   const pendingControllerRef = useRef<AbortController | null>(null);
   const requestSeqRef = useRef(0);
   const authUpdaterRef = useRef<((theme: Theme) => void) | null>(null);
@@ -106,75 +104,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (isAuth !== undefined) {
       isAuthenticatedRef.current = isAuth;
     }
-  }, []);
-
-  const applyWithSingleAnimation = useCallback((apply: () => void, origin?: ThemeChangeOrigin) => {
-    if (activeTransitionRef.current) {
-      try {
-        activeTransitionRef.current.skipTransition();
-      } catch {
-        // Ignored if settled
-      }
-      activeTransitionRef.current = null;
-    }
-    if (fallbackTimerRef.current !== null) {
-      window.clearTimeout(fallbackTimerRef.current);
-      document.documentElement.classList.remove(TRANSITION_CLASS);
-      fallbackTimerRef.current = null;
-    }
-
-    const supportsViewTransitions = typeof document.startViewTransition === "function";
-
-    if (!supportsViewTransitions || prefersReducedMotion()) {
-      document.documentElement.classList.add(TRANSITION_CLASS);
-      apply();
-      fallbackTimerRef.current = window.setTimeout(() => {
-        document.documentElement.classList.remove(TRANSITION_CLASS);
-        fallbackTimerRef.current = null;
-      }, TRANSITION_FALLBACK_MS);
-      return;
-    }
-
-    const transition = document.startViewTransition(() => {
-      flushSync(apply);
-    });
-    activeTransitionRef.current = transition;
-
-    // Viewport-center fallback coordinates when origin is not provided
-    const x = origin?.x ?? window.innerWidth / 2;
-    const y = origin?.y ?? window.innerHeight / 2;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
-
-    transition.ready
-      .then(() => {
-        document.documentElement.style.willChange = "clip-path";
-        document.documentElement.animate(
-          {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${endRadius}px at ${x}px ${y}px)`,
-            ],
-          },
-          {
-            duration: 360,
-            easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-            pseudoElement: "::view-transition-new(root)",
-          }
-        );
-      })
-      .catch(() => {});
-
-    transition.finished
-      .catch(() => {})
-      .finally(() => {
-        document.documentElement.style.willChange = "";
-        if (activeTransitionRef.current === transition) {
-          activeTransitionRef.current = null;
-        }
-      });
   }, []);
 
   const setTheme = useCallback(
@@ -188,14 +117,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       // Runtime callers can bypass TypeScript; reject invalid values before mutating state.
       if (!isTheme(t)) return false;
 
-      // Apply data-theme attribute immediately to initiate CSS repaint without waiting for React re-render.
       const resolved = resolve(t);
-      document.documentElement.setAttribute("data-theme", resolved);
-
-      applyWithSingleAnimation(() => {
-        writeStoredTheme(t);
-        setThemeState(t);
-      }, opts?.origin);
+      applyToDocument(resolved);
+      writeStoredTheme(t);
+      setThemeState(t);
+      setResolvedTheme(resolved);
 
       const hasAuth =
         authUpdaterRef.current === null ||
@@ -245,7 +171,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [applyWithSingleAnimation]
+    []
   );
 
   const cycleTheme = useCallback(

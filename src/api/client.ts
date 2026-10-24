@@ -5,11 +5,13 @@ import { getAccessToken, setAccessToken } from "@/auth/tokenStore";
 export class ApiError extends Error {
   status: number;
   code?: string;
+  details?: Record<string, unknown>;
 
-  constructor(status: number, message: string, code?: string) {
+  constructor(status: number, message: string, code?: string, details?: Record<string, unknown>) {
     super(message);
     this.status = status;
     this.code = code;
+    this.details = details;
     this.name = "ApiError";
   }
 }
@@ -127,11 +129,15 @@ async function handleResponse<T>(
   if (!res.ok) {
     let errorMsg = "An error occurred";
     let errorCode: string | undefined;
+    let details: Record<string, unknown> | undefined;
     try {
       const data = await res.json();
       errorMsg = data.message || data.error || JSON.stringify(data);
       if (typeof data.code === "string") {
         errorCode = data.code;
+      }
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        details = data as Record<string, unknown>;
       }
     } catch {
       errorMsg = await res.text();
@@ -148,7 +154,7 @@ async function handleResponse<T>(
     if (res.status === 403 && (errorCode === "join.profileRequired" || /complete your profile to continue/i.test(mapped))) {
       window.dispatchEvent(new CustomEvent("pg:waiting-join"));
     }
-    throw new ApiError(res.status, mapped, errorCode);
+    throw new ApiError(res.status, mapped, errorCode, details);
   }
 
   if (res.status === 204) {
