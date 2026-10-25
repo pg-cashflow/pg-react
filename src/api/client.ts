@@ -33,9 +33,16 @@ export function stopProactiveRefresh(): void {
   }
 }
 
+let lastRefreshError: Error | null = null;
+
+export function getLastRefreshError(): Error | null {
+  return lastRefreshError;
+}
+
 export async function executeRefresh(failedToken: string | null): Promise<string | null> {
   const currentToken = getAccessToken();
   if (currentToken && currentToken !== failedToken) {
+    lastRefreshError = null;
     return currentToken;
   }
 
@@ -49,6 +56,17 @@ export async function executeRefresh(failedToken: string | null): Promise<string
     });
 
     if (!res.ok) {
+      let errorMsg = "Session expired or unauthorized";
+      let errorCode: string | undefined;
+      try {
+        const body = await res.json();
+        errorMsg = body.message || body.error || errorMsg;
+        if (typeof body.code === "string") errorCode = body.code;
+      } catch {
+        // ignore non-json errors
+      }
+      lastRefreshError = new ApiError(res.status, errorMsg, errorCode);
+
       if (res.status === 401 || res.status === 403) {
         const hadPriorSession = Boolean(currentToken || getStoredUser());
         setAccessToken(null);
@@ -70,11 +88,13 @@ export async function executeRefresh(failedToken: string | null): Promise<string
         setStoredUser(data.user);
       }
       scheduleProactiveRefresh();
+      lastRefreshError = null;
       return data.token;
     }
+    lastRefreshError = new ApiError(500, "Invalid token response from server");
     return null;
-  } catch {
-    // network or other transient failure: keep token and retry later
+  } catch (err) {
+    lastRefreshError = err instanceof Error ? err : new Error(String(err));
     return null;
   }
 }

@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -29,3 +30,17 @@ assertFirebaseConfig();
 
 export const firebaseApp = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
 export const firebaseAuth = getAuth(firebaseApp);
+
+// Initialize Firebase App Check if site key is configured
+const appCheckKey = import.meta.env.VITE_FIREBASE_APPCHECK_KEY;
+if (typeof window !== "undefined" && appCheckKey) {
+  try {
+    initializeAppCheck(firebaseApp, {
+      provider: new ReCaptchaEnterpriseProvider(appCheckKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (err) {
+    console.warn("Firebase App Check initialization error:", err);
+  }
+}
+

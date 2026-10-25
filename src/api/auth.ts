@@ -1,4 +1,6 @@
-import { apiFetch } from "./client";
+import { apiFetch, requestTokenRefresh, getLastRefreshError, ApiError } from "./client";
+import { getStoredUser } from "@/auth/storage";
+import { getAccessToken } from "@/auth/tokenStore";
 import type { LoginResponse } from "@pg/types";
 
 export const exchangeFirebaseToken = (
@@ -14,10 +16,18 @@ export const exchangeFirebaseToken = (
   });
 };
 
-export const refreshSession = (): Promise<LoginResponse> => {
-  return apiFetch<LoginResponse>("/auth/refresh", {
-    method: "POST",
-  });
+export const refreshSession = async (): Promise<LoginResponse> => {
+  const token = await requestTokenRefresh(getAccessToken());
+  if (!token) {
+    const err = getLastRefreshError();
+    if (err) throw err;
+    throw new ApiError(401, "Session expired or unauthorized");
+  }
+  const user = getStoredUser();
+  if (!user) {
+    throw new ApiError(401, "User profile not available");
+  }
+  return { token, user };
 };
 
 export const logoutSession = (): Promise<{ ok: boolean }> => {

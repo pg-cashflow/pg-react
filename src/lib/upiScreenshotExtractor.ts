@@ -10,13 +10,13 @@ export async function extractUtrFromScreenshot(file: File): Promise<string | nul
   };
 
   try {
-    // 1. Load Tesseract.js dynamically if not already present
+    // 1. Load Tesseract.js dynamically from self-hosted origin if not already present
     if (!win.Tesseract) {
       await new Promise<void>((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+        script.src = "/vendor/tesseract/tesseract.min.js";
         script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Could not load OCR engine."));
+        script.onerror = () => reject(new Error("Local OCR engine bundle unavailable"));
         document.head.appendChild(script);
       });
     }

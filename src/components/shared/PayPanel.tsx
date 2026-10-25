@@ -21,6 +21,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
 
   const { state: gatewayState, error: gatewayError, startPayment, checkAgain } = usePayDue(dueId, {
     onPaid: () => onDone?.(),
+    paymentMode: pay?.mode === "manual" ? "manual" : "cashfree",
   });
 
   useEffect(() => {
@@ -334,6 +335,16 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
       ) : (
         /* Manual Mode (QR / UPI Intent / Fallback) */
         <div className="space-y-4">
+          {pay.upi_link && (
+            <a
+              href={pay.upi_link}
+              className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold flex items-center justify-center gap-2 hover:bg-accent/90 transition shadow-sm"
+            >
+              <ExternalLink className="w-4 h-4" />
+              {t("paypanel.openUPIApp")} ({formatPaise(pay.amount_paise)})
+            </a>
+          )}
+
           {qrUrl && (
             <div className="bg-surface border border-hairline p-4 rounded-[14px] text-center space-y-3">
               <img src={qrUrl} alt="UPI QR" className="w-44 h-44 mx-auto bg-white rounded-[10px] p-2" />
@@ -351,11 +362,6 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                 <a href={qrUrl} download={`rent-${pay.due_code}.png`} className="px-3 py-1.5 rounded-[10px] border border-hairline t-caption">
                   <Download className="w-3.5 h-3.5 inline" /> {t("paypanel.downloadQR")}
                 </a>
-                {pay.upi_link && (
-                  <a href={pay.upi_link} className="px-3 py-1.5 rounded-[10px] bg-accent text-white t-caption font-semibold">
-                    {t("paypanel.openUPIApp")} <ExternalLink className="w-3.5 h-3.5 inline" />
-                  </a>
-                )}
               </div>
             </div>
           )}

@@ -19,6 +19,7 @@ export type PayDueState =
 interface UsePayDueOptions {
   onPaid?: () => void;
   onRedirect?: () => void;
+  paymentMode?: "cashfree" | "manual";
 }
 
 export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
@@ -28,8 +29,10 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    preloadCashfreeSdk().catch(() => {});
-  }, []);
+    if (options.paymentMode !== "manual") {
+      preloadCashfreeSdk().catch(() => {});
+    }
+  }, [options.paymentMode]);
 
   const optionsRef = useRef<UsePayDueOptions>(options);
   optionsRef.current = options;

@@ -517,8 +517,9 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     {t("kyc.card.aadhaarLabel")}
                   </label>
                   <input
-                    type="text"
+                    type="tel"
                     inputMode="numeric"
+                    autoComplete="off"
                     value={aadhaarInput}
                     onChange={handleAadhaarChange}
                     placeholder="XXXX XXXX XXXX"
@@ -557,8 +558,10 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     </button>
                   </div>
                   <input
-                    type="text"
+                    type="tel"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]*"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder={t("kyc.card.otpInputPlaceholder")}

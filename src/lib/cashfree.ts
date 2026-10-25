@@ -101,8 +101,8 @@ function loadSdk(): Promise<void> {
   return sdkPromise;
 }
 
-function getCashfreeInstance(): CashfreeInstance {
-  const mode = CASHFREE_ENV === "production" ? "production" : "sandbox";
+export function getCashfreeInstance(runtimeMode?: "production" | "sandbox"): CashfreeInstance {
+  const mode = (runtimeMode || CASHFREE_ENV) === "production" ? "production" : "sandbox";
   if (cachedCashfreeInstance && cachedCashfreeMode === mode) {
     return cachedCashfreeInstance;
   }
@@ -120,11 +120,14 @@ function getCashfreeInstance(): CashfreeInstance {
  * 2. redirect       -> redirected (fallback for restrictive WebViews)
  * 3. error          -> error / user closed popup (check ledger before dismiss)
  */
-export async function startCashfreeCheckout(paymentSessionId: string): Promise<CashfreeCheckoutResult> {
+export async function startCashfreeCheckout(
+  paymentSessionId: string,
+  runtimeMode?: "production" | "sandbox"
+): Promise<CashfreeCheckoutResult> {
   if (!paymentSessionId) throw new Error("Missing payment session");
   await loadSdk();
 
-  const cashfree = getCashfreeInstance();
+  const cashfree = getCashfreeInstance(runtimeMode);
   const res = await cashfree.checkout({ paymentSessionId, redirectTarget: "_modal" });
 
   if (res?.paymentDetails) {

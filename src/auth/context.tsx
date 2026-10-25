@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import type { User, UserRole, AuthTokenPayload } from "@pg/types";
-import { getStoredUser, setStoredUser, getInviteCode, isPendingLogout, setPendingLogout, getSessionHint, setSessionHint } from "./storage";
+import { getStoredUser, setStoredUser, getInviteCode, setInviteCode, isPendingLogout, setPendingLogout, getSessionHint, setSessionHint } from "./storage";
 import { getAccessToken, setAccessToken, onAccessTokenChange } from "./tokenStore";
 import { exchangeFirebaseToken, refreshSession, logoutSession } from "@/api/auth";
 import { scheduleProactiveRefresh, stopProactiveRefresh, ApiError } from "@/api/client";
@@ -27,7 +27,7 @@ interface AuthContextType {
   applySession: (rawToken: string, sessionUser: User, payload?: AuthTokenPayload) => void;
   sendPhoneOtp: (phone: string) => Promise<void>;
   confirmPhoneOtp: (otp: string) => Promise<void>;
-  loginWithGoogle: () => Promise<"ok" | "needs-phone">;
+  loginWithGoogle: () => Promise<void>;
   reExchangeFirebase: () => Promise<void>;
   updateUser: (patch: Partial<User>) => void;
   logout: () => void;
@@ -105,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setJustActivated(false);
     setSessionStatus("anon");
     setSessionHint(null);
+    setInviteCode("");
 
     if (callServerLogout) {
       setPendingLogout(true);
@@ -194,11 +195,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err: unknown) {
       // Differentiate transient errors from terminal auth errors
+      const hasPriorSession = Boolean(stored || hint?.hasSession);
       if (err instanceof ApiError) {
         if (err.status === 429 || err.status >= 500) {
           // Transient failure (rate limit or server unavailable).
           // Retain degraded session from stored hints and retry with backoff.
-          if (stored) {
+          if (hasPriorSession) {
             setSessionStatus("degraded");
             setIsLoading(false);
             clearRetryTimer();
@@ -210,7 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else if (err instanceof TypeError && /failed to fetch|networkerror|load failed/i.test(err.message)) {
         // Network offline: retain session without revoking
-        if (stored) {
+        if (hasPriorSession) {
           setSessionStatus("degraded");
           setIsLoading(false);
           return;
@@ -235,7 +237,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleOnline = () => {
       if (isPendingLogout()) {
         logoutSession().then(() => setPendingLogout(false)).catch(() => {});
-      } else {
+      } else if (sessionStatus !== "online" || !getAccessToken()) {
         void evaluateStored();
       }
     };
@@ -247,7 +249,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.removeEventListener("online", handleOnline);
       clearRetryTimer();
     };
-  }, [evaluateStored, clearLocalSession, clearRetryTimer]);
+  }, [evaluateStored, clearLocalSession, clearRetryTimer, sessionStatus]);
 
   useEffect(() => {
     return onAccessTokenChange((t) => {
@@ -280,12 +282,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await completeWithIdToken(idToken);
   }, [completeWithIdToken]);
 
-  const handleGoogleLogin = useCallback(async (): Promise<"ok" | "needs-phone"> => {
+  const handleGoogleLogin = useCallback(async (): Promise<void> => {
     const { signInWithGoogle } = await import("@/auth/firebaseGoogle");
-    const result = await signInWithGoogle();
-    if (result.needsPhone) return "needs-phone";
-    await completeWithIdToken(result.idToken);
-    return "ok";
+    const idToken = await signInWithGoogle();
+    await completeWithIdToken(idToken);
   }, [completeWithIdToken]);
 
   const reExchangeFirebase = useCallback(async () => {

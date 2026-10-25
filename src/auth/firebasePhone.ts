@@ -24,15 +24,30 @@ function mapFirebaseAuthError(code: string): string {
     case "auth/captcha-check-failed":
       return "Security verification failed. Refresh and try again.";
     case "auth/invalid-app-credential":
-      return "Phone verification failed. Open http://127.0.0.1:5173 (not localhost) and confirm Phone Auth plus 127.0.0.1 in Firebase Authorized domains.";
+      if (import.meta.env.DEV) {
+        console.warn("Dev hint: Open http://127.0.0.1:5173 (not localhost) and confirm Phone Auth plus 127.0.0.1 in Firebase Authorized domains.");
+      }
+      return "Phone verification could not be initialized. Please refresh and try again.";
     case "auth/operation-not-allowed":
-      return "Phone sign-in is not enabled for this Firebase project.";
+      if (import.meta.env.DEV) {
+        console.warn("Dev hint: Phone sign-in is not enabled for this Firebase project.");
+      }
+      return "Phone sign-in is temporarily unavailable. Please try again later.";
     case "auth/quota-exceeded":
-      return "SMS quota exceeded. Try again later or use a Firebase test phone number.";
+      if (import.meta.env.DEV) {
+        console.warn("Dev hint: SMS quota exceeded. Use a Firebase test phone number on Spark plan.");
+      }
+      return "SMS verification limit reached. Please try again later.";
     case "auth/billing-not-enabled":
-      return "Real SMS requires a Blaze billing plan. Use a Firebase test phone number on Spark.";
+      if (import.meta.env.DEV) {
+        console.warn("Dev hint: Real SMS requires a Blaze billing plan. Use a Firebase test phone number on Spark.");
+      }
+      return "SMS verification is temporarily unavailable. Please try again later.";
     case "auth/network-request-failed":
-      return "Network error connecting to Firebase. Check your internet connection, disable ad-blockers/shields (which block reCAPTCHA/Google Identity Toolkit), and confirm 127.0.0.1 and localhost are added to Firebase Console Authorized Domains.";
+      if (import.meta.env.DEV) {
+        console.warn("Dev hint: Network error connecting to Firebase. Check authorized domains and network shields.");
+      }
+      return "Network error connecting to verification service. Please check your internet connection and try again.";
     case "auth/missing-phone-number":
       return "Phone number is required.";
     case "auth/popup-closed-by-user":
