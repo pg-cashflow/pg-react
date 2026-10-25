@@ -104,7 +104,7 @@ pg-react/
 │   │   ├── context.tsx               # AuthProvider, useAuth hook, token claims parser & session lifecycle
 │   │   ├── firebaseGoogle.ts         # Google Sign-In popup with phone credential verification
 │   │   ├── firebasePhone.ts          # Phone OTP verification with invisible reCAPTCHA
-│   │   └── storage.ts                # LocalStorage abstraction (pg_jwt, pg_user, pg_invite, pg_locale, pg_theme)
+│   │   └── storage.ts                # Storage abstraction (in-memory tokenStore, sessionStorage user, pg_has_session, pg_locale, pg_theme)
 │   ├── components/
 │   │   ├── common/                   # Shared UI primitives
 │   │   │   ├── LanguageSelector.tsx  # Language toggle button & segmented picker
@@ -242,7 +242,7 @@ pg-react/
       │◀── 4. Set HttpOnly Cookie: pg_refresh_token (30d, SameSite=Strict) ─│
       │◀── 5. Return 15-Minute Access Token + User Record ──────────────────│
       │                                                                     │
-      │── 6. Store access token in localStorage (pg_jwt, pg_user)           │
+      │── 6. Store access token in memory (tokenStore); user in sessionStorage
       │── 7. Decode JWT claims: sub, user_id, role, tenant_id, property_id  │
       │── 8. TanStack Router Guard routes to role home surface              │
 ```
@@ -257,9 +257,10 @@ pg-react/
    - The Go backend verifies cryptographic signatures with Firebase Admin, provisions or updates the user record, associates invite codes if provided, and issues:
      - **Short-Lived Access Token:** 15-minute TTL JWT with unique `jti` for API authorization.
      - **Refresh Token (HttpOnly Cookie):** 30-day TTL cryptographically hashed (`SHA-256`) refresh token bound to a `family_id` set via `Set-Cookie: pg_refresh_token=...; Path=/api/auth; HttpOnly; SameSite=Strict; [Secure]`.
-3. **Session Persistence (`src/auth/storage.ts`):**
-   - Access token is stored under `pg_jwt`.
-   - Serialized `User` object is stored under `pg_user`.
+3. **Session Persistence (`src/auth/storage.ts` & `src/auth/tokenStore.ts`):**
+   - Access token is held strictly in-memory (`tokenStore.ts`) to mitigate XSS persistence.
+   - Serialized `User` object is stored in `sessionStorage` (`pg_user`), cleared upon closing the session.
+   - A minimal session hint flag is kept in `localStorage` (`pg_has_session`) to coordinate refresh on cold boots without exposing PII.
    - Pending property invite code is cached under `pg_invite`.
    - Active language code is cached under `pg_locale`.
    - User theme preference (`system` | `light` | `dark`) is stored under `pg_theme`.

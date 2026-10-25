@@ -25,8 +25,8 @@ This section defines the physical boundaries of `pg-react`. We analyze the syste
 |               |                            |                          |           |
 |               |                            v                          v           |
 |               |              +--------------------------+  +-------------------+  |
-|               |              |   Browser Secure Store   |  |  TanStack Query   |  |
-|               |              |  (pg_jwt, pg_user)       |  |  Cache & Sockets  |  |
+|               |              |  Browser Session/Memory  |  |  TanStack Query   |  |
+|               |              |  (tokenStore, pg_user)   |  |  Cache & Sockets  |  |
 |               |              +--------------------------+  +-------------------+  |
 |               |                            |                          |           |
 |               +----------------------------+--------------------------+           |
@@ -54,10 +54,10 @@ This section defines the physical boundaries of `pg-react`. We analyze the syste
 - The frontend uses Firebase Client SDK v12 for Phone OTP and Google Sign-In.
 - The phone verification process requires the browser Document Object Model (DOM) to initialize invisible reCAPTCHA (`#recaptcha-container`).
 - The backend exchanges the Firebase token for an application JSON Web Token (JWT).
-- The browser stores the JWT in `localStorage` under the key `pg_jwt`.
+- The browser stores the JWT in-memory (`tokenStore.ts`) and sets an `HttpOnly` refresh cookie.
 - The client injects the token into HTTP request headers (`Authorization: Bearer <jwt>`).
 - The server maintains zero session state in memory. 
-- A server runtime cannot read the client `localStorage` during initial network connection.
+- A server runtime cannot read client storage during initial network connection.
 
 ### Physical Constraint 2: Payment and Verification Hardware Dependencies
 - Manual UPI payments generate dynamic Quick Response (QR) codes in HTML canvas elements via `qrcode`.
