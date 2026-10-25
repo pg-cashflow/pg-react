@@ -11,5 +11,7 @@
     document.documentElement.style.colorScheme = resolved;
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', isDark ? '#15130F' : '#FAFAF7');
+    var fonts = document.getElementById('pg-fonts');
+    if (fonts) fonts.rel = 'stylesheet';
   } catch (e) {}
 })();

@@ -20,6 +20,7 @@ interface UsePayDueOptions {
   onPaid?: () => void;
   onRedirect?: () => void;
   paymentMode?: "cashfree" | "manual";
+  environment?: "production" | "sandbox";
 }
 
 export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
@@ -29,7 +30,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (options.paymentMode !== "manual") {
+    if (options.paymentMode === "cashfree") {
       preloadCashfreeSdk().catch(() => {});
     }
   }, [options.paymentMode]);
@@ -179,7 +180,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       }
 
       setState("CHECKOUT_OPEN");
-      const result = await startCashfreeCheckout(p.payment_session_id);
+      const result = await startCashfreeCheckout(p.payment_session_id, optionsRef.current.environment);
 
       // Precedence order per ADR-017 & Cashfree docs:
       if (result.kind === "completed") {

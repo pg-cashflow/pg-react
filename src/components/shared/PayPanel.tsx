@@ -21,7 +21,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
 
   const { state: gatewayState, error: gatewayError, startPayment, checkAgain } = usePayDue(dueId, {
     onPaid: () => onDone?.(),
-    paymentMode: pay?.mode === "manual" ? "manual" : "cashfree",
+    paymentMode: pay ? (pay.mode === "manual" ? "manual" : "cashfree") : undefined,
   });
 
   useEffect(() => {

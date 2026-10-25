@@ -75,6 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>(() =>
     initialStored ? "degraded" : "anon"
   );
+  const sessionStatusRef = useRef<SessionStatus>(sessionStatus);
+  sessionStatusRef.current = sessionStatus;
   const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearRetryTimer = useCallback(() => {
@@ -237,7 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleOnline = () => {
       if (isPendingLogout()) {
         logoutSession().then(() => setPendingLogout(false)).catch(() => {});
-      } else if (sessionStatus !== "online" || !getAccessToken()) {
+      } else if (sessionStatusRef.current !== "online" || !getAccessToken()) {
         void evaluateStored();
       }
     };
@@ -249,7 +251,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.removeEventListener("online", handleOnline);
       clearRetryTimer();
     };
-  }, [evaluateStored, clearLocalSession, clearRetryTimer, sessionStatus]);
+  }, [evaluateStored, clearLocalSession, clearRetryTimer]);
 
   useEffect(() => {
     return onAccessTokenChange((t) => {

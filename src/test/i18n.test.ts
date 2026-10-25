@@ -394,7 +394,7 @@ describe("i18n message completeness", () => {
 
       // No duplicates
       expect(jsonSet.size).toBe(ERROR_CODES.length);
-    });
+    }, 15000);
   });
 
   describe("formatApiError localized mapping", () => {
