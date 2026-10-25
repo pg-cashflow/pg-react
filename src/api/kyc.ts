@@ -54,6 +54,14 @@ export const verifyAadhaarOTP = (
     body: JSON.stringify({ ref_id: refId, otp }),
   });
 
+export const verifySecureQR = (
+  qrPayload: string
+): Promise<KYCVerification> =>
+  apiFetch<KYCVerification>("/tenant/kyc/qr/verify", {
+    method: "POST",
+    body: JSON.stringify({ qr_payload: qrPayload }),
+  });
+
 
 export const uploadKYCDocument = (file: File): Promise<KYCVerification> => {
   const fd = new FormData();

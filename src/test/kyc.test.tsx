@@ -143,6 +143,26 @@ describe("TenantKYCCard", () => {
     expect(container?.textContent).toContain("Instant Automatic UIDAI Verification");
     expect(container?.textContent).toContain("Aadhaar OTP not working? Upload your ID document instead");
   });
+
+  it("renders Secure QR tab when defaultTab is qr", async () => {
+    vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
+      verification: null,
+      consent_active: false,
+    });
+
+    await act(async () => {
+      root?.render(
+        <QueryClientProvider client={queryClient}>
+          <TenantKYCCard defaultTab="qr" />
+        </QueryClientProvider>
+      );
+    });
+    await flushQueries();
+
+    expect(container?.textContent).toContain("Verify via Secure QR");
+    expect(container?.textContent).toContain("Instant Offline QR Verification");
+    expect(container?.textContent).toContain("Verify Aadhaar QR");
+  });
 });
 
 describe("OwnerKYCView", () => {
