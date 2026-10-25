@@ -22,8 +22,6 @@ export type ResolvedTheme = "light" | "dark";
 const STORAGE_KEY = "pg_theme";
 const PENDING_KEY = "pg_theme_pending";
 const ORDER: Theme[] = ["system", "light", "dark"];
-const TRANSITION_CLASS = "theme-transition";
-const TRANSITION_FALLBACK_MS = 220;
 
 function readStoredTheme(): Theme {
   try {
@@ -53,10 +51,6 @@ function removeStoredTheme(key: string): void {
 
 function isTheme(value: unknown): value is Theme {
   return value === "system" || value === "light" || value === "dark";
-}
-
-function prefersReducedMotion(): boolean {
-  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function getSystemTheme(): ResolvedTheme {

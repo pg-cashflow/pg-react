@@ -51,7 +51,7 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
       <div className="bg-surface border border-border rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-primary" />
+            <Calculator className="w-5 h-5 text-accent" />
             <h3 className="font-semibold text-text text-base">
               Monthly Payroll Calculation — {cycleMonth}
             </h3>
@@ -113,7 +113,7 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
                 </div>
                 <div>
                   <div className="text-xs text-text-muted">Total Deductions</div>
-                  <div className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                  <div className="text-lg font-bold text-warning mt-0.5">
                     {formatPaise(totalDeductionsPaise)}
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
               type="button"
               disabled={finalizeMutation.isPending}
               onClick={handleFinalize}
-              className="px-4 py-2 text-sm font-medium bg-primary text-primary-text rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
               {finalizeMutation.isPending ? (
                 <>

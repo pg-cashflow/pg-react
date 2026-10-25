@@ -100,7 +100,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
       <div className="bg-surface border border-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-primary" />
+            <UserPlus className="w-5 h-5 text-accent" />
             <h3 className="font-semibold text-text text-base">Add Staff Member</h3>
           </div>
           <button
@@ -219,7 +219,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
             {isPayeesLoading ? (
               <div className="text-xs text-text-muted py-2">Loading payees...</div>
             ) : payees.length === 0 ? (
-              <div className="p-3 text-xs text-amber-700 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300 rounded-xl border border-amber-200 dark:border-amber-900/50">
+              <div className="p-3 text-xs text-warning bg-warning-tint rounded-xl border border-warning/20">
                 No payees registered. Please register a payee under Money Out &gt; Payees first.
               </div>
             ) : (
@@ -227,7 +227,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
                 value={payeeId}
                 onChange={(e) => setPayeeId(e.target.value)}
                 required
-                className="w-full px-3 py-2 text-sm bg-surface-elevated border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm bg-surface-elevated border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
               >
                 <option value="">Select a payee...</option>
                 {payees.map((p) => (
@@ -251,7 +251,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
             <button
               type="submit"
               disabled={createStaffMutation.isPending || payees.length === 0}
-              className="px-4 py-2 text-sm font-medium bg-primary text-primary-text rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
               {createStaffMutation.isPending && (
                 <Loader2 className="w-4 h-4 animate-spin" />

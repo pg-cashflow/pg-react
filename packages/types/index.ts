@@ -403,7 +403,11 @@ export interface OwnerKYCVerificationView extends KYCVerification {
 
 export interface KYCStatusResponse {
   verification: KYCVerification | null;
-  consent_active: boolean;
+  consent_active?: boolean;
+  has_consent: boolean;
+  has_verification?: boolean;
+  consent_version?: string;
+  consent_given_at?: string;
 }
 
 export interface Event {

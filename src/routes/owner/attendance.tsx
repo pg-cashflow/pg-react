@@ -138,8 +138,8 @@ export const AttendanceView: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-text tracking-tight flex items-center gap-2">
-            <Users className="w-6 h-6 text-primary" />
+          <h1 className="t-h2 font-bold text-text tracking-tight flex items-center gap-2">
+            <Users className="w-6 h-6 text-accent" />
             Staff Attendance & Wages
           </h1>
           <p className="text-sm text-text-muted mt-1">
@@ -171,14 +171,14 @@ export const AttendanceView: React.FC = () => {
             onClick={() => setIsCreateStaffOpen(true)}
             className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-surface-elevated hover:bg-surface border border-border rounded-xl text-text flex items-center gap-1.5 transition-colors"
           >
-            <Plus className="w-4 h-4 text-primary" />
+            <Plus className="w-4 h-4 text-accent" />
             <span>Add Staff</span>
           </button>
 
           <button
             onClick={() => setIsMarkAttendanceOpen(true)}
             disabled={activeStaffList.length === 0}
-            className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-primary text-primary-text rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
+            className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
           >
             <CalendarCheck2 className="w-4 h-4" />
             <span>Mark Attendance</span>
@@ -200,11 +200,11 @@ export const AttendanceView: React.FC = () => {
         <div className="p-4 bg-surface border border-border rounded-2xl shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-text-muted">Active Staff</span>
-            <span className="p-2 bg-primary/10 text-primary rounded-xl">
+            <span className="p-2 bg-accent-tint text-accent rounded-xl">
               <Users className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-bold text-text mt-2">
+          <div className="t-display-num font-bold text-text mt-2">
             {activeStaffList.length}
           </div>
           <div className="text-xs text-text-muted mt-1">
@@ -219,7 +219,7 @@ export const AttendanceView: React.FC = () => {
               <Calculator className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-bold text-text mt-2">
+          <div className="t-display-num font-bold text-text mt-2">
             {formatPaise(totalNetWagePaise)}
           </div>
           <div className="text-xs text-text-muted mt-1">
@@ -241,7 +241,7 @@ export const AttendanceView: React.FC = () => {
           </div>
           <button
             onClick={() => navigate({ to: "/owner/payouts" })}
-            className="mt-2 text-xs font-medium text-primary hover:underline flex items-center gap-1"
+            className="mt-2 text-xs font-medium text-accent hover:underline flex items-center gap-1"
           >
             <span>Open Money Out Queue</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -301,7 +301,7 @@ export const AttendanceView: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setIsCreateStaffOpen(true)}
-                  className="px-4 py-2 text-sm font-medium bg-primary text-primary-text rounded-xl hover:opacity-90 transition-opacity"
+                  className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity"
                 >
                   Add First Staff Member
                 </button>
@@ -349,7 +349,7 @@ export const AttendanceView: React.FC = () => {
                                     {payee.is_verified ? (
                                       <span className="text-emerald-600 dark:text-emerald-400 ml-1">✓ Verified</span>
                                     ) : (
-                                      <span className="text-amber-600 ml-1">⚠ Unverified</span>
+                                      <span className="text-warning ml-1">⚠ Unverified</span>
                                     )}
                                   </div>
                                 </div>
@@ -470,7 +470,7 @@ export const AttendanceView: React.FC = () => {
                               cellClass = "text-rose-600 dark:text-rose-400 font-bold bg-rose-500/10 rounded";
                             } else if (status === "half_day") {
                               content = "½";
-                              cellClass = "text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 rounded";
+                              cellClass = "text-warning font-bold bg-warning-tint rounded";
                             } else if (status === "paid_leave") {
                               content = "L";
                               cellClass = "text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10 rounded";

@@ -7,6 +7,7 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate, formatMatchedBy } from "@/lib/utils";
 import { Search, CheckCircle2 } from "lucide-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 export const PaymentsView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
@@ -33,6 +34,19 @@ export const PaymentsView: React.FC = () => {
     );
   });
 
+  const parentRef = React.useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filteredPayments.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 57,
+    overscan: 5,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0)
+    : 0;
+
   return (
     <div className="space-y-6">
       <div className="relative flex-1 max-w-md">
@@ -56,9 +70,9 @@ export const PaymentsView: React.FC = () => {
           emptyMessage="No payments recorded"
           onRetry={() => refetch()}
         >
-          <div className="overflow-x-auto">
+          <div ref={parentRef} className="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline">
+              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3.5">Tenant</th>
                   <th className="px-6 py-3.5">Amount</th>
@@ -69,25 +83,44 @@ export const PaymentsView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
-                {filteredPayments.map((p) => (
-                  <tr key={p.id} className="hover:bg-accent-tint transition">
-                    <td className="px-6 py-4 font-medium flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      {tenantMap.get(p.tenant_id) || "Tenant"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <AmountBadge amount={p.amount} variant="success" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs uppercase bg-surface text-ink border border-hairline">
-                        {formatMatchedBy(p.matched_by)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs text-ink-muted">{p.upi_txn_id || "—"}</td>
-                    <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(p.matched_at)}</td>
-                    <td className="px-6 py-4 text-xs text-ink-muted">{p.raw_note || "—"}</td>
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingTop}px` }} colSpan={6} />
                   </tr>
-                ))}
+                )}
+                {virtualItems.map((virtualRow) => {
+                  const p = filteredPayments[virtualRow.index];
+                  if (!p) return null;
+                  return (
+                    <tr
+                      key={p.id}
+                      ref={rowVirtualizer.measureElement}
+                      data-index={virtualRow.index}
+                      className="hover:bg-accent-tint transition"
+                    >
+                      <td className="px-6 py-4 font-medium flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        {tenantMap.get(p.tenant_id) || "Tenant"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <AmountBadge amount={p.amount} variant="success" />
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs uppercase bg-surface text-ink border border-hairline">
+                          {formatMatchedBy(p.matched_by)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-ink-muted">{p.upi_txn_id || "—"}</td>
+                      <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(p.matched_at)}</td>
+                      <td className="px-6 py-4 text-xs text-ink-muted">{p.raw_note || "—"}</td>
+                    </tr>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingBottom}px` }} colSpan={6} />
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

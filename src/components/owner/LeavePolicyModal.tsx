@@ -77,7 +77,7 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
       <div className="bg-surface border border-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
+            <Calendar className="w-5 h-5 text-accent" />
             <h3 className="font-semibold text-text text-base">Leave & Working Policy</h3>
           </div>
           <button
@@ -192,7 +192,7 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="px-4 py-2 text-sm font-medium bg-primary text-primary-text rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
               >
                 {updateMutation.isPending && (
                   <Loader2 className="w-4 h-4 animate-spin" />

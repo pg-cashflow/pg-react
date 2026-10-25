@@ -11,6 +11,7 @@ import {
   getTenantIdPhotoBlob,
   type UpdateTenantPayload,
 } from "@/api/tenants";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatPaise, rupeesToPaise, paiseToRupeeInput, localDateInputValue, formatDate } from "@/lib/utils";
@@ -130,6 +131,19 @@ export const TenantsView: React.FC = () => {
       (t.phone && t.phone.includes(searchTerm))
   );
 
+  const parentRef = React.useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filteredTenants.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 57,
+    overscan: 5,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0)
+    : 0;
+
   return (
     <div className="space-y-6">
       <p className="text-xs text-ink-muted">{t("owner.tenants.subtitle")}</p>
@@ -152,9 +166,9 @@ export const TenantsView: React.FC = () => {
           isEmpty={!isLoading && filteredTenants.length === 0}
           onRetry={() => refetch()}
         >
-          <div className="overflow-x-auto">
+          <div ref={parentRef} className="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline">
+              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3.5">{t("owner.tenants.colName")}</th>
                   <th className="px-6 py-3.5">{t("owner.tenants.colPhone")}</th>
@@ -165,38 +179,54 @@ export const TenantsView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
-                {filteredTenants.map((tItem) => (
-                  <tr
-                    key={tItem.id}
-                    className="hover:bg-accent-tint cursor-pointer"
-                    onClick={() => open(tItem)}
-                  >
-                    <td className="px-6 py-4 font-medium">{tItem.name}</td>
-                    <td className="px-6 py-4 font-mono text-xs">{tItem.phone || t("owner.tenants.cashOnly")}</td>
-                    <td className="px-6 py-4">{tItem.room_number || "—"}</td>
-                    <td className="px-6 py-4">{formatPaise(tItem.rent_amount)}</td>
-                    <td className="px-6 py-4">{tItem.due_day != null ? t("owner.tenants.dayPrefix", { day: tItem.due_day }) : "—"}</td>
-                    <td className="px-6 py-4 text-xs">
-                      {tItem.status === "active" ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
-                          {t("common.active")}
-                        </span>
-                      ) : tItem.status === "pending_allocation" ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
-                          {t("owner.tenants.awaitingRoom")}
-                        </span>
-                      ) : tItem.status === "vacated" ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline">
-                          {t("common.vacated")}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg text-ink border border-hairline capitalize">
-                          {tItem.status}
-                        </span>
-                      )}
-                    </td>
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingTop}px` }} colSpan={6} />
                   </tr>
-                ))}
+                )}
+                {virtualItems.map((virtualRow) => {
+                  const tItem = filteredTenants[virtualRow.index];
+                  if (!tItem) return null;
+                  return (
+                    <tr
+                      key={tItem.id}
+                      ref={rowVirtualizer.measureElement}
+                      data-index={virtualRow.index}
+                      className="hover:bg-accent-tint cursor-pointer"
+                      onClick={() => open(tItem)}
+                    >
+                      <td className="px-6 py-4 font-medium">{tItem.name}</td>
+                      <td className="px-6 py-4 font-mono text-xs">{tItem.phone || t("owner.tenants.cashOnly")}</td>
+                      <td className="px-6 py-4">{tItem.room_number || "—"}</td>
+                      <td className="px-6 py-4">{formatPaise(tItem.rent_amount)}</td>
+                      <td className="px-6 py-4">{tItem.due_day != null ? t("owner.tenants.dayPrefix", { day: tItem.due_day }) : "—"}</td>
+                      <td className="px-6 py-4 text-xs">
+                        {tItem.status === "active" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
+                            {t("common.active")}
+                          </span>
+                        ) : tItem.status === "pending_allocation" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
+                            {t("owner.tenants.awaitingRoom")}
+                          </span>
+                        ) : tItem.status === "vacated" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline">
+                            {t("common.vacated")}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg text-ink border border-hairline capitalize">
+                            {tItem.status}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingBottom}px` }} colSpan={6} />
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
