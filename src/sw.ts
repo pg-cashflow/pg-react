@@ -4,6 +4,8 @@ import { registerRoute, NavigationRoute } from "workbox-routing";
 import { CacheFirst } from "workbox-strategies";
 import { clientsClaim } from "workbox-core";
 
+import { ExpirationPlugin } from "workbox-expiration";
+
 declare let self: ServiceWorkerGlobalScope;
 
 // Activate new service worker immediately without waiting for existing tabs to close
@@ -24,14 +26,23 @@ const navigationRoute = new NavigationRoute(navigationHandler, {
 registerRoute(navigationRoute);
 
 // Runtime caching for immutable hashed assets (downloaded on demand per role)
+// Restrict strictly to same-origin to prevent pinning third-party SDKs (e.g. Cashfree)
 registerRoute(
   ({ request, url }) =>
+    url.origin === self.location.origin &&
     (request.destination === "script" ||
       request.destination === "style" ||
       url.pathname.startsWith("/assets/")) &&
     !url.pathname.startsWith("/api/"),
   new CacheFirst({
     cacheName: "pg-assets-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        purgeOnQuotaError: true,
+      }),
+    ],
   })
 );
 

@@ -194,6 +194,32 @@ export interface Payment {
   created_at: string;
 }
 
+export type GatewayRefundStatus = "initiated" | "succeeded" | "failed" | "cancelled";
+
+export interface GatewayRefund {
+  id: string;
+  payment_id: string;
+  property_id: string;
+  provider: string;
+  provider_refund_id?: string;
+  refund_reference?: string;
+  idempotency_key?: string;
+  amount_paise: Paise;
+  status: GatewayRefundStatus;
+  source: string;
+  initiated_by?: string;
+  reason: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OwnerRefundInput {
+  amount_paise: Paise;
+  reason: string;
+  step_up_token?: string;
+  otp?: string;
+}
+
 export interface ReconciliationSummary {
   period: string;
   rent_collected_paise: Paise;

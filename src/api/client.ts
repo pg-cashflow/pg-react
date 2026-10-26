@@ -224,7 +224,8 @@ function authHeaders(options: RequestInit): Record<string, string> {
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
   };
-  if (!headers["Content-Type"] && !(options.body instanceof FormData)) {
+  const hasBody = options.body !== undefined && options.body !== null;
+  if (!headers["Content-Type"] && hasBody && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
   if (token) {

@@ -1,8 +1,9 @@
-import { apiFetch, unwrapList } from "./client";
 import type {
   DailySettlementBalance,
+  GatewayRefund,
   ImportResult,
   MatchedBy,
+  OwnerRefundInput,
   Payment,
   ReconciliationSummary,
 } from "@pg/types";
@@ -11,6 +12,26 @@ export const getPayments = async (matchedBy?: MatchedBy): Promise<Payment[]> => 
   const qs = matchedBy ? `?matched_by=${matchedBy}` : "";
   const data = await apiFetch<{ payments: Payment[] }>(`/owner/payments${qs}`);
   return unwrapList(data, "payments");
+};
+
+export const refundPayment = async (
+  paymentId: string,
+  input: OwnerRefundInput,
+  idempotencyKey?: string
+): Promise<GatewayRefund> => {
+  const key =
+    idempotencyKey ||
+    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `ref_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`);
+
+  return apiFetch<GatewayRefund>(`/owner/payments/${paymentId}/refund`, {
+    method: "POST",
+    headers: {
+      "Idempotency-Key": key,
+    },
+    body: JSON.stringify(input),
+  });
 };
 
 export const getReconciliation = (period?: string): Promise<ReconciliationSummary> => {

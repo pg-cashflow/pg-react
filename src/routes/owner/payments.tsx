@@ -6,11 +6,14 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate, formatMatchedBy } from "@/lib/utils";
-import { Search, CheckCircle2 } from "lucide-react";
+import { Search, CheckCircle2, RotateCcw } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { RefundModal } from "@/components/owner/RefundModal";
+import type { Payment } from "@pg/types";
 
 export const PaymentsView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
+  const [selectedPaymentForRefund, setSelectedPaymentForRefund] = useState<Payment | null>(null);
 
   const { data: tenants = [] } = useQuery({
     queryKey: QUERY_KEYS.tenants,
@@ -80,17 +83,19 @@ export const PaymentsView: React.FC = () => {
                   <th className="px-6 py-3.5">UPI Ref</th>
                   <th className="px-6 py-3.5">Matched At</th>
                   <th className="px-6 py-3.5">Note</th>
+                  <th className="px-6 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
                 {paddingTop > 0 && (
                   <tr>
-                    <td style={{ height: `${paddingTop}px` }} colSpan={6} />
+                    <td style={{ height: `${paddingTop}px` }} colSpan={7} />
                   </tr>
                 )}
                 {virtualItems.map((virtualRow) => {
                   const p = filteredPayments[virtualRow.index];
                   if (!p) return null;
+                  const isCashfree = p.matched_by === "cashfree";
                   return (
                     <tr
                       key={p.id}
@@ -113,12 +118,27 @@ export const PaymentsView: React.FC = () => {
                       <td className="px-6 py-4 font-mono text-xs text-ink-muted">{p.upi_txn_id || "—"}</td>
                       <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(p.matched_at)}</td>
                       <td className="px-6 py-4 text-xs text-ink-muted">{p.raw_note || "—"}</td>
+                      <td className="px-6 py-4 text-right">
+                        {isCashfree ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedPaymentForRefund(p)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg text-xs font-medium text-ink hover:text-danger hover:border-danger/30 transition shadow-xs"
+                            title="Initiate gateway refund"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            Refund
+                          </button>
+                        ) : (
+                          <span className="text-xs text-ink-muted">—</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
                 {paddingBottom > 0 && (
                   <tr>
-                    <td style={{ height: `${paddingBottom}px` }} colSpan={6} />
+                    <td style={{ height: `${paddingBottom}px` }} colSpan={7} />
                   </tr>
                 )}
               </tbody>
@@ -126,6 +146,16 @@ export const PaymentsView: React.FC = () => {
           </div>
         </QueryState>
       </div>
+
+      <RefundModal
+        isOpen={Boolean(selectedPaymentForRefund)}
+        payment={selectedPaymentForRefund}
+        tenantName={selectedPaymentForRefund ? tenantMap.get(selectedPaymentForRefund.tenant_id) || "Tenant" : ""}
+        onClose={() => setSelectedPaymentForRefund(null)}
+        onRefundComplete={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 };
