@@ -8,12 +8,9 @@ export function ThemeToggle() {
   const { t } = useLocale();
   const Icon = resolvedTheme === "dark" ? Moon : Sun;
 
-  const handleToggle = useCallback(
-    (e: React.MouseEvent) => {
-      cycleTheme({ x: e.clientX, y: e.clientY });
-    },
-    [cycleTheme]
-  );
+  const handleToggle = useCallback(() => {
+    cycleTheme();
+  }, [cycleTheme]);
 
   return (
     <button
@@ -110,14 +107,8 @@ export function ThemeSegmentedControl() {
               buttonRefs.current[opt.value] = el;
             }}
             type="button"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              void setTheme(opt.value, {
-                origin: {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top + rect.height / 2,
-                },
-              });
+            onClick={() => {
+              void setTheme(opt.value);
             }}
             role="radio"
             aria-checked={active}

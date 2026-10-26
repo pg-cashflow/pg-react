@@ -75,8 +75,10 @@ This section defines the physical boundaries of `pg-react`. We analyze the syste
 
 ### Physical Constraint 4: Progressive Web Application (PWA) Offline Shell
 - The application uses `vite-plugin-pwa` with the `injectManifest` strategy (`src/sw.ts`).
-- The service worker precaches all static JavaScript, CSS, and font files.
-- The service worker routes all financial API endpoints (`/api/*`) through a `NetworkOnly` strategy.
+- The service worker precaches shell assets (entry `index-*.js`, `index-*.css`, `theme-init.js`, `manifest.webmanifest`, and icons).
+- Code-split role chunks download on-demand and enter `pg-assets-cache` via a same-origin `CacheFirst` strategy.
+- Google Fonts stylesheets and webfonts use runtime `StaleWhileRevalidate` and `CacheFirst` caching.
+- Navigation routes and asset caching exclude financial API endpoints (`/api/*`), ensuring all financial data routes over the network.
 - This rule prevents the display of stale financial data.
 
 ---

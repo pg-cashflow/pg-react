@@ -69,16 +69,11 @@ function applyToDocument(resolved: ResolvedTheme) {
   if (meta) meta.setAttribute("content", resolved === "dark" ? "#15130F" : "#FAFAF7");
 }
 
-export interface ThemeChangeOrigin {
-  x: number;
-  y: number;
-}
-
 export interface ThemeContextType {
   theme: Theme;
   resolvedTheme: ResolvedTheme;
-  setTheme: (t: Theme, opts?: { origin?: ThemeChangeOrigin; persistServer?: boolean }) => Promise<boolean>;
-  cycleTheme: (origin?: ThemeChangeOrigin) => void;
+  setTheme: (t: Theme, opts?: { persistServer?: boolean }) => Promise<boolean>;
+  cycleTheme: () => void;
   registerAuthUpdater: (updater: ((theme: Theme) => void) | null, isAuthenticated?: boolean) => void;
 }
 
@@ -103,7 +98,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback(
     async (
       t: Theme,
-      opts?: { origin?: ThemeChangeOrigin; persistServer?: boolean }
+      opts?: { persistServer?: boolean }
     ): Promise<boolean> => {
       const persistServer = opts?.persistServer ?? true;
       const seq = ++requestSeqRef.current;
@@ -168,12 +163,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const cycleTheme = useCallback(
-    (origin?: ThemeChangeOrigin) => {
-      void setTheme(ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length], { origin });
-    },
-    [theme, setTheme]
-  );
+  const cycleTheme = useCallback(() => {
+    void setTheme(ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length]);
+  }, [theme, setTheme]);
 
   useEffect(() => {
     const r = resolve(theme);

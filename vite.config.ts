@@ -17,6 +17,7 @@ export default defineConfig({
       injectManifest: {
         globPatterns: [
           'index.html',
+          'theme-init.js',
           'manifest.webmanifest',
           'favicon.svg',
           'icons.svg',
