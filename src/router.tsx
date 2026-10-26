@@ -14,21 +14,34 @@ import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { homeForRole } from "@/auth/roles";
 
 // Helper to catch chunk loading errors after new deployments and refresh once
-function safeImport<T>(loader: () => Promise<T>): Promise<T> {
-  return loader().catch((error: any) => {
-    const isChunkLoadFailed =
-      error?.name === "ChunkLoadError" ||
-      /loading chunk/i.test(error?.message || "") ||
-      /failed to fetch dynamically imported module/i.test(error?.message || "");
-    if (isChunkLoadFailed && typeof window !== "undefined") {
-      const reloadKey = "pg_chunk_reload";
-      if (!sessionStorage.getItem(reloadKey)) {
-        sessionStorage.setItem(reloadKey, "1");
-        window.location.reload();
-      }
-    }
-    throw error;
+if (typeof window !== "undefined") {
+  window.addEventListener("load", () => {
+    sessionStorage.removeItem("pg_chunk_reload");
   });
+}
+
+function safeImport<T>(loader: () => Promise<T>): Promise<T> {
+  return loader()
+    .then((result) => {
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("pg_chunk_reload");
+      }
+      return result;
+    })
+    .catch((error: any) => {
+      const isChunkLoadFailed =
+        error?.name === "ChunkLoadError" ||
+        /loading chunk/i.test(error?.message || "") ||
+        /failed to fetch dynamically imported module/i.test(error?.message || "");
+      if (isChunkLoadFailed && typeof window !== "undefined") {
+        const reloadKey = "pg_chunk_reload";
+        if (!sessionStorage.getItem(reloadKey)) {
+          sessionStorage.setItem(reloadKey, "1");
+          window.location.reload();
+        }
+      }
+      throw error;
+    });
 }
 
 // Helper for code-splitting route views with automatic Suspense boundary
