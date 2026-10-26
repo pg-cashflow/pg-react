@@ -343,4 +343,29 @@ describe("uploadKYCDocument", () => {
     expect(capturedBody?.get("document")).toBeNull();
     expect(Array.from(capturedBody?.keys() || [])).toEqual(["file"]);
   });
+
+  it("delegates to apiUpload when onProgress callback is supplied", async () => {
+    let capturedBody: FormData | null = null;
+    let capturedOptions: clientApi.UploadOptions | undefined;
+    vi.spyOn(clientApi, "apiUpload").mockImplementation(async (_path, formData, options) => {
+      capturedBody = formData;
+      capturedOptions = options;
+      options?.onProgress?.({ loaded: 50, total: 100, percent: 50 });
+      return { id: "test-verif-upload" } as any;
+    });
+
+    const file = new File(["dummy content"], "id.jpg", { type: "image/jpeg" });
+    let progressReceived = 0;
+    const res = await kycApi.uploadKYCDocument(file, {
+      onProgress: (pct) => {
+        progressReceived = pct;
+      },
+    });
+
+    expect(res).toEqual({ id: "test-verif-upload" });
+    expect(capturedBody).toBeInstanceOf(FormData);
+    expect(capturedBody?.get("file")).toBe(file);
+    expect(progressReceived).toBe(50);
+    expect(capturedOptions?.onProgress).toBeDefined();
+  });
 });

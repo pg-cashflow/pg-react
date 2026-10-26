@@ -335,6 +335,9 @@ export const teIN: Record<MessageKey, string> = {
   "kyc.card.verifiedInstantSuccess": "UIDAI తో గుర్తింపు తక్షణమే ధృవీకరించబడింది.",
   "kyc.card.docSubmittedSuccess": "పత్రం యజమాని సమీక్ష కోసం సమర్పించబడింది.",
   "kyc.card.consentRevokedSuccess": "కేవైసీ సమ్మతి రద్దు చేయబడింది మరియు డేటా నిష్క్రియం చేయబడింది.",
+  "kyc.card.optimizingImage": "చిత్రాన్ని ఆప్టిమైజ్ చేస్తోంది...",
+  "kyc.card.uploadingProgress": "పత్రాన్ని అప్‌లోడ్ చేస్తోంది... {percent}%",
+  "kyc.card.uploadFailed": "పత్రం అప్‌లోడ్ విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.",
   "payment.paidOnline": "ఆన్‌లైన్ చెల్లింపు",
 
   // Auto-added Error Codes & Screen Keys

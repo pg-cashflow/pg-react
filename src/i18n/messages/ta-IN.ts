@@ -335,6 +335,9 @@ export const taIN: Record<MessageKey, string> = {
   "kyc.card.verifiedInstantSuccess": "UIDAI மூலம் அடையாளம் உடனடியாக சரிபார்க்கப்பட்டது.",
   "kyc.card.docSubmittedSuccess": "உரிமையாளர் மறுஆய்வுக்கு ஆவணம் சமர்ப்பிக்கப்பட்டது.",
   "kyc.card.consentRevokedSuccess": "KYC ஒப்புதல் திரும்பப் பெறப்பட்டு தரவு செயலிழக்கப்பட்டது.",
+  "kyc.card.optimizingImage": "படத்தை மேம்படுத்துகிறது...",
+  "kyc.card.uploadingProgress": "ஆவணத்தைப் பதிவேற்றுகிறது... {percent}%",
+  "kyc.card.uploadFailed": "ஆவணப் பதிவேற்றம் தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
   "payment.paidOnline": "ஆன்லைன் கட்டணம்",
 
   // Auto-added Error Codes & Screen Keys

@@ -333,6 +333,9 @@ export const enIN = {
   "kyc.card.verifiedInstantSuccess": "Identity verified instantly with UIDAI.",
   "kyc.card.docSubmittedSuccess": "Document submitted for manual review by the owner.",
   "kyc.card.consentRevokedSuccess": "KYC consent revoked and verification data marked inactive.",
+  "kyc.card.optimizingImage": "Optimizing image...",
+  "kyc.card.uploadingProgress": "Uploading document... {percent}%",
+  "kyc.card.uploadFailed": "Document upload failed. Please try again.",
   "payment.paidOnline": "Paid online",
 
   // Auto-added Error Codes & Screen Keys

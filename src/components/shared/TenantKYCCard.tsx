@@ -58,6 +58,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   useEffect(() => {
     if (cooldownSeconds <= 0) return;
@@ -200,17 +201,22 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     mutationFn: async (file: File) => {
       setUiError(null);
       setSuccessMsg(null);
+      setUploadProgress(0);
       await ensureConsent();
-      return uploadKYCDocument(file);
+      return uploadKYCDocument(file, {
+        onProgress: (percent) => setUploadProgress(percent),
+      });
     },
     onSuccess: () => {
       setSuccessMsg(t("kyc.card.docSubmittedSuccess"));
       setUploadFile(null);
+      setUploadProgress(null);
       refreshKYC();
       onSuccess?.();
     },
     onError: (err: unknown) => {
-      setUiError(err instanceof Error ? err.message : "Upload failed");
+      setUploadProgress(null);
+      setUiError(formatKYCError(err, t, "kyc.card.uploadFailed"));
     },
   });
 
@@ -300,6 +306,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setUploadProgress(null);
 
     if (file.type.startsWith("image/")) {
       setCompressing(true);
@@ -727,7 +735,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   <Upload className="w-4 h-4 text-ink-muted shrink-0" />
                   <span className="t-caption text-ink-muted truncate">
                     {compressing
-                      ? "Optimizing image..."
+                      ? t("kyc.card.optimizingImage")
                       : uploadFile
                       ? uploadFile.name
                       : t("kyc.card.chooseDoc")}
@@ -744,6 +752,26 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 </label>
               </div>
 
+              {uploadMutation.isPending && uploadProgress !== null && (
+                <div
+                  className="space-y-1.5 pt-1"
+                  role="progressbar"
+                  aria-valuenow={uploadProgress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div className="flex items-center justify-between t-caption text-ink-muted">
+                    <span>{t("kyc.card.uploadingProgress", { percent: uploadProgress })}</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-surface border border-hairline overflow-hidden">
+                    <div
+                      className="h-full bg-accent transition-all duration-150 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
               <button
                 type="button"
                 disabled={!uploadFile || !consentChecked || uploadMutation.isPending || compressing}
@@ -751,7 +779,16 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
               >
                 {uploadMutation.isPending || compressing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>
+                      {compressing
+                        ? t("kyc.card.optimizingImage")
+                        : uploadProgress !== null
+                        ? `${uploadProgress}%`
+                        : t("kyc.card.submitReviewBtn")}
+                    </span>
+                  </>
                 ) : (
                   t("kyc.card.submitReviewBtn")
                 )}

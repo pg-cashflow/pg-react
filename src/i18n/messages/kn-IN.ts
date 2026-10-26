@@ -336,6 +336,9 @@ export const knIN: Record<MessageKey, string> = {
   "kyc.card.verifiedInstantSuccess": "UIDAI ಮೂಲಕ ಗುರುತನ್ನು ತಕ್ಷಣವೇ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
   "kyc.card.docSubmittedSuccess": "ದಾಖಲೆಯನ್ನು ಮಾಲೀಕರ ಪರಿಶೀಲನೆಗೆ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
   "kyc.card.consentRevokedSuccess": "KYC ಸಮ್ಮತಿ ಹಿಂಪಡೆಯಲಾಗಿದೆ ಮತ್ತು ಡೇಟಾವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ.",
+  "kyc.card.optimizingImage": "ಚಿತ್ರವನ್ನು ಅತ್ಯುತ್ತಮವಾಗಿಸಲಾಗುತ್ತಿದೆ...",
+  "kyc.card.uploadingProgress": "ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ... {percent}%",
+  "kyc.card.uploadFailed": "ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
   "payment.paidOnline": "ಆನ್‌ಲೈನ್‌ ಪಾವತಿ",
 
   // Auto-added Error Codes & Screen Keys

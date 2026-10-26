@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchBlob } from "./client";
+import { apiFetch, apiFetchBlob, apiUpload } from "./client";
 import type {
   KYCStatusResponse,
   KYCVerification,
@@ -24,6 +24,11 @@ export interface AadhaarOTPVerifyPayload {
 
 export interface RejectKYCPayload {
   reason: string;
+}
+
+export interface UploadKYCOptions {
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
 }
 
 // --- Tenant KYC Endpoints ---
@@ -63,12 +68,22 @@ export const verifySecureQR = (
   });
 
 
-export const uploadKYCDocument = (file: File): Promise<KYCVerification> => {
+export const uploadKYCDocument = (
+  file: File,
+  options?: UploadKYCOptions
+): Promise<KYCVerification> => {
   const fd = new FormData();
   fd.append("file", file);
+  if (options?.onProgress) {
+    return apiUpload<KYCVerification>("/tenant/kyc/upload", fd, {
+      onProgress: (p) => options.onProgress?.(p.percent),
+      signal: options.signal,
+    });
+  }
   return apiFetch<KYCVerification>("/tenant/kyc/upload", {
     method: "POST",
     body: fd,
+    signal: options?.signal,
   });
 };
 

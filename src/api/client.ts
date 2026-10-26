@@ -322,6 +322,208 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
   }
 }
 
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percent: number;
+}
+
+export interface UploadOptions {
+  headers?: Record<string, string>;
+  onProgress?: (progress: UploadProgress) => void;
+  signal?: AbortSignal;
+}
+
+export async function apiUpload<T>(
+  path: string,
+  formData: FormData,
+  options: UploadOptions = {}
+): Promise<T> {
+  if (typeof XMLHttpRequest === "undefined") {
+    return apiFetch<T>(path, {
+      method: "POST",
+      body: formData,
+      signal: options.signal,
+      headers: options.headers,
+    });
+  }
+
+  const url = resolveUrl(path);
+  const isAuthEndpoint =
+    path.startsWith("/auth/") ||
+    path === "/auth" ||
+    path.startsWith("/api/auth/") ||
+    path === "/api/auth";
+
+  const buildHeaders = (custom?: Record<string, string>): Record<string, string> => {
+    const token = getAccessToken();
+    const headers: Record<string, string> = { ...(custom || {}) };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const locale = getStoredLocale();
+    if (locale && !headers["Accept-Language"]) {
+      headers["Accept-Language"] = locale;
+    }
+    return headers;
+  };
+
+  const sendXhr = (requestHeaders: Record<string, string>): Promise<{ status: number; text: string }> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url);
+      xhr.withCredentials = true;
+
+      for (const [key, value] of Object.entries(requestHeaders)) {
+        xhr.setRequestHeader(key, value);
+      }
+
+      if (xhr.upload && options.onProgress) {
+        xhr.upload.onprogress = (event: ProgressEvent) => {
+          if (event.lengthComputable && event.total > 0) {
+            const percent = Math.min(100, Math.round((event.loaded / event.total) * 100));
+            options.onProgress?.({
+              loaded: event.loaded,
+              total: event.total,
+              percent,
+            });
+          }
+        };
+      }
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          xhr.abort();
+          reject(new DOMException("The operation was aborted.", "AbortError"));
+          return;
+        }
+        const onAbort = () => {
+          xhr.abort();
+          reject(new DOMException("The operation was aborted.", "AbortError"));
+        };
+        options.signal.addEventListener("abort", onAbort, { once: true });
+        xhr.onloadend = () => {
+          options.signal?.removeEventListener("abort", onAbort);
+        };
+      }
+
+      xhr.onload = () => {
+        resolve({ status: xhr.status, text: xhr.responseText });
+      };
+
+      xhr.onerror = () => {
+        reject(new ApiError(0, networkFailureMessage()));
+      };
+
+      xhr.ontimeout = () => {
+        reject(new ApiError(0, networkFailureMessage()));
+      };
+
+      xhr.send(formData);
+    });
+  };
+
+  const parseXhr = (
+    status: number,
+    responseText: string,
+    opts: { allowSessionClearOn401?: boolean } = { allowSessionClearOn401: true }
+  ): T => {
+    if (status === 401) {
+      if (opts.allowSessionClearOn401 !== false) {
+        const hadPriorSession = Boolean(getAccessToken() || getStoredUser());
+        setAccessToken(null);
+        setStoredUser(null);
+        stopProactiveRefresh();
+        if (hadPriorSession) {
+          window.dispatchEvent(
+            new CustomEvent("pg:unauthorized", { detail: { reason: "session_ended" } })
+          );
+        }
+      }
+      let errorMsg = "Session expired or unauthorized";
+      let errorCode: string | undefined;
+      try {
+        const data = JSON.parse(responseText);
+        errorMsg = data.message || data.error || errorMsg;
+        if (typeof data.code === "string") errorCode = data.code;
+      } catch {
+        // ignore
+      }
+      const mapped = mapApiErrorMessage(401, errorMsg);
+      throw new ApiError(401, mapped, errorCode);
+    }
+
+    if (status < 200 || status >= 300) {
+      let errorMsg = "An error occurred";
+      let errorCode: string | undefined;
+      let details: Record<string, unknown> | undefined;
+      try {
+        const data = JSON.parse(responseText);
+        errorMsg = data.message || data.error || JSON.stringify(data);
+        if (typeof data.code === "string") {
+          errorCode = data.code;
+        }
+        if (data && typeof data === "object" && !Array.isArray(data)) {
+          details = data as Record<string, unknown>;
+        }
+      } catch {
+        errorMsg = responseText;
+      }
+      const mapped = mapApiErrorMessage(status, errorMsg);
+      if (status === 403 && (errorCode === "auth.accessRevoked" || /access revoked/i.test(mapped))) {
+        setAccessToken(null);
+        setStoredUser(null);
+        stopProactiveRefresh();
+        window.dispatchEvent(
+          new CustomEvent("pg:unauthorized", { detail: { reason: "access_revoked" } })
+        );
+      }
+      if (status === 403 && (errorCode === "join.profileRequired" || /complete your profile to continue/i.test(mapped))) {
+        window.dispatchEvent(new CustomEvent("pg:waiting-join"));
+      }
+      throw new ApiError(status, mapped, errorCode, details);
+    }
+
+    if (status === 204 || !responseText.trim()) {
+      return {} as T;
+    }
+
+    try {
+      return JSON.parse(responseText) as T;
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        const msg = import.meta.env.DEV
+          ? `Server returned an invalid response (expected JSON, received HTML or malformed body). Ensure pg-go is running with the latest routes.`
+          : `Server returned an invalid response. Please try again later.`;
+        throw new ApiError(status, msg);
+      }
+      throw err;
+    }
+  };
+
+  const initial = await sendXhr(buildHeaders(options.headers));
+
+  if (initial.status === 401 && !isAuthEndpoint) {
+    const originalToken = getAccessToken();
+    const hasPriorSession = Boolean(originalToken || getStoredUser());
+    if (!hasPriorSession) {
+      throw new ApiError(401, "Session expired or unauthorized");
+    }
+    const newToken = await requestTokenRefresh(originalToken);
+    if (newToken) {
+      const retryResult = await sendXhr(buildHeaders(options.headers));
+      return parseXhr(retryResult.status, retryResult.text, {
+        allowSessionClearOn401: false,
+      });
+    }
+    throw new ApiError(401, "Session expired or unauthorized");
+  }
+
+  return parseXhr(initial.status, initial.text, {
+    allowSessionClearOn401: !isAuthEndpoint,
+  });
+}
+
 export function unwrapList<T>(data: Record<string, T[]>, key: string): T[] {
   return data[key] ?? [];
 }
