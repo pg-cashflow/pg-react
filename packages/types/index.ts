@@ -188,6 +188,8 @@ export interface Payment {
   amount: Paise;
   matched_by: MatchedBy;
   upi_txn_id?: string;
+  cf_payment_id?: string;
+  provider_payment_id?: string;
   recorded_by?: string;
   matched_at: string;
   raw_note?: string;

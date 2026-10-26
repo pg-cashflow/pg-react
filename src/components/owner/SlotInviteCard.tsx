@@ -406,7 +406,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="px-4 py-2.5 rounded-xl bg-surface border border-hairline font-mono text-base font-bold tracking-widest text-ink flex-1 text-center sm:text-left">
+            <div className="px-4 py-2.5 rounded-xl bg-surface border border-hairline font-mono text-base font-bold tracking-widest text-ink flex-1 text-center sm:text-left select-all">
               {successInvite.code}
             </div>
 
@@ -467,7 +467,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold tracking-wider text-ink bg-surface px-2 py-0.5 rounded border border-hairline">
+                          <span className="font-mono font-bold tracking-wider text-ink bg-surface px-2 py-0.5 rounded border border-hairline select-all">
                             {inv.code}
                           </span>
                           <span className="text-ink-muted">·</span>

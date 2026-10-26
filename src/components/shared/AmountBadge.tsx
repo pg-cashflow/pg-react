@@ -23,7 +23,7 @@ export const AmountBadge: React.FC<AmountBadgeProps> = ({
           : "text-ink";
 
   return (
-    <span className={cn("t-amount tracking-tight", color, className)}>
+    <span className={cn("t-amount tracking-tight select-text", color, className)}>
       {formatPaise(amount)}
     </span>
   );
