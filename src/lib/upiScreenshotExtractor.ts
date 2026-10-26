@@ -2,6 +2,37 @@
  * Fast in-browser OCR extractor for UPI payment screenshots (GPay, PhonePe, Paytm, BHIM, Cred)
  */
 
+let tesseractLoadAttempted = false;
+let tesseractAvailable = false;
+
+async function ensureTesseract(): Promise<boolean> {
+  const win = window as unknown as { Tesseract?: unknown };
+  if (win.Tesseract) return true;
+  if (tesseractLoadAttempted && !tesseractAvailable) return false;
+  tesseractLoadAttempted = true;
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "/vendor/tesseract/tesseract.min.js";
+      script.async = true;
+      script.onload = () => {
+        tesseractAvailable = true;
+        resolve();
+      };
+      script.onerror = () => {
+        script.remove();
+        tesseractAvailable = false;
+        reject(new Error("Local OCR engine bundle unavailable"));
+      };
+      document.head.appendChild(script);
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function extractUtrFromScreenshot(file: File): Promise<string | null> {
   const win = window as unknown as {
     Tesseract?: {
@@ -10,18 +41,8 @@ export async function extractUtrFromScreenshot(file: File): Promise<string | nul
   };
 
   try {
-    // 1. Load Tesseract.js dynamically from self-hosted origin if not already present
-    if (!win.Tesseract) {
-      await new Promise<void>((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "/vendor/tesseract/tesseract.min.js";
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Local OCR engine bundle unavailable"));
-        document.head.appendChild(script);
-      });
-    }
-
-    if (!win.Tesseract) return null;
+    const isAvailable = await ensureTesseract();
+    if (!isAvailable || !win.Tesseract) return null;
 
     // 2. Load image onto canvas with contrast enhancement
     const imageUrl = URL.createObjectURL(file);

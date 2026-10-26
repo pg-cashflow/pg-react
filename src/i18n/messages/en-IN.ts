@@ -622,6 +622,40 @@ export const enIN = {
   "kyc.reason.PROVIDER_ERROR": "UIDAI service temporarily unreachable. Please try later or upload document.",
   "kyc.reason.UNKNOWN": "Verification failed. Please try again or upload ID document.",
   "kyc.reason.INVALID_DOB_FORMAT": "Date of birth from Aadhaar could not be verified.",
+
+  // Owner KYC Queue additions
+  "kyc.queueTitle": "KYC Manual Review Queue",
+  "kyc.queueSubtitle": "Manual document photo uploads requiring owner or manager verification. (Aadhaar OTP verifies automatically).",
+  "kyc.pendingReviewCount": "{count} Pending Review",
+  "kyc.searchPlaceholder": "Search by tenant name, room number...",
+  "kyc.emptyManualQueue": "No pending manual reviews. Aadhaar OTP verifications are authenticated automatically by UIDAI.",
+  "kyc.pendingApproval": "Pending Approval",
+  "kyc.duplicateDetected": "Duplicate Identity Detected",
+  "kyc.submitted": "Submitted",
+  "kyc.method": "Method",
+  "kyc.methodManualOcr": "Manual Document OCR",
+  "kyc.document": "Document",
+  "kyc.viewDocument": "View Document",
+  "kyc.rejectModalTitle": "Reject KYC Submission",
+  "kyc.rejectModalSubtitle": "Provide a clear reason for rejecting {name}'s document so they can correct and re-upload.",
+  "kyc.rejectReasonLabel": "Rejection Reason *",
+  "kyc.rejectReasonPlaceholder": "e.g. Photo is blurry / ID expired / Name does not match tenant record",
+  "kyc.confirmReject": "Confirm Rejection",
+  "kyc.rejectionReasonMandatory": "A rejection reason is mandatory so the tenant knows what to fix.",
+  "kyc.rejectionFailed": "Rejection failed",
+  "kyc.approvalFailed": "Approval failed",
+
+  // Tenant Dues & Checkout additions
+  "tenant.dues.awaitingRoomRent": "Pay unlocks after your owner assigns room and rent.",
+  "tenant.dues.emptyWaiting": "No dues yet — waiting for room assignment.",
+  "tenant.dues.emptyPassbook": "No dues on your passbook.",
+  "tenant.dues.hidePay": "Hide pay",
+  "tenant.dues.pay": "Pay",
+  "paypanel.dueCodeLabel": "Due code / UPI note",
+  "paypanel.copyDueCode": "Copy due code",
+  "paypanel.phoneRequiredTitle": "Cashfree checkout requires your phone number",
+  "paypanel.phoneRequiredDesc": "Your owner enabled Cashfree online checkout, but your profile has no phone number yet. Add one to unlock instant UPI / card payment.",
+  "paypanel.updateProfile": "Update profile →",
 };
 
 export type MessageKey = keyof typeof enIN;

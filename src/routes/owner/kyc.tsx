@@ -31,6 +31,7 @@ export const OwnerKYCView: React.FC = () => {
   const [rejectingItem, setRejectingItem] = useState<OwnerKYCVerificationView | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [reasonError, setReasonError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const [previewItem, setPreviewItem] = useState<OwnerKYCVerificationView | null>(null);
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
@@ -48,9 +49,20 @@ export const OwnerKYCView: React.FC = () => {
     };
   }, [previewBlobUrl]);
 
+  const revokeWithDelay = (url: string) => {
+    // 60-second delay prevents 404 in newly opened external browser tabs
+    setTimeout(() => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch {
+        // ignore already revoked URLs
+      }
+    }, 60000);
+  };
+
   const handleClosePreview = () => {
     if (previewBlobUrl) {
-      URL.revokeObjectURL(previewBlobUrl);
+      revokeWithDelay(previewBlobUrl);
     }
     setPreviewBlobUrl(null);
     setPreviewItem(null);
@@ -61,7 +73,7 @@ export const OwnerKYCView: React.FC = () => {
 
   const handleOpenPreview = async (item: OwnerKYCVerificationView) => {
     if (previewBlobUrl) {
-      URL.revokeObjectURL(previewBlobUrl);
+      revokeWithDelay(previewBlobUrl);
       setPreviewBlobUrl(null);
     }
     setPreviewItem(item);
@@ -109,8 +121,12 @@ export const OwnerKYCView: React.FC = () => {
   const approveMutation = useMutation({
     mutationFn: (id: string) => approveOwnerKYC(id),
     onSuccess: () => {
+      setActionError(null);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerKYCQueue });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenants });
+    },
+    onError: (err: unknown) => {
+      setActionError(err instanceof Error ? err.message : t("kyc.approvalFailed"));
     },
   });
 
@@ -121,15 +137,17 @@ export const OwnerKYCView: React.FC = () => {
       setRejectingItem(null);
       setRejectReason("");
       setReasonError(null);
+      setActionError(null);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerKYCQueue });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenants });
     },
     onError: (err: unknown) => {
-      setReasonError(err instanceof Error ? err.message : "Rejection failed");
+      setReasonError(err instanceof Error ? err.message : t("kyc.rejectionFailed"));
     },
   });
 
   const handleApprove = (item: OwnerKYCVerificationView) => {
+    setActionError(null);
     approveMutation.mutate(item.id);
   };
 
@@ -137,11 +155,12 @@ export const OwnerKYCView: React.FC = () => {
     setRejectingItem(item);
     setRejectReason("");
     setReasonError(null);
+    setActionError(null);
   };
 
   const handleConfirmReject = () => {
     if (!rejectReason.trim()) {
-      setReasonError("A rejection reason is mandatory so the tenant knows what to fix.");
+      setReasonError(t("kyc.rejectionReasonMandatory"));
       return;
     }
     if (rejectingItem) {
@@ -162,17 +181,34 @@ export const OwnerKYCView: React.FC = () => {
       {/* Page Description */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="t-h1">KYC Manual Review Queue</h1>
+          <h1 className="t-h1">{t("kyc.queueTitle")}</h1>
           <p className="t-body-sm text-ink-muted mt-0.5">
-            Manual document photo uploads requiring owner or manager verification.
-            (Aadhaar OTP verifies automatically).
+            {t("kyc.queueSubtitle")}
           </p>
         </div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-hairline t-caption text-ink-muted shrink-0">
           <Clock className="w-4 h-4 text-warning" />
-          <span>{queueItems.length} Pending Review</span>
+          <span>{t("kyc.pendingReviewCount", { count: queueItems.length })}</span>
         </div>
       </div>
+
+      {/* Action Error Banner */}
+      {actionError && (
+        <div className="p-3.5 rounded-[12px] bg-danger-tint/30 border border-danger/20 flex items-center justify-between gap-3 text-danger">
+          <div className="flex items-center gap-2 t-body-sm font-semibold">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{actionError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActionError(null)}
+            className="p-1 text-danger hover:opacity-70"
+            aria-label="Dismiss error"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Search Bar */}
       {queueItems.length > 0 && (
@@ -180,7 +216,7 @@ export const OwnerKYCView: React.FC = () => {
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
           <input
             type="text"
-            placeholder="Search by tenant name, room number..."
+            placeholder={t("kyc.searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-surface border border-hairline rounded-xl text-ink placeholder:text-ink-muted text-sm focus:outline-none focus:ring-1 focus:ring-accent"
@@ -195,7 +231,7 @@ export const OwnerKYCView: React.FC = () => {
           isError={isError}
           error={error as Error | null}
           isEmpty={!isLoading && queueItems.length === 0}
-          emptyMessage="No pending manual reviews. Aadhaar OTP verifications are authenticated automatically by UIDAI."
+          emptyMessage={t("kyc.emptyManualQueue")}
           onRetry={() => refetch()}
         >
           <div className="divide-y divide-hairline">
@@ -208,45 +244,45 @@ export const OwnerKYCView: React.FC = () => {
                 <div className="space-y-2 min-w-0 flex-1">
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <span className="t-body font-semibold text-ink">
-                      {item.tenant_name || "Tenant"}
+                      {item.tenant_name || t("tenant.profile")}
                     </span>
                     {item.room_number && (
                       <span className="px-2 py-0.5 rounded-md bg-bg border border-hairline t-caption text-ink font-mono">
-                        Room {item.room_number}
+                        {t("tenant.room")} {item.room_number}
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-tint text-warning t-caption font-semibold">
                       <Clock className="w-3 h-3" />
-                      Pending Approval
+                      {t("kyc.pendingApproval")}
                     </span>
                     {item.duplicate_detected && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-danger-tint text-danger t-caption font-semibold">
                         <AlertTriangle className="w-3 h-3" />
-                        Duplicate Identity Detected
+                        {t("kyc.duplicateDetected")}
                       </span>
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 t-caption text-ink-muted">
                     <div>
-                      <span className="text-ink-faint block">Submitted</span>
+                      <span className="text-ink-faint block">{t("kyc.submitted")}</span>
                       <span>{formatDate(item.created_at, locale)}</span>
                     </div>
                     <div>
-                      <span className="text-ink-faint block">Method</span>
+                      <span className="text-ink-faint block">{t("kyc.method")}</span>
                       <span className="uppercase font-medium">
-                        {item.method === "ocr" ? "Manual Document OCR" : item.method}
+                        {item.method === "ocr" ? t("kyc.methodManualOcr") : item.method}
                       </span>
                     </div>
                     <div>
-                      <span className="text-ink-faint block">Document</span>
+                      <span className="text-ink-faint block">{t("kyc.document")}</span>
                       <button
                         type="button"
                         onClick={() => handleOpenPreview(item)}
                         className="text-accent hover:underline inline-flex items-center gap-1 font-medium"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        {item.document_name || "View Document"}
+                        {item.document_name || t("kyc.viewDocument")}
                       </button>
                     </div>
                   </div>
@@ -265,7 +301,7 @@ export const OwnerKYCView: React.FC = () => {
                     ) : (
                       <>
                         <CheckCircle className="w-4 h-4" />
-                        Approve
+                        {t("kyc.approve")}
                       </>
                     )}
                   </button>
@@ -276,7 +312,7 @@ export const OwnerKYCView: React.FC = () => {
                     className="h-10 px-3 rounded-[10px] border border-hairline text-danger t-caption font-semibold hover:bg-bg transition flex items-center gap-1.5"
                   >
                     <XCircle className="w-4 h-4" />
-                    Reject
+                    {t("kyc.reject")}
                   </button>
                 </div>
               </div>
@@ -341,13 +377,14 @@ export const OwnerKYCView: React.FC = () => {
                 isPdf ? (
                   <iframe
                     src={previewBlobUrl}
+                    sandbox=""
                     className="w-full h-[520px] rounded-lg border-0 bg-white"
-                    title={previewItem.document_name || "KYC Document"}
+                    title={previewItem.document_name || t("kyc.document")}
                   />
                 ) : (
                   <img
                     src={previewBlobUrl}
-                    alt={previewItem.document_name || "KYC Document"}
+                    alt={previewItem.document_name || t("kyc.document")}
                     className="max-h-[520px] w-auto max-w-full object-contain rounded-lg"
                   />
                 )
@@ -411,16 +448,15 @@ export const OwnerKYCView: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-surface border border-hairline rounded-2xl p-6 max-w-md w-full space-y-4">
             <div>
-              <h3 className="t-h3 text-danger">Reject KYC Submission</h3>
+              <h3 className="t-h3 text-danger">{t("kyc.rejectModalTitle")}</h3>
               <p className="t-caption text-ink-muted mt-1">
-                Provide a clear reason for rejecting {rejectingItem.tenant_name || "the tenant"}'s
-                document so they can correct and re-upload.
+                {t("kyc.rejectModalSubtitle", { name: rejectingItem.tenant_name || t("tenant.profile") })}
               </p>
             </div>
 
             <div className="space-y-1.5">
               <label className="t-caption font-medium text-ink-muted block">
-                Rejection Reason *
+                {t("kyc.rejectReasonLabel")}
               </label>
               <textarea
                 rows={3}
@@ -429,7 +465,7 @@ export const OwnerKYCView: React.FC = () => {
                   setRejectReason(e.target.value);
                   setReasonError(null);
                 }}
-                placeholder="e.g. Photo is blurry / ID expired / Name does not match tenant record"
+                placeholder={t("kyc.rejectReasonPlaceholder")}
                 className="w-full p-3 rounded-[10px] border border-hairline bg-bg text-ink t-body-sm placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-accent"
               />
               {reasonError && <p className="t-caption text-danger">{reasonError}</p>}
@@ -445,7 +481,7 @@ export const OwnerKYCView: React.FC = () => {
                 }}
                 className="h-10 px-4 rounded-[10px] border border-hairline t-caption font-semibold hover:bg-bg transition"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -456,7 +492,7 @@ export const OwnerKYCView: React.FC = () => {
                 {rejectMutation.isPending ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  "Confirm Rejection"
+                  t("kyc.confirmReject")
                 )}
               </button>
             </div>

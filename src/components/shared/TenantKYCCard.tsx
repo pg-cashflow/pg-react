@@ -52,6 +52,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   const [consentChecked, setConsentChecked] = useState(false);
   const [consentRecorded, setConsentRecorded] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [compressing, setCompressing] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
@@ -240,11 +241,91 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     setAadhaarInput(formatAadhaarNumber(e.target.value));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = async (file: File, maxDim = 1600, quality = 0.85): Promise<File> => {
+    if (!file.type.startsWith("image/") || file.type.includes("svg")) {
+      return file;
+    }
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width <= maxDim && height <= maxDim && file.size <= 2 * 1024 * 1024) {
+          resolve(file);
+          return;
+        }
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const compressed = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(compressed);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+      img.src = url;
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    if (file.type.startsWith("image/")) {
+      setCompressing(true);
+      setUiError(null);
+      try {
+        const processed = await compressImage(file);
+        if (processed.size > 5 * 1024 * 1024) {
+          setUiError(t("kyc.card.docSizeExceeded"));
+          setUploadFile(null);
+          return;
+        }
+        setUploadFile(processed);
+      } catch {
+        if (file.size > 5 * 1024 * 1024) {
+          setUiError(t("kyc.card.docSizeExceeded"));
+          setUploadFile(null);
+          return;
+        }
+        setUploadFile(file);
+      } finally {
+        setCompressing(false);
+      }
+    } else {
       if (file.size > 5 * 1024 * 1024) {
         setUiError(t("kyc.card.docSizeExceeded"));
+        setUploadFile(null);
         return;
       }
       setUploadFile(file);
@@ -645,7 +726,11 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 <div className="flex items-center gap-2 text-ink truncate min-w-0 pr-2">
                   <Upload className="w-4 h-4 text-ink-muted shrink-0" />
                   <span className="t-caption text-ink-muted truncate">
-                    {uploadFile ? uploadFile.name : t("kyc.card.chooseDoc")}
+                    {compressing
+                      ? "Optimizing image..."
+                      : uploadFile
+                      ? uploadFile.name
+                      : t("kyc.card.chooseDoc")}
                   </span>
                 </div>
                 <label className="px-3 py-1.5 rounded-lg bg-surface border border-hairline text-ink t-caption font-semibold cursor-pointer shrink-0 hover:bg-surface/80 transition">
@@ -661,11 +746,11 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
 
               <button
                 type="button"
-                disabled={!uploadFile || !consentChecked || uploadMutation.isPending}
+                disabled={!uploadFile || !consentChecked || uploadMutation.isPending || compressing}
                 onClick={() => uploadFile && uploadMutation.mutate(uploadFile)}
                 className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
               >
-                {uploadMutation.isPending ? (
+                {uploadMutation.isPending || compressing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   t("kyc.card.submitReviewBtn")

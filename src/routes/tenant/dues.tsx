@@ -29,7 +29,7 @@ export const TenantDuesView: React.FC = () => {
     <div className="space-y-4">
       {awaitingAllocation && (
         <div className="bg-accent-tint border border-accent/20 rounded-[14px] p-4 t-body-sm text-accent">
-          Pay unlocks after your owner assigns room and rent.
+          {t("tenant.dues.awaitingRoomRent")}
         </div>
       )}
       <QueryState
@@ -37,7 +37,7 @@ export const TenantDuesView: React.FC = () => {
         isError={duesQuery.isError}
         error={duesQuery.error as Error | null}
         isEmpty={!duesQuery.isLoading && !duesQuery.isError && dues.length === 0}
-        emptyMessage={awaitingAllocation ? "No dues yet — waiting for room assignment." : "No dues on your passbook."}
+        emptyMessage={awaitingAllocation ? t("tenant.dues.emptyWaiting") : t("tenant.dues.emptyPassbook")}
         onRetry={() => duesQuery.refetch()}
         isFetching={duesQuery.isFetching}
       >
@@ -72,7 +72,7 @@ export const TenantDuesView: React.FC = () => {
                         : "bg-accent text-white"
                     }`}
                   >
-                    {openId === d.id ? "Hide pay" : "Pay"}
+                    {openId === d.id ? t("tenant.dues.hidePay") : t("tenant.dues.pay")}
                   </button>
                 )}
                 {openId === d.id && canPay && (

@@ -117,10 +117,10 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
         <p className="t-amount-lg mt-1">{formatPaise(pay.amount_paise)}</p>
         {pay.note && (
           <div className="mt-3 flex items-center justify-between gap-2">
-            <span className="t-caption text-ink-muted">Due code / UPI note</span>
+            <span className="t-caption text-ink-muted">{t("paypanel.dueCodeLabel")}</span>
             <span className="flex items-center gap-1">
               <span className="t-code font-medium">{pay.note}</span>
-              <CopyButton value={pay.note} label="Copy due code" />
+              <CopyButton value={pay.note} label={t("paypanel.copyDueCode")} />
             </span>
           </div>
         )}
@@ -132,17 +132,16 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
           <Phone className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="t-body-sm font-semibold text-warning">
-              Cashfree checkout requires your phone number
+              {t("paypanel.phoneRequiredTitle")}
             </p>
             <p className="t-caption text-ink-muted mt-0.5">
-              Your owner enabled Cashfree online checkout, but your profile has no phone number yet.
-              Add one to unlock instant UPI&nbsp;/ card payment.
+              {t("paypanel.phoneRequiredDesc")}
             </p>
             <Link
               to="/tenant/profile"
               className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-warning underline underline-offset-2"
             >
-              Update profile →
+              {t("paypanel.updateProfile")}
             </Link>
           </div>
         </div>
