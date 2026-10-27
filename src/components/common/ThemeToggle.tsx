@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect, useCallback } from "react";
+import { useRef, useState, useLayoutEffect, useCallback } from "react";
 import { Sun, Moon, Laptop } from "lucide-react";
 import { useTheme, type Theme } from "@/theme/context";
 import { useLocale } from "@/i18n";
