@@ -100,17 +100,27 @@ export async function executeRefresh(failedToken: string | null): Promise<string
 }
 
 export async function requestTokenRefresh(failedToken: string | null): Promise<string | null> {
-  if (typeof navigator !== "undefined" && navigator.locks?.request) {
-    return navigator.locks.request("pg_token_refresh", async () => {
-      return executeRefresh(failedToken);
-    });
+  const currentToken = getAccessToken();
+  if (currentToken && currentToken !== failedToken) {
+    return currentToken;
   }
 
-  if (!activeRefreshPromise) {
-    activeRefreshPromise = executeRefresh(failedToken).finally(() => {
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
+
+  if (typeof navigator !== "undefined" && navigator.locks?.request) {
+    activeRefreshPromise = navigator.locks.request("pg_token_refresh", async () => {
+      return executeRefresh(failedToken);
+    }).finally(() => {
       activeRefreshPromise = null;
     });
+    return activeRefreshPromise;
   }
+
+  activeRefreshPromise = executeRefresh(failedToken).finally(() => {
+    activeRefreshPromise = null;
+  });
   return activeRefreshPromise;
 }
 

@@ -68,6 +68,20 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     async (newLocale: SupportedLocale, persistServer = true): Promise<boolean> => {
       if (!isSupportedLocale(newLocale)) return false;
 
+      // Ensure dictionary is loaded before switching state to prevent flash of English fallback
+      if (!loadedMessages[newLocale]) {
+        try {
+          const loader = localeLoaders[newLocale] || localeLoaders[DEFAULT_LOCALE];
+          const msgs = await loader();
+          loadedMessages[newLocale] = msgs;
+          setMessages(msgs);
+        } catch (err) {
+          console.warn(`[i18n] Failed to load messages for ${newLocale}:`, err);
+        }
+      } else {
+        setMessages(loadedMessages[newLocale]!);
+      }
+
       const seq = ++requestSeqRef.current;
       setLocaleState(newLocale);
       setStoredLocale(newLocale);
