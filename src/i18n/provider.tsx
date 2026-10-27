@@ -30,6 +30,25 @@ const loadedMessages: Partial<Record<SupportedLocale, Record<string, string>>> =
   "en-IN": enIN,
 };
 
+const LOCALE_FONT_URLS: Partial<Record<SupportedLocale, string>> = {
+  "te-IN": "https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap",
+  "ta-IN": "https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap",
+  "kn-IN": "https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;500;600;700&display=swap",
+};
+
+function ensureLocaleFont(loc: SupportedLocale): void {
+  if (typeof document === "undefined") return;
+  const url = LOCALE_FONT_URLS[loc];
+  if (!url) return;
+  const id = `pg-font-${loc}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = url;
+  document.head.appendChild(link);
+}
+
 interface LocaleContextValue {
   locale: SupportedLocale;
   setLocale: (newLocale: SupportedLocale, persistServer?: boolean) => Promise<boolean>;
@@ -181,9 +200,10 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     };
   }, [locale]);
 
-  // Keep the document language in step with the UI language.
+  // Keep the document language and font in step with the UI language.
   useEffect(() => {
     document.documentElement.lang = locale;
+    ensureLocaleFont(locale);
   }, [locale]);
 
   return (

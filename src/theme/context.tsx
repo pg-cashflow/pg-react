@@ -63,7 +63,6 @@ function resolve(theme: Theme): ResolvedTheme {
 
 function applyToDocument(resolved: ResolvedTheme) {
   document.documentElement.classList.toggle("dark", resolved === "dark");
-  document.documentElement.setAttribute("data-theme", resolved);
   document.documentElement.style.colorScheme = resolved;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", resolved === "dark" ? "#15130F" : "#FAFAF7");
