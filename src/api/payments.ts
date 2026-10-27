@@ -26,13 +26,21 @@ export const refundPayment = async (
       ? crypto.randomUUID()
       : `ref_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`);
 
-  return apiFetch<GatewayRefund>(`/owner/payments/${paymentId}/refund`, {
-    method: "POST",
-    headers: {
-      "Idempotency-Key": key,
-    },
-    body: JSON.stringify(input),
-  });
+  const res = await apiFetch<GatewayRefund | { message: string; refund: GatewayRefund }>(
+    `/owner/payments/${paymentId}/refund`,
+    {
+      method: "POST",
+      headers: {
+        "Idempotency-Key": key,
+      },
+      body: JSON.stringify(input),
+    }
+  );
+
+  if (res && typeof res === "object" && "refund" in res && res.refund) {
+    return res.refund;
+  }
+  return res as GatewayRefund;
 };
 
 export const getReconciliation = (period?: string): Promise<ReconciliationSummary> => {

@@ -46,6 +46,32 @@ describe("refundPayment API and client headers", () => {
     expect(parsedBody.reason).toBe("Tenant deposit refund");
   });
 
+  it("refundPayment unwraps nested refund object on HTTP 202 Accepted response", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        message: "refund processing or gateway response ambiguous; reconciliation in progress",
+        refund: {
+          id: "rf_202_accepted",
+          payment_id: "pay_456",
+          amount_paise: 25000,
+          status: "initiated",
+          reason: "Ambiguous timeout retry",
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await refundPayment("pay_456", {
+      amount_paise: 25000,
+      reason: "Ambiguous timeout retry",
+    });
+
+    expect(result.id).toBe("rf_202_accepted");
+    expect(result.status).toBe("initiated");
+    expect(result.amount_paise).toBe(25000);
+  });
+
   it("apiFetch omits Content-Type on GET requests to prevent CORS preflight", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
