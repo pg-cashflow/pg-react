@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { confirmPaymentReport, getPaymentReports, rejectPaymentReport } from "@/api/reports";
 import { getTenants } from "@/api/tenants";
@@ -47,6 +48,19 @@ export const ReportsView: React.FC = () => {
     [tenantsQuery.data]
   );
   const rows = React.useMemo(() => reportsQuery.data ?? [], [reportsQuery.data]);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 120,
+    overscan: 5,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0)
+    : 0;
 
   // Clamp selected index when rows list changes
   React.useEffect(() => {
@@ -143,14 +157,19 @@ export const ReportsView: React.FC = () => {
           emptyMessage={t("owner.reports.empty")}
           onRetry={() => reportsQuery.refetch()}
         >
-          <div className="divide-y divide-hairline">
-            {rows.map((r, idx) => {
+          <div ref={parentRef} className="divide-y divide-hairline max-h-[75vh] overflow-y-auto">
+            {paddingTop > 0 && <div style={{ height: `${paddingTop}px` }} />}
+            {virtualItems.map((virtualRow) => {
+              const r = rows[virtualRow.index];
+              if (!r) return null;
+              const idx = virtualRow.index;
               const isSelected = selectedIndex === idx;
               return (
                 <div
                   key={r.id}
                   ref={(el) => {
                     cardRefs.current[idx] = el;
+                    if (el) rowVirtualizer.measureElement(el);
                   }}
                   tabIndex={0}
                   onClick={() => setSelectedIndex(idx)}
@@ -224,6 +243,7 @@ export const ReportsView: React.FC = () => {
                 </div>
               );
             })}
+            {paddingBottom > 0 && <div style={{ height: `${paddingBottom}px` }} />}
           </div>
         </QueryState>
       </div>

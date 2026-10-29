@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { setupPassbookCache } from "./passbookCache";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,3 +20,9 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Initialize automatic offline passbook synchronization
+if (typeof window !== "undefined") {
+  setupPassbookCache(queryClient);
+}
+

@@ -6,6 +6,7 @@ import { exchangeFirebaseToken, refreshSession, logoutSession } from "@/api/auth
 import { scheduleProactiveRefresh, stopProactiveRefresh, ApiError } from "@/api/client";
 import { queryClient } from "@/lib/queryClient";
 import { clearServiceWorkerCaches } from "@/lib/session";
+import { clearPassbookCache } from "@/lib/passbookCache";
 import { toE164IndianPhone } from "@/lib/utils";
 
 export type SessionStatus = "online" | "degraded" | "anon";
@@ -90,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     stopProactiveRefresh();
     clearRetryTimer();
     queryClient.clear();
+    clearPassbookCache();
     clearServiceWorkerCaches().catch(() => {});
     import("@/auth/firebasePhone").then((m) => m.resetFirebasePhoneAuth()).catch(() => {});
     import("@/lib/firebase")

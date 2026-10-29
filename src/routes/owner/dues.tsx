@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { getDues, markCashPaid, waiveDue, createDueToken, getDueQR, matchDue } from "@/api/dues";
 import { getOwnerDuePay } from "@/api/pay";
 import { getTenants } from "@/api/tenants";
@@ -314,6 +315,7 @@ export const DuesView: React.FC = () => {
 
   const [selectedRowIndex, setSelectedRowIndex] = useState<number>(0);
   const tableRowRefs = React.useRef<(HTMLTableRowElement | null)[]>([]);
+  const parentRef = React.useRef<HTMLDivElement>(null);
 
   const filteredDues = useMemo(() => {
     return dues.filter((d) => {
@@ -322,6 +324,18 @@ export const DuesView: React.FC = () => {
       return true;
     });
   }, [dues, statusFilter]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filteredDues.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 64,
+    overscan: 5,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0)
+    : 0;
 
   // Clamp selected row index when filtered dues change
   React.useEffect(() => {
@@ -400,7 +414,7 @@ export const DuesView: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [filteredDues, selectedRowIndex, payModalDue, waiveModalDue, matchDueRow, qrModal]);
+  }, [filteredDues, selectedRowIndex, payModalDue, waiveModalDue, matchDueRow, qrModal, handleShowQR]);
 
   return (
     <div className="space-y-6">
@@ -490,9 +504,9 @@ export const DuesView: React.FC = () => {
             refetchTenants();
           }}
         >
-          <div className="overflow-x-auto">
+          <div ref={parentRef} className="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase tracking-wider border-b border-hairline">
+              <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase tracking-wider border-b border-hairline sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3.5">{t("owner.dues.thTenant")}</th>
                   <th className="px-6 py-3.5">{t("owner.dues.thDueCode")}</th>
@@ -503,24 +517,39 @@ export const DuesView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">
-                {filteredDues.map((d, idx) => (
-                  <DueTableRow
-                    key={d.id}
-                    due={d}
-                    isSelected={selectedRowIndex === idx}
-                    tenantName={tenantMap.get(d.tenant_id) || "Student / Tenant"}
-                    locale={locale}
-                    t={t}
-                    onSelect={() => setSelectedRowIndex(idx)}
-                    onShowQR={handleShowQR}
-                    onOpenPay={handleOpenPay}
-                    onOpenMatch={handleOpenMatch}
-                    onOpenWaive={handleOpenWaive}
-                    rowRef={(el) => {
-                      tableRowRefs.current[idx] = el;
-                    }}
-                  />
-                ))}
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingTop}px` }} colSpan={6} />
+                  </tr>
+                )}
+                {virtualItems.map((virtualRow) => {
+                  const d = filteredDues[virtualRow.index];
+                  if (!d) return null;
+                  return (
+                    <DueTableRow
+                      key={d.id}
+                      due={d}
+                      isSelected={selectedRowIndex === virtualRow.index}
+                      tenantName={tenantMap.get(d.tenant_id) || "Student / Tenant"}
+                      locale={locale}
+                      t={t}
+                      onSelect={() => setSelectedRowIndex(virtualRow.index)}
+                      onShowQR={handleShowQR}
+                      onOpenPay={handleOpenPay}
+                      onOpenMatch={handleOpenMatch}
+                      onOpenWaive={handleOpenWaive}
+                      rowRef={(el) => {
+                        tableRowRefs.current[virtualRow.index] = el;
+                        if (el) rowVirtualizer.measureElement(el);
+                      }}
+                    />
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingBottom}px` }} colSpan={6} />
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

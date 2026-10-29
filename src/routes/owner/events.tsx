@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { getEvents } from "@/api/events";
 import { getTenants } from "@/api/tenants";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -19,6 +20,19 @@ export const EventsView: React.FC = () => {
   });
 
   const tenantMap = React.useMemo(() => new Map(tenants.map((t) => [t.id, t.name])), [tenants]);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: events.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 80,
+    overscan: 5,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0)
+    : 0;
 
   const getEventIcon = (type: string) => {
     const lower = type.toLowerCase();
@@ -42,30 +56,41 @@ export const EventsView: React.FC = () => {
         emptyMessage="No events logged yet."
         onRetry={() => refetch()}
       >
-        <div className="divide-y divide-hairline">
-          {events.map((evt) => (
-            <div key={eventKey(evt)} className="p-4 hover:bg-accent-tint transition flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-surface mt-0.5">{getEventIcon(evt.event_type)}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold text-ink font-mono uppercase">
-                    {evt.event_type}
-                  </span>
-                  <span className="text-xs text-ink-muted">{formatDate(evt.occurred_at)}</span>
+        <div ref={parentRef} className="divide-y divide-hairline max-h-[75vh] overflow-y-auto">
+          {paddingTop > 0 && <div style={{ height: `${paddingTop}px` }} />}
+          {virtualItems.map((virtualRow) => {
+            const evt = events[virtualRow.index];
+            if (!evt) return null;
+            return (
+              <div
+                key={eventKey(evt)}
+                ref={rowVirtualizer.measureElement}
+                data-index={virtualRow.index}
+                className="p-4 hover:bg-accent-tint transition flex items-start gap-3"
+              >
+                <div className="p-2 rounded-xl bg-surface mt-0.5">{getEventIcon(evt.event_type)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-ink font-mono uppercase">
+                      {evt.event_type}
+                    </span>
+                    <span className="text-xs text-ink-muted">{formatDate(evt.occurred_at)}</span>
+                  </div>
+                  {evt.tenant_id && (
+                    <p className="text-xs text-ink-muted mt-0.5">
+                      Tenant: {tenantMap.get(evt.tenant_id) || evt.tenant_id}
+                    </p>
+                  )}
+                  {evt.payload && (
+                    <pre className="mt-2 p-2 rounded-lg bg-bg text-[11px] font-mono text-ink-muted overflow-x-auto border border-hairline/60">
+                      {JSON.stringify(evt.payload, null, 2)}
+                    </pre>
+                  )}
                 </div>
-                {evt.tenant_id && (
-                  <p className="text-xs text-ink-muted mt-0.5">
-                    Tenant: {tenantMap.get(evt.tenant_id) || evt.tenant_id}
-                  </p>
-                )}
-                {evt.payload && (
-                  <pre className="mt-2 p-2 rounded-lg bg-bg text-[11px] font-mono text-ink-muted overflow-x-auto border border-hairline/60">
-                    {JSON.stringify(evt.payload, null, 2)}
-                  </pre>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
+          {paddingBottom > 0 && <div style={{ height: `${paddingBottom}px` }} />}
         </div>
       </QueryState>
     </div>
