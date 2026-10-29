@@ -663,4 +663,23 @@ export const taIN: Record<MessageKey, string> = {
   "paypanel.phoneRequiredTitle": "Cashfree கட்டணத்திற்கு உங்கள் தொலைபேசி எண் தேவை",
   "paypanel.phoneRequiredDesc": "உங்கள் உரிமையாளர் Cashfree ஆன்லைன் கட்டணத்தை இயக்கியுள்ளார், ஆனால் உங்கள் சுயவிவரத்தில் இன்னும் தொலைபேசி எண் இல்லை. உடனடி UPI / கார்டு கட்டணத்தைத் திறக்க ஒன்றைச் சேர்க்கவும்.",
   "paypanel.updateProfile": "சுயவிவரத்தைப் புதுப்பிக்குக →",
+
+  // Tenant Dashboard additions
+  "tenant.dashboard.passbook": "பாஸ்புக்",
+  "tenant.dashboard.defaultTenantName": "வாடகைதாரர்",
+  "tenant.dashboard.roomNumber": "அறை {room}",
+  "tenant.dashboard.kycReviewTitle": "KYC ஆவணம் மதிப்பாய்வில் உள்ளது",
+  "tenant.dashboard.kycRequiredTitle": "அடையாள சரிபார்ப்பு தேவை",
+  "tenant.dashboard.kycReviewDesc": "நீங்கள் பதிவேற்றிய அடையாளத்தை நிர்வாகம் சரிபார்க்கிறது.",
+  "tenant.dashboard.kycRequiredDesc": "முழு பாஸ்புக் அம்சங்களையும் இயக்க ஆதார் OTP சரிபார்ப்பை முடிக்கவும்.",
+  "tenant.dashboard.onTimeStreak": "சரியான நேர ஸ்ட்ரீக்",
+  "tenant.dashboard.monthsOnTime": "{months} மாதங்கள் சரியான நேரத்தில்",
+  "tenant.dashboard.ptsPassbook": "{points} புள்ளிகள் · பாஸ்புக்",
+  "tenant.dashboard.payCurrentRent": "தற்போதைய வாடகையைச் செலுத்து ({sentence})",
+  "tenant.dashboard.openPassbook": "பாஸ்புக்கை திறக்கவும்",
+  "tenant.dashboard.outstanding": "நிலுவை",
+  "tenant.dashboard.overdue": "தவணை கடந்தது",
+  "tenant.dashboard.yourPassbook": "உங்கள் பாஸ்புக்",
+  "tenant.dashboard.history": "வரலாறு",
+  "tenant.dashboard.noDuesYet": "இன்னும் நிலுவைத் தொகைகள் இல்லை.",
 };

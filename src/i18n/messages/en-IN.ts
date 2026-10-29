@@ -661,6 +661,25 @@ export const enIN = {
   "paypanel.phoneRequiredTitle": "Cashfree checkout requires your phone number",
   "paypanel.phoneRequiredDesc": "Your owner enabled Cashfree online checkout, but your profile has no phone number yet. Add one to unlock instant UPI / card payment.",
   "paypanel.updateProfile": "Update profile →",
+
+  // Tenant Dashboard additions
+  "tenant.dashboard.passbook": "Passbook",
+  "tenant.dashboard.defaultTenantName": "Tenant",
+  "tenant.dashboard.roomNumber": "Room {room}",
+  "tenant.dashboard.kycReviewTitle": "KYC Document Under Review",
+  "tenant.dashboard.kycRequiredTitle": "Identity Verification Required",
+  "tenant.dashboard.kycReviewDesc": "Your uploaded ID is being verified by management.",
+  "tenant.dashboard.kycRequiredDesc": "Complete Aadhaar OTP verification to enable full passbook features.",
+  "tenant.dashboard.onTimeStreak": "On-time streak",
+  "tenant.dashboard.monthsOnTime": "{months} months on time",
+  "tenant.dashboard.ptsPassbook": "{points} pts · passbook",
+  "tenant.dashboard.payCurrentRent": "Pay current rent ({sentence})",
+  "tenant.dashboard.openPassbook": "Open passbook",
+  "tenant.dashboard.outstanding": "Outstanding",
+  "tenant.dashboard.overdue": "Overdue",
+  "tenant.dashboard.yourPassbook": "Your passbook",
+  "tenant.dashboard.history": "History",
+  "tenant.dashboard.noDuesYet": "No dues yet.",
 };
 
 export type MessageKey = keyof typeof enIN;

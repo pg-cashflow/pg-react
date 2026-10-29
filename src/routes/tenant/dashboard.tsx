@@ -64,11 +64,11 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
     >
       <div className="space-y-6 pb-4">
         <div>
-          <div className="t-body-sm text-ink-muted">Passbook</div>
-          <div className="t-h1">{profile?.name ?? "Tenant"}</div>
+          <div className="t-body-sm text-ink-muted">{t("tenant.dashboard.passbook")}</div>
+          <div className="t-h1">{profile?.name ?? t("tenant.dashboard.defaultTenantName")}</div>
           {profile?.room_number && (
             <div className="t-body-sm text-ink-muted mt-1">
-              <div>Room {profile.room_number}</div>
+              <div>{t("tenant.dashboard.roomNumber", { room: profile.room_number })}</div>
             </div>
           )}
         </div>
@@ -92,13 +92,13 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
               <div className="min-w-0">
                 <p className="t-body font-semibold">
                   {isKycPendingReview
-                    ? "KYC Document Under Review"
-                    : "Identity Verification Required"}
+                    ? t("tenant.dashboard.kycReviewTitle")
+                    : t("tenant.dashboard.kycRequiredTitle")}
                 </p>
                 <p className="t-caption text-ink-muted mt-0.5 truncate">
                   {isKycPendingReview
-                    ? "Your uploaded ID is being verified by management."
-                    : "Complete Aadhaar OTP verification to enable full passbook features."}
+                    ? t("tenant.dashboard.kycReviewDesc")
+                    : t("tenant.dashboard.kycRequiredDesc")}
                 </p>
               </div>
             </div>
@@ -124,12 +124,14 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
             <div className="min-w-0">
               <div className="t-caption text-accent font-semibold flex items-center gap-1">
                 <Flame className="h-3.5 w-3.5" />
-                On-time streak
+                {t("tenant.dashboard.onTimeStreak")}
               </div>
-              <div className="t-h1 text-accent mt-0.5">{points?.on_time_months ?? 0} months on time</div>
+              <div className="t-h1 text-accent mt-0.5">
+                {t("tenant.dashboard.monthsOnTime", { months: points?.on_time_months ?? 0 })}
+              </div>
               <div className="t-body-sm text-ink-muted mt-0.5 flex items-center gap-1">
                 <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                {points?.balance ?? 0} pts · passbook
+                {t("tenant.dashboard.ptsPassbook", { points: points?.balance ?? 0 })}
               </div>
             </div>
           </div>
@@ -139,32 +141,34 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
               onClick={() => onNavigate("dues")}
               className="w-full h-12 rounded-[10px] t-body font-semibold bg-accent text-white"
             >
-              {current ? `Pay current rent (${formatDueSentence(current, t, locale)})` : "Open passbook"}
+              {current
+                ? t("tenant.dashboard.payCurrentRent", { sentence: formatDueSentence(current, t, locale) })
+                : t("tenant.dashboard.openPassbook")}
             </button>
           </div>
         </section>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-[14px] border border-hairline bg-surface p-4">
-            <div className="t-caption text-ink-muted">Outstanding</div>
+            <div className="t-caption text-ink-muted">{t("tenant.dashboard.outstanding")}</div>
             <AmountBadge amount={outstanding} variant="warning" className="t-amount-lg block mt-1" />
             <div className="t-caption text-ink-muted mt-1">{formatPendingDuesCount(pendingCount, t)}</div>
           </div>
           <div className="rounded-[14px] border border-hairline bg-surface p-4">
-            <div className="t-caption text-ink-muted">Overdue</div>
+            <div className="t-caption text-ink-muted">{t("tenant.dashboard.overdue")}</div>
             <div className="t-display-num text-danger mt-1">{overdueCount}</div>
           </div>
         </div>
 
         <section>
           <div className="flex items-center justify-between px-1 mb-3">
-            <h2 className="t-h2">Your passbook</h2>
+            <h2 className="t-h2">{t("tenant.dashboard.yourPassbook")}</h2>
             <button type="button" onClick={() => onNavigate("dues")} className="t-caption text-accent font-semibold">
-              History
+              {t("tenant.dashboard.history")}
             </button>
           </div>
           <div className="space-y-2.5">
-            {recent.length === 0 && <p className="t-body-sm text-ink-muted">No dues yet.</p>}
+            {recent.length === 0 && <p className="t-body-sm text-ink-muted">{t("tenant.dashboard.noDuesYet")}</p>}
             {recent.map((d) => (
               <button
                 key={d.id}

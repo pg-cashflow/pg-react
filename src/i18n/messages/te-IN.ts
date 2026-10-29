@@ -663,4 +663,23 @@ export const teIN: Record<MessageKey, string> = {
   "paypanel.phoneRequiredTitle": "Cashfree చెక్‌అవుట్‌కు మీ ఫోన్ నంబర్ అవసరం",
   "paypanel.phoneRequiredDesc": "మీ యజమాని Cashfree ఆన్‌లైన్ చెక్‌అవుట్‌ను ప్రారంభించారు, కానీ మీ ప్రొఫైల్‌లో ఇంకా ఫోన్ నంబర్ లేదు. తక్షణ UPI / కార్డ్ చెల్లింపును అన్‌లాక్ చేయడానికి ఒకదాన్ని జోడించండి.",
   "paypanel.updateProfile": "ప్రొఫైల్‌ను నవీకరించండి →",
+
+  // Tenant Dashboard additions
+  "tenant.dashboard.passbook": "పాస్‌బుక్",
+  "tenant.dashboard.defaultTenantName": "అద్దెదారు",
+  "tenant.dashboard.roomNumber": "గది {room}",
+  "tenant.dashboard.kycReviewTitle": "KYC పత్రం పరిశీలనలో ఉంది",
+  "tenant.dashboard.kycRequiredTitle": "గుర్తింపు ధృవీకరణ అవసరం",
+  "tenant.dashboard.kycReviewDesc": "మీరు అప్‌లోడ్ చేసిన గుర్తింపు కార్డును యాజమాన్యం పరిశీలిస్తోంది.",
+  "tenant.dashboard.kycRequiredDesc": "పూర్తి పాస్‌బుక్ ఫీచర్లను ప్రారంభించడానికి ఆధార్ OTP ధృవీకరణను పూర్తి చేయండి.",
+  "tenant.dashboard.onTimeStreak": "సమయానికి చెల్లింపుల స్ట్రీక్",
+  "tenant.dashboard.monthsOnTime": "{months} నెలలు సమయానికి",
+  "tenant.dashboard.ptsPassbook": "{points} పాయింట్లు · పాస్‌బుక్",
+  "tenant.dashboard.payCurrentRent": "ప్రస్తుత అద్దెను చెల్లించండి ({sentence})",
+  "tenant.dashboard.openPassbook": "పాస్‌బుక్ తెరవండి",
+  "tenant.dashboard.outstanding": "బకాయి",
+  "tenant.dashboard.overdue": "గడువు ముగిసినది",
+  "tenant.dashboard.yourPassbook": "మీ పాస్‌బుక్",
+  "tenant.dashboard.history": "చరిత్ర",
+  "tenant.dashboard.noDuesYet": "ఇంకా బకాయిలు లేవు.",
 };

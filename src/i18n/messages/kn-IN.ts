@@ -664,4 +664,23 @@ export const knIN: Record<MessageKey, string> = {
   "paypanel.phoneRequiredTitle": "Cashfree ಚೆಕ್‌ಔಟ್‌ಗೆ ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆ ಅಗತ್ಯವಿದೆ",
   "paypanel.phoneRequiredDesc": "ನಿಮ್ಮ ಮಾಲೀಕರು Cashfree ಆನ್‌ಲೈನ್ ಚೆಕ್‌ಔಟ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ್ದಾರೆ, ಆದರೆ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಇನ್ನೂ ಫೋನ್ ಸಂಖ್ಯೆ ಇಲ್ಲ. ತ್ವರಿತ UPI / ಕಾರ್ಡ್ ಪಾವತಿಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಒಂದನ್ನು ಸೇರಿಸಿ.",
   "paypanel.updateProfile": "ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಿ →",
+
+  // Tenant Dashboard additions
+  "tenant.dashboard.passbook": "ಪಾಸ್‌ಬುಕ್",
+  "tenant.dashboard.defaultTenantName": "ಬಾಡಿಗೆದಾರ",
+  "tenant.dashboard.roomNumber": "ಕೊಠಡಿ {room}",
+  "tenant.dashboard.kycReviewTitle": "KYC ದಾಖಲೆ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ",
+  "tenant.dashboard.kycRequiredTitle": "ಗುರುತು ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
+  "tenant.dashboard.kycReviewDesc": "ನಿಮ್ಮ ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಗುರುತನ್ನು ನಿರ್ವಹಣೆ ಪರಿಶೀಲಿಸುತ್ತಿದೆ.",
+  "tenant.dashboard.kycRequiredDesc": "ಸಂಪೂರ್ಣ ಪಾಸ್‌ಬುಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಆಧಾರ್ OTP ಪರಿಶೀಲನೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.",
+  "tenant.dashboard.onTimeStreak": "ಸಮಯಕ್ಕೆ ಸರಿಯಾದ ಸ್ಟ್ರೀಕ್",
+  "tenant.dashboard.monthsOnTime": "{months} ತಿಂಗಳುಗಳು ಸಮಯಕ್ಕೆ ಸರಿಯಾಗಿ",
+  "tenant.dashboard.ptsPassbook": "{points} ಅಂಕಗಳು · ಪಾಸ್‌ಬುಕ್",
+  "tenant.dashboard.payCurrentRent": "ಪ್ರಸ್ತುತ ಬಾಡಿಗೆಯನ್ನು ಪಾವತಿಸಿ ({sentence})",
+  "tenant.dashboard.openPassbook": "ಪಾಸ್‌ಬುಕ್ ತೆರೆಯಿರಿ",
+  "tenant.dashboard.outstanding": "ಬಾಕಿ",
+  "tenant.dashboard.overdue": "ಮೀರಿದ ಗಡುವು",
+  "tenant.dashboard.yourPassbook": "ನಿಮ್ಮ ಪಾಸ್‌ಬುಕ್",
+  "tenant.dashboard.history": "ಇತಿಹಾಸ",
+  "tenant.dashboard.noDuesYet": "ಇನ್ನೂ ಯಾವುದೇ ಬಾಕಿಗಳಿಲ್ಲ.",
 };
