@@ -40,7 +40,7 @@
 - **Payments:** Dual-mode payment architecture:
   - **Manual UPI (P2P Proof):** Dynamic QR code (`qrcode` 1.5.4), deep links (`upi://pay`), PG VPA, and 12-digit UTR payment slip submission with screenshot upload and client-side OCR extraction (`upiScreenshotExtractor.ts`).
   - **Payment Gateway:** Cashfree Checkout SDK (`payment_session_id`) integration (`src/lib/cashfree.ts`).
-- **KYC & Identity Verification (ADR-004):** DPDP Act 2023 compliant identity architecture supporting Tier 1 Cashfree DigiLocker redirects, Tier 2 UIDAI Secure QR offline parsing (`aadhaarExtractor.ts`), consent recording/revocation with PII scrubbing, and owner duplicate audit reviews.
+- **KYC & Identity Verification (ADR-004):** DPDP Act 2023 compliant identity architecture supporting Tier 1 Cashfree Secure ID Aadhaar OTP fast-path (~20s verification), Tier 2 UIDAI Secure QR offline parsing (`aadhaarExtractor.ts`), document upload with owner manual review fallback, consent recording/revocation with PII scrubbing, and owner duplicate audit reviews.
 - **Push & Notifications:** Universal In-App Notification Center (`<NotificationCenter />`) with unread count polling, action filtering (`is_action_required`), read state mutation, and Web Push notifications via Service Worker and VAPID public key subscription (`src/push/subscribe.ts`).
 - **Global Search:** Command palette (`Cmd+K`) / search in `TopBar` querying `GET /api/search` (mode: lexical or hybrid) with client-side navigation shortcuts (`src/lib/navIndex.ts`).
 - **PWA & Offline:** `vite-plugin-pwa` 1.3.0 and `workbox-window` 7.4.1 configuring standalone web application manifest, auto-updating service worker (`registerType: 'autoUpdate'`), and selective `NetworkOnly` runtime caching for all data API calls.
