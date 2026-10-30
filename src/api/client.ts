@@ -160,6 +160,9 @@ async function handleResponse<T>(
     let errorMsg = "An error occurred";
     let errorCode: string | undefined;
     let details: Record<string, unknown> | undefined;
+    // A body can be read once. Keep a clone so a non-JSON error page (for example an HTML
+    // 502/530 from the edge when the origin is down) can still be read as text.
+    const fallbackBody = typeof res.clone === "function" ? res.clone() : null;
     try {
       const data = await res.json();
       errorMsg = data.message || data.error || JSON.stringify(data);
@@ -170,7 +173,7 @@ async function handleResponse<T>(
         details = data as Record<string, unknown>;
       }
     } catch {
-      errorMsg = await res.text();
+      errorMsg = await readNonJsonErrorMessage(fallbackBody, res.status);
     }
     const mapped = mapApiErrorMessage(res.status, errorMsg);
     if (res.status === 403 && (errorCode === "auth.accessRevoked" || /access revoked/i.test(mapped))) {
@@ -202,6 +205,25 @@ async function handleResponse<T>(
     }
     throw err;
   }
+}
+
+/**
+ * Message for an error response whose body is not JSON. HTML or empty bodies come from
+ * proxies and edges (Cloudflare 502/504/530), so show a plain status message, never markup.
+ */
+async function readNonJsonErrorMessage(body: Response | null, status: number): Promise<string> {
+  let text = "";
+  try {
+    text = body ? (await body.text()).trim() : "";
+  } catch {
+    text = "";
+  }
+  const looksLikeMarkup = text.startsWith("<") || /<\/?(html|body|head)\b/i.test(text);
+  if (text && !looksLikeMarkup && text.length <= 200) return text;
+  if (status === 502 || status === 503 || status === 504 || status === 530) {
+    return "The service is temporarily unavailable. Please try again in a moment.";
+  }
+  return `Something went wrong (HTTP ${status}). Please try again.`;
 }
 
 function mapApiErrorMessage(status: number, raw: string): string {
@@ -319,6 +341,12 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
           allowSessionClearOn401: false,
         });
       }
+      if (lastRefreshError instanceof ApiError && lastRefreshError.status >= 500) {
+        throw lastRefreshError;
+      }
+      if (lastRefreshError && isNetworkFailure(lastRefreshError)) {
+        throw new ApiError(0, networkFailureMessage());
+      }
       throw new ApiError(401, "Session expired or unauthorized");
     }
 
@@ -335,7 +363,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 export async function apiFetchBlob(path: string, options: RequestInit = {}): Promise<Blob> {
   const url = resolveUrl(path);
   try {
-    const res = await fetch(url, {
+    const res = await timedFetch(url, {
       ...options,
       credentials: options.credentials ?? "include",
       headers: authHeaders(options),
@@ -346,7 +374,7 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
       const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
-        const retryRes = await fetch(url, {
+        const retryRes = await timedFetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
           headers: authHeaders(options),
@@ -354,6 +382,12 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
         return await handleResponse(retryRes, () => retryRes.blob(), {
           allowSessionClearOn401: false,
         });
+      }
+      if (lastRefreshError instanceof ApiError && lastRefreshError.status >= 500) {
+        throw lastRefreshError;
+      }
+      if (lastRefreshError && isNetworkFailure(lastRefreshError)) {
+        throw new ApiError(0, networkFailureMessage());
       }
       throw new ApiError(401, "Session expired or unauthorized");
     }

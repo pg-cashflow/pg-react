@@ -133,6 +133,40 @@ describe("api/client proactive refresh", () => {
     window.removeEventListener("pg:unauthorized", unauthorizedSpy);
   });
 
+  it("apiFetch throws the 503 error when refresh fails with 503 instead of false session expiration", async () => {
+    setAccessToken("current-token");
+    setStoredUser({ id: "u1", role: "tenant", phone: "+919000000000" });
+    const unauthorizedSpy = vi.fn();
+    window.addEventListener("pg:unauthorized", unauthorizedSpy);
+
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("/auth/refresh")) {
+        return Promise.resolve({
+          ok: false,
+          status: 503,
+          json: async () => ({ error: "Database unavailable", message: "Database unavailable" }),
+        });
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: "Unauthorized" }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiFetch("/tenant/dues")).rejects.toMatchObject({
+      status: 503,
+      message: "Database unavailable",
+    });
+
+    // Session should remain preserved
+    expect(unauthorizedSpy).not.toHaveBeenCalled();
+    expect(getStoredUser()).not.toBeNull();
+
+    window.removeEventListener("pg:unauthorized", unauthorizedSpy);
+  });
+
 
   it("executeRefresh handles revoked session (AUTH_ACCESS_REVOKED) without retry loop", async () => {
     setAccessToken("expiring-token");
@@ -214,6 +248,64 @@ describe("api/client proactive refresh", () => {
     expect(getStoredUser()).not.toBeNull();
 
     window.removeEventListener("pg:unauthorized", unauthorizedSpy);
+  });
+});
+
+describe("api/client non-JSON error bodies", () => {
+  beforeEach(() => {
+    setAccessToken("tok");
+    setStoredUser({ id: "u1", role: "tenant", phone: "+918008281429" });
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    setAccessToken(null);
+    setStoredUser(null);
+  });
+
+  it("turns an HTML 502 from the edge into a friendly ApiError, not a raw TypeError", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response("<html><body>Bad gateway</body></html>", {
+          status: 502,
+          headers: { "content-type": "text/html" },
+        })
+      )
+    );
+    await expect(apiFetch("/tenant/dues")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 502,
+      message: expect.stringMatching(/temporarily unavailable/i),
+    });
+  });
+
+  it("keeps a short plain-text error body as the message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("upstream timeout", { status: 504 }))
+    );
+    await expect(apiFetch("/tenant/dues")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 504,
+      message: "upstream timeout",
+    });
+  });
+
+  it("still surfaces JSON error code and message unchanged", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: "nope", code: "request.invalidBody" }), {
+          status: 400,
+          headers: { "content-type": "application/json" },
+        })
+      )
+    );
+    await expect(apiFetch("/tenant/dues")).rejects.toMatchObject({
+      status: 400,
+      code: "request.invalidBody",
+      message: "nope",
+    });
   });
 });
 
