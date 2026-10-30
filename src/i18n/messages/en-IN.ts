@@ -278,7 +278,6 @@ export const enIN = {
   "kyc.card.uidaiVerified": "UIDAI Verified",
   "kyc.card.method": "Method",
   "kyc.card.methodDirectOtp": "Direct Aadhaar OTP",
-  "kyc.card.methodDigilocker": "DigiLocker",
   "kyc.card.methodManual": "Manual ID Review",
   "kyc.card.methodQr": "Secure QR",
   "kyc.card.verifiedOn": "Verified on {date}",

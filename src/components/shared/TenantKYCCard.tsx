@@ -413,8 +413,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <span className="t-caption font-medium uppercase tracking-wider text-ink-muted">
                 {kyc?.method === "aadhaar_otp"
                   ? t("kyc.card.methodDirectOtp")
-                  : kyc?.method === "digilocker"
-                  ? t("kyc.card.methodDigilocker")
                   : kyc?.method === "ocr"
                   ? t("kyc.card.methodManual")
                   : t("kyc.card.methodQr")}

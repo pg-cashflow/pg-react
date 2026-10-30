@@ -7,7 +7,6 @@ import {
   vacateTenant,
   attachPhone,
   prorateTenant,
-  settleDeposit,
   getTenantIdPhotoBlob,
   type UpdateTenantPayload,
 } from "@/api/tenants";
@@ -94,8 +93,6 @@ export const TenantsView: React.FC = () => {
   const [editDue, setEditDue] = useState(1);
   const [phone, setPhone] = useState("");
   const [vacateDate, setVacateDate] = useState(localDateInputValue());
-  const [refund, setRefund] = useState("");
-  const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{ title: string; description: string; run: () => void } | null>(null);
 
@@ -113,8 +110,6 @@ export const TenantsView: React.FC = () => {
     setEditRent(paiseToRupeeInput(t.rent_amount));
     setEditDue(t.due_day ?? 5);
     setPhone("");
-    setRefund("");
-    setReason("");
     setError(null);
   };
 
@@ -359,22 +354,6 @@ export const TenantsView: React.FC = () => {
                 Prorate
               </button>
             </div>
-
-            <div className="flex gap-2">
-              <input value={refund} onChange={(e) => setRefund(e.target.value)} placeholder="Refund ₹" type="number" className="flex-1 px-3 py-2 bg-surface rounded-xl text-sm text-ink" />
-              <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" className="flex-1 px-3 py-2 bg-surface rounded-xl text-sm text-ink" />
-              <button
-                onClick={() =>
-                  settleDeposit(selected.id, rupeesToPaise(refund), reason || undefined)
-                    .then(invalidate)
-                    .catch((e: Error) => setError(e.message))
-                }
-                className="px-3 py-2 rounded-xl bg-surface text-sm"
-              >
-                Settle deposit
-              </button>
-            </div>
-            <p className="text-xs text-ink-muted">Deposit settle is a ledger event — money moves outside the app.</p>
           </div>
         </div>
       )}

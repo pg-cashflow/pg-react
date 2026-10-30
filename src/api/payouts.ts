@@ -6,9 +6,11 @@ import type {
   ApprovePayoutBatchInput,
   RequestPayoutBatchOTPResponse,
   PayeeType,
+  TenantDeparture,
 } from "@pg/types";
 
 export interface CreatePayeeInput {
+  tenant_id?: string;
   payee_type: PayeeType;
   name: string;
   phone?: string;
@@ -101,4 +103,25 @@ export const dispatchPayoutBatch = async (
 
 export const exportPayoutBatchCSV = async (batchId: string): Promise<Blob> => {
   return apiFetchBlob(`/owner/payouts/batches/${batchId}/export`);
+};
+
+export interface DisburseCashInput {
+  receipt_ref: string;
+  notes?: string;
+  otp?: string;
+  firebase_id_token?: string;
+  reauth_confirmation?: string;
+}
+
+export const disburseDepartureCash = async (
+  departureId: string,
+  input: DisburseCashInput
+): Promise<{ departure: TenantDeparture }> => {
+  return apiFetch<{ departure: TenantDeparture }>(
+    `/owner/departures/${departureId}/disburse-cash`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    }
+  );
 };

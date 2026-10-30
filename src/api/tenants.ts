@@ -57,15 +57,6 @@ export const prorateTenant = (id: string, vacateDate: string): Promise<unknown> 
     body: JSON.stringify({ vacate_date: vacateDate }),
   });
 
-export const settleDeposit = (
-  id: string,
-  refundedAmountPaise: Paise,
-  reason?: string
-): Promise<{ ok: boolean }> =>
-  apiFetch(`/owner/tenants/${id}/deposit/settle`, {
-    method: "POST",
-    body: JSON.stringify({ refunded_amount_paise: refundedAmountPaise, reason }),
-  });
 
 export const getTenantIdPhotoBlob = (id: string): Promise<Blob> =>
   apiFetchBlob(`/owner/tenants/${id}/id-photo`);

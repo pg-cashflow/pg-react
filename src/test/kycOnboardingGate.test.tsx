@@ -96,7 +96,7 @@ describe("TenantKYCOnboardingGate", () => {
       verification: {
         id: "v-ok",
         status: "verified",
-        method: "digilocker",
+        method: "aadhaar_otp",
         masked_uid: "9876",
         verified_at: "2026-10-17T12:00:00Z",
         created_at: "2026-10-17T11:59:00Z",

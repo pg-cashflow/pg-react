@@ -280,7 +280,6 @@ export const taIN: Record<MessageKey, string> = {
   "kyc.card.uidaiVerified": "UIDAI சரிபார்க்கப்பட்டது",
   "kyc.card.method": "முறை",
   "kyc.card.methodDirectOtp": "நேரடி ஆதார் OTP",
-  "kyc.card.methodDigilocker": "டிஜிலாக்கர்",
   "kyc.card.methodManual": "கையேடு அடையாள ஆய்வு",
   "kyc.card.methodQr": "பாதுகாப்பான QR",
   "kyc.card.verifiedOn": "{date} அன்று சரிபார்க்கப்பட்டது",

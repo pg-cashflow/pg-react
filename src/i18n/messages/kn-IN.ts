@@ -281,7 +281,6 @@ export const knIN: Record<MessageKey, string> = {
   "kyc.card.uidaiVerified": "UIDAI ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
   "kyc.card.method": "ವಿಧಾನ",
   "kyc.card.methodDirectOtp": "ನೇರ ಆಧಾರ್ OTP",
-  "kyc.card.methodDigilocker": "ಡಿಜಿಲಾಕರ್",
   "kyc.card.methodManual": "ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆ",
   "kyc.card.methodQr": "ಸುರಕ್ಷಿತ QR",
   "kyc.card.verifiedOn": "{date} ರಂದು ಪರಿಶೀಲಿಸಲಾಗಿದೆ",

@@ -398,7 +398,7 @@ export type KYCStatus =
   | "expired"
   | "revoked";
 
-export type KYCMethod = "digilocker" | "aadhaar_otp" | "ocr" | "qr";
+export type KYCMethod = "aadhaar_otp" | "ocr" | "qr";
 
 export interface KYCVerification {
   id: string;
@@ -807,6 +807,35 @@ export interface PayoutItem {
   failure_reason?: string | null;
   cf_transfer_id?: string | null;
   retry_of?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DepartureStatus = "pending" | "inspected" | "approved" | "refunded" | "cancelled";
+export type SettlementMode = "payout" | "offline_cash";
+
+export interface TenantDeparture {
+  id: string;
+  tenant_id: string;
+  property_id: string;
+  notice_given_at: string;
+  planned_vacate_date: string;
+  actual_vacate_date?: string | null;
+  inspected_at?: string | null;
+  sla_deadline_at?: string | null;
+  deposit_amount_paise: number;
+  unused_rent_refund_paise: number;
+  prorated_rent_owed_paise: number;
+  outstanding_dues_netted_paise: number;
+  deductions_paise: number;
+  net_refund_paise: number;
+  receivable_balance_paise: number;
+  status: DepartureStatus;
+  notes?: string | null;
+  settlement_mode: SettlementMode;
+  cash_receipt_ref?: string | null;
+  cash_disbursed_at?: string | null;
+  cash_disbursed_by?: string | null;
   created_at: string;
   updated_at: string;
 }
