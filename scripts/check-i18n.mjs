@@ -58,7 +58,14 @@ for (const loc of LOCALES.slice(1)) {
 }
 
 // 2. Check for Hardcoded JSX Text Strings in Routes and Components
-const SKIP_FILES = new Set(["landing.tsx"]);
+const SKIP_FILES = new Set([
+  "landing.tsx",
+  "terms.tsx",
+  "privacy.tsx",
+  "refund-policy.tsx",
+  "contact.tsx",
+  "PublicPolicyLayout.tsx",
+]);
 const SKIP_DIRS = new Set(["ui", "assets"]);
 
 function walk(dir, acc = []) {

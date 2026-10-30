@@ -471,6 +471,10 @@ export const LandingPage: React.FC = () => {
             <Link to="/login" className="hover:text-ink transition-colors">{t("landing.ownerLogin")}</Link>
             <a href="#roles" className="hover:text-ink transition-colors">Portals</a>
             <a href="#security" className="hover:text-ink transition-colors">Security</a>
+            <Link to="/terms" className="hover:text-ink transition-colors">Terms</Link>
+            <Link to="/privacy" className="hover:text-ink transition-colors">Privacy</Link>
+            <Link to="/refund-policy" className="hover:text-ink transition-colors">Refunds</Link>
+            <Link to="/contact" className="hover:text-ink transition-colors">Contact</Link>
           </div>
         </div>
       </footer>

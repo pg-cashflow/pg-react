@@ -8,8 +8,13 @@ import { CacheableResponsePlugin } from "workbox-cacheable-response";
 
 declare let self: ServiceWorkerGlobalScope;
 
-// Activate new service worker immediately without waiting for existing tabs to close
-self.skipWaiting();
+// Defer activation of new service worker until explicitly signaled or all tabs are closed
+// to avoid interrupting active payment transactions or mutating state mid-flight.
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 clientsClaim();
 
 // Cleanup old cache versions automatically

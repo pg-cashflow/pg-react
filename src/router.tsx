@@ -87,6 +87,10 @@ const InvitePage = lazyView(() => import("@/routes/invite"), "InvitePage");
 const LoginPage = lazyView(() => import("@/routes/login"), "LoginPage");
 const AccessDeniedView = lazyView(() => import("@/routes/access-denied"), "AccessDeniedView");
 const NotFoundView = lazyView(() => import("@/routes/not-found"), "NotFoundView");
+const TermsPage = lazyView(() => import("@/routes/terms"), "TermsPage");
+const PrivacyPage = lazyView(() => import("@/routes/privacy"), "PrivacyPage");
+const RefundPolicyPage = lazyView(() => import("@/routes/refund-policy"), "RefundPolicyPage");
+const ContactPage = lazyView(() => import("@/routes/contact"), "ContactPage");
 
 // Lazy-loaded Owner Views
 const JoinsView = lazyView(() => import("@/routes/owner/joins"), "JoinsView");
@@ -318,6 +322,30 @@ const deniedRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/denied",
   component: AccessDeniedView,
+});
+
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/terms",
+  component: TermsPage,
+});
+
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/privacy",
+  component: PrivacyPage,
+});
+
+const refundPolicyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/refund-policy",
+  component: RefundPolicyPage,
+});
+
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/contact",
+  component: ContactPage,
 });
 
 const ownerRoute = createRoute({
@@ -679,6 +707,10 @@ const routeTree = rootRoute.addChildren([
   activationRoute,
   joinRoute,
   deniedRoute,
+  termsRoute,
+  privacyRoute,
+  refundPolicyRoute,
+  contactRoute,
   rootDashboard,
   rootJoinRequests,
   rootJoins,

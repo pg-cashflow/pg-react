@@ -202,6 +202,10 @@ const landingHtml = `
         <a href="/login" class="hover:text-ink transition-colors">Owner Sign In</a>
         <a href="#roles" class="hover:text-ink transition-colors">Portals</a>
         <a href="#security" class="hover:text-ink transition-colors">Security</a>
+        <a href="/terms" class="hover:text-ink transition-colors">Terms</a>
+        <a href="/privacy" class="hover:text-ink transition-colors">Privacy</a>
+        <a href="/refund-policy" class="hover:text-ink transition-colors">Refunds</a>
+        <a href="/contact" class="hover:text-ink transition-colors">Contact</a>
       </div>
     </div>
   </footer>
@@ -217,3 +221,160 @@ const updatedHtml = currentHtml.replace(
 const landingHtmlPath = path.resolve(__dirname, "../dist/landing.html");
 fs.writeFileSync(landingHtmlPath, updatedHtml, "utf-8");
 console.log("✓ Pre-rendered static landing page written to dist/landing.html (dist/index.html preserved clean)");
+
+function writeStaticPage(routeSlug, title, subtitle, sections) {
+  const sectionsHtml = sections
+    .map(
+      (s) => `
+    <section class="space-y-3 mb-8">
+      <h2 class="t-h2 text-ink font-semibold">${s.heading}</h2>
+      ${s.paragraphs.map((p) => `<p class="t-body-sm text-ink-muted leading-relaxed">${p}</p>`).join("")}
+      ${s.list ? `<ul class="list-disc pl-5 space-y-1.5 t-body-sm text-ink-muted">${s.list.map((li) => `<li>${li}</li>`).join("")}</ul>` : ""}
+    </section>`
+    )
+    .join("");
+
+  const pageHtml = `
+<div class="min-h-screen bg-bg text-ink flex flex-col">
+  <header class="sticky top-0 z-30 border-b border-hairline bg-surface/90 backdrop-blur-md">
+    <nav class="mx-auto max-w-5xl px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/landing" class="t-h3 font-bold tracking-tight text-ink flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+          <span>PG Cashflow</span>
+        </a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/" class="hidden sm:inline-flex items-center h-9 px-3.5 rounded-[10px] border border-hairline bg-surface t-caption font-semibold text-ink">Join Property</a>
+        <a href="/login" class="inline-flex items-center h-9 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold">Owner Sign In</a>
+      </div>
+    </nav>
+  </header>
+  <main class="flex-1 py-10 sm:py-16 px-4 sm:px-6">
+    <div class="mx-auto max-w-3xl">
+      <div class="mb-8">
+        <a href="/landing" class="inline-flex items-center gap-1.5 t-caption font-medium text-ink-muted hover:text-accent mb-4">&larr; Back to Overview</a>
+        <div class="t-caption uppercase font-semibold text-accent tracking-wider mb-2">Compliance &amp; Governance</div>
+        <h1 class="t-display text-ink font-bold tracking-tight">${title}</h1>
+        <p class="t-body text-ink-muted mt-2">${subtitle}</p>
+        <p class="t-caption text-ink-muted mt-3">Last Updated: October 30, 2026</p>
+      </div>
+      <div class="rounded-[14px] border border-hairline bg-surface p-6 sm:p-10 shadow-xs">
+        ${sectionsHtml}
+      </div>
+    </div>
+  </main>
+  <footer class="border-t border-hairline bg-surface py-10 px-4 sm:px-6 mt-auto">
+    <div class="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="w-2 h-2 rounded-full bg-accent"></span>
+        <span class="t-h3 font-bold text-ink">PG Cashflow</span>
+        <span class="t-body-sm text-ink-muted">Built for Indian PGs and hostels.</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-5 t-caption font-medium text-ink-muted">
+        <a href="/terms" class="hover:text-ink">Terms of Service</a>
+        <a href="/privacy" class="hover:text-ink">Privacy Policy</a>
+        <a href="/refund-policy" class="hover:text-ink">Refund Policy</a>
+        <a href="/contact" class="hover:text-ink">Contact Us</a>
+        <a href="/landing" class="hover:text-ink">Overview</a>
+      </div>
+    </div>
+  </footer>
+</div>`.trim();
+
+  const rendered = currentHtml.replace('<div id="root"></div>', `<div id="root">${pageHtml}</div>`);
+  const flatPath = path.resolve(__dirname, `../dist/${routeSlug}.html`);
+  fs.writeFileSync(flatPath, rendered, "utf-8");
+
+  const dirPath = path.resolve(__dirname, `../dist/${routeSlug}`);
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+  fs.writeFileSync(path.resolve(dirPath, "index.html"), rendered, "utf-8");
+  console.log(`✓ Pre-rendered static policy page written to dist/${routeSlug}.html and dist/${routeSlug}/index.html`);
+}
+
+writeStaticPage("terms", "Terms of Service", "Operating terms and conditions governing the use of the PG Cashflow platform.", [
+  {
+    heading: "1. Platform Nature & Scope",
+    paragraphs: [
+      "PG Cashflow is a technology platform providing digital ledger management, automated rent collection records, daily operational workflows, and verified tenant onboarding infrastructure for paying guest accommodations, co-living spaces, and student hostels across India.",
+      "The Platform acts solely as a technological intermediary connecting property owners/operators, designated managers, and residents."
+    ]
+  },
+  {
+    heading: "2. Payments, Dues & Gateway Processing",
+    paragraphs: [
+      "All financial transactions (rent payments, security deposits, and operational dues) are routed through authorized, RBI-regulated payment aggregators (including Cashfree Payments India Pvt. Ltd.)."
+    ],
+    list: [
+      "Rent dues generated with specific reference identifiers (e.g., PG-XXXXXX) reflect contractual obligations set by the respective property owner.",
+      "The Platform records transaction receipts and updates ledgers upon receiving cryptographic confirmation from the payment gateway."
+    ]
+  },
+  {
+    heading: "3. Governing Law & Jurisdiction",
+    paragraphs: [
+      "These Terms are governed by the laws of India. Any disputes arising hereunder shall be subject to the exclusive jurisdiction of the competent courts in Bengaluru, Karnataka, India."
+    ]
+  }
+]);
+
+writeStaticPage("privacy", "Privacy Policy", "How PG Cashflow handles, protects, and stores personal data under the Digital Personal Data Protection (DPDP) Act, 2023.", [
+  {
+    heading: "1. Data Fiduciary & Compliance",
+    paragraphs: [
+      "This Privacy Notice outlines how PG Cashflow operates as a Data Fiduciary under the Digital Personal Data Protection Act, 2023. We are committed to data minimization, purpose limitation, and absolute transparency regarding personal data."
+    ]
+  },
+  {
+    heading: "2. Data We Collect & Masking Standards",
+    paragraphs: [
+      "We collect contact identifiers (mobile number for OTP authentication), payment transaction references, and identity proof processed through UIDAI-authorized DigiLocker / Aadhaar OTP fast-path.",
+      "In strict compliance with UIDAI regulations and the Aadhaar Act 2016, raw unmasked 12-digit Aadhaar numbers and biometric data are never stored. Only the masked UID (last 4 digits) is retained."
+    ]
+  },
+  {
+    heading: "3. Grievance Redressal",
+    paragraphs: [
+      "Data principals may contact our designated Grievance Officer at privacy@pgcashflow.in. Complaints are acknowledged within 48 hours and resolved within 15 business days."
+    ]
+  }
+]);
+
+writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensive rules, timelines, and payment rail processing for rent dues, security deposits, and duplicate charges.", [
+  {
+    heading: "1. Rent Dues & Monthly Payments",
+    paragraphs: [
+      "Monthly rent payments made toward an active tenancy period are final and non-refundable once allocated to an invoice or ledger due."
+    ]
+  },
+  {
+    heading: "2. Security Deposit Refunds & Two-Tier Processing",
+    paragraphs: [
+      "Security deposits are settled upon departure after move-out inspection and deduction of pending utility bills.",
+      "Within 120 days of deposit payment, refunds are reversed via the Payment Gateway Source Refund API directly to the original payment instrument. Beyond 120-180 days, refunds are settled via Direct Payout (IMPS / UPI) to prevent gateway expiration failures."
+    ]
+  },
+  {
+    heading: "3. Duplicate Transactions & Timelines",
+    paragraphs: [
+      "Duplicate deductions caused by network timeouts are automatically reconciled within 24 to 48 hours. Gateway UPI refunds credit within 24-48 hours; cards and netbanking credit within 3 to 7 business days."
+    ]
+  }
+]);
+
+writeStaticPage("contact", "Contact Us & Grievance Redressal", "Reach out to the PG Cashflow support team or contact our compliance officers.", [
+  {
+    heading: "1. Customer & Operations Support",
+    paragraphs: [
+      "General Support: support@pgcashflow.in (Mon-Sat, 9:00 AM - 7:00 PM IST)",
+      "Helpdesk Line: +91 (080) 4567-8900",
+      "Registered Address: PG Cashflow Technologies Private Limited, Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India"
+    ]
+  },
+  {
+    heading: "2. Grievance Officer Details",
+    paragraphs: [
+      "Designated Grievance & Compliance Officer: grievance@pgcashflow.in (acknowledged within 48 hours; resolved within 15 business days per DPDP requirements)."
+    ]
+  }
+]);
