@@ -3,6 +3,7 @@ import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { refundPayment } from "@/api/payments";
 import type { Payment, GatewayRefund } from "@pg/types";
+import { useLocale } from "@/i18n/provider";
 
 interface RefundModalProps {
   payment: Payment | null;
@@ -19,6 +20,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   onClose,
   onRefundComplete,
 }) => {
+  const { t } = useLocale();
   const [rupeesInput, setRupeesInput] = useState("");
   const [reason, setReason] = useState("");
   const [otp, setOtp] = useState("");
@@ -125,8 +127,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
               <RotateCcw className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-ink">Initiate Payment Refund</h2>
-              <p className="text-xs text-ink-muted">Refund to tenant&apos;s original payment method via Cashfree</p>
+              <h2 className="text-base font-semibold text-ink">{t("owner.refund.title")}</h2>
+              <p className="text-xs text-ink-muted">{t("owner.refund.subtitle")}</p>
             </div>
           </div>
           <button
@@ -142,21 +144,21 @@ export const RefundModal: React.FC<RefundModalProps> = ({
           {/* Payment Summary Banner */}
           <div className="bg-bg border border-hairline rounded-xl p-4 space-y-2 text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Tenant</span>
+              <span className="text-ink-muted">{t("owner.refund.tenant")}</span>
               <span className="font-semibold text-ink">{tenantName}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Original Payment</span>
+              <span className="text-ink-muted">{t("owner.refund.originalPayment")}</span>
               <span className="font-semibold text-success">{formatPaise(payment.amount)}</span>
             </div>
             {payment.upi_txn_id && (
               <div className="flex justify-between items-center">
-                <span className="text-ink-muted">UPI Ref</span>
+                <span className="text-ink-muted">{t("owner.refund.upiRef")}</span>
                 <span className="font-mono text-ink">{payment.upi_txn_id}</span>
               </div>
             )}
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Channel</span>
+              <span className="text-ink-muted">{t("owner.refund.channel")}</span>
               <span className="uppercase text-ink">{payment.matched_by}</span>
             </div>
           </div>
@@ -174,27 +176,27 @@ export const RefundModal: React.FC<RefundModalProps> = ({
               {refundResult.status === "succeeded" && (
                 <div className="p-4 bg-success/10 border border-success/20 rounded-xl text-center space-y-2">
                   <CheckCircle2 className="w-8 h-8 text-success mx-auto" />
-                  <h3 className="font-semibold text-sm text-ink">Refund Succeeded</h3>
+                  <h3 className="font-semibold text-sm text-ink">{t("owner.refund.succeeded")}</h3>
                   <p className="text-xs text-ink-muted">
-                    {formatPaise(refundResult.amount_paise)} refunded successfully.
+                    {t("owner.refund.succeededDesc", { amount: formatPaise(refundResult.amount_paise) })}
                   </p>
                   {refundResult.refund_reference && (
                     <div className="text-xs font-mono text-ink-muted">
-                      Ref: {refundResult.refund_reference}
+                      {t("owner.refund.ref", { ref: refundResult.refund_reference })}
                     </div>
                   )}
                 </div>
               )}
 
-              {(refundResult.status === "initiated" || refundResult.status as string === "pending") && (
+              {(refundResult.status === "initiated" || (refundResult.status as string) === "pending") && (
                 <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl text-center space-y-2">
                   <Clock className="w-8 h-8 text-warning mx-auto animate-pulse" />
-                  <h3 className="font-semibold text-sm text-ink">Refund Initiated</h3>
+                  <h3 className="font-semibold text-sm text-ink">{t("owner.refund.initiated")}</h3>
                   <p className="text-xs text-ink-muted">
-                    Refund of {formatPaise(refundResult.amount_paise)} is being processed by the bank.
+                    {t("owner.refund.initiatedDesc", { amount: formatPaise(refundResult.amount_paise) })}
                   </p>
                   <p className="text-xs text-ink-muted">
-                    Reconciliation worker will settle this status automatically.
+                    {t("owner.refund.reconNote")}
                   </p>
                 </div>
               )}
@@ -202,16 +204,16 @@ export const RefundModal: React.FC<RefundModalProps> = ({
               {refundResult.status === "failed" && (
                 <div className="p-4 bg-danger/10 border border-danger/20 rounded-xl text-center space-y-3">
                   <AlertCircle className="w-8 h-8 text-danger mx-auto" />
-                  <h3 className="font-semibold text-sm text-ink">Refund Failed</h3>
+                  <h3 className="font-semibold text-sm text-ink">{t("owner.refund.failed")}</h3>
                   <p className="text-xs text-ink-muted">
-                    The payment gateway rejected the refund request.
+                    {t("owner.refund.failedDesc")}
                   </p>
                   <button
                     type="button"
                     onClick={handleRetryWithNewKey}
                     className="px-4 py-2 bg-surface border border-hairline rounded-xl text-xs font-medium text-ink hover:bg-bg transition"
                   >
-                    Retry with New Idempotency Key
+                    {t("owner.refund.retryKey")}
                   </button>
                 </div>
               )}
@@ -222,7 +224,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   onClick={onClose}
                   className="px-5 py-2.5 bg-accent text-accent-contrast rounded-xl text-sm font-semibold hover:bg-accent/90 transition"
                 >
-                  Close
+                  {t("common.close")}
                 </button>
               </div>
             </div>
@@ -230,7 +232,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-ink uppercase mb-1.5">
-                  Refund Amount (₹)
+                  {t("owner.refund.amountLabel")}
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-muted">₹</span>
@@ -247,40 +249,40 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   />
                 </div>
                 <p className="mt-1 text-[11px] text-ink-muted">
-                  Max refundable: {formatPaise(payment.amount)}
+                  {t("owner.refund.maxRefundable", { amount: formatPaise(payment.amount) })}
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-ink uppercase mb-1.5">
-                  Reason for Refund
+                  {t("owner.refund.reasonLabel")}
                 </label>
                 <input
                   type="text"
                   maxLength={100}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="e.g. Overpayment adjustment requested by tenant"
+                  placeholder={t("owner.refund.reasonPlaceholder")}
                   required
                   disabled={isSubmitting}
                   className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-sm text-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
                 <p className="mt-1 text-[11px] text-ink-muted">
-                  Min 3, max 100 characters (sent to gateway records).
+                  {t("owner.refund.reasonHint")}
                 </p>
               </div>
 
               {needsStepUp && (
                 <div className="p-3.5 bg-accent-tint border border-accent/20 rounded-xl space-y-2">
                   <label className="block text-xs font-semibold text-ink uppercase">
-                    Authorization OTP / Step-Up Code
+                    {t("owner.refund.stepUpLabel")}
                   </label>
                   <input
                     type="text"
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter 6-digit approval code"
+                    placeholder={t("owner.refund.stepUpPlaceholder")}
                     disabled={isSubmitting}
                     className="w-full px-3.5 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink font-mono"
                   />
@@ -294,7 +296,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   disabled={isSubmitting}
                   className="px-4 py-2.5 border border-hairline rounded-xl text-sm font-medium text-ink hover:bg-bg transition"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -302,7 +304,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   className="px-5 py-2.5 bg-danger text-white rounded-xl text-sm font-semibold hover:bg-danger/90 transition flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Confirm Refund
+                  {t("owner.refund.confirm")}
                 </button>
               </div>
             </form>

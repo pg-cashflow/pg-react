@@ -679,6 +679,32 @@ export const enIN = {
   "tenant.dashboard.yourPassbook": "Your passbook",
   "tenant.dashboard.history": "History",
   "tenant.dashboard.noDuesYet": "No dues yet.",
+
+  // Refund Modal
+  "common.close": "Close",
+  "owner.refund.title": "Initiate Payment Refund",
+  "owner.refund.subtitle": "Refund to tenant's original payment method via Cashfree",
+  "owner.refund.tenant": "Tenant",
+  "owner.refund.originalPayment": "Original Payment",
+  "owner.refund.upiRef": "UPI Ref",
+  "owner.refund.channel": "Channel",
+  "owner.refund.succeeded": "Refund Succeeded",
+  "owner.refund.succeededDesc": "{amount} refunded successfully.",
+  "owner.refund.ref": "Ref: {ref}",
+  "owner.refund.initiated": "Refund Initiated",
+  "owner.refund.initiatedDesc": "Refund of {amount} is being processed by the bank.",
+  "owner.refund.reconNote": "Reconciliation worker will settle this status automatically.",
+  "owner.refund.failed": "Refund Failed",
+  "owner.refund.failedDesc": "The payment gateway rejected the refund request.",
+  "owner.refund.retryKey": "Retry with New Idempotency Key",
+  "owner.refund.amountLabel": "Refund Amount (₹)",
+  "owner.refund.maxRefundable": "Max refundable: {amount}",
+  "owner.refund.reasonLabel": "Reason for Refund",
+  "owner.refund.reasonPlaceholder": "e.g. Overpayment adjustment requested by tenant",
+  "owner.refund.reasonHint": "Min 3, max 100 characters (sent to gateway records).",
+  "owner.refund.stepUpLabel": "Authorization OTP / Step-Up Code",
+  "owner.refund.stepUpPlaceholder": "Enter 6-digit approval code",
+  "owner.refund.confirm": "Confirm Refund",
 };
 
 export type MessageKey = keyof typeof enIN;

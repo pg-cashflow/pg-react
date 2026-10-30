@@ -6,9 +6,11 @@ import { setInviteCode } from "@/auth/storage";
 import { ApiError } from "@/api/client";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { useLocale } from "@/i18n/provider";
 
 export const InvitePage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,7 +92,7 @@ export const InvitePage: React.FC = () => {
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 h-12 rounded-[10px] bg-accent text-white font-semibold text-sm hover:bg-accent-pressed disabled:opacity-50"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{t("common.continue")} <ArrowRight className="w-4 h-4" /></>}
           </button>
         </form>
       </AuthLayout>
