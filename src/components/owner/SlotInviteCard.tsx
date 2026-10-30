@@ -258,7 +258,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
 
                     {rm.tenant_names && rm.tenant_names.length > 0 && (
                       <div className="text-[11px] text-ink-muted mt-2 border-t border-hairline/50 pt-1.5 truncate">
-                        <span className="font-medium">Tenants:</span> {rm.tenant_names.join(", ")}
+                        <span className="font-medium">{t("common.tenants")}:</span> {rm.tenant_names.join(", ")}
                       </div>
                     )}
                   </div>

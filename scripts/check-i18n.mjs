@@ -8,7 +8,7 @@ const LOCALES = ["en-IN", "te-IN", "ta-IN", "kn-IN"];
 
 // Ratchet baseline ceiling: build fails if detected literal strings exceed this limit.
 // As files are converted to t(), decrease this number to prevent future regressions.
-const BASELINE_LITERAL_CEILING = 273;
+const BASELINE_LITERAL_CEILING = 268;
 
 let parityHits = 0;
 

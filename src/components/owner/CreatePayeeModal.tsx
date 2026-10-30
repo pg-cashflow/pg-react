@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, UserPlus, Building, Smartphone, Loader2 } from "lucide-react";
 import { useCreatePayee } from "@/lib/usePayouts";
 import type { PayeeType } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 interface CreatePayeeModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
   onClose,
   onCreated,
 }) => {
+  const { t } = useLocale();
   const [name, setName] = useState("");
   const [payeeType, setPayeeType] = useState<PayeeType>("staff");
   const [phone, setPhone] = useState("");
@@ -81,8 +83,8 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
               <UserPlus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-ink">Add Payout Payee</h2>
-              <p className="text-xs text-ink-muted">Register staff or vendor for direct disbursement</p>
+              <h2 className="text-base font-semibold text-ink">{t("owner.payees.addTitle")}</h2>
+              <p className="text-xs text-ink-muted">{t("owner.payees.addSubtitle")}</p>
             </div>
           </div>
           <button
@@ -103,7 +105,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1">
-              Payee Type
+              {t("owner.payees.payeeType")}
             </label>
             <div className="grid grid-cols-3 gap-2">
               {(["staff", "vendor", "tenant_deposit"] as const).map((type) => (
@@ -125,7 +127,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1">
-              Full Legal Name
+              {t("owner.payees.fullLegalName")}
             </label>
             <input
               type="text"
@@ -139,7 +141,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1">
-              Phone Number (Optional)
+              {t("owner.payees.phoneOptional")}
             </label>
             <input
               type="tel"
@@ -152,7 +154,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1">
-              Payment Destination
+              {t("owner.payees.paymentDestination")}
             </label>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <button
@@ -165,7 +167,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
                 }`}
               >
                 <Building className="w-4 h-4" />
-                Bank Account
+                {t("owner.payees.bankAccount")}
               </button>
               <button
                 type="button"
@@ -177,7 +179,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
                 }`}
               >
                 <Smartphone className="w-4 h-4" />
-                UPI ID (VPA)
+                {t("owner.payees.upiVpa")}
               </button>
             </div>
 
@@ -187,7 +189,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="Bank Account Number"
+                    placeholder={t("owner.payees.bankAccountNumber")}
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:border-accent"
@@ -197,14 +199,14 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="IFSC Code (e.g. HDFC0001234)"
+                    placeholder={t("owner.payees.ifscCode")}
                     value={ifsc}
                     onChange={(e) => setIfsc(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-ink text-sm uppercase focus:outline-none focus:border-accent"
                   />
                   <input
                     type="text"
-                    placeholder="Bank Name (Optional)"
+                    placeholder={t("owner.payees.bankNameOptional")}
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:border-accent"
@@ -232,7 +234,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
               disabled={createPayeeMutation.isPending}
               className="px-4 py-2.5 rounded-xl border border-hairline text-ink text-sm font-medium hover:bg-bg transition"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -242,10 +244,10 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
               {createPayeeMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
+                  {t("owner.payees.saving")}
                 </>
               ) : (
-                "Save Payee"
+                t("owner.payees.savePayee")
               )}
             </button>
           </div>

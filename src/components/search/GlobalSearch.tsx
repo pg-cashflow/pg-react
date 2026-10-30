@@ -5,6 +5,7 @@ import { Search, Loader2, CornerDownLeft } from "lucide-react";
 import type { UserRole } from "@pg/types";
 import { searchGlobal, type SearchResult } from "@/api/search";
 import { filterNavItems, navItemsForRole, type NavIndexItem } from "@/lib/navIndex";
+import { useLocale } from "@/i18n";
 
 const DEBOUNCE_MS = 200;
 
@@ -17,6 +18,7 @@ type PaletteRow =
   | { kind: "api"; item: SearchResult };
 
 export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
+  const { t } = useLocale();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -116,7 +118,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
         aria-label="Open search"
       >
         <Search className="w-3.5 h-3.5" />
-        <span>Search</span>
+        <span>{t("common.search")}</span>
         <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-bg border border-hairline">Ctrl K</kbd>
       </button>
       <button
