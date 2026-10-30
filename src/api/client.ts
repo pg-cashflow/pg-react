@@ -256,10 +256,46 @@ function resolveUrl(path: string): string {
   return `${API_BASE}${cleanPath}`;
 }
 
+const READ_TIMEOUT_MS = 20_000;
+const WRITE_TIMEOUT_MS = 45_000;
+
+/**
+ * fetch with a time-to-response-headers budget. A stalled mobile connection would
+ * otherwise leave the UI in a loading state forever. A caller-supplied signal still
+ * wins and surfaces as a normal AbortError; only our own timeout becomes ApiError(0).
+ */
+async function timedFetch(url: string, init: RequestInit): Promise<Response> {
+  const method = (init.method || "GET").toUpperCase();
+  const budget = method === "GET" || method === "HEAD" ? READ_TIMEOUT_MS : WRITE_TIMEOUT_MS;
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, budget);
+  const external = init.signal;
+  const onExternalAbort = () => controller.abort();
+  if (external) {
+    if (external.aborted) controller.abort();
+    else external.addEventListener("abort", onExternalAbort, { once: true });
+  }
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (err) {
+    if (timedOut && !external?.aborted) {
+      throw new ApiError(0, networkFailureMessage());
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+    external?.removeEventListener("abort", onExternalAbort);
+  }
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = resolveUrl(path);
   try {
-    const res = await fetch(url, {
+    const res = await timedFetch(url, {
       ...options,
       credentials: options.credentials ?? "include",
       headers: authHeaders(options),
@@ -274,7 +310,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
       }
       const newToken = await requestTokenRefresh(originalToken);
       if (newToken) {
-        const retryRes = await fetch(url, {
+        const retryRes = await timedFetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
           headers: authHeaders(options),

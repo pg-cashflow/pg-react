@@ -86,11 +86,22 @@ self.addEventListener("push", (event) => {
     }
   }
 
+  // Only same-origin deep links are honoured; anything else falls back to the app root.
+  let safeUrl = "/";
+  try {
+    const parsed = new URL(data.url || "/", self.location.origin);
+    if (parsed.origin === self.location.origin) {
+      safeUrl = parsed.pathname + parsed.search + parsed.hash;
+    }
+  } catch {
+    safeUrl = "/";
+  }
+
   const options = {
     body: data.body || "",
     icon: "/pwa-192x192.png",
     badge: "/pwa-192x192.png",
-    data: data.url || "/",
+    data: safeUrl,
     vibrate: [200, 100, 200],
   } as unknown as NotificationOptions;
 
@@ -105,7 +116,7 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
-        if (client.url.includes(urlToOpen) && "focus" in client) {
+        if (new URL(client.url).pathname === new URL(urlToOpen, self.location.origin).pathname && "focus" in client) {
           return client.focus();
         }
       }
