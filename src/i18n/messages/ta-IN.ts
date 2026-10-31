@@ -698,7 +698,8 @@ export const taIN: Record<MessageKey, string> = {
   "owner.refund.reconNote": "சரிபார்ப்பு பணியாளர் இந்த நிலையை தானாகவே தீர்ப்பார்.",
   "owner.refund.failed": "பணம் திரும்பப் பெறுதல் தோல்வியடைந்தது",
   "owner.refund.failedDesc": "கட்டண நுழைவாயில் பணத்தைத் திரும்பப் பெறுவதற்கான கோரிக்கையை நிராகரித்தது.",
-  "owner.refund.retryKey": "புதிய விசை மூலம் மீண்டும் முயற்சிக்கவும்",
+  "owner.refund.retryKey": "மீண்டும் முயற்சிக்கவும்",
+  "owner.refund.checkStatus": "நிலையைச் சரிபார்க்கவும்",
   "owner.refund.amountLabel": "திரும்பப் பெறும் தொகை (₹)",
   "owner.refund.maxRefundable": "அதிகபட்சமாக திரும்பப் பெறக்கூடியது: {amount}",
   "owner.refund.reasonLabel": "திரும்பப் பெறுவதற்கான காரணம்",
@@ -707,6 +708,11 @@ export const taIN: Record<MessageKey, string> = {
   "owner.refund.stepUpLabel": "அங்கீகார OTP / படிநிலை குறியீடு",
   "owner.refund.stepUpPlaceholder": "6 இலக்க ஒப்புதல் குறியீட்டை உள்ளிடவும்",
   "owner.refund.confirm": "திரும்பப் பெறுவதை உறுதிப்படுத்தவும்",
+
+  // Service worker update prompt
+  "pwa.updateAvailable": "PG Cashflow-ன் புதிய பதிப்பு கிடைக்கிறது.",
+  "pwa.updateNow": "இப்போதே புதுப்பிக்கவும்",
+  "pwa.updateDismiss": "பிறகு",
 
   // Added batch i18n keys
   "common.search": "தேடு",

@@ -198,6 +198,13 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   <p className="text-xs text-ink-muted">
                     {t("owner.refund.reconNote")}
                   </p>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="mt-2 px-4 py-2 bg-surface border border-hairline rounded-xl text-xs font-medium text-ink hover:bg-bg transition"
+                  >
+                    {t("owner.refund.checkStatus")}
+                  </button>
                 </div>
               )}
 

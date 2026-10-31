@@ -699,7 +699,8 @@ export const knIN: Record<MessageKey, string> = {
   "owner.refund.reconNote": "ಸಮನ್ವಯ ವರ್ಕರ್ ಈ ಸ್ಥಿತಿಯನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಇತ್ಯರ್ಥಪಡಿಸುತ್ತದೆ.",
   "owner.refund.failed": "ಮರುಪಾವತಿ ವಿಫಲವಾಗಿದೆ",
   "owner.refund.failedDesc": "ಪಾವತಿ ಗೇಟ್‌ವೇ ಮರುಪಾವತಿ ವಿನಂತಿಯನ್ನು ತಿರಸ್ಕರಿಸಿದೆ.",
-  "owner.refund.retryKey": "ಹೊಸ ಕೀ ಮೂಲಕ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+  "owner.refund.retryKey": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+  "owner.refund.checkStatus": "ಸ್ಥಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಿ",
   "owner.refund.amountLabel": "ಮರುಪಾವತಿ ಮೊತ್ತ (₹)",
   "owner.refund.maxRefundable": "ಗರಿಷ್ಠ ಮರುಪಾವತಿಸಬಹುದಾದ ಮೊತ್ತ: {amount}",
   "owner.refund.reasonLabel": "ಮರುಪಾವತಿಗೆ ಕಾರಣ",
@@ -708,6 +709,11 @@ export const knIN: Record<MessageKey, string> = {
   "owner.refund.stepUpLabel": "ದೃಢೀಕರಣ OTP / ಹಂತ-ಮೇಲಿನ ಕೋಡ್",
   "owner.refund.stepUpPlaceholder": "6-ಅಂಕಿಯ ಅನುಮೋದನೆ ಕೋಡ್ ನಮೂದಿಸಿ",
   "owner.refund.confirm": "ಮರುಪಾವತಿಯನ್ನು ದೃಢೀಕರಿಸಿ",
+
+  // Service worker update prompt
+  "pwa.updateAvailable": "PG Cashflow ನ ಹೊಸ ಆವೃತ್ತಿ ಲಭ್ಯವಿದೆ.",
+  "pwa.updateNow": "ಈಗಲೇ ನವೀಕರಿಸಿ",
+  "pwa.updateDismiss": "ನಂತರ",
 
   // Added batch i18n keys
   "common.search": "ಹುಡುಕಿ",

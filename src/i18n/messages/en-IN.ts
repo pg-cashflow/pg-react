@@ -696,7 +696,8 @@ export const enIN = {
   "owner.refund.reconNote": "Reconciliation worker will settle this status automatically.",
   "owner.refund.failed": "Refund Failed",
   "owner.refund.failedDesc": "The payment gateway rejected the refund request.",
-  "owner.refund.retryKey": "Retry with New Idempotency Key",
+  "owner.refund.retryKey": "Try Again",
+  "owner.refund.checkStatus": "Check Status",
   "owner.refund.amountLabel": "Refund Amount (₹)",
   "owner.refund.maxRefundable": "Max refundable: {amount}",
   "owner.refund.reasonLabel": "Reason for Refund",
@@ -705,6 +706,11 @@ export const enIN = {
   "owner.refund.stepUpLabel": "Authorization OTP / Step-Up Code",
   "owner.refund.stepUpPlaceholder": "Enter 6-digit approval code",
   "owner.refund.confirm": "Confirm Refund",
+
+  // Service worker update prompt
+  "pwa.updateAvailable": "A new version of PG Cashflow is available.",
+  "pwa.updateNow": "Update Now",
+  "pwa.updateDismiss": "Later",
 
   // Added batch i18n keys
   "common.search": "Search",

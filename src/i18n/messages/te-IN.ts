@@ -698,7 +698,8 @@ export const teIN: Record<MessageKey, string> = {
   "owner.refund.reconNote": "రీకన్సిలియేషన్ వర్కర్ ఈ స్థితిని ఆటోమేటిక్‌గా సెటిల్ చేస్తుంది.",
   "owner.refund.failed": "వాపసు విఫలమైంది",
   "owner.refund.failedDesc": "పేమెంట్ గేట్‌వే వాపసు అభ్యర్థనను తిరస్కరించింది.",
-  "owner.refund.retryKey": "కొత్త ఐడెంపోటెన్సీ కీతో మళ్లీ ప్రయత్నించండి",
+  "owner.refund.retryKey": "మళ్లీ ప్రయత్నించండి",
+  "owner.refund.checkStatus": "స్థితిని తనిఖీ చేయండి",
   "owner.refund.amountLabel": "వాపసు మొత్తం (₹)",
   "owner.refund.maxRefundable": "గరిష్టంగా వాపసు చేయదగినది: {amount}",
   "owner.refund.reasonLabel": "వాపసుకు కారణం",
@@ -707,6 +708,11 @@ export const teIN: Record<MessageKey, string> = {
   "owner.refund.stepUpLabel": "ప్రామాణీకరణ OTP / స్టెప్-అప్ కోడ్",
   "owner.refund.stepUpPlaceholder": "6-అంకెల ఆమోద కోడ్‌ను నమోదు చేయండి",
   "owner.refund.confirm": "వాపసును నిర్ధారించండి",
+
+  // Service worker update prompt
+  "pwa.updateAvailable": "పీజీ క్యాష్‌ఫ్లో కొత్త వెర్షన్ అందుబాటులో ఉంది.",
+  "pwa.updateNow": "ఇప్పుడే అప్‌డేట్ చేయండి",
+  "pwa.updateDismiss": "తర్వాత",
 
   // Added batch i18n keys
   "common.search": "వెతకండి",

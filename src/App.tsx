@@ -6,6 +6,7 @@ import { ThemeProvider, ThemeSync } from "./theme/context";
 import { queryClient } from "./lib/queryClient";
 import { router } from "./router";
 import { LocaleProvider, LocaleSync } from "./i18n";
+import { ServiceWorkerUpdatePrompt } from "./components/common/ServiceWorkerUpdatePrompt";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <LocaleSync />
             <ThemeSync />
             <RouterProvider router={router} />
+            <ServiceWorkerUpdatePrompt />
           </AuthProvider>
         </ThemeProvider>
       </LocaleProvider>
