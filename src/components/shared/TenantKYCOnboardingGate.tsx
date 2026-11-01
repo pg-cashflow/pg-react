@@ -13,7 +13,7 @@ import { useLocale } from "@/i18n";
  * Hard onboarding gate: a tenant may not reach the dashboard (or any other
  * tenant route) until they have done their part of identity verification.
  *
- * "Done their part" means status is `verified` (automatic methods: DigiLocker,
+ * "Done their part" means status is `verified` (Aadhaar OTP) or
  * Aadhaar OTP, Secure QR) or `pending_manual_review` (document upload — the
  * remaining step, owner approval, is outside the tenant's control, so the
  * gate does not make them wait on it; TenantKYCCard shows the review-pending
