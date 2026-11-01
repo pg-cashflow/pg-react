@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { bulkGenerateFloorsRooms, type BulkGenerateFloorsRoomsInput } from "@/api/gamification";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { useLocale } from "@/i18n";
 
 interface QuickLayoutModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
   startFloorNumber = 1,
   onSuccess,
 }) => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
 
   const [floorsCount, setFloorsCount] = useState<number>(3);
@@ -159,7 +161,7 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-ink">Quick Setup: Floors & Rooms</h2>
+              <h2 className="text-base font-bold text-ink">{t("owner.layout.quickSetupTitle")}</h2>
               <p className="text-xs text-ink-muted">
                 {propertyName ? `Generate layout for ${propertyName}` : "Generate layout conveniently"}
               </p>
@@ -296,7 +298,7 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
             </div>
 
             <div className="bg-surface border border-hairline rounded-xl p-3">
-              <span className="block text-[11px] text-ink-muted mb-1">Start Floor</span>
+              <span className="block text-[11px] text-ink-muted mb-1">{t("owner.layout.startFloor")}</span>
               <select
                 value={startFloor}
                 onChange={(e) => {
@@ -396,7 +398,7 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
             {generateMutation.isPending ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Generating Layout...</span>
+                <span>{t("owner.layout.generatingLayout")}</span>
               </>
             ) : (
               <>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Calculator, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { usePayrollPreview, useFinalizePayroll } from "@/lib/useAttendance";
 import { formatPaise } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 import type { StaffProfile } from "@pg/types";
 
 interface PayrollPreviewModalProps {
@@ -19,6 +20,7 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
   staffMap,
   onFinalized,
 }) => {
+  const { t } = useLocale();
   const { data, isLoading, isError, error, refetch } = usePayrollPreview(cycleMonth);
   const finalizeMutation = useFinalizePayroll();
 
@@ -106,19 +108,19 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
               {/* Summary Metrics */}
               <div className="grid grid-cols-3 gap-3 p-3 bg-surface-elevated/40 border border-border rounded-xl">
                 <div>
-                  <div className="text-xs text-text-muted">Total Net Payout</div>
+                  <div className="text-xs text-text-muted">{t("owner.payroll.totalNetPayout")}</div>
                   <div className="text-lg font-bold text-text mt-0.5">
                     {formatPaise(totalNetWagePaise)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-text-muted">Total Deductions</div>
+                  <div className="text-xs text-text-muted">{t("owner.payroll.totalDeductions")}</div>
                   <div className="text-lg font-bold text-warning mt-0.5">
                     {formatPaise(totalDeductionsPaise)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-text-muted">Staff Headcount</div>
+                  <div className="text-xs text-text-muted">{t("owner.payroll.staffHeadcount")}</div>
                   <div className="text-lg font-bold text-text mt-0.5">
                     {calculations.length}
                   </div>
@@ -130,11 +132,11 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
                 <table className="w-full text-left text-xs">
                   <thead className="bg-surface-elevated text-text-muted border-b border-border">
                     <tr>
-                      <th className="px-3 py-2 font-medium">Staff Member</th>
-                      <th className="px-3 py-2 font-medium">Base Wage</th>
-                      <th className="px-3 py-2 font-medium">Att. (P / L / A)</th>
-                      <th className="px-3 py-2 font-medium">Deductions</th>
-                      <th className="px-3 py-2 font-medium text-right">Net Payable</th>
+                      <th className="px-3 py-2 font-medium">{t("owner.payroll.staffMember")}</th>
+                      <th className="px-3 py-2 font-medium">{t("owner.payroll.baseWage")}</th>
+                      <th className="px-3 py-2 font-medium">{t("owner.payroll.attSummary")}</th>
+                      <th className="px-3 py-2 font-medium">{t("owner.payroll.deductions")}</th>
+                      <th className="px-3 py-2 font-medium text-right">{t("owner.payroll.netPayable")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -215,7 +217,7 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
                 </>
               ) : (
                 <>
-                  <span>Finalize & Push to Payouts</span>
+                  <span>{t("owner.payroll.finalizeAndPush")}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, CalendarCheck2, Check, AlertCircle, Loader2 } from "lucide-react";
 import { useMarkDailyAttendance } from "@/lib/useAttendance";
+import { useLocale } from "@/i18n";
 import type { StaffProfile, AttendanceStatus, DailyAttendanceEntryInput } from "@pg/types";
 
 interface MarkAttendanceModalProps {
@@ -26,6 +27,7 @@ export const MarkAttendanceModal: React.FC<MarkAttendanceModalProps> = ({
   initialDate,
   onRecorded,
 }) => {
+  const { t } = useLocale();
   const [workDate, setWorkDate] = useState<string>(
     () => initialDate || new Date().toISOString().split("T")[0]
   );
@@ -125,7 +127,7 @@ export const MarkAttendanceModal: React.FC<MarkAttendanceModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
             <CalendarCheck2 className="w-5 h-5 text-accent" />
-            <h3 className="font-semibold text-text text-base">Record Daily Attendance</h3>
+            <h3 className="font-semibold text-text text-base">{t("owner.attendance.recordTitle")}</h3>
           </div>
           <button
             onClick={onClose}
@@ -145,7 +147,7 @@ export const MarkAttendanceModal: React.FC<MarkAttendanceModalProps> = ({
 
           <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-text-muted">Work Date:</label>
+              <label className="text-xs font-medium text-text-muted">{t("owner.attendance.workDate")}</label>
               <input
                 type="date"
                 required
@@ -155,7 +157,7 @@ export const MarkAttendanceModal: React.FC<MarkAttendanceModalProps> = ({
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-text-muted">Quick Set:</span>
+              <span className="text-xs text-text-muted">{t("owner.attendance.quickSet")}</span>
               <button
                 type="button"
                 onClick={() => handleMarkAll("present")}

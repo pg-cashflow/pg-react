@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Calendar, Plus, Trash2, Loader2, AlertCircle } from "lucide-react";
 import { useLeavePolicy, useUpdateLeavePolicy } from "@/lib/useAttendance";
+import { useLocale } from "@/i18n";
 import type { WorkingDaysBasis } from "@pg/types";
 
 interface LeavePolicyModalProps {
@@ -12,6 +13,7 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useLocale();
   const { data: policy, isLoading } = useLeavePolicy();
   const updateMutation = useUpdateLeavePolicy();
 
@@ -78,7 +80,7 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-accent" />
-            <h3 className="font-semibold text-text text-base">Leave & Working Policy</h3>
+            <h3 className="font-semibold text-text text-base">{t("owner.leave.policyTitle")}</h3>
           </div>
           <button
             onClick={onClose}
@@ -129,9 +131,9 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
                 onChange={(e) => setBasis(e.target.value as WorkingDaysBasis)}
                 className="w-full px-3 py-2 text-sm bg-surface-elevated border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               >
-                <option value="calendar_days">Calendar Days (28-31 days per month)</option>
-                <option value="fixed_30">Fixed 30 Days (standard monthly divisor)</option>
-                <option value="working_days_excluding_sundays">Excluding Sundays</option>
+                <option value="calendar_days">{t("owner.leave.calendarDays")}</option>
+                <option value="fixed_30">{t("owner.leave.fixed30Days")}</option>
+                <option value="working_days_excluding_sundays">{t("owner.leave.excludingSundays")}</option>
               </select>
             </div>
 

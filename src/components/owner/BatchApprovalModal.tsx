@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { OtpInput } from "@/components/shared/OtpInput";
+import { useLocale } from "@/i18n";
 import { useRequestPayoutBatchOTP, useApprovePayoutBatch } from "@/lib/usePayouts";
 import type { PayoutBatch } from "@pg/types";
 
@@ -18,6 +19,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   onClose,
   onApproved,
 }) => {
+  const { t } = useLocale();
   const [itemCountInput, setItemCountInput] = useState("");
   const [rupeesInput, setRupeesInput] = useState("");
   const [otp, setOtp] = useState("");
@@ -93,7 +95,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-ink">Approve Payout Batch</h2>
+              <h2 className="text-base font-semibold text-ink">{t("owner.batch.approveTitle")}</h2>
               <p className="text-xs text-ink-muted font-mono">{batch.batch_number}</p>
             </div>
           </div>
@@ -116,11 +118,11 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
           {/* Batch Invariant Summary */}
           <div className="p-4 rounded-xl bg-bg border border-hairline grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">Total Items</p>
+              <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">{t("owner.batch.totalItems")}</p>
               <p className="t-h2 text-ink mt-0.5">{batch.item_count}</p>
             </div>
             <div>
-              <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">Total Amount</p>
+              <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">{t("owner.batch.totalAmount")}</p>
               <p className="t-h2 font-mono text-ink mt-0.5">{formatPaise(batch.total_amount_paise)}</p>
             </div>
           </div>
@@ -131,7 +133,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
               <label className="text-xs font-semibold text-ink uppercase tracking-wider">
                 Step 1: Affirmative Verification
               </label>
-              <span className="text-xs text-ink-muted">Dual-control safety</span>
+              <span className="text-xs text-ink-muted">{t("owner.batch.dualControlSafety")}</span>
             </div>
 
             <div className="space-y-3">
@@ -215,7 +217,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
                   autoFocus
                 />
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-ink-muted">Enter 6-digit SMS / Email code</span>
+                  <span className="text-ink-muted">{t("owner.batch.enterOtpCode")}</span>
                   <button
                     type="button"
                     onClick={handleRequestOTP}

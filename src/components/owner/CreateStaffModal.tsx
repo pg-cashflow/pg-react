@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, UserPlus, Loader2, AlertCircle } from "lucide-react";
 import { useCreateStaffProfile } from "@/lib/useAttendance";
 import { usePayees } from "@/lib/usePayouts";
+import { useLocale } from "@/i18n";
 
 interface CreateStaffModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
   onClose,
   onCreated,
 }) => {
+  const { t } = useLocale();
   const [name, setName] = useState("");
   const [role, setRole] = useState("Cook");
   const [customRole, setCustomRole] = useState("");
@@ -101,7 +103,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-accent" />
-            <h3 className="font-semibold text-text text-base">Add Staff Member</h3>
+            <h3 className="font-semibold text-text text-base">{t("owner.staff.addTitle")}</h3>
           </div>
           <button
             onClick={onClose}
@@ -217,7 +219,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
               Disbursement Payee (Bank or UPI) *
             </label>
             {isPayeesLoading ? (
-              <div className="text-xs text-text-muted py-2">Loading payees...</div>
+              <div className="text-xs text-text-muted py-2">{t("owner.staff.loadingPayees")}</div>
             ) : payees.length === 0 ? (
               <div className="p-3 text-xs text-warning bg-warning-tint rounded-xl border border-warning/20">
                 No payees registered. Please register a payee under Money Out &gt; Payees first.
@@ -229,7 +231,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
                 required
                 className="w-full px-3 py-2 text-sm bg-surface-elevated border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
               >
-                <option value="">Select a payee...</option>
+                <option value="">{t("owner.staff.selectPayee")}</option>
                 {payees.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} ({p.upi_vpa ? `UPI: ${p.upi_vpa}` : `A/C: ****${p.account_number_last4 || ""}`})

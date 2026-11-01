@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useLocale } from "@/i18n";
 import {
   Bell,
   CheckCheck,
@@ -118,6 +119,7 @@ function getNotificationIcon(type: string) {
 }
 
 export const NotificationCenter: React.FC = () => {
+  const { t } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -217,7 +219,7 @@ export const NotificationCenter: React.FC = () => {
           {/* Panel Header */}
           <div className="px-4 py-3 border-b border-hairline flex items-center justify-between bg-surface/80">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-ink">Notifications</h3>
+              <h3 className="text-sm font-semibold text-ink">{t("notifications.title")}</h3>
               {unreadCount > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-tint text-accent">
                   {unreadCount} new
@@ -233,7 +235,7 @@ export const NotificationCenter: React.FC = () => {
                   title="Mark all as read"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Mark read</span>
+                  <span className="hidden sm:inline">{t("notifications.markRead")}</span>
                 </button>
               )}
               <button
@@ -251,14 +253,14 @@ export const NotificationCenter: React.FC = () => {
             {isLoading ? (
               <div className="py-12 flex flex-col items-center justify-center text-ink-muted gap-2">
                 <Loader2 className="w-5 h-5 animate-spin text-accent" />
-                <span className="text-xs">Loading notifications...</span>
+                <span className="text-xs">{t("notifications.loading")}</span>
               </div>
             ) : notifications.length === 0 ? (
               <div className="py-12 px-4 flex flex-col items-center justify-center text-center">
                 <div className="w-12 h-12 rounded-2xl bg-accent-tint flex items-center justify-center text-accent mb-3">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-medium text-ink">All caught up!</p>
+                <p className="text-sm font-medium text-ink">{t("notifications.allCaughtUp")}</p>
                 <p className="text-xs text-ink-muted mt-1">
                   No new notifications right now.
                 </p>

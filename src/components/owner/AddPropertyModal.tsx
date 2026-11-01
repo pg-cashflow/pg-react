@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { createProperty, switchProperty, type CreatePropertyInput, type CustomFloorInput } from "@/api/properties";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { useLocale } from "@/i18n";
 import type { Property, PaymentMode } from "@pg/types";
 
 interface AddPropertyModalProps {
@@ -39,6 +40,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
   onClose,
   onPropertyCreated,
 }) => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
 
   // Basic Details
@@ -197,8 +199,8 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-ink">Add New Property</h2>
-              <p className="text-xs text-ink-muted">Quick & convenient setup with floors and rooms</p>
+              <h2 className="text-base font-bold text-ink">{t("owner.property.addNewTitle")}</h2>
+              <p className="text-xs text-ink-muted">{t("owner.property.addNewSubtitle")}</p>
             </div>
           </div>
           <button
@@ -269,7 +271,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                   onChange={(e) => setEnableQuickLayout(e.target.checked)}
                   className="rounded border-hairline text-accent focus:ring-accent"
                 />
-                <span>Auto-generate layout</span>
+                <span>{t("owner.property.autoGenerate")}</span>
               </label>
             </div>
 
@@ -393,7 +395,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
 
                   {/* Start Floor */}
                   <div className="bg-surface border border-hairline rounded-xl p-3">
-                    <span className="block text-[11px] text-ink-muted mb-1">Start Floor</span>
+                    <span className="block text-[11px] text-ink-muted mb-1">{t("owner.layout.startFloor")}</span>
                     <select
                       value={startFloor}
                       onChange={(e) => {
@@ -568,7 +570,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
             {createMutation.isPending ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating Property...</span>
+                <span>{t("owner.property.creatingProperty")}</span>
               </>
             ) : (
               <>

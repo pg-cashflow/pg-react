@@ -5,9 +5,11 @@ import { Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { verifyTenantDuePay } from "@/api/pay";
 import { getMyDues } from "@/api/tenant";
+import { useLocale } from "@/i18n";
 import type { Due } from "@pg/types";
 
 export const TenantPayReturnView: React.FC = () => {
+  const { t } = useLocale();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -104,7 +106,7 @@ export const TenantPayReturnView: React.FC = () => {
   return (
     <div className="max-w-md mx-auto p-4 space-y-6 pt-12">
       <div className="text-center space-y-2">
-        <h1 className="t-h2 font-bold text-ink">Payment Confirmation</h1>
+        <h1 className="t-h2 font-bold text-ink">{t("payreturn.title")}</h1>
         {orderId && <p className="t-caption text-ink-muted">Reference: {orderId}</p>}
       </div>
 
@@ -112,9 +114,9 @@ export const TenantPayReturnView: React.FC = () => {
         <div className="p-6 rounded-[16px] bg-success-tint border border-success/20 text-center space-y-4">
           <CheckCircle2 className="w-12 h-12 text-success mx-auto" />
           <div>
-            <p className="t-h2 font-semibold text-success">Payment Received!</p>
+            <p className="t-h2 font-semibold text-success">{t("payreturn.received")}</p>
             <p className="t-body-sm text-ink-muted mt-1">
-              Your rent due has been updated and marked as paid on the ledger.
+              {t("payreturn.receivedDesc")}
             </p>
           </div>
           <button
@@ -122,16 +124,16 @@ export const TenantPayReturnView: React.FC = () => {
             onClick={() => navigate({ to: "/tenant/dues" })}
             className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm inline-flex items-center justify-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" /> View My Dues
+            <ArrowLeft className="w-4 h-4" /> {t("payreturn.viewDues")}
           </button>
         </div>
       ) : status === "STILL_PENDING" ? (
         <div className="p-6 rounded-[16px] border border-hairline bg-surface text-center space-y-4">
           <AlertCircle className="w-10 h-10 text-accent mx-auto" />
           <div>
-            <p className="t-h3 font-semibold text-ink">Confirmation in Progress</p>
+            <p className="t-h3 font-semibold text-ink">{t("payreturn.inProgress")}</p>
             <p className="t-body-sm text-ink-muted mt-1">
-              Your payment is still being processed by the bank or gateway. You will receive an update as soon as it settles.
+              {t("payreturn.inProgressDesc")}
             </p>
           </div>
           <button
@@ -139,16 +141,16 @@ export const TenantPayReturnView: React.FC = () => {
             onClick={() => navigate({ to: "/tenant/dues" })}
             className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm"
           >
-            Back to Dues
+            {t("payreturn.backToDues")}
           </button>
         </div>
       ) : (
         <div className="p-8 rounded-[16px] border border-hairline bg-surface text-center space-y-4">
           <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
           <div>
-            <p className="t-h3 font-semibold text-ink">Verifying with your bank…</p>
+            <p className="t-h3 font-semibold text-ink">{t("payreturn.verifying")}</p>
             <p className="t-body-sm text-ink-muted mt-1">
-              Please wait while we confirm your transaction. Do not close this browser window.
+              {t("payreturn.verifyingDesc")}
             </p>
           </div>
         </div>

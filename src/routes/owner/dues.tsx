@@ -469,7 +469,7 @@ export const DuesView: React.FC = () => {
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Enter</kbd>
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">{/* lint-allow-i18n */}Enter</kbd>
             <span>{t("owner.dues.keyVerifyCash")}</span>
           </span>
           <span>·</span>

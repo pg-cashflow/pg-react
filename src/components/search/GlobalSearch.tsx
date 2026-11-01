@@ -119,7 +119,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
       >
         <Search className="w-3.5 h-3.5" />
         <span>{t("common.search")}</span>
-        <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-bg border border-hairline">Ctrl K</kbd>
+        <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-bg border border-hairline">{/* lint-allow-i18n */}Ctrl K</kbd>
       </button>
       <button
         type="button"

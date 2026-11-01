@@ -47,7 +47,7 @@ export const LoginPage: React.FC = () => {
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
-      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1)); // lint-allow-i18n
     }, 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);

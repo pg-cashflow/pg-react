@@ -1,8 +1,10 @@
 import React from "react";
 import { Download, Share, PlusSquare, X, Smartphone } from "lucide-react";
 import { usePwaInstall } from "@/lib/usePwaInstall";
+import { useLocale } from "@/i18n";
 
 export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }) => {
+  const { t } = useLocale();
   const { canInstall, isIOS, showIosSheet, setShowIosSheet, promptInstall } = usePwaInstall();
 
   if (!canInstall) return null;
@@ -18,8 +20,8 @@ export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }
             <Smartphone className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="t-h3">Install PG Cashflow</h4>
-            <p className="t-caption text-ink-muted">Quick access from your home screen. No app store needed.</p>
+            <h4 className="t-h3">{t("pwa.installPromptTitle")}</h4>
+            <p className="t-caption text-ink-muted">{t("pwa.installPromptDesc")}</p>
           </div>
         </div>
         <button
@@ -44,7 +46,7 @@ export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }
             data-testid="ios-install-sheet"
           >
             <div className="flex items-center justify-between pb-2 border-b border-hairline">
-              <h3 className="t-h2">Add to Home Screen</h3>
+              <h3 className="t-h2">{t("pwa.addToHomeScreen")}</h3>
               <button
                 type="button"
                 onClick={() => setShowIosSheet(false)}
@@ -65,8 +67,8 @@ export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }
                   <Share className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="t-body font-semibold">1. Tap the Share button</div>
-                  <div className="t-caption text-ink-muted">In the Safari toolbar at the bottom of the screen.</div>
+                  <div className="t-body font-semibold">{t("pwa.iosStep1")}</div>
+                  <div className="t-caption text-ink-muted">{t("pwa.iosStep1Desc")}</div>
                 </div>
               </div>
 
@@ -75,8 +77,8 @@ export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }
                   <PlusSquare className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="t-body font-semibold">2. Tap "Add to Home Screen"</div>
-                  <div className="t-caption text-ink-muted">Scroll down in the share sheet and tap Add.</div>
+                  <div className="t-body font-semibold">{t("pwa.iosStep2")}</div>
+                  <div className="t-caption text-ink-muted">{t("pwa.iosStep2Desc")}</div>
                 </div>
               </div>
             </div>

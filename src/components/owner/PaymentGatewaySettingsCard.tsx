@@ -17,12 +17,14 @@ import {
   switchProperty,
 } from "@/api/properties";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { useLocale } from "@/i18n";
 import type { PaymentMode } from "@pg/types";
 
 export const PaymentGatewaySettingsCard: React.FC<{ className?: string; propertyId?: string }> = ({
   className = "",
   propertyId: propIdProp,
 }) => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>(propIdProp || "");
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; message: string } | null>(null);
@@ -88,10 +90,10 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
         <div>
           <div className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-accent shrink-0" />
-            <h3 className="font-semibold text-ink text-base">Rent Collection & Gateway Platform</h3>
+            <h3 className="font-semibold text-ink text-base">{t("owner.gateway.title")}</h3>
           </div>
           <p className="text-xs text-ink-muted mt-1">
-            Choose how tenants pay rent. Cashfree provides instant online checkout and automated ledger settlement.
+            {t("owner.gateway.subtitle")}
           </p>
         </div>
 
@@ -126,7 +128,7 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
         {readinessQuery.isLoading ? (
           <div className="flex items-center gap-2 text-xs text-ink-muted">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>Checking gateway health...</span>
+            <span>{t("owner.gateway.checkingHealth")}</span>
           </div>
         ) : readiness?.ready ? (
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-success-tint border border-success/20 text-success">
@@ -235,7 +237,7 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
       {updateMutation.isPending && (
         <div className="flex items-center gap-2 text-xs text-accent">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span>Updating collection mode on ledger...</span>
+          <span>{t("owner.gateway.updatingMode")}</span>
         </div>
       )}
     </section>
