@@ -137,7 +137,7 @@ export const ReportsView: React.FC = () => {
           </span>
           <span>·</span>
           <span className="inline-flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">Enter</kbd>
+            <kbd className="px-1.5 py-0.5 rounded border border-hairline bg-bg font-mono font-semibold text-ink">{t("common.keyEnter")}</kbd>
             <span>{t("owner.reports.keyVerify")}</span>
           </span>
           <span>·</span>
@@ -205,7 +205,7 @@ export const ReportsView: React.FC = () => {
                       className="px-3.5 py-2 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success/90 active:scale-95 transition disabled:opacity-50 flex items-center gap-1.5"
                     >
                       <span>{t("common.confirm")}</span>
-                      {isSelected && <span className="text-[10px] opacity-80 font-mono">(Enter)</span>}
+                      {isSelected && <span className="text-[10px] opacity-80 font-mono">{t("common.keyEnterParen")}</span>}
                     </button>
                     <button
                       onClick={(e) => {

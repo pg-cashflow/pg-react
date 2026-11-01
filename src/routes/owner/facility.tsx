@@ -33,8 +33,10 @@ import type { PropertyGamificationSettings } from "@pg/types";
 import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
 import { QuickLayoutModal } from "@/components/owner/QuickLayoutModal";
 import { PaymentGatewaySettingsCard } from "@/components/owner/PaymentGatewaySettingsCard";
+import { useLocale } from "@/i18n";
 
 export const OwnerFacilityView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
 
   // Selected property
@@ -242,7 +244,7 @@ export const OwnerFacilityView: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 bg-accent text-white rounded-xl text-xs font-semibold hover:bg-accent/90 transition shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>New Property</span>
+            <span>{t("owner.facility.newProperty")}</span>
           </button>
         </div>
       </div>
@@ -296,7 +298,7 @@ export const OwnerFacilityView: React.FC = () => {
           }`}
         >
           <Sliders className="w-4 h-4" />
-          <span>Gamification Rules</span>
+          <span>{t("owner.facility.gamificationRules")}</span>
         </button>
         <button
           onClick={() => setTab("gateway")}
@@ -305,7 +307,7 @@ export const OwnerFacilityView: React.FC = () => {
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>Payment Gateway</span>
+          <span>{t("owner.facility.paymentGateway")}</span>
         </button>
       </div>
 
@@ -318,7 +320,7 @@ export const OwnerFacilityView: React.FC = () => {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-ink mb-1">Floor Number</label>
+                <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.floorNumber")}</label>
                 <input
                   type="number"
                   value={floorNumber}
@@ -328,7 +330,7 @@ export const OwnerFacilityView: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-ink mb-1">Floor Name / Description</label>
+                <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.floorNameDesc")}</label>
                 <input
                   value={floorName}
                   onChange={(e) => setFloorName(e.target.value)}
@@ -348,27 +350,27 @@ export const OwnerFacilityView: React.FC = () => {
 
           <div className="md:col-span-2 bg-surface border border-hairline rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-ink">Floors in Property</h3>
+              <h3 className="text-sm font-bold text-ink">{t("owner.facility.floorsInProperty")}</h3>
               <button
                 type="button"
                 onClick={() => setIsQuickLayoutOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-tint text-accent border border-accent/20 rounded-xl text-xs font-semibold hover:bg-accent hover:text-white transition shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Quick Setup (3F, 12R...)</span>
+                <span>{t("owner.facility.quickSetup")}</span>
               </button>
             </div>
             <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {floors.length === 0 ? (
                 <div className="p-6 text-center space-y-3">
-                  <p className="text-xs text-ink-muted">No floors added yet for this property.</p>
+                  <p className="text-xs text-ink-muted">{t("owner.facility.noFloorsAdded")}</p>
                   <button
                     type="button"
                     onClick={() => setIsQuickLayoutOpen(true)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>Quick Generate Layout (e.g. 3 floors, 12 rooms)</span>
+                    <span>{t("owner.facility.quickGenerateLayout")}</span>
                   </button>
                 </div>
               ) : (
@@ -393,13 +395,13 @@ export const OwnerFacilityView: React.FC = () => {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-ink mb-1">Floor</label>
+                <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.floor")}</label>
                 <select
                   value={roomFloorId}
                   onChange={(e) => setRoomFloorId(e.target.value)}
                   className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
                 >
-                  <option value="">Select Floor...</option>
+                  <option value="">{t("owner.facility.selectFloor")}</option>
                   {floors.map((f) => (
                     <option key={f.id} value={f.id}>
                       Floor {f.floor_number} — {f.name}
@@ -408,7 +410,7 @@ export const OwnerFacilityView: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-ink mb-1">Room Number / Name</label>
+                <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.roomNumberName")}</label>
                 <input
                   value={roomNumber}
                   onChange={(e) => setRoomNumber(e.target.value)}
@@ -418,7 +420,7 @@ export const OwnerFacilityView: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-ink mb-1">Capacity</label>
+                  <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.capacity")}</label>
                   <input
                     type="number"
                     value={roomCapacity}
@@ -427,7 +429,7 @@ export const OwnerFacilityView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-ink mb-1">Included Units (kWh)</label>
+                  <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.includedUnitsKwh")}</label>
                   <input
                     type="number"
                     value={includedUnits}
@@ -448,27 +450,27 @@ export const OwnerFacilityView: React.FC = () => {
 
           <div className="md:col-span-2 bg-surface border border-hairline rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-ink">Rooms in Property</h3>
+              <h3 className="text-sm font-bold text-ink">{t("owner.facility.roomsInProperty")}</h3>
               <button
                 type="button"
                 onClick={() => setIsQuickLayoutOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-tint text-accent border border-accent/20 rounded-xl text-xs font-semibold hover:bg-accent hover:text-white transition shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Quick Setup (3F, 12R...)</span>
+                <span>{t("owner.facility.quickSetup")}</span>
               </button>
             </div>
             <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {rooms.length === 0 ? (
                 <div className="p-6 text-center space-y-3">
-                  <p className="text-xs text-ink-muted">No rooms configured yet.</p>
+                  <p className="text-xs text-ink-muted">{t("owner.facility.noRoomsConfigured")}</p>
                   <button
                     type="button"
                     onClick={() => setIsQuickLayoutOpen(true)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>Quick Generate Layout (e.g. 3 floors, 12 rooms)</span>
+                    <span>{t("owner.facility.quickGenerateLayout")}</span>
                   </button>
                 </div>
               ) : (
@@ -499,7 +501,7 @@ export const OwnerFacilityView: React.FC = () => {
             </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-ink mb-1">Phone Number (10 digits or E.164)</label>
+                <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.phoneHelper")}</label>
                 <input
                   value={managerPhone}
                   onChange={(e) => setManagerPhone(e.target.value)}
@@ -604,18 +606,18 @@ export const OwnerFacilityView: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-ink mb-1">Point Value (Paise)</label>
+              <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.pointValuePaise")}</label>
               <input
                 type="number"
                 value={settings.point_value_paise}
                 onChange={(e) => setSettings({ ...settings, point_value_paise: parseInt(e.target.value, 10) || 0 })}
                 className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
-              <span className="text-[10px] text-ink-muted">100 paise = ₹1.00</span>
+              <span className="text-[10px] text-ink-muted">{t("owner.facility.pointValueNote")}</span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1">Monthly Budget (Paise)</label>
+              <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.monthlyBudgetPaise")}</label>
               <input
                 type="number"
                 value={settings.monthly_budget_paise}
@@ -625,7 +627,7 @@ export const OwnerFacilityView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1">Max Earn Cap Per Resident (Pts)</label>
+              <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.maxEarnCap")}</label>
               <input
                 type="number"
                 value={settings.earn_cap_per_tenant}
@@ -635,7 +637,7 @@ export const OwnerFacilityView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1">Meal RSVP Monthly Sub-cap (Pts)</label>
+              <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.mealRsvpSubcap")}</label>
               <input
                 type="number"
                 value={settings.rsvp_sub_cap}
@@ -645,18 +647,18 @@ export const OwnerFacilityView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1">Floor Cleanliness Threshold (%)</label>
+              <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.cleanlinessThreshold")}</label>
               <input
                 type="number"
                 value={settings.floor_bonus_threshold}
                 onChange={(e) => setSettings({ ...settings, floor_bonus_threshold: parseInt(e.target.value, 10) || 0 })}
                 className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
-              <span className="text-[10px] text-ink-muted">Unlocks 1.5× clean points multiplier</span>
+              <span className="text-[10px] text-ink-muted">{t("owner.facility.cleanlinessMultiplierNote")}</span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1">Electricity Tariff (Paise / kWh)</label>
+              <label className="block text-xs font-medium text-ink mb-1">{t("owner.facility.electricityTariff")}</label>
               <input
                 type="number"
                 value={settings.electricity_tariff_paise}

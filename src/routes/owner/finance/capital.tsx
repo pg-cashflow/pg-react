@@ -6,6 +6,7 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";
 import { formatDate, rupeesToPaise } from "@/lib/utils";
 import type { CapitalKind, CapitalTransaction } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 const KIND_LABEL: Record<CapitalKind, string> = {
   initial: "Initial Equity",
@@ -14,6 +15,7 @@ const KIND_LABEL: Record<CapitalKind, string> = {
 };
 
 export const FinanceCapitalView: React.FC = () => {
+  const { t } = useLocale();
   const [showAdd, setShowAdd] = useState(false);
   const capitalQuery = useCapitalEntries();
   const createMutation = useCreateCapitalEntry();
@@ -34,7 +36,7 @@ export const FinanceCapitalView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Owner Capital</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.capitalTitle")}</h1>
           <p className="text-sm text-ink-muted">
             Track equity contributions, property renovations, and capital drawings.
           </p>
@@ -59,7 +61,7 @@ export const FinanceCapitalView: React.FC = () => {
           <div>
             <AmountBadge amount={totalInjectedPaise} className="t-amount-lg text-ink" />
           </div>
-          <p className="text-xs text-ink-muted">Initial equity + subsequent injections</p>
+          <p className="text-xs text-ink-muted">{t("owner.finance.capitalSubtitle")}</p>
         </div>
 
         <div className="bg-surface border border-hairline rounded-2xl p-5 space-y-1">
@@ -69,7 +71,7 @@ export const FinanceCapitalView: React.FC = () => {
           <div>
             <AmountBadge amount={totalWithdrawnPaise} className="t-amount-lg text-ink" />
           </div>
-          <p className="text-xs text-ink-muted">Owner distributions and drawings</p>
+          <p className="text-xs text-ink-muted">{t("owner.finance.ownerDistributions")}</p>
         </div>
 
         <div className="bg-surface border border-hairline rounded-2xl p-5 space-y-1">
@@ -83,7 +85,7 @@ export const FinanceCapitalView: React.FC = () => {
               className="t-amount-lg"
             />
           </div>
-          <p className="text-xs text-ink-muted">Net equity currently committed</p>
+          <p className="text-xs text-ink-muted">{t("owner.finance.netEquityCommitted")}</p>
         </div>
       </div>
 
@@ -168,6 +170,7 @@ function CapitalModal({
   isSubmitting: boolean;
   error: Error | null;
 }) {
+  const { t } = useLocale();
   const [kind, setKind] = useState<CapitalKind>("additional");
   const [amountRupees, setAmountRupees] = useState("");
   const [purpose, setPurpose] = useState("");
@@ -176,7 +179,7 @@ function CapitalModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
       <div className="bg-surface border border-hairline rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between pb-2 border-b border-hairline">
-          <h2 className="text-base font-bold text-ink">Record Owner Capital</h2>
+          <h2 className="text-base font-bold text-ink">{t("owner.finance.recordOwnerCapital")}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -207,9 +210,9 @@ function CapitalModal({
               onChange={(e) => setKind(e.target.value as CapitalKind)}
               className="w-full h-11 px-3 rounded-xl border border-hairline bg-surface text-ink text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent"
             >
-              <option value="initial">Initial Equity Contribution</option>
-              <option value="additional">Additional Capital Injection</option>
-              <option value="withdrawal">Capital Withdrawal (Owner Drawing)</option>
+              <option value="initial">{t("owner.finance.initialEquityContrib")}</option>
+              <option value="additional">{t("owner.finance.additionalCapitalInjection")}</option>
+              <option value="withdrawal">{t("owner.finance.capitalWithdrawal")}</option>
             </select>
           </div>
 

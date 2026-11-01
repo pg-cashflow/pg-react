@@ -21,6 +21,7 @@ import {
   Scale,
   ShieldCheck,
 } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 function todayDateString(): string {
   const d = new Date();
@@ -33,6 +34,7 @@ function currentPeriod(): string {
 }
 
 export const ReconciliationView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"balancer" | "monthly">("balancer");
 
@@ -186,7 +188,7 @@ export const ReconciliationView: React.FC = () => {
                 Loading audit trail...
               </div>
             ) : !historyQuery.data || historyQuery.data.length === 0 ? (
-              <p className="p-6 text-xs text-ink-muted">No audit snapshots available yet.</p>
+              <p className="p-6 text-xs text-ink-muted">{t("owner.reconciliation.noAuditSnapshots")}</p>
             ) : (
               <div className="divide-y divide-hairline">
                 {historyQuery.data.map((row) => (
@@ -277,10 +279,10 @@ export const ReconciliationView: React.FC = () => {
 
                 <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
                   <div className="px-6 py-4 border-b border-hairline">
-                    <h3 className="text-sm font-bold text-ink">Collected by Channel</h3>
+                    <h3 className="text-sm font-bold text-ink">{t("owner.reconciliation.collectedByChannel")}</h3>
                   </div>
                   {channels.length === 0 ? (
-                    <p className="p-6 text-xs text-ink-muted">No payments recorded this period.</p>
+                    <p className="p-6 text-xs text-ink-muted">{t("owner.reconciliation.noPaymentsRecorded")}</p>
                   ) : (
                     <div className="divide-y divide-hairline">
                       {channels.map(([channel, amount]) => (
@@ -304,6 +306,7 @@ export const ReconciliationView: React.FC = () => {
 };
 
 function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-6">
       {/* Primary Status Banner */}
@@ -352,26 +355,26 @@ function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
             1. Gateway Clearing
           </p>
           <div>
-            <span className="text-xs text-ink-muted">Gross Paired:</span>
+            <span className="text-xs text-ink-muted">{t("owner.reconciliation.grossPaired")}</span>
             <div>
               <AmountBadge amount={balance.gateway_gross_paise} />
             </div>
           </div>
           <div className="text-xs text-ink-muted space-y-1 border-t border-hairline pt-2">
             <div className="flex justify-between">
-              <span>Net Settled:</span>
+              <span>{t("owner.reconciliation.netSettled")}</span>
               <AmountBadge amount={balance.gateway_net_settled_paise} />
             </div>
             <div className="flex justify-between">
-              <span>Fees:</span>
+              <span>{t("owner.reconciliation.fees")}</span>
               <AmountBadge amount={balance.gateway_fees_paise} />
             </div>
             <div className="flex justify-between">
-              <span>Tax (GST):</span>
+              <span>{t("owner.reconciliation.taxGst")}</span>
               <AmountBadge amount={balance.gateway_tax_paise} />
             </div>
             <div className="flex justify-between">
-              <span>Adjustment:</span>
+              <span>{t("owner.reconciliation.adjustment")}</span>
               <AmountBadge amount={balance.gateway_adjustment_paise} />
             </div>
           </div>
@@ -383,7 +386,7 @@ function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
             2. Gateway In-Transit
           </p>
           <div>
-            <span className="text-xs text-ink-muted">Clearing In-Flight:</span>
+            <span className="text-xs text-ink-muted">{t("owner.reconciliation.clearingInFlight")}</span>
             <div>
               <AmountBadge
                 amount={balance.gateway_in_transit_paise}
@@ -405,19 +408,19 @@ function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
           </p>
           <div className="text-xs space-y-1.5">
             <div className="flex justify-between">
-              <span className="text-ink-muted">Bank Statement Cr:</span>
+              <span className="text-ink-muted">{t("owner.reconciliation.bankStatementCr")}</span>
               <AmountBadge amount={balance.bank_credits_paise} />
             </div>
             <div className="flex justify-between">
-              <span className="text-ink-muted">Ledger Bank Dr:</span>
+              <span className="text-ink-muted">{t("owner.reconciliation.ledgerBankDr")}</span>
               <AmountBadge amount={balance.ledger_bank_dr_paise} />
             </div>
             <div className="flex justify-between border-t border-hairline pt-1">
-              <span className="text-ink-muted">Bank Statement Dr:</span>
+              <span className="text-ink-muted">{t("owner.reconciliation.bankStatementDr")}</span>
               <AmountBadge amount={balance.bank_debits_paise} />
             </div>
             <div className="flex justify-between">
-              <span className="text-ink-muted">Ledger Bank Cr:</span>
+              <span className="text-ink-muted">{t("owner.reconciliation.ledgerBankCr")}</span>
               <AmountBadge amount={balance.ledger_bank_cr_paise} />
             </div>
           </div>
@@ -429,7 +432,7 @@ function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
             4. Unapplied Quarantine
           </p>
           <div>
-            <span className="text-xs text-ink-muted">Tier 2 Quarantined:</span>
+            <span className="text-xs text-ink-muted">{t("owner.reconciliation.tier2Quarantined")}</span>
             <div>
               <AmountBadge amount={balance.unapplied_quarantine_paise} />
             </div>
@@ -443,7 +446,7 @@ function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
       {/* Discrepancy Items / Explanations */}
       <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
         <div className="px-6 py-4 border-b border-hairline flex items-center justify-between">
-          <h3 className="text-sm font-bold text-ink">Audit Variances & Discrepancies</h3>
+          <h3 className="text-sm font-bold text-ink">{t("owner.reconciliation.auditVariances")}</h3>
           <span className="text-xs text-ink-muted">
             {balance.discrepancies.length} item(s) detected
           </span>

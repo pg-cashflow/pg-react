@@ -83,7 +83,7 @@ export const OwnerRemindersView: React.FC = () => {
         {error && <div className="rounded-[14px] bg-danger-tint text-danger p-3 t-body-sm">{error}</div>}
         <div className="rounded-[14px] border border-hairline bg-surface overflow-hidden">
           {rows.length === 0 && (
-            <div className="px-5 py-10 text-center t-body-sm text-ink-muted">No open dues to remind.</div>
+            <div className="px-5 py-10 text-center t-body-sm text-ink-muted">{t("owner.reminders.noOpenDues")}</div>
           )}
           {rows.map((r) => (
             <div key={r.due.id} className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-hairline last:border-0">
@@ -113,10 +113,10 @@ export const OwnerRemindersView: React.FC = () => {
                   {busyId === r.due.id ? "Sending…" : "Send now"}
                 </button>
               ) : (
-                <span className="t-caption text-ink-faint">Delivered</span>
+                <span className="t-caption text-ink-faint">{t("owner.reminders.delivered")}</span>
               )}
               {!r.tenant?.phone && r.status === "scheduled" && (
-                <p className="w-full t-caption text-danger">No phone on file — attach phone on Tenants.</p>
+                <p className="w-full t-caption text-danger">{t("owner.reminders.noPhone")}</p>
               )}
             </div>
           ))}

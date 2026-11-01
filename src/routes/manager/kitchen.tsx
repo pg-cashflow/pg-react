@@ -6,8 +6,10 @@ import { getManagerKitchenHeadcount, listManagerInspections } from "@/api/gamifi
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useManagerAction } from "@/components/layout/ManagerShell";
 import { AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 export const KitchenHeadcountView: React.FC = () => {
+  const { t } = useLocale();
   const { user } = useAuth();
   const setAction = useManagerAction();
   const propertyId = user?.property_id || "";
@@ -78,7 +80,7 @@ export const KitchenHeadcountView: React.FC = () => {
           <AlertTriangle className="h-5 w-5" />
         </div>
         <div className="flex-1">
-          <div className="t-h3">Flagged today</div>
+          <div className="t-h3">{t("manager.kitchen.flaggedToday")}</div>
           <div className="t-body-sm text-ink-muted">
             {flagged === 0 ? "Nothing flagged in today's rounds" : `${flagged} failed items from today's rounds`}
           </div>
@@ -90,7 +92,7 @@ export const KitchenHeadcountView: React.FC = () => {
         <div key={m.name} className="flex items-center gap-4 rounded-[14px] border border-hairline bg-surface px-4 py-4">
           <div className="flex-1">
             <div className="t-h3">{m.name}</div>
-            <div className="t-caption text-ink-muted">Tenant RSVPs</div>
+            <div className="t-caption text-ink-muted">{t("manager.kitchen.tenantRsvps")}</div>
           </div>
           <div className="t-display-num text-accent">{m.n}</div>
         </div>

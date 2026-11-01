@@ -14,6 +14,7 @@ import {
 import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";
+import { useLocale } from "@/i18n";
 
 function currentPeriodString(): string {
   const d = new Date();
@@ -21,6 +22,7 @@ function currentPeriodString(): string {
 }
 
 export const FinanceReportsView: React.FC = () => {
+  const { t } = useLocale();
   const [period, setPeriod] = useState<string>(currentPeriodString);
 
   const driftQuery = useClearingDriftReport();
@@ -47,7 +49,7 @@ export const FinanceReportsView: React.FC = () => {
     <div className="space-y-8 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Integrity & Audit Reports</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.integrityAuditReports")}</h1>
           <p className="text-sm text-ink-muted">
             Bank reserve compliance, clearing drift, capital recovery, and ledger variance.
           </p>
@@ -79,7 +81,7 @@ export const FinanceReportsView: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-ink">T+3 Gateway Clearing Drift</h2>
+              <h2 className="text-base font-bold text-ink">{t("owner.finance.gatewayDriftTitle")}</h2>
               {drift && (
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -115,28 +117,28 @@ export const FinanceReportsView: React.FC = () => {
           {drift && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">Gross Collected</span>
+                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.grossCollected")}</span>
                 <div>
                   <AmountBadge amount={drift.total_gross_collected_paise} className="font-bold text-base" />
                 </div>
               </div>
 
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">Gross Settled</span>
+                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.grossSettled")}</span>
                 <div>
                   <AmountBadge amount={drift.total_gross_settled_paise} className="font-bold text-base" />
                 </div>
               </div>
 
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">Net Uncleared</span>
+                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.netUncleared")}</span>
                 <div>
                   <AmountBadge amount={drift.net_uncleared_paise} className="font-bold text-base" />
                 </div>
               </div>
 
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">Aging &gt; 3 Days</span>
+                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.agingOver3Days")}</span>
                 <div>
                   <AmountBadge
                     amount={drift.aging_past_3_days_paise}
@@ -155,7 +157,7 @@ export const FinanceReportsView: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-ink">Deposit Reserve Ring-Fencing</h2>
+              <h2 className="text-base font-bold text-ink">{t("owner.finance.depositReserveTitle")}</h2>
               {reserve && (
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -226,7 +228,7 @@ export const FinanceReportsView: React.FC = () => {
               {/* Progress Bar */}
               <div className="space-y-1 pt-1">
                 <div className="flex justify-between text-xs font-semibold text-ink-muted">
-                  <span>Coverage</span>
+                  <span>{t("owner.finance.coverage")}</span>
                   <span>{(reserve.coverage_percentage_bps / 100).toFixed(1)}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-surface-muted overflow-hidden">
@@ -250,7 +252,7 @@ export const FinanceReportsView: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-ink">Capital Payback &amp; Break-Even</h2>
+              <h2 className="text-base font-bold text-ink">{t("owner.finance.capitalPaybackTitle")}</h2>
               {payback && (
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -279,28 +281,28 @@ export const FinanceReportsView: React.FC = () => {
             <div className="space-y-3">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Invested</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.invested")}</span>
                   <div>
                     <AmountBadge amount={payback.total_invested_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Withdrawn</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.withdrawn")}</span>
                   <div>
                     <AmountBadge amount={payback.total_withdrawn_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Cumulative OCF</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.cumulativeOcf")}</span>
                   <div>
                     <AmountBadge amount={payback.cumulative_ocf_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Unrecovered Capital</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.unrecoveredCapital")}</span>
                   <div>
                     <AmountBadge
                       amount={payback.unrecovered_capital_paise}
@@ -314,7 +316,7 @@ export const FinanceReportsView: React.FC = () => {
               {/* Progress Bar */}
               <div className="space-y-1 pt-1">
                 <div className="flex justify-between text-xs font-semibold text-ink-muted">
-                  <span>Payback Progress</span>
+                  <span>{t("owner.finance.paybackProgress")}</span>
                   <span>{(payback.payback_percentage_bps / 100).toFixed(1)}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-surface-muted overflow-hidden">
@@ -352,21 +354,21 @@ export const FinanceReportsView: React.FC = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Budgeted OCF</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.budgetedOcf")}</span>
                   <div>
                     <AmountBadge amount={variance.budgeted_ocf_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Actual OCF</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.actualOcf")}</span>
                   <div>
                     <AmountBadge amount={variance.actual_ocf_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">Residual Unexplained</span>
+                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.residualUnexplained")}</span>
                   <div>
                     <AmountBadge amount={variance.residual_paise} className="font-bold text-base" />
                   </div>
@@ -394,7 +396,7 @@ export const FinanceReportsView: React.FC = () => {
       {/* 5. Reconciling Items Review */}
       <div className="bg-surface border border-hairline rounded-2xl p-5 sm:p-6 space-y-4">
         <div>
-          <h2 className="text-base font-bold text-ink">Aged Ledger Reconciling Items</h2>
+          <h2 className="text-base font-bold text-ink">{t("owner.finance.agedLedgerItems")}</h2>
           <p className="text-xs text-ink-muted">
             Unresolved money integrity items requiring manual review or classification.
           </p>

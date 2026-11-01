@@ -248,7 +248,7 @@ export const TenantsView: React.FC = () => {
                   </span>
                 )}
               </div>
-              <button onClick={() => setSelected(null)} className="text-ink-muted">Close</button>
+              <button onClick={() => setSelected(null)} className="text-ink-muted">{t("common.close")}</button>
             </div>
             {error && <p className="text-xs text-danger">{error}</p>}
             <div className="text-xs text-ink-muted space-y-1 rounded-xl bg-bg p-3">
@@ -260,7 +260,7 @@ export const TenantsView: React.FC = () => {
               {selected.current_address && <p>Current: {selected.current_address}</p>}
               {selected.joined_on && <p>Joined: {formatDate(selected.joined_on)}</p>}
               <div className="flex items-center gap-2 pt-1 border-t border-hairline/60">
-                <span className="text-ink-faint">KYC Status:</span>
+                <span className="text-ink-faint">{t("owner.tenants.kycStatusLabel")}</span>
                 <TenantKYCStatusBadge tenantId={selected.id} />
               </div>
               {selected.has_id_photo && (

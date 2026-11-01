@@ -4,6 +4,7 @@ import { logManagerViolation } from "@/api/gamification";
 import { useManagerAction } from "@/components/layout/ManagerShell";
 import { validateAndProcessImage } from "@/lib/imageValidation";
 import { Camera, X, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 function fileToB64(file: File): Promise<string> {
   return new Promise((res, rej) => {
@@ -15,6 +16,7 @@ function fileToB64(file: File): Promise<string> {
 }
 
 export const ViolationsView: React.FC = () => {
+  const { t } = useLocale();
   const setAction = useManagerAction();
   const [tenantId, setTenantId] = useState("");
   const [ruleCode, setRuleCode] = useState("");
@@ -93,7 +95,7 @@ export const ViolationsView: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      <h1 className="t-h1">Log a violation</h1>
+      <h1 className="t-h1">{t("manager.violations.logTitle")}</h1>
       <input
         value={tenantId}
         onChange={(e) => setTenantId(e.target.value)}
@@ -128,7 +130,7 @@ export const ViolationsView: React.FC = () => {
       />
 
       <div>
-        <label className="block text-xs font-semibold text-ink mb-1.5">Evidence Photo (Optional)</label>
+        <label className="block text-xs font-semibold text-ink mb-1.5">{t("manager.violations.evidencePhotoOptional")}</label>
         {photoPreview ? (
           <div className="relative rounded-[12px] border border-hairline p-2 bg-surface flex items-center gap-3">
             <img src={photoPreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover border border-hairline" />
@@ -157,12 +159,12 @@ export const ViolationsView: React.FC = () => {
             {isValidatingPhoto ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin text-accent" />
-                <span className="text-xs font-medium">Checking file...</span>
+                <span className="text-xs font-medium">{t("manager.violations.checkingFile")}</span>
               </>
             ) : (
               <>
                 <Camera className="h-4 w-4 text-ink-muted" />
-                <span className="text-xs font-semibold">Attach photo evidence</span>
+                <span className="text-xs font-semibold">{t("manager.violations.attachPhoto")}</span>
               </>
             )}
             <input

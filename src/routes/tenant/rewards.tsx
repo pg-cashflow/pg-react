@@ -16,8 +16,10 @@ import {
   Gift,
 } from "lucide-react";
 import type { RewardsCatalogItem, Redemption } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 export const TenantRewardsView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [successRedemption, setSuccessRedemption] = useState<{
     item: RewardsCatalogItem;
@@ -60,7 +62,7 @@ export const TenantRewardsView: React.FC = () => {
               <Award className="w-3.5 h-3.5 text-accent" />
               Resident Rewards Club
             </div>
-            <h1 className="t-h1 tracking-tight">Perks & Point Store</h1>
+            <h1 className="t-h1 tracking-tight">{t("tenant.rewards.storeTitle")}</h1>
             <p className="text-xs text-ink-muted max-w-md leading-relaxed">
               Earn points for on-time rent, kitchen RSVPs, and maintaining clean rooms. Redeem for rent discounts, meal upgrades, and amenities.
             </p>
@@ -69,29 +71,29 @@ export const TenantRewardsView: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             {/* Balance pill */}
             <div className="bg-surface/80 border border-hairline/80 rounded-2xl px-4 py-3 text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">Balance</span>
+              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.balance")}</span>
               <div className="flex items-baseline justify-center gap-1 mt-0.5">
                 <span className="t-display-num text-success">{balance}</span>
-                <span className="text-xs font-semibold text-success">pts</span>
+                <span className="text-xs font-semibold text-success">{t("tenant.rewards.pts")}</span>
               </div>
             </div>
 
             {/* Streak flame */}
             <div className="bg-surface/80 border border-hairline/80 rounded-2xl px-4 py-3 text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">On-Time Streak</span>
+              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.onTimeStreak")}</span>
               <div className="flex items-center justify-center gap-1 mt-0.5">
                 <Flame className="w-5 h-5 text-accent fill-accent animate-pulse" />
                 <span className="t-display-num text-ink">{streak}</span>
-                <span className="text-xs font-semibold text-ink-muted">mo</span>
+                <span className="text-xs font-semibold text-ink-muted">{t("tenant.rewards.monthsShort")}</span>
               </div>
             </div>
 
             {/* Freeze Tokens */}
             <div className="bg-surface/80 border border-hairline/80 rounded-2xl px-4 py-3 text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">Freeze Tokens</span>
+              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.freezeTokens")}</span>
               <div className="flex items-baseline justify-center gap-1 mt-0.5">
                 <span className="t-display-num text-accent">{freezes}</span>
-                <span className="t-caption font-semibold text-accent">left</span>
+                <span className="t-caption font-semibold text-accent">{t("tenant.rewards.left")}</span>
               </div>
             </div>
           </div>
@@ -193,13 +195,13 @@ export const TenantRewardsView: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-ink">Reward Claimed!</h3>
+              <h3 className="text-base font-bold text-ink">{t("tenant.rewards.claimedTitle")}</h3>
               <p className="text-xs text-ink-muted mt-1">{successRedemption.item.title}</p>
             </div>
 
             {successRedemption.redemption.coupon_code && (
               <div className="p-3 bg-surface/80 rounded-2xl border border-dashed border-hairline">
-                <span className="text-[10px] uppercase font-bold text-ink-muted block mb-1">Coupon Code</span>
+                <span className="text-[10px] uppercase font-bold text-ink-muted block mb-1">{t("tenant.rewards.couponCode")}</span>
                 <span className="font-mono text-lg font-bold text-accent tracking-wider">
                   {successRedemption.redemption.coupon_code}
                 </span>

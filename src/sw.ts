@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute, NavigationRoute } from "workbox-routing";
-import { CacheFirst, StaleWhileRevalidate } from "workbox-strategies";
+import { CacheFirst } from "workbox-strategies";
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
@@ -30,26 +30,19 @@ const navigationRoute = new NavigationRoute(navigationHandler, {
 });
 registerRoute(navigationRoute);
 
-// Cache Google Fonts stylesheets with StaleWhileRevalidate
+// Cache self-hosted webfonts and stylesheet with CacheFirst (1 year)
 registerRoute(
-  ({ url }) => url.origin === "https://fonts.googleapis.com",
-  new StaleWhileRevalidate({
-    cacheName: "google-fonts-stylesheets",
-  })
-);
-
-// Cache Google Fonts webfont files with CacheFirst (1 year)
-registerRoute(
-  ({ url }) => url.origin === "https://fonts.gstatic.com",
+  ({ url }) =>
+    url.origin === self.location.origin && url.pathname.startsWith("/fonts/"),
   new CacheFirst({
-    cacheName: "google-fonts-webfonts",
+    cacheName: "self-hosted-fonts",
     plugins: [
       new CacheableResponsePlugin({
         statuses: [0, 200],
       }),
       new ExpirationPlugin({
         maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-        maxEntries: 30,
+        maxEntries: 100,
       }),
     ],
   })

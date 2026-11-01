@@ -14,6 +14,7 @@ import { FinanceNav } from "@/components/owner/FinanceNav";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
 import { useFinanceSummary } from "@/lib/useFinance";
+import { useLocale } from "@/i18n";
 
 function currentPeriodString(): string {
   const d = new Date();
@@ -21,6 +22,7 @@ function currentPeriodString(): string {
 }
 
 export const FinanceOverviewView: React.FC = () => {
+  const { t } = useLocale();
   const [period, setPeriod] = useState<string>(currentPeriodString);
   const summaryQuery = useFinanceSummary(period);
 
@@ -41,7 +43,7 @@ export const FinanceOverviewView: React.FC = () => {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Finance & Ledger</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.title")}</h1>
           <p className="text-sm text-ink-muted">
             Double-entry financial health, operational cash flow, and ledger integrity.
           </p>
@@ -153,7 +155,7 @@ export const FinanceOverviewView: React.FC = () => {
                 </h2>
                 <div className="divide-y divide-hairline">
                   <div className="py-2.5 flex items-center justify-between">
-                    <span className="text-sm text-ink-muted">Manager Advances Outstanding</span>
+                    <span className="text-sm text-ink-muted">{t("owner.finance.managerAdvances")}</span>
                     <AmountBadge
                       amount={op.manager_advance_outstanding_paise}
                       variant={op.manager_advance_outstanding_paise > 0 ? "warning" : "default"}
@@ -161,19 +163,19 @@ export const FinanceOverviewView: React.FC = () => {
                     />
                   </div>
                   <div className="py-2.5 flex items-center justify-between">
-                    <span className="text-sm text-ink-muted">Deposits Held (Liability)</span>
+                    <span className="text-sm text-ink-muted">{t("owner.finance.depositsHeld")}</span>
                     <AmountBadge amount={col.deposits_held_paise} className="font-semibold" />
                   </div>
                   <div className="py-2.5 flex items-center justify-between">
-                    <span className="text-sm text-ink-muted">Deposits Refunded (Period)</span>
+                    <span className="text-sm text-ink-muted">{t("owner.finance.depositsRefunded")}</span>
                     <AmountBadge amount={col.deposits_refunded_paise} className="font-semibold" />
                   </div>
                   <div className="py-2.5 flex items-center justify-between">
-                    <span className="text-sm text-ink-muted">Tenant Credits Held</span>
+                    <span className="text-sm text-ink-muted">{t("owner.finance.tenantCreditsHeld")}</span>
                     <AmountBadge amount={col.credits_held_paise} className="font-semibold" />
                   </div>
                   <div className="py-2.5 flex items-center justify-between">
-                    <span className="text-sm text-ink-muted">Gamification Loyalty Issued</span>
+                    <span className="text-sm text-ink-muted">{t("owner.finance.gamificationIssued")}</span>
                     <AmountBadge amount={op.loyalty_issued_paise} className="font-semibold" />
                   </div>
                 </div>
@@ -217,7 +219,7 @@ export const FinanceOverviewView: React.FC = () => {
                     <h3 className="text-sm font-bold text-ink group-hover:text-accent transition-colors">
                       Statements
                     </h3>
-                    <p className="text-xs text-ink-muted">P&amp;L, Balance Sheet, Cash Flow</p>
+                    <p className="text-xs text-ink-muted">{t("owner.finance.statementsCardDesc")}</p>
                   </div>
                 </div>
                 <ArrowRight size={16} className="text-ink-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
@@ -235,7 +237,7 @@ export const FinanceOverviewView: React.FC = () => {
                     <h3 className="text-sm font-bold text-ink group-hover:text-accent transition-colors">
                       Integrity Reports
                     </h3>
-                    <p className="text-xs text-ink-muted">T+3 Drift, Deposit Reserve</p>
+                    <p className="text-xs text-ink-muted">{t("owner.finance.reportsCardDesc")}</p>
                   </div>
                 </div>
                 <ArrowRight size={16} className="text-ink-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
@@ -253,7 +255,7 @@ export const FinanceOverviewView: React.FC = () => {
                     <h3 className="text-sm font-bold text-ink group-hover:text-accent transition-colors">
                       Month Close
                     </h3>
-                    <p className="text-xs text-ink-muted">Tie-out and period lock</p>
+                    <p className="text-xs text-ink-muted">{t("owner.finance.closeCardDesc")}</p>
                   </div>
                 </div>
                 <ArrowRight size={16} className="text-ink-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" />

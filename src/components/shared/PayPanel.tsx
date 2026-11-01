@@ -54,7 +54,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
       active = false;
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
-  }, [dueId]);
+  }, [dueId, t]);
 
   const copy = async (label: string, value?: string) => {
     if (!value) return;

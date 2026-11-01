@@ -10,8 +10,10 @@ import { Search, CheckCircle2, RotateCcw } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { RefundModal } from "@/components/owner/RefundModal";
 import type { Payment } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 export const PaymentsView: React.FC = () => {
+  const { t } = useLocale();
   const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [selectedPaymentForRefund, setSelectedPaymentForRefund] = useState<Payment | null>(null);
 
@@ -77,13 +79,13 @@ export const PaymentsView: React.FC = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-bg text-ink-muted text-xs font-semibold uppercase border-b border-hairline sticky top-0 z-10">
                 <tr>
-                  <th className="px-6 py-3.5">Tenant</th>
-                  <th className="px-6 py-3.5">Amount</th>
-                  <th className="px-6 py-3.5">Matched By</th>
-                  <th className="px-6 py-3.5">UPI Ref</th>
-                  <th className="px-6 py-3.5">Matched At</th>
-                  <th className="px-6 py-3.5">Note</th>
-                  <th className="px-6 py-3.5 text-right">Actions</th>
+                  <th className="px-6 py-3.5">{t("owner.payments.colTenant")}</th>
+                  <th className="px-6 py-3.5">{t("owner.payments.colAmount")}</th>
+                  <th className="px-6 py-3.5">{t("owner.payments.colMatchedBy")}</th>
+                  <th className="px-6 py-3.5">{t("owner.payments.colUpiRef")}</th>
+                  <th className="px-6 py-3.5">{t("owner.payments.colMatchedAt")}</th>
+                  <th className="px-6 py-3.5">{t("owner.payments.colNote")}</th>
+                  <th className="px-6 py-3.5 text-right">{t("owner.payments.colActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline text-ink">

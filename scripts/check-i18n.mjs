@@ -8,7 +8,7 @@ const LOCALES = ["en-IN", "te-IN", "ta-IN", "kn-IN"];
 
 // Ratchet baseline ceiling: build fails if detected literal strings exceed this limit.
 // As files are converted to t(), decrease this number to prevent future regressions.
-const BASELINE_LITERAL_CEILING = 214;
+const BASELINE_LITERAL_CEILING = 0;
 
 let parityHits = 0;
 
@@ -111,8 +111,8 @@ for (const f of files) {
       }
       // Check if text has at least one Latin word of 2+ chars
       if (/[A-Za-z]{2,}/.test(text)) {
-        // Exclude common HTML entity / code strings
-        if (/^(div|span|button|svg|path|class|className|id|src|href)$/i.test(text)) continue;
+        // Exclude common HTML entity / code strings and TS generic types
+        if (/^(div|span|button|svg|path|class|className|id|src|href|Promise)$/i.test(text)) continue;
         console.warn(`[i18n LITERAL] ${f}:${i + 1} -> "${text}"`);
         literalHits++;
         hitsByFile.set(f, (hitsByFile.get(f) || 0) + 1);

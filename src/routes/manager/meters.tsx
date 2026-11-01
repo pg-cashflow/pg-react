@@ -10,8 +10,10 @@ import {
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useManagerAction } from "@/components/layout/ManagerShell";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 export const MetersView: React.FC = () => {
+  const { t } = useLocale();
   const { user } = useAuth();
   const setAction = useManagerAction();
   const propertyId = user?.property_id || "";
@@ -89,7 +91,7 @@ export const MetersView: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="t-h1">Meter reading</h1>
+      <h1 className="t-h1">{t("manager.meters.meterReading")}</h1>
       <div className="grid grid-cols-2 gap-2">
         {(["electricity", "water"] as const).map((k) => (
           <button
@@ -110,7 +112,7 @@ export const MetersView: React.FC = () => {
           onChange={(e) => setRoomId(e.target.value)}
           className="w-full h-12 rounded-[10px] border border-hairline bg-surface px-3"
         >
-          <option value="">Room</option>
+          <option value="">{t("manager.meters.room")}</option>
           {(roomsQuery.data ?? []).map((r) => (
             <option key={r.id} value={r.id}>
               {r.room_number}
@@ -123,7 +125,7 @@ export const MetersView: React.FC = () => {
           onChange={(e) => setFloorId(e.target.value)}
           className="w-full h-12 rounded-[10px] border border-hairline bg-surface px-3"
         >
-          <option value="">Floor</option>
+          <option value="">{t("manager.meters.floor")}</option>
           {(floorsQuery.data ?? []).map((f) => (
             <option key={f.id} value={f.id}>
               {f.name || `Floor ${f.floor_number}`}
@@ -147,7 +149,7 @@ export const MetersView: React.FC = () => {
       </label>
 
       <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
-        <h2 className="t-h3">Vendor inspection</h2>
+        <h2 className="t-h3">{t("manager.meters.vendorInspection")}</h2>
         <input
           value={vendorName}
           onChange={(e) => setVendorName(e.target.value)}

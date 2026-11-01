@@ -10,6 +10,7 @@ import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";
 import { formatDate } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 type StatementType = "income" | "balance_sheet" | "cash_flow" | "trial_balance";
 
@@ -19,6 +20,7 @@ function currentPeriodString(): string {
 }
 
 export const FinanceStatementsView: React.FC = () => {
+  const { t } = useLocale();
   const [activeStatement, setActiveStatement] = useState<StatementType>("income");
   const [period, setPeriod] = useState<string>(currentPeriodString);
 
@@ -39,7 +41,7 @@ export const FinanceStatementsView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Financial Statements</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.statementsTitle")}</h1>
           <p className="text-sm text-ink-muted">
             Formal double-entry accounting statements generated directly from journal entries.
           </p>
@@ -130,7 +132,7 @@ export const FinanceStatementsView: React.FC = () => {
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
             <div className="p-4 sm:p-5 border-b border-hairline bg-surface-muted/30 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-ink">Income Statement</h2>
+                <h2 className="text-base font-bold text-ink">{t("owner.finance.incomeStatement")}</h2>
                 <p className="text-xs text-ink-muted">
                   Operating period {incomeQuery.data?.from ? formatDate(incomeQuery.data.from) : ""} to{" "}
                   {incomeQuery.data?.to ? formatDate(incomeQuery.data.to) : ""}
@@ -173,7 +175,7 @@ export const FinanceStatementsView: React.FC = () => {
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
             <div className="p-4 sm:p-5 border-b border-hairline bg-surface-muted/30 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-ink">Balance Sheet</h2>
+                <h2 className="text-base font-bold text-ink">{t("owner.finance.balanceSheet")}</h2>
                 <p className="text-xs text-ink-muted">
                   As of {balanceSheetQuery.data?.as_of ? formatDate(balanceSheetQuery.data.as_of) : period}
                 </p>
@@ -215,8 +217,8 @@ export const FinanceStatementsView: React.FC = () => {
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
             <div className="p-4 sm:p-5 border-b border-hairline bg-surface-muted/30 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-ink">Direct Cash Flow Statement</h2>
-                <p className="text-xs text-ink-muted">Cash receipts and operational disbursements</p>
+                <h2 className="text-base font-bold text-ink">{t("owner.finance.directCashFlow")}</h2>
+                <p className="text-xs text-ink-muted">{t("owner.finance.directCashFlowDesc")}</p>
               </div>
             </div>
 
@@ -254,19 +256,19 @@ export const FinanceStatementsView: React.FC = () => {
         >
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
             <div className="p-4 sm:p-5 border-b border-hairline bg-surface-muted/30">
-              <h2 className="text-base font-bold text-ink">Trial Balance</h2>
-              <p className="text-xs text-ink-muted">Debit and credit balances per account</p>
+              <h2 className="text-base font-bold text-ink">{t("owner.finance.trialBalance")}</h2>
+              <p className="text-xs text-ink-muted">{t("owner.finance.trialBalanceDesc")}</p>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-hairline bg-surface-muted/10 text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    <th className="py-3 px-4">Account</th>
+                    <th className="py-3 px-4">{t("owner.finance.colAccount")}</th>
                     <th className="py-3 px-4">Class</th>
-                    <th className="py-3 px-4 text-right">Debit</th>
-                    <th className="py-3 px-4 text-right">Credit</th>
-                    <th className="py-3 px-4 text-right">Net Balance</th>
+                    <th className="py-3 px-4 text-right">{t("owner.finance.colDebit")}</th>
+                    <th className="py-3 px-4 text-right">{t("owner.finance.colCredit")}</th>
+                    <th className="py-3 px-4 text-right">{t("owner.finance.colNetBalance")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-hairline">

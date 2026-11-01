@@ -24,6 +24,7 @@ export default defineConfig({
           'pwa-*.png',
           'assets/index-*.js',
           'assets/index-*.css',
+          'fonts/fonts.css',
         ],
       },
       manifest: {

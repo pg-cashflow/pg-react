@@ -16,6 +16,7 @@ import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";
 import { formatDate } from "@/lib/utils";
+import { useLocale } from "@/i18n";
 
 function currentPeriodString(): string {
   const d = new Date();
@@ -23,6 +24,7 @@ function currentPeriodString(): string {
 }
 
 export const FinanceCloseView: React.FC = () => {
+  const { t } = useLocale();
   const [period, setPeriod] = useState<string>(currentPeriodString);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [showReopenModal, setShowReopenModal] = useState(false);
@@ -47,7 +49,7 @@ export const FinanceCloseView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Month Close &amp; Tie-Out</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.closeTitle")}</h1>
           <p className="text-sm text-ink-muted">
             Formal accounting period lock, collection tie-out, and audited reopening.
           </p>
@@ -148,7 +150,7 @@ export const FinanceCloseView: React.FC = () => {
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-4 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-ink-muted uppercase">Difference</span>
+                    <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.difference")}</span>
                     {isBalanced ? (
                       <CheckCircle2 size={14} className="text-success" />
                     ) : (
@@ -170,7 +172,7 @@ export const FinanceCloseView: React.FC = () => {
             <div className="bg-surface border border-hairline rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-ink">Tie-Out Reconciliation Items</h3>
+                  <h3 className="text-base font-bold text-ink">{t("owner.finance.tieOutReconItems")}</h3>
                   <p className="text-xs text-ink-muted">
                     Itemized timing differences, adjustments, and investigated variances.
                   </p>

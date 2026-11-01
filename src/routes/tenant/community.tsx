@@ -25,8 +25,10 @@ import {
   ShieldCheck,
   Flame,
 } from "lucide-react";
+import { useLocale } from "@/i18n";
 
 export const TenantCommunityView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
 
   // Active section tab: meals | poll | hazards | inspections | leaderboard
@@ -142,7 +144,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <Utensils className="w-4 h-4" />
-          <span>Meal RSVP</span>
+          <span>{t("tenant.community.tabMealRsvp")}</span>
         </button>
         <button
           onClick={() => setTab("poll")}
@@ -151,7 +153,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <Vote className="w-4 h-4" />
-          <span>Menu Poll</span>
+          <span>{t("tenant.community.tabMenuPoll")}</span>
         </button>
         <button
           onClick={() => setTab("inspections")}
@@ -160,7 +162,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <ShieldCheck className="w-4 h-4" />
-          <span>Cleanliness</span>
+          <span>{t("tenant.community.tabCleanliness")}</span>
         </button>
         <button
           onClick={() => setTab("hazards")}
@@ -169,7 +171,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>Report Hazard</span>
+          <span>{t("tenant.community.tabReportHazard")}</span>
         </button>
         <button
           onClick={() => setTab("leaderboard")}
@@ -178,7 +180,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <Trophy className="w-4 h-4" />
-          <span>Leaderboard</span>
+          <span>{t("tenant.community.tabLeaderboard")}</span>
         </button>
         <button
           onClick={() => setTab("referrals")}
@@ -187,7 +189,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>Referrals</span>
+          <span>{t("tenant.community.tabReferrals")}</span>
         </button>
         <button
           onClick={() => setTab("violations")}
@@ -196,7 +198,7 @@ export const TenantCommunityView: React.FC = () => {
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>Violations</span>
+          <span>{t("tenant.community.tabViolations")}</span>
         </button>
       </div>
 
@@ -223,8 +225,8 @@ export const TenantCommunityView: React.FC = () => {
           <div className="space-y-3">
             <label className="p-3.5 rounded-xl bg-bg border border-hairline/60 flex items-center justify-between cursor-pointer hover:bg-accent-tint transition">
               <div>
-                <span className="font-semibold text-xs text-ink block">Breakfast</span>
-                <span className="text-[11px] text-ink-muted">07:30 AM — 09:30 AM</span>
+                <span className="font-semibold text-xs text-ink block">{t("tenant.community.mealBreakfast")}</span>
+                <span className="text-[11px] text-ink-muted">{t("tenant.community.mealBreakfastTime")}</span>
               </div>
               <input
                 type="checkbox"
@@ -236,8 +238,8 @@ export const TenantCommunityView: React.FC = () => {
 
             <label className="p-3.5 rounded-xl bg-bg border border-hairline/60 flex items-center justify-between cursor-pointer hover:bg-accent-tint transition">
               <div>
-                <span className="font-semibold text-xs text-ink block">Lunch</span>
-                <span className="text-[11px] text-ink-muted">12:30 PM — 02:30 PM</span>
+                <span className="font-semibold text-xs text-ink block">{t("tenant.community.mealLunch")}</span>
+                <span className="text-[11px] text-ink-muted">{t("tenant.community.mealLunchTime")}</span>
               </div>
               <input
                 type="checkbox"
@@ -249,8 +251,8 @@ export const TenantCommunityView: React.FC = () => {
 
             <label className="p-3.5 rounded-xl bg-bg border border-hairline/60 flex items-center justify-between cursor-pointer hover:bg-accent-tint transition">
               <div>
-                <span className="font-semibold text-xs text-ink block">Dinner</span>
-                <span className="text-[11px] text-ink-muted">07:30 PM — 09:30 PM (20:00 cutoff)</span>
+                <span className="font-semibold text-xs text-ink block">{t("tenant.community.mealDinner")}</span>
+                <span className="text-[11px] text-ink-muted">{t("tenant.community.mealDinnerTime")}</span>
               </div>
               <input
                 type="checkbox"
@@ -267,7 +269,7 @@ export const TenantCommunityView: React.FC = () => {
             className="w-full py-3 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 transition shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
           >
             {saveRsvpMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            <span>Save Tomorrow's Attendance</span>
+            <span>{t("tenant.community.saveTomorrowAttendance")}</span>
           </button>
         </div>
       )}
@@ -286,7 +288,7 @@ export const TenantCommunityView: React.FC = () => {
           </div>
 
           {!pollQuery.data?.poll ? (
-            <p className="text-xs text-ink-muted">No active menu poll for this month.</p>
+            <p className="text-xs text-ink-muted">{t("tenant.community.noActiveMenuPoll")}</p>
           ) : (
             <div className="space-y-3">
               <h3 className="text-xs font-bold text-ink uppercase tracking-wider">
@@ -378,10 +380,10 @@ export const TenantCommunityView: React.FC = () => {
                           </button>
                         )}
                         {it.resolution_status === "disputed" && (
-                          <span className="text-[10px] text-accent font-medium">Under Review</span>
+                          <span className="text-[10px] text-accent font-medium">{t("tenant.community.underReview")}</span>
                         )}
                         {it.resolution_status === "overturned" && (
-                          <span className="text-[10px] text-success font-medium">Dispute Upheld (Passed)</span>
+                          <span className="text-[10px] text-success font-medium">{t("tenant.community.disputeUpheld")}</span>
                         )}
                       </div>
                     ))}
@@ -415,22 +417,22 @@ export const TenantCommunityView: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-ink mb-1.5 uppercase">Category</label>
+              <label className="block text-xs font-medium text-ink mb-1.5 uppercase">{t("tenant.community.category")}</label>
               <select
                 value={hzCat}
                 onChange={(e) => setHzCat(e.target.value)}
                 className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               >
-                <option value="Water leakage / Plumbing">Water leakage / Plumbing</option>
-                <option value="Electrical / Wiring hazard">Electrical / Wiring hazard</option>
-                <option value="Pest / Deep Cleanliness">Pest / Deep Cleanliness</option>
-                <option value="Door lock / Security">Door lock / Security</option>
-                <option value="Other">Other</option>
+                <option value="Water leakage / Plumbing">{t("tenant.community.catPlumbing")}</option>
+                <option value="Electrical / Wiring hazard">{t("tenant.community.catElectrical")}</option>
+                <option value="Pest / Deep Cleanliness">{t("tenant.community.catCleanliness")}</option>
+                <option value="Door lock / Security">{t("tenant.community.catSecurity")}</option>
+                <option value="Other">{t("tenant.community.catOther")}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1.5 uppercase">Description</label>
+              <label className="block text-xs font-medium text-ink mb-1.5 uppercase">{t("tenant.community.description")}</label>
               <textarea
                 rows={3}
                 value={hzDesc}
@@ -441,7 +443,7 @@ export const TenantCommunityView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-ink mb-1.5 uppercase">Photo Evidence (Optional)</label>
+              <label className="block text-xs font-medium text-ink mb-1.5 uppercase">{t("tenant.community.photoEvidenceOptional")}</label>
               <input
                 type="file"
                 accept="image/*"
@@ -456,7 +458,7 @@ export const TenantCommunityView: React.FC = () => {
               className="w-full py-3 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {reportHazardMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
-              <span>Submit Report & Earn 25 Pts on Fix</span>
+              <span>{t("tenant.community.submitReportEarnPts")}</span>
             </button>
           </div>
         </div>
@@ -493,7 +495,7 @@ export const TenantCommunityView: React.FC = () => {
             </h3>
             <div className="divide-y divide-hairline border border-hairline rounded-xl overflow-hidden">
               {(leaderboardQuery.data?.floor_scores ?? []).length === 0 ? (
-                <div className="p-4 text-center text-xs text-ink-muted">No floor audits logged this month.</div>
+                <div className="p-4 text-center text-xs text-ink-muted">{t("tenant.community.noFloorAudits")}</div>
               ) : (
                 leaderboardQuery.data?.floor_scores?.map((fl) => (
                   <div key={fl.floor_number} className="p-3 flex items-center justify-between text-xs">
@@ -515,10 +517,10 @@ export const TenantCommunityView: React.FC = () => {
 
       {tab === "referrals" && (
         <div className="max-w-xl rounded-[14px] border border-hairline bg-surface p-5 space-y-3">
-          <h2 className="t-h3">Referrals</h2>
-          <p className="t-body-sm text-ink-muted">Points land when a referred tenant moves in.</p>
+          <h2 className="t-h3">{t("tenant.community.referralsTitle")}</h2>
+          <p className="t-body-sm text-ink-muted">{t("tenant.community.referralsDesc")}</p>
           {(referralsQuery.data ?? []).length === 0 ? (
-            <p className="t-caption text-ink-muted">No referrals yet.</p>
+            <p className="t-caption text-ink-muted">{t("tenant.community.noReferrals")}</p>
           ) : (
             <ul className="divide-y divide-hairline">
               {(referralsQuery.data ?? []).map((r) => (
@@ -536,9 +538,9 @@ export const TenantCommunityView: React.FC = () => {
 
       {tab === "violations" && (
         <div className="max-w-xl rounded-[14px] border border-hairline bg-surface p-5 space-y-3">
-          <h2 className="t-h3">Violations</h2>
+          <h2 className="t-h3">{t("tenant.community.violationsTitle")}</h2>
           {(violationsQuery.data ?? []).length === 0 ? (
-            <p className="t-caption text-ink-muted">No violations on file.</p>
+            <p className="t-caption text-ink-muted">{t("tenant.community.noViolations")}</p>
           ) : (
             <ul className="divide-y divide-hairline">
               {(violationsQuery.data ?? []).map((v) => (
@@ -556,7 +558,7 @@ export const TenantCommunityView: React.FC = () => {
       {disputingItemId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
           <div className="bg-surface border border-hairline rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-ink">Dispute Inspection Item</h3>
+            <h3 className="text-base font-bold text-ink">{t("tenant.community.disputeInspectionItem")}</h3>
             <p className="text-xs text-ink-muted">
               Explain why this item should pass (e.g. maintenance was scheduled, photo misinterpretation). Warden will review within 48 hours.
             </p>

@@ -11,6 +11,7 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";
 import { formatDate, localDateInputValue, rupeesToPaise } from "@/lib/utils";
 import type { Expense, ExpenseStatus } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 const STATUS_LABEL: Record<ExpenseStatus, string> = {
   draft: "Draft",
@@ -39,6 +40,7 @@ const CATEGORY_PRESETS = [
 ];
 
 export const FinanceExpensesView: React.FC = () => {
+  const { t } = useLocale();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showAdd, setShowAdd] = useState(false);
   const [payFor, setPayFor] = useState<Expense | null>(null);
@@ -59,7 +61,7 @@ export const FinanceExpensesView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Expenses</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.expensesTitle")}</h1>
           <p className="text-sm text-ink-muted">
             Track operational spending, vendor disbursements, and payments.
           </p>
@@ -407,6 +409,7 @@ function PayExpenseModal({
   isSubmitting: boolean;
   error: Error | null;
 }) {
+  const { t } = useLocale();
   const [amountRupees, setAmountRupees] = useState(String(expense.amount_paise / 100));
   const [method, setMethod] = useState("bank_transfer");
 
@@ -431,10 +434,10 @@ function PayExpenseModal({
             onChange={(e) => setMethod(e.target.value)}
             className="w-full h-11 px-3 rounded-xl border border-hairline bg-surface text-ink text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent"
           >
-            <option value="bank_transfer">Bank Transfer (NEFT/IMPS)</option>
-            <option value="upi">UPI</option>
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
+            <option value="bank_transfer">{t("owner.finance.bankTransfer")}</option>
+            <option value="upi">{t("owner.finance.upi")}</option>
+            <option value="cash">{t("owner.finance.cash")}</option>
+            <option value="cheque">{t("owner.finance.cheque")}</option>
           </select>
         </div>
 

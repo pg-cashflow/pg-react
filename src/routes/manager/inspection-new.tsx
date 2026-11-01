@@ -7,6 +7,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useManagerAction } from "@/components/layout/ManagerShell";
 import { Check, Camera, AlertCircle, Trash2, Loader2 } from "lucide-react";
 import { validateAndProcessImage } from "@/lib/imageValidation";
+import { useLocale } from "@/i18n";
 
 const ITEMS = [
   { key: "bed_clear", desc: "Bed / desk clear and tidy" },
@@ -36,6 +37,7 @@ function fileToB64(file: File): Promise<string> {
 }
 
 export const InspectionNewView: React.FC = () => {
+  const { t } = useLocale();
   const { user } = useAuth();
   const setAction = useManagerAction();
   const navigate = useNavigate();
@@ -197,17 +199,17 @@ export const InspectionNewView: React.FC = () => {
 
       {isScope && (
         <div className="space-y-3">
-          <h1 className="t-h1">What are you inspecting?</h1>
-          {(["room", "floor", "common_bathroom"] as const).map((t) => (
+          <h1 className="t-h1">{t("manager.inspection.whatInspecting")}</h1>
+          {(["room", "floor", "common_bathroom"] as const).map((scope) => (
             <button
-              key={t}
+              key={scope}
               type="button"
-              onClick={() => setInsType(t)}
+              onClick={() => setInsType(scope)}
               className={`w-full text-left rounded-[14px] border px-4 py-3 ${
-                insType === t ? "border-accent bg-accent-tint" : "border-hairline bg-surface"
+                insType === scope ? "border-accent bg-accent-tint" : "border-hairline bg-surface"
               }`}
             >
-              <div className="t-h3 capitalize">{t.replace("_", " ")}</div>
+              <div className="t-h3 capitalize">{scope.replace("_", " ")}</div>
             </button>
           ))}
           {insType === "room" && (
@@ -216,7 +218,7 @@ export const InspectionNewView: React.FC = () => {
               onChange={(e) => setSelectedRoomId(e.target.value)}
               className="w-full h-12 rounded-[10px] border border-hairline bg-surface px-3"
             >
-              <option value="">Select room</option>
+              <option value="">{t("manager.inspection.selectRoom")}</option>
               {rooms.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.room_number}
@@ -230,7 +232,7 @@ export const InspectionNewView: React.FC = () => {
               onChange={(e) => setSelectedFloorId(e.target.value)}
               className="w-full h-12 rounded-[10px] border border-hairline bg-surface px-3"
             >
-              <option value="">Select floor</option>
+              <option value="">{t("manager.inspection.selectFloor")}</option>
               {floors.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name || `Floor ${f.floor_number}`}
@@ -318,12 +320,12 @@ export const InspectionNewView: React.FC = () => {
                     {isValidatingPhoto ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin text-accent" />
-                        <span className="text-xs font-medium">Checking file...</span>
+                        <span className="text-xs font-medium">{t("manager.inspection.checkingFile")}</span>
                       </>
                     ) : (
                       <>
                         <Camera className="h-4 w-4 text-ink-muted" />
-                        <span className="text-xs font-semibold">Attach photo evidence</span>
+                        <span className="text-xs font-semibold">{t("manager.inspection.attachPhoto")}</span>
                       </>
                     )}
                     <input
@@ -367,7 +369,7 @@ export const InspectionNewView: React.FC = () => {
 
       {isReview && (
         <div className="space-y-3">
-          <h1 className="t-h1">Review round</h1>
+          <h1 className="t-h1">{t("manager.inspection.reviewRound")}</h1>
           <ul className="rounded-[14px] border border-hairline bg-surface divide-y divide-hairline">
             {items.map((it) => (
               <li key={it.key} className="px-4 py-3 flex justify-between t-body">

@@ -2,8 +2,10 @@ import React, { useEffect } from "react";
 import { useAuth } from "@/auth/context";
 import { useManagerAction } from "@/components/layout/ManagerShell";
 import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
+import { useLocale } from "@/i18n";
 
 export const ManagerProfileView: React.FC = () => {
+  const { t } = useLocale();
   const { user, logout } = useAuth();
   const setAction = useManagerAction();
 
@@ -14,15 +16,15 @@ export const ManagerProfileView: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="t-h1">Warden profile</h1>
+      <h1 className="t-h1">{t("manager.profile.title")}</h1>
       <section className="rounded-[14px] border border-hairline bg-surface divide-y divide-hairline">
         <div className="flex justify-between px-4 py-3">
-          <span className="t-caption text-ink-faint">Phone</span>
+          <span className="t-caption text-ink-faint">{t("manager.profile.phone")}</span>
           <span className="t-body font-medium">{user?.phone || "—"}</span>
         </div>
         <div className="flex justify-between px-4 py-3">
-          <span className="t-caption text-ink-faint">Role</span>
-          <span className="t-body font-medium">Warden</span>
+          <span className="t-caption text-ink-faint">{t("manager.profile.role")}</span>
+          <span className="t-body font-medium">{t("manager.profile.warden")}</span>
         </div>
       </section>
       <ActiveSessionsCard />
@@ -31,7 +33,7 @@ export const ManagerProfileView: React.FC = () => {
         onClick={logout}
         className="w-full h-12 rounded-[10px] border border-hairline text-danger font-semibold"
       >
-        Log out
+        {t("common.logout")}
       </button>
     </div>
   );

@@ -30,8 +30,10 @@ import { MarkAttendanceModal } from "@/components/owner/MarkAttendanceModal";
 import { PayrollPreviewModal } from "@/components/owner/PayrollPreviewModal";
 import { useNavigate } from "@tanstack/react-router";
 import type { StaffProfile, AttendanceStatus } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 export const AttendanceView: React.FC = () => {
+  const { t } = useLocale();
   const navigate = useNavigate();
 
   // Current month string default: "YYYY-MM"
@@ -164,7 +166,7 @@ export const AttendanceView: React.FC = () => {
             className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-surface-elevated hover:bg-surface border border-border rounded-xl text-text flex items-center gap-1.5 transition-colors"
           >
             <Sliders className="w-4 h-4 text-text-muted" />
-            <span>Policy</span>
+            <span>{t("owner.attendance.policy")}</span>
           </button>
 
           <button
@@ -172,7 +174,7 @@ export const AttendanceView: React.FC = () => {
             className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-surface-elevated hover:bg-surface border border-border rounded-xl text-text flex items-center gap-1.5 transition-colors"
           >
             <Plus className="w-4 h-4 text-accent" />
-            <span>Add Staff</span>
+            <span>{t("owner.attendance.addStaff")}</span>
           </button>
 
           <button
@@ -181,7 +183,7 @@ export const AttendanceView: React.FC = () => {
             className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
           >
             <CalendarCheck2 className="w-4 h-4" />
-            <span>Mark Attendance</span>
+            <span>{t("owner.attendance.markAttendance")}</span>
           </button>
 
           <button
@@ -190,7 +192,7 @@ export const AttendanceView: React.FC = () => {
             className="px-3 py-1.5 text-xs sm:text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
           >
             <Calculator className="w-4 h-4" />
-            <span>Calculate Payroll</span>
+            <span>{t("owner.attendance.calculatePayroll")}</span>
           </button>
         </div>
       </div>
@@ -199,7 +201,7 @@ export const AttendanceView: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 bg-surface border border-border rounded-2xl shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-muted">Active Staff</span>
+            <span className="text-xs font-medium text-text-muted">{t("owner.attendance.activeStaff")}</span>
             <span className="p-2 bg-accent-tint text-accent rounded-xl">
               <Users className="w-4 h-4" />
             </span>
@@ -214,7 +216,7 @@ export const AttendanceView: React.FC = () => {
 
         <div className="p-4 bg-surface border border-border rounded-2xl shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-muted">Total Monthly Payroll</span>
+            <span className="text-xs font-medium text-text-muted">{t("owner.attendance.totalMonthlyPayroll")}</span>
             <span className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
               <Calculator className="w-4 h-4" />
             </span>
@@ -230,7 +232,7 @@ export const AttendanceView: React.FC = () => {
         <div className="p-4 bg-surface border border-border rounded-2xl shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-text-muted">Money Out Integration</span>
+              <span className="text-xs font-medium text-text-muted">{t("owner.attendance.moneyOutIntegration")}</span>
               <span className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
                 <Send className="w-4 h-4" />
               </span>
@@ -243,7 +245,7 @@ export const AttendanceView: React.FC = () => {
             onClick={() => navigate({ to: "/owner/payouts" })}
             className="mt-2 text-xs font-medium text-accent hover:underline flex items-center gap-1"
           >
-            <span>Open Money Out Queue</span>
+            <span>{t("owner.attendance.openMoneyOutQueue")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -295,7 +297,7 @@ export const AttendanceView: React.FC = () => {
             {staffList.length === 0 ? (
               <div className="p-12 text-center bg-surface border border-dashed border-border rounded-2xl">
                 <Users className="w-10 h-10 text-text-muted mx-auto mb-3" />
-                <h3 className="font-semibold text-text text-base">No staff members enrolled</h3>
+                <h3 className="font-semibold text-text text-base">{t("owner.attendance.noStaffEnrolled")}</h3>
                 <p className="text-sm text-text-muted max-w-sm mx-auto mt-1 mb-4">
                   Add cooks, wardens, security guards, and cleaners to record attendance and compute monthly wages.
                 </p>
@@ -312,12 +314,12 @@ export const AttendanceView: React.FC = () => {
                   <table className="w-full text-left text-sm">
                     <thead className="bg-surface-elevated text-text-muted border-b border-border text-xs">
                       <tr>
-                        <th className="px-4 py-3 font-medium">Name & Role</th>
-                        <th className="px-4 py-3 font-medium">Monthly Wage</th>
-                        <th className="px-4 py-3 font-medium">Disbursement Payee</th>
-                        <th className="px-4 py-3 font-medium">Start Date</th>
-                        <th className="px-4 py-3 font-medium">Status</th>
-                        <th className="px-4 py-3 font-medium text-right">Actions</th>
+                        <th className="px-4 py-3 font-medium">{t("owner.attendance.colNameRole")}</th>
+                        <th className="px-4 py-3 font-medium">{t("owner.attendance.colMonthlyWage")}</th>
+                        <th className="px-4 py-3 font-medium">{t("owner.attendance.colDisbursementPayee")}</th>
+                        <th className="px-4 py-3 font-medium">{t("owner.attendance.colStartDate")}</th>
+                        <th className="px-4 py-3 font-medium">{t("owner.attendance.colStatus")}</th>
+                        <th className="px-4 py-3 font-medium text-right">{t("owner.attendance.colActions")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -347,14 +349,14 @@ export const AttendanceView: React.FC = () => {
                                   <div className="text-text-muted font-mono text-[11px]">
                                     {payee.upi_vpa ? `UPI: ${payee.upi_vpa}` : `A/C: ****${payee.account_number_last4 || ""}`}
                                     {payee.is_verified ? (
-                                      <span className="text-emerald-600 dark:text-emerald-400 ml-1">✓ Verified</span>
+                                      <span className="text-emerald-600 dark:text-emerald-400 ml-1">{t("owner.attendance.verified")}</span>
                                     ) : (
-                                      <span className="text-warning ml-1">⚠ Unverified</span>
+                                      <span className="text-warning ml-1">{t("owner.attendance.unverified")}</span>
                                     )}
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-xs text-text-muted">Linked Payee Missing</span>
+                                <span className="text-xs text-text-muted">{t("owner.attendance.linkedPayeeMissing")}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 text-xs text-text-muted font-mono">
@@ -521,7 +523,7 @@ export const AttendanceView: React.FC = () => {
                 className="px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-1.5"
               >
                 <Calculator className="w-3.5 h-3.5" />
-                <span>Review & Finalize</span>
+                <span>{t("owner.attendance.reviewFinalize")}</span>
               </button>
             </div>
 
@@ -539,13 +541,13 @@ export const AttendanceView: React.FC = () => {
                 <table className="w-full text-left text-sm">
                   <thead className="bg-surface-elevated text-text-muted border-b border-border text-xs">
                     <tr>
-                      <th className="px-4 py-3 font-medium">Staff Member</th>
-                      <th className="px-4 py-3 font-medium">Base Wage</th>
-                      <th className="px-4 py-3 font-medium">Employed Days</th>
-                      <th className="px-4 py-3 font-medium">Present</th>
-                      <th className="px-4 py-3 font-medium">Paid Leaves / Free</th>
-                      <th className="px-4 py-3 font-medium">Deductions</th>
-                      <th className="px-4 py-3 font-medium text-right">Net Payable</th>
+                      <th className="px-4 py-3 font-medium">{t("owner.attendance.colStaffMember")}</th>
+                      <th className="px-4 py-3 font-medium">{t("owner.attendance.colBaseWage")}</th>
+                      <th className="px-4 py-3 font-medium">{t("owner.attendance.colEmployedDays")}</th>
+                      <th className="px-4 py-3 font-medium">{t("owner.attendance.colPresent")}</th>
+                      <th className="px-4 py-3 font-medium">{t("owner.attendance.colPaidLeaves")}</th>
+                      <th className="px-4 py-3 font-medium">{t("owner.attendance.colDeductions")}</th>
+                      <th className="px-4 py-3 font-medium text-right">{t("owner.attendance.colNetPayable")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

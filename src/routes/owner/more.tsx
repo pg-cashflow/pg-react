@@ -11,8 +11,10 @@ import { LanguageSegmentedControl } from "@/components/common/LanguageSelector";
 import { ActiveSessionsCard } from "@/components/shared/ActiveSessionsCard";
 import { SlotInviteCard } from "@/components/owner/SlotInviteCard";
 import { PaymentGatewaySettingsCard } from "@/components/owner/PaymentGatewaySettingsCard";
+import { useLocale } from "@/i18n";
 
 export const MoreView: React.FC = () => {
+  const { t } = useLocale();
   const queryClient = useQueryClient();
   const [walkName, setWalkName] = useState("");
   const [walkPhone, setWalkPhone] = useState("");
@@ -60,8 +62,8 @@ export const MoreView: React.FC = () => {
       {/* Appearance / Theme Settings */}
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
         <div>
-          <h3 className="font-semibold text-ink">Appearance</h3>
-          <p className="text-xs text-ink-muted mt-0.5">Customize your preferred display theme</p>
+          <h3 className="font-semibold text-ink">{t("settings.appearance")}</h3>
+          <p className="text-xs text-ink-muted mt-0.5">{t("settings.appearanceDesc")}</p>
         </div>
         <ThemeSegmentedControl />
       </section>
@@ -69,8 +71,8 @@ export const MoreView: React.FC = () => {
       {/* Language Preferences */}
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
         <div>
-          <h3 className="font-semibold text-ink">Language / భాష / மொழி / ಭಾಷೆ</h3>
-          <p className="text-xs text-ink-muted mt-0.5">Select your preferred display language</p>
+          <h3 className="font-semibold text-ink">Language / భాష / மொழி / ಭಾಷೆ</h3> {/* lint-allow-i18n */}
+          <p className="text-xs text-ink-muted mt-0.5">{t("owner.more.languageSelection")}</p>
         </div>
         <LanguageSegmentedControl />
       </section>
@@ -79,7 +81,7 @@ export const MoreView: React.FC = () => {
       <PaymentGatewaySettingsCard />
 
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
-        <h3 className="font-semibold text-ink">Notifications</h3>
+        <h3 className="font-semibold text-ink">{t("notifications.title")}</h3>
         <p className="text-xs text-ink-muted">
           Rent reminders go out on WhatsApp three days before each due date. Automatic send needs pg-go cron.
         </p>
@@ -98,7 +100,7 @@ export const MoreView: React.FC = () => {
 
       {/* Walk-in tenant */}
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
-        <h3 className="font-semibold text-ink">Add walk-in tenant</h3>
+        <h3 className="font-semibold text-ink">{t("owner.more.addWalkInTenant")}</h3>
         <p className="text-xs text-ink-muted">
           Creates an active tenant directly without a join request.
         </p>
@@ -167,7 +169,7 @@ export const MoreView: React.FC = () => {
 
       {/* CSV import */}
       <section className="bg-surface border border-hairline rounded-2xl p-5 space-y-3">
-        <h3 className="font-semibold text-ink">Bank statement CSV</h3>
+        <h3 className="font-semibold text-ink">{t("owner.more.bankStatementCsv")}</h3>
         {importMsg && <p className="text-xs text-ink-muted">{importMsg}</p>}
         <input
           type="file"

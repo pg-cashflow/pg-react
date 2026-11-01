@@ -6,6 +6,7 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";
 import { rupeesToPaise } from "@/lib/utils";
 import type { Budget } from "@pg/types";
+import { useLocale } from "@/i18n";
 
 const CATEGORY_PRESETS = [
   { code: "vendor", label: "Vendor & Supplies" },
@@ -24,6 +25,7 @@ function currentPeriodString(): string {
 }
 
 export const FinanceBudgetsView: React.FC = () => {
+  const { t } = useLocale();
   const [period, setPeriod] = useState<string>(currentPeriodString);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Budget | null>(null);
@@ -46,7 +48,7 @@ export const FinanceBudgetsView: React.FC = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="t-h1 tracking-tight text-ink">Budgets</h1>
+          <h1 className="t-h1 tracking-tight text-ink">{t("owner.finance.budgetsTitle")}</h1>
           <p className="text-sm text-ink-muted">
             Set and allocate monthly spending targets per operational category.
           </p>
@@ -128,7 +130,7 @@ export const FinanceBudgetsView: React.FC = () => {
               </div>
 
               <div className="pt-2 border-t border-hairline flex items-baseline justify-between">
-                <span className="text-xs text-ink-muted">Allocated Target</span>
+                <span className="text-xs text-ink-muted">{t("owner.finance.allocatedTarget")}</span>
                 <AmountBadge amount={b.amount_paise} className="text-lg font-bold" />
               </div>
             </div>
