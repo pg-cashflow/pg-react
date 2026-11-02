@@ -82,6 +82,7 @@ export const ERROR_CODES = [
   "finance.invalidSettings",
   "request.invalidBody",
   "request.invalidId",
+  "request.notFound",
   "request.dueDayInvalid",
   "request.imageTooLarge",
   "request.imageReadFailed",
@@ -91,6 +92,8 @@ export const ERROR_CODES = [
   "preferences.noFields",
   "push.endpointInvalid",
   "push.endpointConflict",
+  "refund.reasonLength",
+  "refund.reasonCharacters",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

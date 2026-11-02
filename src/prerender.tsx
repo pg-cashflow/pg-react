@@ -8,12 +8,12 @@ import { PrivacyPage } from "@/routes/privacy";
 import { RefundPolicyPage } from "@/routes/refund-policy";
 import { ContactPage } from "@/routes/contact";
 
-async function renderWithRouter(Component: React.ComponentType, path: string): Promise<string> {
+async function renderWithRouter(Component: React.ComponentType): Promise<string> {
   const rootRoute = createRootRoute();
   const testRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/",
-    component: Component,
+    component: () => <Component />,
   });
   const routeTree = rootRoute.addChildren([testRoute]);
   const history = createMemoryHistory({ initialEntries: ["/"] });
@@ -29,10 +29,10 @@ async function renderWithRouter(Component: React.ComponentType, path: string): P
 
 export async function prerenderAll() {
   return {
-    landing: await renderWithRouter(LandingPage, "/"),
-    terms: await renderWithRouter(TermsPage, "/terms"),
-    privacy: await renderWithRouter(PrivacyPage, "/privacy"),
-    refundPolicy: await renderWithRouter(RefundPolicyPage, "/refund-policy"),
-    contact: await renderWithRouter(ContactPage, "/contact"),
+    landing: await renderWithRouter(LandingPage),
+    terms: await renderWithRouter(TermsPage),
+    privacy: await renderWithRouter(PrivacyPage),
+    refundPolicy: await renderWithRouter(RefundPolicyPage),
+    contact: await renderWithRouter(ContactPage),
   };
 }

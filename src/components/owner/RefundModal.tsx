@@ -3,7 +3,7 @@ import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { refundPayment } from "@/api/payments";
 import type { Payment, GatewayRefund } from "@pg/types";
-import { useLocale } from "@/i18n/provider";
+import { useLocale, formatApiError } from "@/i18n";
 
 interface RefundModalProps {
   payment: Payment | null;
@@ -68,8 +68,17 @@ export const RefundModal: React.FC<RefundModalProps> = ({
       return;
     }
 
-    if (reason.trim().length < 3 || reason.trim().length > 100) {
-      setErrorMessage("Reason must be between 3 and 100 characters.");
+    const trimmedReason = reason.trim().normalize("NFC");
+    const reasonCharCount = Array.from(trimmedReason).length;
+    if (reasonCharCount < 5 || reasonCharCount > 200) {
+      setErrorMessage(t("error.refund.reasonLength"));
+      return;
+    }
+
+    // eslint-disable-next-line no-misleading-character-class
+    const validReasonRegex = /^[\p{L}\p{M}\p{N}\u200C\u200D .,_'/-]+$/u;
+    if (!validReasonRegex.test(trimmedReason)) {
+      setErrorMessage(t("error.refund.reasonCharacters"));
       return;
     }
 
@@ -85,7 +94,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
         payment.id,
         {
           amount_paise: requestedPaise,
-          reason: reason.trim(),
+          reason: trimmedReason,
           otp: otp.trim() || undefined,
         },
         idempotencyKey
@@ -96,11 +105,11 @@ export const RefundModal: React.FC<RefundModalProps> = ({
         onRefundComplete(result);
       }
     } catch (err: unknown) {
-      const apiErr = err as { message?: string; status?: number };
-      const msg = apiErr.message || "Failed to process refund";
+      const apiErr = err as { message?: string; status?: number; code?: string };
+      const msg = formatApiError(err, t);
       if (apiErr.status === 401 && (msg.toLowerCase().includes("step-up") || msg.toLowerCase().includes("otp"))) {
         setNeedsStepUp(true);
-        setErrorMessage("Dual-control or step-up authentication required. Please enter OTP.");
+        setErrorMessage(msg);
       } else {
         // Regenerate idempotency key on failure so next attempt does not replay the error
         setIdempotencyKey(generateNewKey());

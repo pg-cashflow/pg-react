@@ -410,6 +410,7 @@ export const knIN: Record<MessageKey, string> = {
   "error.finance.invalidSettings": "ಹಣಕಾಸು ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಮಾನ್ಯವಾಗಿವೆ.",
   "error.request.invalidBody": "ಅಮಾನ್ಯ ವಿನಂತಿ ಡೇಟಾ.",
   "error.request.invalidId": "ಅಮಾನ್ಯ ಗುರುತಿಸುವಿಕೆ ಸ್ವರೂಪ.",
+  "error.request.notFound": "ವಿನಂತಿಸಿದ ಸಂಪನ್ಮೂಲ ಕಂಡುಬಂದಿಲ್ಲ.",
   "error.request.dueDayInvalid": "ಗಡುವು ದಿನಾಂಕ 1 ಮತ್ತು 28 ರ ನಡುವೆ ಇರಬೇಕು.",
   "error.request.imageTooLarge": "ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್ ಗರಿಷ್ಠ ಮಿತಿಯನ್ನು ಮೀರಿದೆ.",
   "error.request.imageReadFailed": "ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಚಿತ್ರವನ್ನು ಓದಲು ವಿಫಲವಾಗಿದೆ.",
@@ -419,6 +420,8 @@ export const knIN: Record<MessageKey, string> = {
   "error.preferences.noFields": "ನವೀಕರಿಸಲು ಯಾವುದೇ ಕ್ಷೇತ್ರಗಳನ್ನು ಒದಗಿಸಲಾಗಿಲ್ಲ.",
   "error.push.endpointInvalid": "ಪುಶ್ ಅಧಿಸೂಚನೆ ಎಂಡ್‌ಪಾಯಿಂಟ್ ಅಮಾನ್ಯವಾಗಿದೆ.",
   "error.push.endpointConflict": "ಪುಶ್ ಚಂದಾದಾರಿಕೆ ಸಂಘರ್ಷ ಪತ್ತೆಯಾಗಿದೆ.",
+  "error.refund.reasonLength": "ಮರುಪಾವತಿ ಕಾರಣವು 5 ರಿಂದ 200 ಅಕ್ಷರಗಳ ನಡುವೆ ಇರಬೇಕು.",
+  "error.refund.reasonCharacters": "ಮರುಪಾವತಿ ಕಾರಣದಲ್ಲಿ ಅಮಾನ್ಯ ಅಕ್ಷರಗಳಿವೆ.",
   "join.pageTitle": "ಹಾಸ್ಟೆಲ್‌ಗೆ ಸೇರಿ",
   "join.pageSubtitle": "ನಿಮ್ಮ ಕೊಠಡಿಗೆ ಪ್ರವೇಶಿಸಲು ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ",
   "join.fullName": "ಪೂರ್ಣ ಕಾನೂನುಬದ್ಧ ಹೆಸರು",
@@ -682,6 +685,7 @@ export const knIN: Record<MessageKey, string> = {
   "tenant.dashboard.yourPassbook": "ನಿಮ್ಮ ಪಾಸ್‌ಬುಕ್",
   "tenant.dashboard.history": "ಇತಿಹಾಸ",
   "tenant.dashboard.noDuesYet": "ಇನ್ನೂ ಯಾವುದೇ ಬಾಕಿಗಳಿಲ್ಲ.",
+  "tenant.dashboard.payAmount": "{amount} ಪಾವತಿಸಿ",
 
   // Refund Modal
   "common.close": "ಮುಚ್ಚಿ",
@@ -705,7 +709,7 @@ export const knIN: Record<MessageKey, string> = {
   "owner.refund.maxRefundable": "ಗರಿಷ್ಠ ಮರುಪಾವತಿಸಬಹುದಾದ ಮೊತ್ತ: {amount}",
   "owner.refund.reasonLabel": "ಮರುಪಾವತಿಗೆ ಕಾರಣ",
   "owner.refund.reasonPlaceholder": "ಉದಾ. ಬಾಡಿಗೆದಾರರು ವಿನಂತಿಸಿದ ಹೆಚ್ಚುವರಿ ಪಾವತಿ ಹೊಂದಾಣಿಕೆ",
-  "owner.refund.reasonHint": "ಕನಿಷ್ಠ 3, ಗರಿಷ್ಠ 100 ಅಕ್ಷರಗಳು (ಗೇಟ್‌ವೇ ದಾಖಲೆಗಳಿಗೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ).",
+  "owner.refund.reasonHint": "ಕನಿಷ್ಠ 5, ಗರಿಷ್ಠ 200 ಅಕ್ಷರಗಳು (ಆಡಿಟ್ ದಾಖಲೆಗಳಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ).",
   "owner.refund.stepUpLabel": "ದೃಢೀಕರಣ OTP / ಹಂತ-ಮೇಲಿನ ಕೋಡ್",
   "owner.refund.stepUpPlaceholder": "6-ಅಂಕಿಯ ಅನುಮೋದನೆ ಕೋಡ್ ನಮೂದಿಸಿ",
   "owner.refund.confirm": "ಮರುಪಾವತಿಯನ್ನು ದೃಢೀಕರಿಸಿ",

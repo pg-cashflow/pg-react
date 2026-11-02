@@ -30,10 +30,6 @@ const loadedMessages: Partial<Record<SupportedLocale, Record<string, string>>> =
   "en-IN": enIN,
 };
 
-function ensureLocaleFont(_loc: SupportedLocale): void {
-  // All locale fonts are self-hosted in /fonts/fonts.css
-}
-
 interface LocaleContextValue {
   locale: SupportedLocale;
   setLocale: (newLocale: SupportedLocale, persistServer?: boolean) => Promise<boolean>;
@@ -188,7 +184,6 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   // Keep the document language and font in step with the UI language.
   useEffect(() => {
     document.documentElement.lang = locale;
-    ensureLocaleFont(locale);
   }, [locale]);
 
   return (
