@@ -675,6 +675,7 @@ export const taIN: Record<MessageKey, string> = {
   "tenant.dashboard.monthsOnTime": "{months} மாதங்கள் சரியான நேரத்தில்",
   "tenant.dashboard.ptsPassbook": "{points} புள்ளிகள் · பாஸ்புக்",
   "tenant.dashboard.payCurrentRent": "தற்போதைய வாடகையைச் செலுத்து ({sentence})",
+  "tenant.dashboard.payAmount": "{amount} செலுத்துக",
   "tenant.dashboard.openPassbook": "பாஸ்புக்கை திறக்கவும்",
   "tenant.dashboard.outstanding": "நிலுவை",
   "tenant.dashboard.overdue": "தவணை கடந்தது",

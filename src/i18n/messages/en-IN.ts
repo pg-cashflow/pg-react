@@ -673,6 +673,7 @@ export const enIN = {
   "tenant.dashboard.monthsOnTime": "{months} months on time",
   "tenant.dashboard.ptsPassbook": "{points} pts · passbook",
   "tenant.dashboard.payCurrentRent": "Pay current rent ({sentence})",
+  "tenant.dashboard.payAmount": "Pay {amount}",
   "tenant.dashboard.openPassbook": "Open passbook",
   "tenant.dashboard.outstanding": "Outstanding",
   "tenant.dashboard.overdue": "Overdue",
