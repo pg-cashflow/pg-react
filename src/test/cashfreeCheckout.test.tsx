@@ -61,6 +61,23 @@ describe("Cashfree checkout precedence and result mapping", () => {
       expect(result.error?.message).toBe("User closed popup");
     }
   });
+
+  it("forwards custom redirectTarget when provided in options", async () => {
+    const mockCheckout = vi.fn().mockResolvedValue({
+      redirect: true,
+    });
+
+    (window as any).Cashfree = vi.fn().mockReturnValue({
+      checkout: mockCheckout,
+    });
+
+    const result = await startCashfreeCheckout("sess_123", { redirectTarget: "_self" });
+    expect(result.kind).toBe("redirect");
+    expect(mockCheckout).toHaveBeenCalledWith({
+      paymentSessionId: "sess_123",
+      redirectTarget: "_self",
+    });
+  });
 });
 
 describe("Payment history formatting and localization", () => {

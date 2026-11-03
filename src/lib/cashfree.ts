@@ -106,6 +106,11 @@ export function getCashfreeInstance(runtimeMode?: "production" | "sandbox"): Cas
   return cachedCashfreeInstance;
 }
 
+export interface StartCashfreeCheckoutOptions {
+  runtimeMode?: "production" | "sandbox";
+  redirectTarget?: "_modal" | "_self" | "_top";
+}
+
 /**
  * Initiates Cashfree checkout via modal with precedence evaluation:
  * 1. paymentDetails -> completed (check ledger / verify)
@@ -114,13 +119,19 @@ export function getCashfreeInstance(runtimeMode?: "production" | "sandbox"): Cas
  */
 export async function startCashfreeCheckout(
   paymentSessionId: string,
-  runtimeMode?: "production" | "sandbox"
+  runtimeModeOrOptions?: "production" | "sandbox" | StartCashfreeCheckoutOptions
 ): Promise<CashfreeCheckoutResult> {
   if (!paymentSessionId) throw new Error("Missing payment session");
   await loadSdk();
 
-  const cashfree = getCashfreeInstance(runtimeMode);
-  const res = await cashfree.checkout({ paymentSessionId, redirectTarget: "_modal" });
+  const options: StartCashfreeCheckoutOptions =
+    typeof runtimeModeOrOptions === "object"
+      ? runtimeModeOrOptions
+      : { runtimeMode: runtimeModeOrOptions };
+
+  const cashfree = getCashfreeInstance(options.runtimeMode);
+  const redirectTarget = options.redirectTarget || "_modal";
+  const res = await cashfree.checkout({ paymentSessionId, redirectTarget });
 
   if (res?.paymentDetails) {
     return { kind: "completed", details: res.paymentDetails };
