@@ -296,7 +296,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                           }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-medium transition ${
                             isActive
-                              ? "bg-accent text-white shadow-sm"
+                              ? "bg-accent text-accent-contrast shadow-sm"
                               : "bg-surface border border-hairline text-ink hover:border-accent/40"
                           }`}
                         >
@@ -502,7 +502,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                       <ShieldCheck className="w-3.5 h-3.5 text-accent" />
                       Cashfree Checkout
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent text-white">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast">
                       Primary
                     </span>
                   </div>
@@ -565,7 +565,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
             type="button"
             onClick={() => createMutation.mutate()}
             disabled={createMutation.isPending || !name.trim()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50 transition shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50 transition shadow-sm"
           >
             {createMutation.isPending ? (
               <>

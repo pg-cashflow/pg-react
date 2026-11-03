@@ -253,7 +253,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
             <button
               type="submit"
               disabled={createStaffMutation.isPending || payees.length === 0}
-              className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium bg-accent text-accent-contrast rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
               {createStaffMutation.isPending && (
                 <Loader2 className="w-4 h-4 animate-spin" />

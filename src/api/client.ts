@@ -1,6 +1,6 @@
 import { API_BASE } from "@/lib/constants";
 import { getStoredLocale, getStoredUser, setStoredUser } from "@/auth/storage";
-import { getAccessToken, setAccessToken } from "@/auth/tokenStore";
+import { getAccessToken, getAccessTokenRevision, setAccessToken } from "@/auth/tokenStore";
 
 export class ApiError extends Error {
   status: number;
@@ -41,13 +41,14 @@ export function getLastRefreshError(): Error | null {
 
 export async function executeRefresh(failedToken: string | null): Promise<string | null> {
   const currentToken = getAccessToken();
+  const revision = getAccessTokenRevision();
   if (currentToken && currentToken !== failedToken) {
     lastRefreshError = null;
     return currentToken;
   }
 
   try {
-    const res = await fetch(`${API_BASE}/auth/refresh`, {
+    const res = await timedFetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -65,6 +66,7 @@ export async function executeRefresh(failedToken: string | null): Promise<string
       } catch {
         // ignore non-json errors
       }
+      if (revision !== getAccessTokenRevision()) return getAccessToken();
       lastRefreshError = new ApiError(res.status, errorMsg, errorCode);
 
       if (res.status === 401 || res.status === 403) {
@@ -82,6 +84,7 @@ export async function executeRefresh(failedToken: string | null): Promise<string
     }
 
     const data = await res.json();
+    if (revision !== getAccessTokenRevision()) return getAccessToken();
     if (data?.token) {
       setAccessToken(data.token);
       if (data.user) {
@@ -341,7 +344,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
           allowSessionClearOn401: false,
         });
       }
-      if (lastRefreshError instanceof ApiError && lastRefreshError.status >= 500) {
+      if (lastRefreshError instanceof ApiError && (lastRefreshError.status === 0 || lastRefreshError.status === 429 || lastRefreshError.status >= 500)) {
         throw lastRefreshError;
       }
       if (lastRefreshError && isNetworkFailure(lastRefreshError)) {
@@ -383,7 +386,7 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
           allowSessionClearOn401: false,
         });
       }
-      if (lastRefreshError instanceof ApiError && lastRefreshError.status >= 500) {
+      if (lastRefreshError instanceof ApiError && (lastRefreshError.status === 0 || lastRefreshError.status === 429 || lastRefreshError.status >= 500)) {
         throw lastRefreshError;
       }
       if (lastRefreshError && isNetworkFailure(lastRefreshError)) {
@@ -453,6 +456,7 @@ export async function apiUpload<T>(
       const xhr = new XMLHttpRequest();
       xhr.open("POST", url);
       xhr.withCredentials = true;
+      xhr.timeout = WRITE_TIMEOUT_MS;
 
       for (const [key, value] of Object.entries(requestHeaders)) {
         xhr.setRequestHeader(key, value);

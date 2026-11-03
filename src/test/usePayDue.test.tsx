@@ -111,6 +111,24 @@ describe("usePayDue State Machine", () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
+  it("does not label a policy-blocked non-payable due as paid", async () => {
+    verifyShouldSucceed = false;
+    server.use(http.get(`${API_BASE}/tenant/dues/:id/pay`, () => HttpResponse.json({ payable: false, mode: "manual" })));
+    const hook = renderHook(() => usePayDue(dueId), { wrapper });
+    await act(async () => { await hook.result.current.startPayment(); });
+    expect(hook.result.current.state).toBe("READY");
+    expect(hook.result.current.error).toContain("not available");
+    hook.unmount();
+  });
+
+  it("opens only one checkout for simultaneous clicks", async () => {
+    const checkout = vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({ kind: "completed", details: {} });
+    const hook = renderHook(() => usePayDue(dueId), { wrapper });
+    await act(async () => { await Promise.all([hook.result.current.startPayment(), hook.result.current.startPayment()]); });
+    expect(checkout).toHaveBeenCalledTimes(1);
+    hook.unmount();
+  });
+
   it("transitions directly to PAID when immediate verify succeeds", async () => {
     vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({
       kind: "completed",

@@ -1,4 +1,5 @@
 let accessToken: string | null = null;
+let accessTokenRevision = 0;
 const listeners = new Set<(t: string | null) => void>();
 
 let authSyncChannel: BroadcastChannel | null = null;
@@ -10,6 +11,7 @@ if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
         const token = event.data.token ?? null;
         if (token !== accessToken) {
           accessToken = token;
+          accessTokenRevision++;
           notifyListeners(token);
         }
       }
@@ -33,8 +35,15 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
+// Includes explicit clears of an already-empty token, so logout also invalidates
+// a refresh that started while restoring a cookie session.
+export function getAccessTokenRevision(): number {
+  return accessTokenRevision;
+}
+
 export function setAccessToken(token: string | null, broadcast = true): void {
   accessToken = token;
+  accessTokenRevision++;
   notifyListeners(token);
   if (broadcast && authSyncChannel) {
     try {

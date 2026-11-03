@@ -72,7 +72,7 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
                 }}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   active
-                    ? "bg-accent text-white shadow-sm font-semibold"
+                    ? "bg-accent text-accent-contrast shadow-sm font-semibold"
                     : "text-ink-muted hover:text-ink hover:bg-accent-tint"
                 }`}
               >

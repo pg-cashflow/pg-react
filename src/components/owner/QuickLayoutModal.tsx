@@ -203,7 +203,7 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
                     }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-medium transition ${
                       isActive
-                        ? "bg-accent text-white shadow-sm"
+                        ? "bg-accent text-accent-contrast shadow-sm"
                         : "bg-surface border border-hairline text-ink hover:border-accent/40"
                     }`}
                   >
@@ -393,7 +393,7 @@ export const QuickLayoutModal: React.FC<QuickLayoutModalProps> = ({
             type="button"
             onClick={() => generateMutation.mutate()}
             disabled={generateMutation.isPending}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50 transition shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50 transition shadow-sm"
           >
             {generateMutation.isPending ? (
               <>

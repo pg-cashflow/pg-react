@@ -38,7 +38,7 @@ function ErrorFallbackView({
       </div>
       <button
         onClick={onReset}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-white font-semibold text-xs hover:bg-accent/90 transition shadow-md shadow-accent/20"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-xs hover:bg-accent/90 transition shadow-md shadow-accent/20"
       >
         <RotateCcw className="w-3.5 h-3.5" />
         {t("common.reloadPage")}

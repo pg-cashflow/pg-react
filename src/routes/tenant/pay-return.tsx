@@ -122,7 +122,7 @@ export const TenantPayReturnView: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate({ to: "/tenant/dues" })}
-            className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm inline-flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm inline-flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> {t("payreturn.viewDues")}
           </button>
@@ -139,7 +139,7 @@ export const TenantPayReturnView: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate({ to: "/tenant/dues" })}
-            className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm"
+            className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm"
           >
             {t("payreturn.backToDues")}
           </button>

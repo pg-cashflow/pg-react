@@ -114,7 +114,7 @@ export function ThemeSegmentedControl() {
             aria-checked={active}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent ${
               active
-                ? "text-white font-semibold"
+                ? "text-accent-contrast font-semibold"
                 : "text-ink-muted hover:text-ink"
             }`}
           >

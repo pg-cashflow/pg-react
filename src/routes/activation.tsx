@@ -37,7 +37,7 @@ export const ActivationCelebration: React.FC<{ role?: string }> = ({ role }) => 
         <button
           type="button"
           onClick={handleCta}
-          className="w-full h-12 font-semibold mt-8 rounded-[10px] bg-accent text-white hover:bg-accent-pressed transition active:scale-95"
+          className="w-full h-12 font-semibold mt-8 rounded-[10px] bg-accent text-accent-contrast hover:bg-accent-pressed transition active:scale-95"
         >
           {copy.cta}
         </button>

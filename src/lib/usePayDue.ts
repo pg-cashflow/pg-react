@@ -44,6 +44,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deadlineRef = useRef<number>(0);
   const isCheckingRef = useRef(false);
+  const paymentInFlightRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (pollTimerRef.current) {
@@ -160,7 +161,8 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
 
   // Start payment flow: fetch intent, check payable, launch Cashfree modal
   const startPayment = useCallback(async () => {
-    if (stateRef.current === "OPENING" || stateRef.current === "CHECKOUT_OPEN") return;
+    if (paymentInFlightRef.current || stateRef.current === "OPENING" || stateRef.current === "CHECKOUT_OPEN") return;
+    paymentInFlightRef.current = true;
 
     setState("OPENING");
     setError(null);
@@ -170,8 +172,12 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       setIntent(p);
 
       if (!p.payable) {
-        // Due is already paid or waived
-        markPaid();
+        // Non-payable can also mean an onboarding/policy restriction. Confirm
+        // ledger state before showing a successful payment.
+        if (!(await checkDueStatus())) {
+          setState("READY");
+          setError("Payment is not available for this due. Check its current status.");
+        }
         return;
       }
 
@@ -196,8 +202,10 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       clearTimer();
       setState("READY");
       setError(err instanceof Error ? err.message : "Payment initialization failed");
+    } finally {
+      paymentInFlightRef.current = false;
     }
-  }, [clearTimer, dueId, enterChecking, enterConfirming, markPaid]);
+  }, [checkDueStatus, clearTimer, dueId, enterChecking, enterConfirming]);
 
   // Explicit re-verify triggered from STILL_PENDING ("Check again")
   const checkAgain = useCallback(async () => {

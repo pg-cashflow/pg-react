@@ -118,9 +118,9 @@ export const getOwnerTenantKYC = (
 ): Promise<OwnerKYCVerificationView> =>
   apiFetch<OwnerKYCVerificationView>(`/owner/tenants/${tenantId}/kyc`);
 
-export const getOwnerTenantKYCPhoto = (tenantId: string): Promise<Blob> =>
-  apiFetchBlob(`/owner/tenants/${tenantId}/kyc/photo`);
+export const getOwnerTenantKYCPhoto = (tenantId: string, signal?: AbortSignal): Promise<Blob> =>
+  apiFetchBlob(`/owner/tenants/${tenantId}/kyc/photo`, { signal });
 
-export const getOwnerKYCDocumentBlob = (id: string): Promise<Blob> =>
-  apiFetchBlob(`/owner/kyc/${id}/document`);
+export const getOwnerKYCDocumentBlob = (id: string, signal?: AbortSignal): Promise<Blob> =>
+  apiFetchBlob(`/owner/kyc/${id}/document`, { signal });
 

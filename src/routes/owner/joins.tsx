@@ -151,7 +151,7 @@ export const JoinsView: React.FC = () => {
                   </div>
                   <button
                     onClick={() => void openAssign(j)}
-                    className="px-3 py-2 rounded-xl bg-accent text-white text-sm font-semibold shrink-0"
+                    className="px-3 py-2 rounded-xl bg-accent text-accent-contrast text-sm font-semibold shrink-0"
                   >
                     {t("owner.joins.assignButton")}
                   </button>
@@ -257,7 +257,7 @@ export const JoinsView: React.FC = () => {
               <button
                 type="submit"
                 disabled={activateMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm disabled:opacity-50"
               >
                 {activateMutation.isPending && <Loader2 className="w-4 h-4 animate-spin inline mr-1" />}
                 {t("owner.joins.confirmAssignment")}

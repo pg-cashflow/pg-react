@@ -464,7 +464,7 @@ export const JoinWaitingPage: React.FC = () => {
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm hover:bg-accent-pressed transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-accent text-accent-contrast font-bold text-sm hover:bg-accent-pressed transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

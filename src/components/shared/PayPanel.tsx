@@ -257,7 +257,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                 <button
                   type="button"
                   onClick={() => setShowFallbackForm(true)}
-                  className="flex-1 h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm hover:bg-accent/90 transition"
+                  className="flex-1 h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm hover:bg-accent/90 transition"
                 >
                   {t("paypanel.submitScreenshotBtn")}
                 </button>
@@ -273,7 +273,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                 type="button"
                 disabled={gatewayState === "OPENING" || gatewayState === "CHECKOUT_OPEN"}
                 onClick={startPayment}
-                className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-60 transition"
+                className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-60 transition"
               >
                 {gatewayState === "OPENING" ? (
                   <>
@@ -337,7 +337,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
           {pay.upi_link && (
             <a
               href={pay.upi_link}
-              className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold flex items-center justify-center gap-2 hover:bg-accent/90 transition shadow-sm"
+              className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold flex items-center justify-center gap-2 hover:bg-accent/90 transition shadow-sm"
             >
               <ExternalLink className="w-4 h-4" />
               {t("paypanel.openUPIApp")} ({formatPaise(pay.amount_paise)})

@@ -88,7 +88,7 @@ export function LanguageSegmentedControl() {
             onClick={() => setLocale(opt.code as SupportedLocale)}
             className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg text-xs font-medium transition-all ${
               active
-                ? "bg-accent text-white shadow-sm font-semibold"
+                ? "bg-accent text-accent-contrast shadow-sm font-semibold"
                 : "text-ink-muted hover:text-ink hover:bg-accent-tint"
             }`}
           >

@@ -244,7 +244,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
             <button
               type="submit"
               disabled={!canRequestOTP || !otpSentInfo || otp.length !== 6 || approveMutation.isPending}
-              className="px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2 shadow-sm"
             >
               {approveMutation.isPending ? (
                 <>

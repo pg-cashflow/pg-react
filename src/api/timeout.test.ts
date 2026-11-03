@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, apiFetch } from "./client";
+import { ApiError, apiFetch, requestTokenRefresh, getLastRefreshError, stopProactiveRefresh } from "./client";
+import { getAccessToken, setAccessToken } from "../auth/tokenStore";
 
 function hangingFetch(): typeof fetch {
   return ((_url: RequestInfo | URL, init?: RequestInit) =>
@@ -15,8 +16,21 @@ describe("apiFetch timeout", () => {
     vi.useFakeTimers();
   });
   afterEach(() => {
+    stopProactiveRefresh();
     vi.useRealTimers();
     vi.unstubAllGlobals();
+  });
+
+  it("bounds a stalled refresh and releases the shared refresh promise", async () => {
+    setAccessToken("existing-token");
+    vi.stubGlobal("fetch", hangingFetch());
+    const pending = requestTokenRefresh("existing-token");
+    await vi.advanceTimersByTimeAsync(45_001);
+    expect(await pending).toBeNull();
+    expect(getLastRefreshError()).toMatchObject({ status: 0 });
+    expect(getAccessToken()).toBe("existing-token");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: "recovered-token" }) }));
+    expect(await requestTokenRefresh("existing-token")).toBe("recovered-token");
   });
 
   it("turns a stalled GET into ApiError(0) after the read budget", async () => {

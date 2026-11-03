@@ -46,7 +46,7 @@ export const TenantKYCOnboardingGate: React.FC<{ children: React.ReactNode }> = 
           <button
             type="button"
             onClick={() => refetch()}
-            className="h-10 px-4 rounded-[10px] bg-accent text-white t-body-sm font-semibold"
+            className="h-10 px-4 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold"
           >
             {t("common.retry")}
           </button>

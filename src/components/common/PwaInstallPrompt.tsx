@@ -27,7 +27,7 @@ export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }
         <button
           type="button"
           onClick={() => void promptInstall()}
-          className="h-10 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold flex items-center gap-1.5 shrink-0 hover:bg-accent-pressed active:scale-95 transition"
+          className="h-10 px-4 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold flex items-center gap-1.5 shrink-0 hover:bg-accent-pressed active:scale-95 transition"
         >
           <Download className="w-4 h-4" />
           Install
@@ -86,7 +86,7 @@ export const PwaInstallPrompt: React.FC<{ className?: string }> = ({ className }
             <button
               type="button"
               onClick={() => setShowIosSheet(false)}
-              className="w-full h-11 rounded-[10px] bg-accent text-white t-body font-semibold hover:bg-accent-pressed transition"
+              className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body font-semibold hover:bg-accent-pressed transition"
             >
               Got it
             </button>

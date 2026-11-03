@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   isExpanded ? "px-3 gap-3 justify-start" : "px-0 justify-center"
                 } ${
                   active
-                    ? "bg-accent text-white shadow-sm font-semibold"
+                    ? "bg-accent text-accent-contrast shadow-sm font-semibold"
                     : "text-ink-muted hover:text-ink hover:bg-accent-tint"
                 }`}
               >

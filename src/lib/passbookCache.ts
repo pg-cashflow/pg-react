@@ -1,4 +1,5 @@
 import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
+import { getStoredUser } from "@/auth/storage";
 
 export const PASSBOOK_STORAGE_KEY = "pg_passbook_cache";
 
@@ -16,8 +17,10 @@ function isPassbookKey(queryKey: readonly unknown[]): boolean {
  * Dehydrates passbook queries and persists them to localStorage for instant offline cold-boot.
  */
 export function savePassbookCache(client: QueryClient): void {
-  if (typeof window === "undefined" || !window.localStorage) return;
   try {
+    if (typeof window === "undefined") return;
+    const user = getStoredUser();
+    if (!user?.id || user.role !== "tenant") return;
     const dehydrated = dehydrate(client, {
       shouldDehydrateQuery: (query) => {
         return query.state.status === "success" && isPassbookKey(query.queryKey);
@@ -25,7 +28,12 @@ export function savePassbookCache(client: QueryClient): void {
     });
 
     if (dehydrated.queries.length > 0) {
-      localStorage.setItem(PASSBOOK_STORAGE_KEY, JSON.stringify(dehydrated));
+      const raw = JSON.stringify({ version: 1, userId: user.id, savedAt: Date.now(), state: dehydrated });
+      // Bound synchronous storage work on the main thread.
+      if (raw.length <= 500_000) localStorage.setItem(PASSBOOK_STORAGE_KEY, raw);
+      else localStorage.removeItem(PASSBOOK_STORAGE_KEY);
+    } else {
+      localStorage.removeItem(PASSBOOK_STORAGE_KEY);
     }
   } catch {
     // QuotaExceededError or private browsing restriction: fail safe
@@ -36,12 +44,23 @@ export function savePassbookCache(client: QueryClient): void {
  * Restores passbook queries from localStorage into the QueryClient cache.
  */
 export function restorePassbookCache(client: QueryClient): void {
-  if (typeof window === "undefined" || !window.localStorage) return;
   try {
+    if (typeof window === "undefined") return;
     const raw = localStorage.getItem(PASSBOOK_STORAGE_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw);
-    hydrate(client, parsed);
+    const user = getStoredUser();
+    if (raw.length > 500_000 || parsed.version !== 1 || user?.role !== "tenant" ||
+        parsed.userId !== user.id || !Number.isFinite(parsed.savedAt) ||
+        Date.now() - parsed.savedAt > 24 * 60 * 60 * 1000 || parsed.savedAt > Date.now() ||
+        !Array.isArray(parsed.state?.queries)) {
+      clearPassbookCache();
+      return;
+    }
+    hydrate(client, {
+      mutations: [],
+      queries: parsed.state.queries.filter((query: { queryKey: readonly unknown[] }) => isPassbookKey(query.queryKey)),
+    });
   } catch {
     // Malformed JSON or outdated structure: purge corrupt key
     try {
@@ -54,8 +73,8 @@ export function restorePassbookCache(client: QueryClient): void {
  * Purges the offline passbook cache from localStorage on user logout.
  */
 export function clearPassbookCache(): void {
-  if (typeof window === "undefined" || !window.localStorage) return;
   try {
+    if (typeof window === "undefined") return;
     localStorage.removeItem(PASSBOOK_STORAGE_KEY);
   } catch {}
 }

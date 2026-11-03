@@ -7,7 +7,9 @@ function normalizeApiBase(raw: string): string {
 }
 
 /** pg-go data routes live under /api. Production embed uses `/api`. */
-export const API_BASE = normalizeApiBase(import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api");
+export const API_BASE = normalizeApiBase(
+  import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? "/api" : "http://localhost:8080/api")
+);
 
 /** Must match pg-go CASHFREE_ENV (sandbox | production). */
 export const CASHFREE_ENV =

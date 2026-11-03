@@ -194,7 +194,7 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium bg-accent text-accent-contrast rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
               >
                 {updateMutation.isPending && (
                   <Loader2 className="w-4 h-4 animate-spin" />

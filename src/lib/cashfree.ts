@@ -55,47 +55,39 @@ function loadSdk(): Promise<void> {
   if (sdkPromise) return sdkPromise;
 
   sdkPromise = new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      sdkPromise = null;
-      reject(new Error("Cashfree SDK failed to load (timeout)"));
-    }, 10000);
-
+    const existing = document.querySelector<HTMLScriptElement>("script[data-pg-cashfree]");
+    const script = existing ?? document.createElement("script");
     const cleanup = () => {
       clearTimeout(timeout);
+      script.removeEventListener("load", onLoad);
+      script.removeEventListener("error", onError);
     };
-
-    const existing = document.querySelector<HTMLScriptElement>("script[data-pg-cashfree]");
-    if (existing) {
-      if ((existing as any).readyState === "complete" || (existing as any).readyState === "loaded" || window.Cashfree) {
-        cleanup();
-        resolve();
+    const fail = (message: string) => {
+      cleanup();
+      // A failed script never fires load again. Remove it so the next user
+      // action can make a fresh request rather than wait on a dead element.
+      script.remove();
+      sdkPromise = null;
+      reject(new Error(message));
+    };
+    const onLoad = () => {
+      if (!window.Cashfree) {
+        fail("Cashfree SDK did not initialize");
         return;
       }
-      existing.addEventListener("load", () => {
-        cleanup();
-        resolve();
-      }, { once: true });
-      existing.addEventListener("error", () => {
-        cleanup();
-        sdkPromise = null;
-        reject(new Error("Cashfree SDK failed to load"));
-      }, { once: true });
-      return;
-    }
-    const s = document.createElement("script");
-    s.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
-    s.async = true;
-    s.dataset.pgCashfree = "1";
-    s.onload = () => {
       cleanup();
       resolve();
     };
-    s.onerror = () => {
-      cleanup();
-      sdkPromise = null;
-      reject(new Error("Cashfree SDK failed to load"));
-    };
-    document.head.appendChild(s);
+    const onError = () => fail("Cashfree SDK failed to load");
+    const timeout = setTimeout(() => fail("Cashfree SDK failed to load (timeout)"), 10000);
+    script.addEventListener("load", onLoad, { once: true });
+    script.addEventListener("error", onError, { once: true });
+    if (!existing) {
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.async = true;
+      script.dataset.pgCashfree = "1";
+      document.head.appendChild(script);
+    }
   });
 
   return sdkPromise;

@@ -145,7 +145,7 @@ export const LandingPage: React.FC = () => {
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center h-9 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold hover:opacity-95 transition-opacity"
+              className="inline-flex items-center h-9 px-4 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold hover:opacity-95 transition-opacity"
             >
               {t("landing.ownerLogin")}
             </Link>
@@ -172,7 +172,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
             <Link
               to="/login"
-              className="h-11 inline-flex items-center justify-center rounded-[10px] bg-accent text-white px-6 t-body font-semibold hover:opacity-95 shadow-sm gap-2"
+              className="h-11 inline-flex items-center justify-center rounded-[10px] bg-accent text-accent-contrast px-6 t-body font-semibold hover:opacity-95 shadow-sm gap-2"
             >
               <span>Get your PG onboard</span>
               <ArrowRight className="w-4 h-4" />
@@ -437,7 +437,7 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
                 <Link
                   to="/login"
-                  className="h-11 inline-flex items-center justify-center rounded-[10px] bg-accent text-white px-6 t-body font-semibold hover:opacity-95 shadow-sm"
+                  className="h-11 inline-flex items-center justify-center rounded-[10px] bg-accent text-accent-contrast px-6 t-body font-semibold hover:opacity-95 shadow-sm"
                 >
                   Sign in to your ledger
                 </Link>

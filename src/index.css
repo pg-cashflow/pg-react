@@ -40,6 +40,7 @@
   --accent: var(--raw-teal);        /* public pages (login/invite) default to brand teal */
   --accent-pressed: var(--raw-teal-pressed);
   --accent-tint: var(--raw-teal-tint);
+  --accent-contrast: var(--raw-surface);
 
   /* Financial status tokens */
   --status-paid-bg: var(--success-tint);
@@ -64,6 +65,7 @@
 }
 
 .dark {
+  --accent-contrast: var(--raw-paper-dark);
   --bg: var(--raw-paper-dark);
   --surface: var(--raw-surface-dark);
   --ink: var(--raw-ink-dark);
@@ -98,7 +100,7 @@
 
 /* ---- Portal accent, both modes ---- */
 [data-portal="owner"]   { --accent: var(--raw-teal);     --accent-pressed: var(--raw-teal-pressed); --accent-tint: var(--raw-teal-tint); }
-[data-portal="tenant"]  { --accent: var(--raw-marigold); --accent-pressed: var(--raw-marigold-pressed); --accent-tint: var(--raw-marigold-tint); }
+[data-portal="tenant"]  { --accent: var(--raw-marigold); --accent-pressed: var(--raw-marigold-pressed); --accent-tint: var(--raw-marigold-tint); --accent-contrast: var(--raw-ink); }
 [data-portal="manager"] { --accent: var(--raw-graphite); --accent-pressed: var(--raw-graphite); --accent-tint: var(--raw-graphite-tint); }
 
 .dark[data-portal="owner"],
@@ -133,6 +135,7 @@
   --color-accent: var(--accent);
   --color-accent-pressed: var(--accent-pressed);
   --color-accent-tint: var(--accent-tint);
+  --color-accent-contrast: var(--accent-contrast);
   --color-danger: var(--danger);
   --color-danger-tint: var(--danger-tint);
   --color-warning: var(--warning);

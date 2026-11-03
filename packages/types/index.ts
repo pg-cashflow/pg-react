@@ -92,8 +92,8 @@ export const ERROR_CODES = [
   "preferences.noFields",
   "push.endpointInvalid",
   "push.endpointConflict",
-  "refund.reasonLength",
-  "refund.reasonCharacters",
+  "payment.refundReasonLength",
+  "payment.refundReasonCharacters",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -199,7 +199,7 @@ export interface Payment {
   created_at: string;
 }
 
-export type GatewayRefundStatus = "initiated" | "succeeded" | "failed" | "cancelled";
+export type GatewayRefundStatus = "initiated" | "pending" | "on_hold" | "succeeded" | "failed" | "cancelled";
 
 export interface GatewayRefund {
   id: string;

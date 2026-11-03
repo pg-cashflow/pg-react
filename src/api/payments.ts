@@ -15,6 +15,9 @@ export const getPayments = async (matchedBy?: MatchedBy): Promise<Payment[]> => 
   return unwrapList(data, "payments");
 };
 
+export const requestRefundOTP = (paymentId: string): Promise<{ channel: string; destination: string }> =>
+  apiFetch(`/owner/payments/${paymentId}/refund/request-otp`, { method: "POST", body: "{}" });
+
 export const refundPayment = async (
   paymentId: string,
   input: OwnerRefundInput,

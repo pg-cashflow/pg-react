@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
+import { setStoredUser } from "../auth/storage";
 import {
   savePassbookCache,
   restorePassbookCache,
@@ -14,6 +15,7 @@ describe("passbookCache", () => {
   beforeEach(() => {
     localStorage.clear();
     client = new QueryClient();
+    setStoredUser({ id: "tenant-user-1", role: "tenant", phone: "+919000000001" });
   });
 
   it("persists only tenant passbook queries to localStorage", () => {
@@ -27,7 +29,7 @@ describe("passbookCache", () => {
     expect(storedRaw).toBeTruthy();
 
     const parsed = JSON.parse(storedRaw!);
-    const keys = parsed.queries.map((q: { queryKey: unknown[] }) => q.queryKey);
+    const keys = parsed.state.queries.map((q: { queryKey: unknown[] }) => q.queryKey);
 
     expect(keys).toContainEqual(["tenant", "dues"]);
     expect(keys).toContainEqual(["tenant", "payments"]);
@@ -52,6 +54,27 @@ describe("passbookCache", () => {
 
     clearPassbookCache();
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+  });
+
+  it("does not restore another account's financial data", () => {
+    client.setQueryData(["tenant", "dues"], [{ id: "private-due" }]);
+    savePassbookCache(client);
+    setStoredUser({ id: "tenant-user-2", role: "tenant", phone: "+919000000002" });
+    const fresh = new QueryClient();
+    restorePassbookCache(fresh);
+    expect(fresh.getQueryData(["tenant", "dues"])).toBeUndefined();
+    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+  });
+
+  it("removes cached finance records after the 24-hour offline limit", () => {
+    client.setQueryData(["tenant", "dues"], [{ id: "expired-due" }]);
+    savePassbookCache(client);
+    const data = JSON.parse(localStorage.getItem(PASSBOOK_STORAGE_KEY)!);
+    data.savedAt -= 25 * 60 * 60 * 1000;
+    localStorage.setItem(PASSBOOK_STORAGE_KEY, JSON.stringify(data));
+    const fresh = new QueryClient();
+    restorePassbookCache(fresh);
+    expect(fresh.getQueryData(["tenant", "dues"])).toBeUndefined();
   });
 
   it("handles corrupted json gracefully without throwing", () => {

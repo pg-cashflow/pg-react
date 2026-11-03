@@ -27,7 +27,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
             {t("common.appName")}
           </Link>
           {Icon && (
-            <div className="mx-auto mt-4 flex items-center justify-center w-14 h-14 rounded-[14px] bg-accent text-white">
+            <div className="mx-auto mt-4 flex items-center justify-center w-14 h-14 rounded-[14px] bg-accent text-accent-contrast">
               <Icon className="w-7 h-7" aria-hidden />
             </div>
           )}

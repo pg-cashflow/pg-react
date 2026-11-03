@@ -164,7 +164,7 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
                 <ShieldCheck className="w-4 h-4 text-accent" />
                 Cashfree Checkout
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent text-white">
+              <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent text-accent-contrast">
                 Primary
               </span>
             </div>

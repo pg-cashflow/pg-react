@@ -69,7 +69,7 @@ export const TenantDuesView: React.FC = () => {
                     className={`w-full min-h-11 rounded-[10px] t-body font-semibold ${
                       openId === d.id
                         ? "border border-hairline text-ink"
-                        : "bg-accent text-white"
+                        : "bg-accent text-accent-contrast"
                     }`}
                   >
                     {openId === d.id ? t("tenant.dues.hidePay") : t("tenant.dues.pay")}

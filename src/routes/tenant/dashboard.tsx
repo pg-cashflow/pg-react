@@ -139,7 +139,7 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
             <button
               type="button"
               onClick={() => onNavigate("dues")}
-              className="w-full h-12 rounded-[10px] t-body font-semibold bg-accent text-white"
+              className="w-full h-12 rounded-[10px] t-body font-semibold bg-accent text-accent-contrast"
             >
               {current
                 ? t("tenant.dashboard.payCurrentRent", { sentence: formatDueSentence(current, t, locale) })

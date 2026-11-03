@@ -172,7 +172,7 @@ export const ProofUploadForm: React.FC<ProofUploadFormProps> = ({
         <button
           type="submit"
           disabled={busy}
-          className="flex-1 h-12 rounded-[10px] bg-accent text-white font-semibold t-body-sm flex items-center justify-center gap-2"
+          className="flex-1 h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm flex items-center justify-center gap-2"
         >
           {busy ? (
             <>

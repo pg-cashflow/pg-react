@@ -297,7 +297,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-pressed transition shadow-sm active:scale-95 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:bg-accent-pressed transition shadow-sm active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -359,7 +359,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-pressed transition shadow-sm active:scale-95 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:bg-accent-pressed transition shadow-sm active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

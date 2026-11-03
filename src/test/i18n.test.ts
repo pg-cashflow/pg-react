@@ -209,6 +209,9 @@ describe("i18n message completeness", () => {
 
       await React.act(async () => {
         p1 = contextValue.setLocale("te-IN", true);
+        // Wait until the first dictionary has loaded and persistence has begun.
+        // A superseded dictionary load should now skip the server call entirely.
+        while (capturedSignals.length === 0) await new Promise((resolve) => setTimeout(resolve, 0));
         p2 = contextValue.setLocale("ta-IN", true);
       });
 

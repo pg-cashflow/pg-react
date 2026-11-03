@@ -32,7 +32,7 @@ export const InspectionsListView: React.FC = () => {
       isEmpty={!q.isLoading && (q.data?.length ?? 0) === 0}
       emptyMessage="No inspections yet."
       emptyAction={
-        <Link to="/manager/inspections/new" className="inline-flex h-11 items-center px-4 rounded-[10px] bg-accent text-white font-semibold">
+        <Link to="/manager/inspections/new" className="inline-flex h-11 items-center px-4 rounded-[10px] bg-accent text-accent-contrast font-semibold">
           Start a round
         </Link>
       }

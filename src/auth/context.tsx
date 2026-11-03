@@ -131,6 +131,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applySession = useCallback((rawToken: string, sessionUser: User, payload?: AuthTokenPayload) => {
     clearRetryTimer();
+    if (getStoredUser()?.id !== sessionUser.id) {
+      queryClient.clear();
+      clearPassbookCache();
+    }
     const jwtPayload = payload ?? parseJwt(rawToken);
     const resolvedRole = sessionUser.role ?? jwtPayload?.role;
     const tid = sessionUser.tenant_id || jwtPayload?.tenant_id || null;
@@ -201,7 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Differentiate transient errors from terminal auth errors
       const hasPriorSession = Boolean(stored || hint?.hasSession);
       if (err instanceof ApiError) {
-        if (err.status === 429 || err.status >= 500) {
+        if (err.status === 0 || err.status === 429 || err.status >= 500) {
           // Transient failure (rate limit or server unavailable).
           // Retain degraded session from stored hints and retry with backoff.
           if (hasPriorSession) {

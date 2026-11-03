@@ -236,7 +236,7 @@ export const MarkAttendanceModal: React.FC<MarkAttendanceModalProps> = ({
             <button
               type="submit"
               disabled={markMutation.isPending || staffList.length === 0}
-              className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium bg-accent text-accent-contrast rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
               {markMutation.isPending ? (
                 <>

@@ -86,7 +86,7 @@ export const MoreView: React.FC = () => {
           Rent reminders go out on WhatsApp three days before each due date. Automatic send needs pg-go cron.
         </p>
         <div className="flex flex-wrap gap-2">
-          <Link to="/owner/reminders" className="inline-flex h-10 items-center px-4 rounded-[10px] bg-accent text-white t-caption font-semibold">
+          <Link to="/owner/reminders" className="inline-flex h-10 items-center px-4 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold">
             Open reminders
           </Link>
           <Link to="/owner/facility" className="inline-flex h-10 items-center px-4 rounded-[10px] border border-hairline t-caption font-semibold">
@@ -159,7 +159,7 @@ export const MoreView: React.FC = () => {
           <button
             type="submit"
             disabled={walkMutation.isPending}
-            className="px-4 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent-pressed transition active:scale-95 disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:bg-accent-pressed transition active:scale-95 disabled:opacity-50"
           >
             {walkMutation.isPending && <Loader2 className="w-4 h-4 animate-spin inline mr-1" />}
             Create walk-in

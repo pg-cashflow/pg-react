@@ -40,7 +40,7 @@ export const PublicPolicyLayout: React.FC<PublicPolicyLayoutProps> = ({
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center h-9 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold hover:opacity-95 transition-opacity"
+              className="inline-flex items-center h-9 px-4 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold hover:opacity-95 transition-opacity"
             >
               Owner Sign In
             </Link>

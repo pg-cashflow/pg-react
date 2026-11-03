@@ -73,7 +73,7 @@ export const InspectionDetailView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => resolveMut.mutate({ itemId: item.id, status: "overturned" })}
-                      className="h-10 px-3 rounded-[10px] bg-accent text-white t-caption font-semibold"
+                      className="h-10 px-3 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold"
                     >
                       Overturn
                     </button>

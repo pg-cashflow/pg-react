@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -40,6 +40,9 @@ export const OwnerKYCView: React.FC = () => {
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const previewController = useRef<AbortController | null>(null);
+
+  useEffect(() => () => previewController.current?.abort(), []);
 
   useEffect(() => {
     return () => {
@@ -61,6 +64,7 @@ export const OwnerKYCView: React.FC = () => {
   };
 
   const handleClosePreview = () => {
+    previewController.current?.abort();
     if (previewBlobUrl) {
       revokeWithDelay(previewBlobUrl);
     }
@@ -72,6 +76,9 @@ export const OwnerKYCView: React.FC = () => {
   };
 
   const handleOpenPreview = async (item: OwnerKYCVerificationView) => {
+    previewController.current?.abort();
+    const controller = new AbortController();
+    previewController.current = controller;
     if (previewBlobUrl) {
       revokeWithDelay(previewBlobUrl);
       setPreviewBlobUrl(null);
@@ -82,14 +89,17 @@ export const OwnerKYCView: React.FC = () => {
     setPreviewContentType(null);
 
     try {
-      const blob = await getOwnerKYCDocumentBlob(item.id);
+      const blob = await getOwnerKYCDocumentBlob(item.id, controller.signal);
+      if (controller.signal.aborted) return;
       const url = URL.createObjectURL(blob);
       setPreviewBlobUrl(url);
       setPreviewContentType(blob.type);
     } catch {
+      if (controller.signal.aborted) return;
       if (item.tenant_id) {
         try {
-          const photoBlob = await getOwnerTenantKYCPhoto(item.tenant_id);
+          const photoBlob = await getOwnerTenantKYCPhoto(item.tenant_id, controller.signal);
+          if (controller.signal.aborted) return;
           const url = URL.createObjectURL(photoBlob);
           setPreviewBlobUrl(url);
           setPreviewContentType(photoBlob.type || "image/jpeg");
@@ -98,9 +108,9 @@ export const OwnerKYCView: React.FC = () => {
           // Both failed
         }
       }
-      setPreviewError(t("kyc.previewUnavailableDesc"));
+      if (!controller.signal.aborted) setPreviewError(t("kyc.previewUnavailableDesc"));
     } finally {
-      setPreviewLoading(false);
+      if (!controller.signal.aborted) setPreviewLoading(false);
     }
   };
 
@@ -294,7 +304,7 @@ export const OwnerKYCView: React.FC = () => {
                     type="button"
                     disabled={approveMutation.isPending}
                     onClick={() => handleApprove(item)}
-                    className="h-10 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold flex items-center gap-1.5 hover:bg-accent/90 transition disabled:opacity-50"
+                    className="h-10 px-4 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold flex items-center gap-1.5 hover:bg-accent/90 transition disabled:opacity-50"
                   >
                     {approveMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -426,7 +436,7 @@ export const OwnerKYCView: React.FC = () => {
                     handleApprove(previewItem);
                     handleClosePreview();
                   }}
-                  className="h-9 px-4 rounded-[10px] bg-accent text-white t-caption font-semibold flex items-center gap-1.5 hover:bg-accent/90 transition disabled:opacity-50"
+                  className="h-9 px-4 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold flex items-center gap-1.5 hover:bg-accent/90 transition disabled:opacity-50"
                 >
                   {approveMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

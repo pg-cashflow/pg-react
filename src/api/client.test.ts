@@ -202,6 +202,30 @@ describe("api/client proactive refresh", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("does not restore a token after logout during refresh", async () => {
+    setAccessToken("old-token");
+    let respond!: (value: unknown) => void;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((resolve) => { respond = resolve; })));
+    const pending = executeRefresh("old-token");
+    setAccessToken(null);
+    setStoredUser(null);
+    respond({ ok: true, json: async () => ({ token: "late-token", user: { id: "old-user", role: "owner" } }) });
+    expect(await pending).toBeNull();
+    expect(getAccessToken()).toBeNull();
+    expect(getStoredUser()).toBeNull();
+  });
+
+  it("does not clear a newer session when an older refresh is rejected", async () => {
+    setAccessToken("old-token");
+    let respond!: (value: unknown) => void;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((resolve) => { respond = resolve; })));
+    const pending = executeRefresh("old-token");
+    setAccessToken("new-login-token");
+    respond({ ok: false, status: 401, json: async () => ({ error: "old session revoked" }) });
+    expect(await pending).toBe("new-login-token");
+    expect(getAccessToken()).toBe("new-login-token");
+  });
+
   it("converts SyntaxError into clean ApiError when server returns non-JSON body", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

@@ -264,7 +264,7 @@ describe("OwnerKYCView", () => {
     });
     await flushQueries();
 
-    expect(getDocBlobSpy).toHaveBeenCalledWith("review-1");
+    expect(getDocBlobSpy).toHaveBeenCalledWith("review-1", expect.any(AbortSignal));
     expect(createObjectURLSpy).toHaveBeenCalledWith(mockBlob);
 
     // Modal should now be visible with iframe for pdf

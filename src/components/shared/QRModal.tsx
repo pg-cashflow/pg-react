@@ -90,7 +90,7 @@ export const QRModal: React.FC<QRModalProps> = ({
               href={paymentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent/90 transition shadow-md"
+              className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-accent-contrast font-medium text-sm hover:bg-accent/90 transition shadow-md"
             >
               {t("qrmodal.openPaymentPage")}
               <ExternalLink className="w-4 h-4" />

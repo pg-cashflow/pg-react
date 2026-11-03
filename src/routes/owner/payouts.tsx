@@ -156,7 +156,7 @@ export const PayoutsView: React.FC = () => {
             <button
               onClick={handleCreateBatch}
               disabled={createBatchMutation.isPending}
-              className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 flex items-center gap-2 transition shadow-sm disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:opacity-90 flex items-center gap-2 transition shadow-sm disabled:opacity-50"
             >
               {createBatchMutation.isPending ? (
                 <>
@@ -298,7 +298,7 @@ export const PayoutsView: React.FC = () => {
                           {b.status === "draft" && (
                             <button
                               onClick={() => setSelectedBatchForApproval(b)}
-                              className="px-3 py-1.5 rounded-xl bg-accent text-white font-semibold text-xs hover:opacity-90 transition shadow-sm"
+                              className="px-3 py-1.5 rounded-xl bg-accent text-accent-contrast font-semibold text-xs hover:opacity-90 transition shadow-sm"
                             >
                               {t("owner.payouts.reviewApprove")}
                             </button>
@@ -364,7 +364,7 @@ export const PayoutsView: React.FC = () => {
               <button
                 onClick={handleCreateBatch}
                 disabled={createBatchMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 transition shadow-sm"
+                className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:opacity-90 transition shadow-sm"
               >
                 {t("owner.payouts.createBatch")}
               </button>

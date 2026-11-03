@@ -205,7 +205,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                     }}
                     className={`px-3 py-1.5 text-xs font-medium rounded-xl border transition ${
                       isSelected
-                        ? "bg-accent text-white border-accent shadow-sm"
+                        ? "bg-accent text-accent-contrast border-accent shadow-sm"
                         : "bg-bg text-ink border-hairline hover:bg-hairline/20"
                     }`}
                   >
@@ -379,7 +379,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                 type="button"
                 disabled={isDisabled}
                 onClick={() => createMutation.mutate()}
-                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-accent-contrast text-xs font-semibold hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -412,7 +412,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
 
             <button
               onClick={() => handleCopy(successInvite.code)}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition"
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-accent-contrast text-xs font-semibold hover:bg-accent/90 transition"
             >
               {copiedCode === successInvite.code ? (
                 <Check className="w-4 h-4" />

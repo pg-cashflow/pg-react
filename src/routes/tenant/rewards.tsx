@@ -166,7 +166,7 @@ export const TenantRewardsView: React.FC = () => {
                     disabled={redeemMutation.isPending || !canAfford || !isEligible}
                     className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                       canAfford && isEligible
-                        ? "bg-accent text-white hover:bg-accent/90 shadow-md shadow-accent/20"
+                        ? "bg-accent text-accent-contrast hover:bg-accent/90 shadow-md shadow-accent/20"
                         : "bg-surface text-ink-muted cursor-not-allowed border border-hairline/40"
                     }`}
                   >

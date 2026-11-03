@@ -112,7 +112,7 @@ export const FinanceCloseView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowCloseModal(true)}
-                      className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors shadow-sm"
+                      className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:bg-accent/90 transition-colors shadow-sm"
                     >
                       <Lock size={15} /> Close Period {period}
                     </button>
@@ -316,7 +316,7 @@ function CloseModal({
             type="button"
             disabled={typedConfirmation !== "CLOSE" || isSubmitting}
             onClick={onConfirm}
-            className="flex-1 h-11 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm"
+            className="flex-1 h-11 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm"
           >
             {isSubmitting ? "Locking…" : "Lock Period"}
           </button>

@@ -140,7 +140,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("meals")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "meals" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "meals" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Utensils className="w-4 h-4" />
@@ -149,7 +149,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("poll")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "poll" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "poll" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Vote className="w-4 h-4" />
@@ -158,7 +158,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("inspections")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "inspections" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "inspections" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -167,7 +167,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("hazards")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "hazards" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "hazards" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -176,7 +176,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("leaderboard")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "leaderboard" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "leaderboard" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Trophy className="w-4 h-4" />
@@ -185,7 +185,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("referrals")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "referrals" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "referrals" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Sparkles className="w-4 h-4" />
@@ -194,7 +194,7 @@ export const TenantCommunityView: React.FC = () => {
         <button
           onClick={() => setTab("violations")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "violations" ? "bg-accent text-white shadow-md" : "text-ink-muted hover:text-ink"
+            tab === "violations" ? "bg-accent text-accent-contrast shadow-md" : "text-ink-muted hover:text-ink"
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -266,7 +266,7 @@ export const TenantCommunityView: React.FC = () => {
           <button
             onClick={() => saveRsvpMutation.mutate()}
             disabled={saveRsvpMutation.isPending}
-            className="w-full py-3 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 transition shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 transition shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
           >
             {saveRsvpMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             <span>{t("tenant.community.saveTomorrowAttendance")}</span>
@@ -455,7 +455,7 @@ export const TenantCommunityView: React.FC = () => {
             <button
               onClick={() => reportHazardMutation.mutate()}
               disabled={reportHazardMutation.isPending || !hzDesc.trim()}
-              className="w-full py-3 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent transition shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {reportHazardMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
               <span>{t("tenant.community.submitReportEarnPts")}</span>
@@ -579,7 +579,7 @@ export const TenantCommunityView: React.FC = () => {
               <button
                 onClick={() => disputeMutation.mutate()}
                 disabled={disputeMutation.isPending || !disputeNote.trim()}
-                className="px-4 py-2 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
               >
                 {disputeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Dispute"}
               </button>

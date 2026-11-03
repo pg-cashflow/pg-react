@@ -19,7 +19,7 @@ export const AccessDeniedView: React.FC = () => {
         </p>
         <button
           onClick={logout}
-          className="inline-flex items-center justify-center gap-2 px-5 h-11 rounded-[10px] bg-accent text-white font-semibold"
+          className="inline-flex items-center justify-center gap-2 px-5 h-11 rounded-[10px] bg-accent text-accent-contrast font-semibold"
         >
           <LogOut className="w-4 h-4" />
           {t("common.logout")}

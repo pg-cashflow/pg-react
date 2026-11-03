@@ -241,7 +241,7 @@ export const OwnerFacilityView: React.FC = () => {
 
           <button
             onClick={() => setIsAddPropertyOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-accent text-white rounded-xl text-xs font-semibold hover:bg-accent/90 transition shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-accent text-accent-contrast rounded-xl text-xs font-semibold hover:bg-accent/90 transition shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>{t("owner.facility.newProperty")}</span>
@@ -267,7 +267,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("floors")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "floors" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
+            tab === "floors" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -276,7 +276,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("rooms")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "rooms" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
+            tab === "rooms" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:text-ink"
           }`}
         >
           <DoorOpen className="w-4 h-4" />
@@ -285,7 +285,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("wardens")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "wardens" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
+            tab === "wardens" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:text-ink"
           }`}
         >
           <UserCheck className="w-4 h-4" />
@@ -294,7 +294,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("gamification")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "gamification" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
+            tab === "gamification" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:text-ink"
           }`}
         >
           <Sliders className="w-4 h-4" />
@@ -303,7 +303,7 @@ export const OwnerFacilityView: React.FC = () => {
         <button
           onClick={() => setTab("gateway")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition ${
-            tab === "gateway" ? "bg-accent text-white" : "text-ink-muted hover:text-ink"
+            tab === "gateway" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:text-ink"
           }`}
         >
           <CreditCard className="w-4 h-4" />
@@ -341,7 +341,7 @@ export const OwnerFacilityView: React.FC = () => {
               <button
                 onClick={() => addFloorMutation.mutate()}
                 disabled={addFloorMutation.isPending || !floorNumber || !floorName}
-                className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
               >
                 {addFloorMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Create Floor"}
               </button>
@@ -367,7 +367,7 @@ export const OwnerFacilityView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsQuickLayoutOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-contrast rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>{t("owner.facility.quickGenerateLayout")}</span>
@@ -441,7 +441,7 @@ export const OwnerFacilityView: React.FC = () => {
               <button
                 onClick={() => addRoomMutation.mutate()}
                 disabled={addRoomMutation.isPending || !roomNumber || !roomFloorId}
-                className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
               >
                 {addRoomMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Create Room"}
               </button>
@@ -467,7 +467,7 @@ export const OwnerFacilityView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsQuickLayoutOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-contrast rounded-xl text-xs font-bold hover:bg-accent/90 transition shadow-sm"
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>{t("owner.facility.quickGenerateLayout")}</span>
@@ -515,7 +515,7 @@ export const OwnerFacilityView: React.FC = () => {
               <button
                 onClick={() => addManagerMutation.mutate()}
                 disabled={addManagerMutation.isPending || !managerPhone.trim()}
-                className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
               >
                 {addManagerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Assign Warden"}
               </button>
@@ -671,7 +671,7 @@ export const OwnerFacilityView: React.FC = () => {
           <button
             onClick={() => updateSettingsMutation.mutate()}
             disabled={updateSettingsMutation.isPending}
-            className="w-full py-2.5 rounded-xl bg-accent text-white font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
+            className="w-full py-2.5 rounded-xl bg-accent text-accent-contrast font-bold text-xs hover:bg-accent/90 disabled:opacity-50"
           >
             {updateSettingsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Save Gamification Rules"}
           </button>

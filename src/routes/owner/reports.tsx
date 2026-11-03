@@ -184,7 +184,7 @@ export const ReportsView: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-ink">{tenantMap.get(r.tenant_id) || t("owner.reports.tenantFallback")}</p>
                         {isSelected && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-accent text-white">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-contrast">
                             {t("owner.reports.activeHint")}
                           </span>
                         )}

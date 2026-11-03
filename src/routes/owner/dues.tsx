@@ -62,7 +62,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
         <div className="flex items-center gap-2">
           <span>{tenantName}</span>
           {isSelected && (
-            <span className="inline-flex items-center text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-white">
+            <span className="inline-flex items-center text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-accent-contrast">
               Active
             </span>
           )}
@@ -697,7 +697,7 @@ export const DuesView: React.FC = () => {
               <button
                 type="submit"
                 disabled={matchMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm disabled:opacity-50"
               >
                 {t("owner.dues.keyMatch")}
               </button>

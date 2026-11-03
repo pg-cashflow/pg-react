@@ -54,7 +54,7 @@ export const HazardsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => resolveMut.mutate(h.id)}
-                className="mt-3 h-10 px-3 rounded-[10px] bg-accent text-white t-caption font-semibold"
+                className="mt-3 h-10 px-3 rounded-[10px] bg-accent text-accent-contrast t-caption font-semibold"
               >
                 Mark resolved
               </button>

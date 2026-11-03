@@ -26,7 +26,7 @@ export const NotFoundView: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
           <Link
             to={homeDest}
-            className="w-full sm:w-auto inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-6 font-semibold bg-accent text-white hover:bg-accent/90 transition shadow-sm"
+            className="w-full sm:w-auto inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-6 font-semibold bg-accent text-accent-contrast hover:bg-accent/90 transition shadow-sm"
           >
             <Home className="w-4 h-4" />
             {isAuthenticated ? t("common.goToDashboard") : t("common.goToHome")}

@@ -44,7 +44,7 @@ export const FinanceCapitalView: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowAdd(true)}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:bg-accent/90 transition-colors shadow-sm self-start sm:self-auto"
         >
           <Plus size={16} /> Record Capital
         </button>
@@ -250,7 +250,7 @@ function CapitalModal({
           <button
             type="submit"
             disabled={isSubmitting || !purpose.trim()}
-            className="w-full h-11 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm"
+            className="w-full h-11 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-50 shadow-sm"
           >
             {isSubmitting ? "Recording…" : "Save Capital Entry"}
           </button>

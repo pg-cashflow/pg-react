@@ -90,7 +90,7 @@ export const InvitePage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 h-12 rounded-[10px] bg-accent text-white font-semibold text-sm hover:bg-accent-pressed disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold text-sm hover:bg-accent-pressed disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{t("common.continue")} <ArrowRight className="w-4 h-4" /></>}
           </button>

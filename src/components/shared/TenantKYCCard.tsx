@@ -489,7 +489,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               }}
               className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
                 activeTab === "qr"
-                  ? "bg-accent text-white border-accent shadow-sm"
+                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
                   : "bg-surface text-ink border-hairline hover:bg-hairline/20"
               }`}
             >
@@ -504,7 +504,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               }}
               className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
                 activeTab === "otp"
-                  ? "bg-accent text-white border-accent shadow-sm"
+                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
                   : "bg-surface text-ink border-hairline hover:bg-hairline/20"
               }`}
             >
@@ -519,7 +519,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               }}
               className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
                 activeTab === "upload"
-                  ? "bg-accent text-white border-accent shadow-sm"
+                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
                   : "bg-surface text-ink border-hairline hover:bg-hairline/20"
               }`}
             >
@@ -560,7 +560,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     verifyQrMutation.isPending
                   }
                   onClick={() => verifyQrMutation.mutate(qrInput)}
-                  className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
+                  className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
                 >
                   {verifyQrMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -621,7 +621,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                       requestOtpMutation.isPending
                     }
                     onClick={() => requestOtpMutation.mutate(aadhaarInput)}
-                    className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
+                    className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
                   >
                     {requestOtpMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -676,7 +676,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                       attemptsRemaining === 0
                     }
                     onClick={() => verifyOtpMutation.mutate()}
-                    className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
+                    className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
                   >
                     {verifyOtpMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -774,7 +774,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 type="button"
                 disabled={!uploadFile || !consentChecked || uploadMutation.isPending || compressing}
                 onClick={() => uploadFile && uploadMutation.mutate(uploadFile)}
-                className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
+                className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
               >
                 {uploadMutation.isPending || compressing ? (
                   <>

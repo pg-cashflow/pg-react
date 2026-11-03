@@ -239,7 +239,7 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
             <button
               type="submit"
               disabled={createPayeeMutation.isPending}
-              className="px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 rounded-xl bg-accent text-accent-contrast text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2 shadow-sm"
             >
               {createPayeeMutation.isPending ? (
                 <>

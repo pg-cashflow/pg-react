@@ -283,7 +283,7 @@ export const TenantsView: React.FC = () => {
                   due_day: editDue,
                 })
               }
-              className="px-4 py-2 rounded-xl bg-accent text-white text-sm font-semibold"
+              className="px-4 py-2 rounded-xl bg-accent text-accent-contrast text-sm font-semibold"
             >
               {patchMutation.isPending && <Loader2 className="w-4 h-4 animate-spin inline mr-1" />}
               Save changes

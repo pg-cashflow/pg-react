@@ -123,7 +123,7 @@ export const ManagerShell: React.FC = () => {
                   setIsMobileMenuOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-[10px] t-body ${
-                  active ? "bg-accent text-white font-semibold" : "text-ink-muted hover:bg-accent-tint"
+                  active ? "bg-accent text-accent-contrast font-semibold" : "text-ink-muted hover:bg-accent-tint"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -178,7 +178,7 @@ export const ManagerShell: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate({ to: action.to! })}
-              className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold"
+              className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold"
             >
               {action.label}
             </button>
@@ -187,7 +187,7 @@ export const ManagerShell: React.FC = () => {
               type="button"
               disabled={action.busy || action.disabled}
               onClick={action.onClick}
-              className="w-full h-12 rounded-[10px] bg-accent text-white font-semibold disabled:opacity-40"
+              className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold disabled:opacity-40"
             >
               {action.busy ? action.busyLabel || t("common.working") : action.label}
             </button>
@@ -217,7 +217,7 @@ export const ManagerShell: React.FC = () => {
               <button
                 type="button"
                 onClick={handleDismissLangPrompt}
-                className="w-full h-11 rounded-[10px] bg-accent text-white t-body-sm font-semibold transition hover:bg-accent/90"
+                className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold transition hover:bg-accent/90"
               >
                 {t("common.continue")}
               </button>

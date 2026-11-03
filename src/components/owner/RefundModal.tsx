@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
-import { refundPayment } from "@/api/payments";
+import { refundPayment, requestRefundOTP } from "@/api/payments";
 import type { Payment, GatewayRefund } from "@pg/types";
 import { useLocale, formatApiError } from "@/i18n";
 
@@ -29,6 +29,9 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [refundResult, setRefundResult] = useState<GatewayRefund | null>(null);
   const [idempotencyKey, setIdempotencyKey] = useState<string>("");
+  const [sendingOTP, setSendingOTP] = useState(false);
+  const [otpDestination, setOtpDestination] = useState("");
+  const [attemptPending, setAttemptPending] = useState(false);
 
   const generateNewKey = () => {
     if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -43,9 +46,21 @@ export const RefundModal: React.FC<RefundModalProps> = ({
       setReason("");
       setOtp("");
       setNeedsStepUp(false);
+      setOtpDestination("");
       setErrorMessage(null);
       setRefundResult(null);
       setIdempotencyKey(generateNewKey());
+      setAttemptPending(false);
+      try {
+        const raw = sessionStorage.getItem(`pg_refund_attempt:${payment.id}`);
+        const saved = raw ? JSON.parse(raw) : null;
+        if (saved && typeof saved.key === "string" && Number.isSafeInteger(saved.amount) && typeof saved.reason === "string") {
+          setIdempotencyKey(saved.key);
+          setRupeesInput((saved.amount / 100).toString());
+          setReason(saved.reason);
+          setAttemptPending(true);
+        }
+      } catch { /* Storage may be unavailable; same-open retries still reuse the key. */ }
     }
   }, [isOpen, payment]);
 
@@ -70,24 +85,28 @@ export const RefundModal: React.FC<RefundModalProps> = ({
 
     const trimmedReason = reason.trim().normalize("NFC");
     const reasonCharCount = Array.from(trimmedReason).length;
-    if (reasonCharCount < 5 || reasonCharCount > 200) {
-      setErrorMessage(t("error.refund.reasonLength"));
+    if (reasonCharCount < 3 || reasonCharCount > 100) {
+      setErrorMessage(t("error.payment.refundReasonLength"));
       return;
     }
 
     // eslint-disable-next-line no-misleading-character-class
     const validReasonRegex = /^[\p{L}\p{M}\p{N}\u200C\u200D .,_'/-]+$/u;
     if (!validReasonRegex.test(trimmedReason)) {
-      setErrorMessage(t("error.refund.reasonCharacters"));
+      setErrorMessage(t("error.payment.refundReasonCharacters"));
       return;
     }
 
-    if (needsStepUp && (!otp || otp.length < 4)) {
+    if (needsStepUp && !/^\d{6}$/.test(otp)) {
       setErrorMessage("Please enter the authorization OTP.");
       return;
     }
 
     setIsSubmitting(true);
+    setAttemptPending(true);
+    try {
+      sessionStorage.setItem(`pg_refund_attempt:${payment.id}`, JSON.stringify({ key: idempotencyKey, amount: requestedPaise, reason: trimmedReason }));
+    } catch { /* The backend remains authoritative if local recovery is unavailable. */ }
 
     try {
       const result = await refundPayment(
@@ -111,8 +130,13 @@ export const RefundModal: React.FC<RefundModalProps> = ({
         setNeedsStepUp(true);
         setErrorMessage(msg);
       } else {
-        // Regenerate idempotency key on failure so next attempt does not replay the error
-        setIdempotencyKey(generateNewKey());
+        // A transport error does not prove that the refund was rejected. Keep
+        // the operation identity so retry cannot create another refund.
+        if (apiErr.status === 400 || apiErr.status === 422) {
+          // These responses are validation failures before gateway dispatch.
+          setAttemptPending(false);
+          try { sessionStorage.removeItem(`pg_refund_attempt:${payment.id}`); } catch { /* best effort */ }
+        }
         setErrorMessage(msg);
       }
     } finally {
@@ -121,6 +145,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   };
 
   const handleRetryWithNewKey = () => {
+    try { sessionStorage.removeItem(`pg_refund_attempt:${payment.id}`); } catch { /* best effort */ }
+    setAttemptPending(false);
     setIdempotencyKey(generateNewKey());
     setRefundResult(null);
     setErrorMessage(null);
@@ -142,6 +168,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            disabled={isSubmitting}
+            aria-label={t("common.close")}
             className="text-ink-muted hover:text-ink p-1.5 rounded-lg hover:bg-bg transition"
           >
             <X className="w-5 h-5" />
@@ -197,7 +225,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                 </div>
               )}
 
-              {(refundResult.status === "initiated" || (refundResult.status as string) === "pending") && (
+              {!["succeeded", "failed", "cancelled"].includes(refundResult.status) && (
                 <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl text-center space-y-2">
                   <Clock className="w-8 h-8 text-warning mx-auto animate-pulse" />
                   <h3 className="font-semibold text-sm text-ink">{t("owner.refund.initiated")}</h3>
@@ -217,7 +245,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                 </div>
               )}
 
-              {refundResult.status === "failed" && (
+              {(refundResult.status === "failed" || refundResult.status === "cancelled") && (
                 <div className="p-4 bg-danger/10 border border-danger/20 rounded-xl text-center space-y-3">
                   <AlertCircle className="w-8 h-8 text-danger mx-auto" />
                   <h3 className="font-semibold text-sm text-ink">{t("owner.refund.failed")}</h3>
@@ -255,12 +283,12 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   <input
                     type="number"
                     step="0.01"
-                    min="1"
+                    min="0.01"
                     max={maxAmountRupees}
                     value={rupeesInput}
                     onChange={(e) => setRupeesInput(e.target.value)}
                     required
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || attemptPending}
                     className="w-full pl-8 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-sm text-ink focus:outline-none focus:ring-1 focus:ring-accent"
                   />
                 </div>
@@ -280,7 +308,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={t("owner.refund.reasonPlaceholder")}
                   required
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || attemptPending}
                   className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-sm text-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
                 <p className="mt-1 text-[11px] text-ink-muted">
@@ -295,6 +323,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
@@ -302,6 +332,18 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                     disabled={isSubmitting}
                     className="w-full px-3.5 py-2 bg-surface border border-hairline rounded-xl text-sm text-ink font-mono"
                   />
+                  <button type="button" disabled={sendingOTP || isSubmitting} onClick={async () => {
+                    setSendingOTP(true);
+                    try {
+                      const res = await requestRefundOTP(payment.id);
+                      setOtpDestination(res.destination);
+                      setErrorMessage(null);
+                    } catch (err) { setErrorMessage(formatApiError(err, t)); }
+                    finally { setSendingOTP(false); }
+                  }} className="text-xs font-semibold text-accent disabled:opacity-50">
+                    {t("owner.refund.sendCode")}
+                  </button>
+                  {otpDestination && <p className="text-xs text-ink-muted" role="status">{t("owner.refund.codeSent", { destination: otpDestination })}</p>}
                 </div>
               )}
 
