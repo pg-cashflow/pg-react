@@ -139,6 +139,7 @@ const MetersView = lazyView(() => import("@/routes/manager/meters"), "MetersView
 const HazardsView = lazyView(() => import("@/routes/manager/hazards"), "HazardsView");
 const ManagerProfileView = lazyView(() => import("@/routes/manager/profile"), "ManagerProfileView");
 const ViolationsView = lazyView(() => import("@/routes/manager/violations"), "ViolationsView");
+const ManagerKYCView = lazyView(() => import("@/routes/manager/kyc"), "ManagerKYCView");
 
 export const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading, role, isPendingJoin, justActivated } = useAuth();
@@ -663,7 +664,7 @@ const managerViolations = createRoute({
 const managerKYC = createRoute({
   getParentRoute: () => managerRoute,
   path: "/kyc",
-  component: OwnerKYCView,
+  component: ManagerKYCView,
 });
 
 const rootDashboard = createRoute({

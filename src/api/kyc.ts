@@ -124,3 +124,9 @@ export const getOwnerTenantKYCPhoto = (tenantId: string, signal?: AbortSignal): 
 export const getOwnerKYCDocumentBlob = (id: string, signal?: AbortSignal): Promise<Blob> =>
   apiFetchBlob(`/owner/kyc/${id}/document`, { signal });
 
+
+
+// --- Manager KYC Endpoints ---
+
+export const getManagerKYCDocumentBlob = (id: string, signal?: AbortSignal): Promise<Blob> =>
+  apiFetchBlob(`/manager/kyc/${id}/document`, { signal });
