@@ -66,10 +66,19 @@ export function useExpenses(
   });
 }
 
+export type CreateExpenseVariables =
+  | CreateExpenseInput
+  | { input: CreateExpenseInput; idempotencyKey?: string };
+
 export function useCreateExpense() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateExpenseInput) => createExpense(input),
+    mutationFn: (vars: CreateExpenseVariables) => {
+      if ("input" in vars) {
+        return createExpense(vars.input, vars.idempotencyKey);
+      }
+      return createExpense(vars);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owner", "finance", "expenses"] });
       queryClient.invalidateQueries({ queryKey: ["owner", "finance", "summary"] });
@@ -83,10 +92,12 @@ export function useRecordExpensePayment() {
     mutationFn: ({
       expenseId,
       input,
+      idempotencyKey,
     }: {
       expenseId: string;
       input: ExpensePaymentInput;
-    }) => recordExpensePayment(expenseId, input),
+      idempotencyKey?: string;
+    }) => recordExpensePayment(expenseId, input, idempotencyKey),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owner", "finance", "expenses"] });
       queryClient.invalidateQueries({ queryKey: ["owner", "finance", "summary"] });
@@ -120,10 +131,19 @@ export function useCapitalEntries() {
   });
 }
 
+export type CreateCapitalVariables =
+  | CreateCapitalInput
+  | { input: CreateCapitalInput; idempotencyKey?: string };
+
 export function useCreateCapitalEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateCapitalInput) => createCapitalEntry(input),
+    mutationFn: (vars: CreateCapitalVariables) => {
+      if ("input" in vars) {
+        return createCapitalEntry(vars.input, vars.idempotencyKey);
+      }
+      return createCapitalEntry(vars);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.financeCapital });
       queryClient.invalidateQueries({ queryKey: ["owner", "finance", "summary"] });

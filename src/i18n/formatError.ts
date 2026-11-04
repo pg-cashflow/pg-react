@@ -1,4 +1,5 @@
 import { ApiError } from "@/api/client";
+import { AuthFlowError } from "@/auth/authFlowError";
 import type { MessageKey } from "./messages/en-IN";
 
 /**
@@ -59,3 +60,12 @@ export function formatKYCError(
   return formatApiError(err, t, fallbackKey);
 }
 
+/** Translates Firebase sign-in failures; falls back to the generic API error formatter. */
+export function formatAuthFlowError(
+  err: unknown,
+  t: (key: MessageKey, values?: Record<string, any>) => string,
+  fallbackKey: MessageKey = "auth.err.generic"
+): string {
+  if (err instanceof AuthFlowError) return t(err.messageKey);
+  return formatApiError(err, t, fallbackKey);
+}

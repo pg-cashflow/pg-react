@@ -138,6 +138,22 @@ export const knIN: Record<MessageKey, string> = {
   "auth.clearInvite": "ಆಹ್ವಾನ ತೆರವುಗೊಳಿಸಿ",
   "auth.cantAccessPhone": "ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲವೇ?",
   "auth.cantAccessPhoneDesc": "ನಿಮ್ಮ ಗುರುತನ್ನು ಪರಿಶೀಲಿಸಲು ನಿಮ್ಮ ಪಿಜಿ ಮಾಲೀಕರು ಅಥವಾ ವಾರ್ಡನ್ ಅವರನ್ನು ಕೇಳಿ. ಅವರು ಒಂದು ಬಾರಿಯ ಸೈನ್-ಇನ್ ಲಿಂಕ್ ರಚಿಸಬಹುದು ಅಥವಾ ನಿಮ್ಮ ನೋಂದಾಯಿತ ಸಂಖ್ಯೆಯನ್ನು ನವೀಕರಿಸಬಹುದು.",
+  // DRAFT translations: need native-speaker review before release
+  "auth.err.invalidPhone": "ಫೋನ್ ಸಂಖ್ಯೆ ಅಮಾನ್ಯವಾಗಿದೆ. +91 ಸ್ವರೂಪ ಬಳಸಿ, ಉದಾ. +919876543210",
+  "auth.err.tooManyRequests": "ಹಲವು ಪ್ರಯತ್ನಗಳಾಗಿವೆ. ಸ್ವಲ್ಪ ಕಾಯಿರಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.invalidCode": "OTP ತಪ್ಪಾಗಿದೆ. ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.codeExpired": "OTP ಅವಧಿ ಮುಗಿದಿದೆ. ಹೊಸ ಕೋಡ್ ವಿನಂತಿಸಿ.",
+  "auth.err.captchaFailed": "ಭದ್ರತಾ ಪರಿಶೀಲನೆ ವಿಫಲವಾಗಿದೆ. ರಿಫ್ರೆಶ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.initFailed": "ಫೋನ್ ಪರಿಶೀಲನೆ ಆರಂಭಿಸಲಾಗಲಿಲ್ಲ. ರಿಫ್ರೆಶ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.unavailable": "ಈ ಸೇವೆ ಸದ್ಯ ಲಭ್ಯವಿಲ್ಲ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.network": "ಪರಿಶೀಲನಾ ಸೇವೆಗೆ ಸಂಪರ್ಕಿಸಲಾಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.missingPhone": "ಫೋನ್ ಸಂಖ್ಯೆ ಅಗತ್ಯ.",
+  "auth.err.cancelled": "Google ಸೈನ್-ಇನ್ ರದ್ದಾಯಿತು.",
+  "auth.err.linkedElsewhere": "ಈ ಫೋನ್ ಈಗಾಗಲೇ ಬೇರೆ ಖಾತೆಗೆ ಲಿಂಕ್ ಆಗಿದೆ. ಆ ವಿಧಾನದಿಂದ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+  "auth.err.alreadyLinked": "ಈ ಸೈನ್-ಇನ್ ವಿಧಾನ ಈಗಾಗಲೇ ಲಿಂಕ್ ಆಗಿದೆ.",
+  "auth.err.generic": "ಸೈನ್-ಇನ್ ವಿಫಲವಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "auth.err.resetCaptcha": "ಭದ್ರತಾ ಪರಿಶೀಲನೆ ರೀಸೆಟ್ ಆಗಿದೆ. ಮತ್ತೆ OTP ಕಳುಹಿಸಿ ಒತ್ತಿ.",
+  "auth.err.noOtpInProgress": "ಯಾವುದೇ OTP ವಿನಂತಿ ಇಲ್ಲ. ಮೊದಲು OTP ಕಳುಹಿಸಿ.",
 
   // Extended Tenant
   "tenant.kycVerified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ (****{last4})",

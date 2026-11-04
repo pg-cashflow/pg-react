@@ -21,7 +21,7 @@ import type {
   VarianceBridge,
 } from "@pg/types";
 
-function createIdempotencyKey(): string {
+export function createIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
@@ -70,24 +70,26 @@ export const getExpenses = (
 };
 
 export const createExpense = (
-  input: CreateExpenseInput
+  input: CreateExpenseInput,
+  idempotencyKey?: string
 ): Promise<{ expense: Expense; approval?: unknown }> =>
   apiFetch<{ expense: Expense; approval?: unknown }>("/owner/finance/expenses", {
     method: "POST",
     headers: {
-      "Idempotency-Key": createIdempotencyKey(),
+      "Idempotency-Key": idempotencyKey || createIdempotencyKey(),
     },
     body: JSON.stringify(input),
   });
 
 export const recordExpensePayment = (
   expenseId: string,
-  input: ExpensePaymentInput
+  input: ExpensePaymentInput,
+  idempotencyKey?: string
 ): Promise<{ payment: unknown }> =>
   apiFetch<{ payment: unknown }>(`/owner/finance/expenses/${expenseId}/payments`, {
     method: "POST",
     headers: {
-      "Idempotency-Key": createIdempotencyKey(),
+      "Idempotency-Key": idempotencyKey || createIdempotencyKey(),
     },
     body: JSON.stringify(input),
   });
@@ -109,12 +111,13 @@ export const getCapitalEntries = async (): Promise<CapitalTransaction[]> => {
 };
 
 export const createCapitalEntry = (
-  input: CreateCapitalInput
+  input: CreateCapitalInput,
+  idempotencyKey?: string
 ): Promise<{ capital: CapitalTransaction }> =>
   apiFetch<{ capital: CapitalTransaction }>("/owner/finance/capital", {
     method: "POST",
     headers: {
-      "Idempotency-Key": createIdempotencyKey(),
+      "Idempotency-Key": idempotencyKey || createIdempotencyKey(),
     },
     body: JSON.stringify(input),
   });

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { createIdempotencyKey } from "@/api/finance";
 import { Plus, X, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { useCapitalEntries, useCreateCapitalEntry } from "@/lib/useFinance";
 import { QueryState } from "@/components/shared/QueryState";
@@ -147,8 +148,8 @@ export const FinanceCapitalView: React.FC = () => {
       {showAdd && (
         <CapitalModal
           onClose={() => setShowAdd(false)}
-          onSubmit={async (input) => {
-            await createMutation.mutateAsync(input);
+          onSubmit={async (input, idempotencyKey) => {
+            await createMutation.mutateAsync({ input, idempotencyKey });
             setShowAdd(false);
           }}
           isSubmitting={createMutation.isPending}
@@ -166,10 +167,14 @@ function CapitalModal({
   error,
 }: {
   onClose: () => void;
-  onSubmit: (input: { kind: CapitalKind; amount_paise: number; purpose: string }) => Promise<void>;
+  onSubmit: (
+    input: { kind: CapitalKind; amount_paise: number; purpose: string },
+    idempotencyKey?: string
+  ) => Promise<void>;
   isSubmitting: boolean;
   error: Error | null;
 }) {
+  const idempotencyKeyRef = useRef<string>(createIdempotencyKey());
   const { t } = useLocale();
   const [kind, setKind] = useState<CapitalKind>("additional");
   const [amountRupees, setAmountRupees] = useState("");
@@ -194,11 +199,14 @@ function CapitalModal({
           className="space-y-4"
           onSubmit={async (ev) => {
             ev.preventDefault();
-            await onSubmit({
-              kind,
-              amount_paise: rupeesToPaise(amountRupees),
-              purpose: purpose.trim(),
-            });
+            await onSubmit(
+              {
+                kind,
+                amount_paise: rupeesToPaise(amountRupees),
+                purpose: purpose.trim(),
+              },
+              idempotencyKeyRef.current
+            );
           }}
         >
           <div className="space-y-1.5">

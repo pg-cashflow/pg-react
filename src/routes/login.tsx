@@ -5,7 +5,7 @@ import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
 import { Building2, ArrowRight, Phone, AlertCircle, Loader2, Sparkles, X } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import AuthLayout from "@/components/layout/AuthLayout";
-import { useLocale } from "@/i18n";
+import { useLocale, formatAuthFlowError } from "@/i18n";
 import { OtpInput } from "@/components/shared/OtpInput";
 
 const GoogleMark: React.FC = () => (
@@ -82,7 +82,7 @@ export const LoginPage: React.FC = () => {
       setResendCooldown(30);
       setStep("otp");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to send OTP");
+      setError(formatAuthFlowError(err, t));
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export const LoginPage: React.FC = () => {
       setSessionNotice(null);
       await confirmPhoneOtp(codeToVerify);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid verification code");
+      setError(formatAuthFlowError(err, t));
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ export const LoginPage: React.FC = () => {
       await sendPhoneOtp(phone.trim());
       setResendCooldown(30);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to resend OTP");
+      setError(formatAuthFlowError(err, t));
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ export const LoginPage: React.FC = () => {
       setSessionNotice(null);
       await loginWithGoogle();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed");
+      setError(formatAuthFlowError(err, t));
     } finally {
       setLoading(false);
     }

@@ -138,6 +138,22 @@ export const teIN: Record<MessageKey, string> = {
   "auth.clearInvite": "ఆహ్వానం తొలగించు",
   "auth.cantAccessPhone": "మీ ఫోన్ నంబర్‌ను యాక్సెస్ చేయలేకపోతున్నారా?",
   "auth.cantAccessPhoneDesc": "మీ గుర్తింపును ధృవీకరించడానికి మీ పీజీ యజమానిని లేదా వార్డెన్‌ను అడగండి. వారు వన్-టైమ్ సైన్-ఇన్ లింక్‌ను రూపొందించగలరు లేదా మీ రిజిస్టర్డ్ నంబర్‌ను అప్‌డేట్ చేయగలరు.",
+  // DRAFT translations: need native-speaker review before release
+  "auth.err.invalidPhone": "ఫోన్ నంబర్ చెల్లదు. +91 ఫార్మాట్ వాడండి, ఉదా. +919876543210",
+  "auth.err.tooManyRequests": "చాలా ప్రయత్నాలు జరిగాయి. కొంచెం ఆగి మళ్ళీ ప్రయత్నించండి.",
+  "auth.err.invalidCode": "OTP తప్పుగా ఉంది. సరిచూసి మళ్ళీ ప్రయత్నించండి.",
+  "auth.err.codeExpired": "OTP గడువు ముగిసింది. కొత్త కోడ్ అడగండి.",
+  "auth.err.captchaFailed": "భద్రతా ధృవీకరణ విఫలమైంది. రిఫ్రెష్ చేసి మళ్ళీ ప్రయత్నించండి.",
+  "auth.err.initFailed": "ఫోన్ ధృవీకరణ ప్రారంభం కాలేదు. రిఫ్రెష్ చేసి మళ్ళీ ప్రయత్నించండి.",
+  "auth.err.unavailable": "ఈ సేవ ప్రస్తుతం అందుబాటులో లేదు. కొంచెం తర్వాత ప్రయత్నించండి.",
+  "auth.err.network": "ధృవీకరణ సేవకు కనెక్ట్ కాలేకపోయాం. ఇంటర్నెట్ తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.",
+  "auth.err.missingPhone": "ఫోన్ నంబర్ అవసరం.",
+  "auth.err.cancelled": "Google సైన్-ఇన్ రద్దు చేయబడింది.",
+  "auth.err.linkedElsewhere": "ఈ ఫోన్ మరో ఖాతాకు ఇప్పటికే లింక్ అయింది. ఆ పద్ధతితో సైన్ ఇన్ చేయండి.",
+  "auth.err.alreadyLinked": "ఈ సైన్-ఇన్ పద్ధతి ఇప్పటికే లింక్ అయింది.",
+  "auth.err.generic": "సైన్-ఇన్ విఫలమైంది. మళ్ళీ ప్రయత్నించండి.",
+  "auth.err.resetCaptcha": "భద్రతా తనిఖీ రీసెట్ అయింది. మళ్ళీ OTP పంపండి నొక్కండి.",
+  "auth.err.noOtpInProgress": "OTP అభ్యర్థన లేదు. ముందు OTP పంపండి.",
 
   // Extended Tenant
   "tenant.kycVerified": "ధృవీకరించబడింది (****{last4})",

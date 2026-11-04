@@ -5,79 +5,57 @@ import {
   type ConfirmationResult,
 } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebase";
+import { AuthFlowError } from "@/auth/authFlowError";
+import type { MessageKey } from "@/i18n/messages/en-IN";
 
 const RECAPTCHA_CONTAINER_ID = "recaptcha-container";
 
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 let pendingConfirmation: ConfirmationResult | null = null;
 
-function mapFirebaseAuthError(code: string): string {
-  switch (code) {
-    case "auth/invalid-phone-number":
-      return "Invalid phone number. Use +91 format, e.g. +919876543210";
-    case "auth/too-many-requests":
-      return "Too many attempts. Please wait and try again.";
-    case "auth/invalid-verification-code":
-      return "Invalid OTP. Please check and try again.";
-    case "auth/code-expired":
-      return "OTP expired. Request a new code.";
-    case "auth/captcha-check-failed":
-      return "Security verification failed. Refresh and try again.";
-    case "auth/invalid-app-credential":
-      if (import.meta.env.DEV) {
-        console.warn("Dev hint: Open http://127.0.0.1:5173 (not localhost) and confirm Phone Auth plus 127.0.0.1 in Firebase Authorized domains.");
-      }
-      return "Phone verification could not be initialized. Please refresh and try again.";
-    case "auth/operation-not-allowed":
-      if (import.meta.env.DEV) {
-        console.warn("Dev hint: Phone sign-in is not enabled for this Firebase project.");
-      }
-      return "Phone sign-in is temporarily unavailable. Please try again later.";
-    case "auth/quota-exceeded":
-      if (import.meta.env.DEV) {
-        console.warn("Dev hint: SMS quota exceeded. Use a Firebase test phone number on Spark plan.");
-      }
-      return "SMS verification limit reached. Please try again later.";
-    case "auth/billing-not-enabled":
-      if (import.meta.env.DEV) {
-        console.warn("Dev hint: Real SMS requires a Blaze billing plan. Use a Firebase test phone number on Spark.");
-      }
-      return "SMS verification is temporarily unavailable. Please try again later.";
-    case "auth/network-request-failed":
-      if (import.meta.env.DEV) {
-        console.warn("Dev hint: Network error connecting to Firebase. Check authorized domains and network shields.");
-      }
-      return "Network error connecting to verification service. Please check your internet connection and try again.";
-    case "auth/missing-phone-number":
-      return "Phone number is required.";
-    case "auth/popup-closed-by-user":
-    case "auth/cancelled-popup-request":
-      return "Google sign-in was cancelled.";
-    case "auth/account-exists-with-different-credential":
-    case "auth/credential-already-in-use":
-      return "This phone is already linked to another account. Sign in with that method instead.";
-    case "auth/provider-already-linked":
-      return "This sign-in method is already linked to your account.";
-    default:
-      return `Authentication failed (${code}). Please try again.`;
+const FIREBASE_ERROR_KEYS: Record<string, MessageKey> = {
+  "auth/invalid-phone-number": "auth.err.invalidPhone",
+  "auth/too-many-requests": "auth.err.tooManyRequests",
+  "auth/invalid-verification-code": "auth.err.invalidCode",
+  "auth/code-expired": "auth.err.codeExpired",
+  "auth/captcha-check-failed": "auth.err.captchaFailed",
+  "auth/invalid-app-credential": "auth.err.initFailed",
+  "auth/operation-not-allowed": "auth.err.unavailable",
+  "auth/quota-exceeded": "auth.err.unavailable",
+  "auth/billing-not-enabled": "auth.err.unavailable",
+  "auth/network-request-failed": "auth.err.network",
+  "auth/missing-phone-number": "auth.err.missingPhone",
+  "auth/popup-closed-by-user": "auth.err.cancelled",
+  "auth/cancelled-popup-request": "auth.err.cancelled",
+  "auth/account-exists-with-different-credential": "auth.err.linkedElsewhere",
+  "auth/credential-already-in-use": "auth.err.linkedElsewhere",
+  "auth/provider-already-linked": "auth.err.alreadyLinked",
+};
+
+const ENGLISH_FALLBACK = "Sign-in failed. Please try again.";
+
+/** Maps any thrown value to an AuthFlowError whose key the UI translates. Never exposes raw Firebase codes. */
+export function toAuthFlowError(err: unknown): AuthFlowError {
+  if (err instanceof AuthFlowError) return err;
+  const code = (err as { code?: string })?.code;
+  if (code && FIREBASE_ERROR_KEYS[code]) {
+    return new AuthFlowError(FIREBASE_ERROR_KEYS[code], code);
   }
-}
-
-function logFirebaseAuthError(err: unknown): void {
-  const code = (err as { code?: string })?.code;
-  const message = err instanceof Error ? err.message : String(err);
-  console.error("Firebase auth error", { code, message, err });
-}
-
-export function getFirebaseErrorMessage(err: unknown): string {
-  const code = (err as { code?: string })?.code;
-  if (code) return mapFirebaseAuthError(code);
   const message = err instanceof Error ? err.message : "";
   if (/already been rendered/i.test(message)) {
-    return "Security check was reset. Please tap Send OTP again.";
+    return new AuthFlowError("auth.err.resetCaptcha", "recaptcha already rendered");
   }
-  if (message) return message;
-  return "Authentication failed. Please try again.";
+  return new AuthFlowError("auth.err.generic", code ?? ENGLISH_FALLBACK);
+}
+
+// Log the error code only. Full error objects can carry the phone number (PII).
+function logFirebaseAuthError(err: unknown): void {
+  const code = (err as { code?: string })?.code ?? "unknown";
+  if (import.meta.env.DEV) {
+    console.error("Firebase auth error", { code, message: err instanceof Error ? err.message : String(err) });
+  } else {
+    console.error("Firebase auth error", { code });
+  }
 }
 
 function replaceRecaptchaContainer(): HTMLElement {
@@ -139,13 +117,13 @@ export async function sendFirebasePhoneOtp(e164Phone: string): Promise<void> {
   } catch (err) {
     logFirebaseAuthError(err);
     resetFirebasePhoneAuth();
-    throw new Error(getFirebaseErrorMessage(err));
+    throw toAuthFlowError(err);
   }
 }
 
 export async function confirmFirebasePhoneOtp(otp: string): Promise<string> {
   if (!pendingConfirmation) {
-    throw new Error("No OTP request in progress. Send OTP first.");
+    throw new AuthFlowError("auth.err.noOtpInProgress", "No OTP request in progress. Send OTP first.");
   }
   try {
     const credential = await pendingConfirmation.confirm(otp);
@@ -154,7 +132,7 @@ export async function confirmFirebasePhoneOtp(otp: string): Promise<string> {
     return idToken;
   } catch (err) {
     logFirebaseAuthError(err);
-    throw new Error(getFirebaseErrorMessage(err));
+    throw toAuthFlowError(err);
   }
 }
 

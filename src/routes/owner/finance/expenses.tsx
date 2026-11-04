@@ -1,4 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Plus, X, Ban, CreditCard, AlertCircle } from "lucide-react";
+import {
+  useCreateExpense,
+  useExpenses,
+  useRecordExpensePayment,
+  useVoidExpense,
+} from "@/lib/useFinance";
+import { createIdempotencyKey } from "@/api/finance";
+import { createIdempotencyKey } from "@/api/finance";
 import { Plus, X, Ban, CreditCard, AlertCircle } from "lucide-react";
 import {
   useCreateExpense,
@@ -189,8 +198,8 @@ export const FinanceExpensesView: React.FC = () => {
         <PayExpenseModal
           expense={payFor}
           onClose={() => setPayFor(null)}
-          onSubmit={async (input) => {
-            await payMutation.mutateAsync({ expenseId: payFor.id, input });
+          onSubmit={async (input, idempotencyKey) => {
+            await payMutation.mutateAsync({ expenseId: payFor.id, input, idempotencyKey });
             setPayFor(null);
           }}
           isSubmitting={payMutation.isPending}
@@ -250,18 +259,22 @@ function AddExpenseModal({
   error,
 }: {
   onClose: () => void;
-  onSubmit: (input: {
-    category_code: string;
-    vendor_name?: string;
-    description: string;
-    amount_paise: number;
-    emergency?: boolean;
-    is_recurring?: boolean;
-    occurred_at?: string;
-  }) => Promise<void>;
+  onSubmit: (
+    input: {
+      category_code: string;
+      vendor_name?: string;
+      description: string;
+      amount_paise: number;
+      emergency?: boolean;
+      is_recurring?: boolean;
+      occurred_at?: string;
+    },
+    idempotencyKey?: string
+  ) => Promise<void>;
   isSubmitting: boolean;
   error: Error | null;
 }) {
+  const idempotencyKeyRef = useRef<string>(createIdempotencyKey());
   const [categoryCode, setCategoryCode] = useState("vendor");
   const [vendorName, setVendorName] = useState("");
   const [description, setDescription] = useState("");
@@ -276,15 +289,18 @@ function AddExpenseModal({
         className="space-y-4"
         onSubmit={async (ev) => {
           ev.preventDefault();
-          await onSubmit({
-            category_code: categoryCode,
-            vendor_name: vendorName.trim() || undefined,
-            description: description.trim(),
-            amount_paise: rupeesToPaise(amountRupees),
-            emergency,
-            is_recurring: isRecurring,
-            occurred_at: new Date(occurredAt).toISOString(),
-          });
+          await onSubmit(
+            {
+              category_code: categoryCode,
+              vendor_name: vendorName.trim() || undefined,
+              description: description.trim(),
+              amount_paise: rupeesToPaise(amountRupees),
+              emergency,
+              is_recurring: isRecurring,
+              occurred_at: new Date(occurredAt).toISOString(),
+            },
+            idempotencyKeyRef.current
+          );
         }}
       >
         <div className="space-y-1.5">
@@ -405,10 +421,14 @@ function PayExpenseModal({
 }: {
   expense: Expense;
   onClose: () => void;
-  onSubmit: (input: { amount_paise: number; method: string }) => Promise<void>;
+  onSubmit: (
+    input: { amount_paise: number; method: string },
+    idempotencyKey?: string
+  ) => Promise<void>;
   isSubmitting: boolean;
   error: Error | null;
 }) {
+  const idempotencyKeyRef = useRef<string>(createIdempotencyKey());
   const { t } = useLocale();
   const [amountRupees, setAmountRupees] = useState(String(expense.amount_paise / 100));
   const [method, setMethod] = useState("bank_transfer");
@@ -419,10 +439,13 @@ function PayExpenseModal({
         className="space-y-4"
         onSubmit={async (ev) => {
           ev.preventDefault();
-          await onSubmit({
-            amount_paise: rupeesToPaise(amountRupees),
-            method,
-          });
+          await onSubmit(
+            {
+              amount_paise: rupeesToPaise(amountRupees),
+              method,
+            },
+            idempotencyKeyRef.current
+          );
         }}
       >
         <div className="space-y-1.5">

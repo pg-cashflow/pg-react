@@ -3,12 +3,12 @@ function normalizeApiBase(raw: string): string {
   if (trimmed === "http://localhost:8080" || trimmed === "http://127.0.0.1:8080") {
     return `${trimmed}/api`;
   }
-  return trimmed || "http://localhost:8080/api";
+  return trimmed || "/api";
 }
 
-/** pg-go data routes live under /api. Production embed uses `/api`. */
+/** pg-go data routes live under /api. Production embed and dev proxy use `/api`. */
 export const API_BASE = normalizeApiBase(
-  import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? "/api" : "http://localhost:8080/api")
+  import.meta.env.VITE_API_BASE_URL || "/api"
 );
 
 /** Must match pg-go CASHFREE_ENV (sandbox | production). */

@@ -1,6 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebase";
-import { getFirebaseErrorMessage } from "@/auth/firebasePhone";
+import { toAuthFlowError } from "@/auth/firebasePhone";
 
 export async function signInWithGoogle(): Promise<string> {
   try {
@@ -9,6 +9,6 @@ export async function signInWithGoogle(): Promise<string> {
     const credential = await signInWithPopup(firebaseAuth, provider);
     return await credential.user.getIdToken(true);
   } catch (err) {
-    throw new Error(getFirebaseErrorMessage(err));
+    throw toAuthFlowError(err);
   }
 }

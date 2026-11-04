@@ -30,6 +30,20 @@ const loadedMessages: Partial<Record<SupportedLocale, Record<string, string>>> =
   "en-IN": enIN,
 };
 
+// Pre-load stored locale chunk immediately on module evaluation to minimize render wait
+const initialStoredLocale = (() => {
+  const cached = getStoredLocale();
+  return isSupportedLocale(cached) ? cached : DEFAULT_LOCALE;
+})();
+
+if (initialStoredLocale !== DEFAULT_LOCALE && localeLoaders[initialStoredLocale]) {
+  localeLoaders[initialStoredLocale]()
+    .then((msgs) => {
+      loadedMessages[initialStoredLocale] = msgs;
+    })
+    .catch(() => {});
+}
+
 interface LocaleContextValue {
   locale: SupportedLocale;
   setLocale: (newLocale: SupportedLocale, persistServer?: boolean) => Promise<boolean>;
@@ -86,6 +100,7 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
       }
 
       if (seq !== requestSeqRef.current) return false;
+      setLocaleReady(true);
       setLocaleState(newLocale);
       setStoredLocale(newLocale);
 
@@ -154,6 +169,7 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     []
   );
 
+  const [localeReady, setLocaleReady] = useState<boolean>(() => Boolean(loadedMessages[locale]));
   const [messages, setMessages] = useState<Record<string, string>>(
     () => loadedMessages[locale] || enIN
   );
@@ -161,6 +177,7 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   useEffect(() => {
     if (loadedMessages[locale]) {
       setMessages(loadedMessages[locale]!);
+      setLocaleReady(true);
       return;
     }
     let isMounted = true;
@@ -170,12 +187,14 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
         loadedMessages[locale] = msgs;
         if (isMounted) {
           setMessages(msgs);
+          setLocaleReady(true);
         }
       })
       .catch((err) => {
         console.warn(`[i18n] Failed to load messages for ${locale}:`, err);
         if (isMounted) {
           setMessages(enIN);
+          setLocaleReady(true);
         }
       });
 
@@ -188,6 +207,10 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  if (!localeReady) {
+    return null;
+  }
 
   return (
     <IntlProvider
