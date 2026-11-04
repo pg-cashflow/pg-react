@@ -320,7 +320,7 @@ export const enIN = {
   "kyc.card.browse": "Browse",
   "kyc.card.change": "Change",
   "kyc.card.submitReviewBtn": "Submit Document for Review",
-  "kyc.card.consentText": "I consent to the PG collecting and storing my identity verification details for residency compliance under the DPDP Act.",
+  "kyc.card.consentText": "I agree to my identity details being verified and stored for PG occupancy records in compliance with the DPDP Act.",
   "kyc.card.sandboxFallback": "Aadhaar OTP service is unavailable or in sandbox mode. You can instantly proceed by uploading your ID document instead.",
   "kyc.card.uploadInsteadBtn": "Upload ID Document Instead →",
   "kyc.card.revokeTitle": "Revoke KYC Consent",

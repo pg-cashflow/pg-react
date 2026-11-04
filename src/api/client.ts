@@ -327,6 +327,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     });
 
     const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth" || path.startsWith("/api/auth/") || path === "/api/auth";
+    const method = (options.method || "GET").toUpperCase();
+    const isSafeMethod = method === "GET" || method === "HEAD" || method === "OPTIONS";
+
     if (res.status === 401 && !isAuthEndpoint) {
       const originalToken = getAccessToken();
       const hasPriorSession = Boolean(originalToken || getStoredUser());
@@ -334,7 +337,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
         throw new ApiError(401, "Session expired or unauthorized");
       }
       const newToken = await requestTokenRefresh(originalToken);
-      if (newToken) {
+      // Automatically replay safe, idempotent methods only.
+      // Non-idempotent methods (POST, PATCH, DELETE) must not be silently replayed.
+      if (newToken && isSafeMethod) {
         const retryRes = await timedFetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
@@ -373,10 +378,13 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
     });
 
     const isAuthEndpoint = path.startsWith("/auth/") || path === "/auth" || path.startsWith("/api/auth/") || path === "/api/auth";
+    const method = (options.method || "GET").toUpperCase();
+    const isSafeMethod = method === "GET" || method === "HEAD" || method === "OPTIONS";
+
     if (res.status === 401 && !isAuthEndpoint) {
       const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
-      if (newToken) {
+      if (newToken && isSafeMethod) {
         const retryRes = await timedFetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
@@ -590,17 +598,12 @@ export async function apiUpload<T>(
   if (initial.status === 401 && !isAuthEndpoint) {
     const originalToken = getAccessToken();
     const hasPriorSession = Boolean(originalToken || getStoredUser());
-    if (!hasPriorSession) {
-      throw new ApiError(401, "Session expired or unauthorized");
+    if (hasPriorSession) {
+      // Refresh token in background so subsequent user actions succeed,
+      // but do not automatically replay mutating multipart uploads without caller intent.
+      void requestTokenRefresh(originalToken);
     }
-    const newToken = await requestTokenRefresh(originalToken);
-    if (newToken) {
-      const retryResult = await sendXhr(buildHeaders(options.headers));
-      return parseXhr(retryResult.status, retryResult.text, {
-        allowSessionClearOn401: false,
-      });
-    }
-    throw new ApiError(401, "Session expired or unauthorized");
+    throw new ApiError(401, "Session expired during upload. Please retry the upload.");
   }
 
   return parseXhr(initial.status, initial.text, {
