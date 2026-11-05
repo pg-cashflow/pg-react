@@ -7,12 +7,15 @@ if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
   try {
     authSyncChannel = new BroadcastChannel("pg_token_sync");
     authSyncChannel.onmessage = (event) => {
-      if (event.data?.type === "TOKEN_UPDATED") {
-        const token = event.data.token ?? null;
-        if (token !== accessToken) {
-          accessToken = token;
+      if (event.data?.type === "SESSION_ENDED") {
+        if (accessToken !== null) {
+          accessToken = null;
           accessTokenRevision++;
-          notifyListeners(token);
+          notifyListeners(null);
+        }
+      } else if (event.data?.type === "SESSION_ACTIVE" || event.data?.type === "REFRESH_REQUIRED") {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("pg:session_changed"));
         }
       }
     };
@@ -47,7 +50,11 @@ export function setAccessToken(token: string | null, broadcast = true): void {
   notifyListeners(token);
   if (broadcast && authSyncChannel) {
     try {
-      authSyncChannel.postMessage({ type: "TOKEN_UPDATED", token });
+      if (token) {
+        authSyncChannel.postMessage({ type: "SESSION_ACTIVE" });
+      } else {
+        authSyncChannel.postMessage({ type: "SESSION_ENDED" });
+      }
     } catch {
       // Ignore broadcast failures
     }

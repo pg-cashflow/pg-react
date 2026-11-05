@@ -3,7 +3,7 @@ import { getStoredUser } from "@/auth/storage";
 
 export const PASSBOOK_STORAGE_KEY = "pg_passbook_cache";
 
-const PASSBOOK_QUERY_PREFIXES = new Set(["dues", "payments", "me", "points"]);
+const PASSBOOK_QUERY_PREFIXES = new Set(["dues", "payments", "points"]);
 
 /**
  * Checks if a query key belongs to the tenant passbook domain.

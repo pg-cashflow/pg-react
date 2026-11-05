@@ -100,7 +100,6 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
       }
 
       if (seq !== requestSeqRef.current) return false;
-      setLocaleReady(true);
       setLocaleState(newLocale);
       setStoredLocale(newLocale);
 
@@ -169,7 +168,6 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     []
   );
 
-  const [localeReady, setLocaleReady] = useState<boolean>(() => Boolean(loadedMessages[locale]));
   const [messages, setMessages] = useState<Record<string, string>>(
     () => loadedMessages[locale] || enIN
   );
@@ -177,7 +175,6 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   useEffect(() => {
     if (loadedMessages[locale]) {
       setMessages(loadedMessages[locale]!);
-      setLocaleReady(true);
       return;
     }
     let isMounted = true;
@@ -187,15 +184,13 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
         loadedMessages[locale] = msgs;
         if (isMounted) {
           setMessages(msgs);
-          setLocaleReady(true);
-        }
+            }
       })
       .catch((err) => {
         console.warn(`[i18n] Failed to load messages for ${locale}:`, err);
         if (isMounted) {
           setMessages(enIN);
-          setLocaleReady(true);
-        }
+            }
       });
 
     return () => {
@@ -208,9 +203,7 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     document.documentElement.lang = locale;
   }, [locale]);
 
-  if (!localeReady) {
-    return null;
-  }
+
 
   return (
     <IntlProvider
