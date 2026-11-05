@@ -16,7 +16,9 @@ import { homeForRole } from "@/auth/roles";
 // Helper to catch chunk loading errors after new deployments and refresh once
 if (typeof window !== "undefined") {
   window.addEventListener("load", () => {
-    sessionStorage.removeItem("pg_chunk_reload");
+    try {
+      sessionStorage.removeItem("pg_chunk_reload");
+    } catch {}
   });
 }
 
@@ -24,7 +26,9 @@ function safeImport<T>(loader: () => Promise<T>): Promise<T> {
   return loader()
     .then((result) => {
       if (typeof window !== "undefined") {
-        sessionStorage.removeItem("pg_chunk_reload");
+        try {
+          sessionStorage.removeItem("pg_chunk_reload");
+        } catch {}
       }
       return result;
     })
@@ -35,8 +39,12 @@ function safeImport<T>(loader: () => Promise<T>): Promise<T> {
         /failed to fetch dynamically imported module/i.test(error?.message || "");
       if (isChunkLoadFailed && typeof window !== "undefined") {
         const reloadKey = "pg_chunk_reload";
-        if (!sessionStorage.getItem(reloadKey)) {
-          sessionStorage.setItem(reloadKey, "1");
+        try {
+          if (!sessionStorage.getItem(reloadKey)) {
+            sessionStorage.setItem(reloadKey, "1");
+            window.location.reload();
+          }
+        } catch {
           window.location.reload();
         }
       }

@@ -53,7 +53,9 @@ export const OwnerRemindersView: React.FC = () => {
     try {
       const token = await createDueToken(dueId);
       const next = { ...sent, [dueId]: new Date().toISOString() };
-      localStorage.setItem(SENT_KEY, JSON.stringify(next));
+      try {
+        localStorage.setItem(SENT_KEY, JSON.stringify(next));
+      } catch {}
       setSent(next);
       if (token.wa_me) window.open(token.wa_me, "_blank");
       else if (token.url) window.open(token.url, "_blank");

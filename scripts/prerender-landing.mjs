@@ -329,7 +329,7 @@ writeStaticPage("privacy", "Privacy Policy", "How PG Cashflow handles, protects,
     heading: "2. Data We Collect & Masking Standards",
     paragraphs: [
       "We collect contact identifiers (mobile number for OTP authentication), payment transaction references, and identity proof processed through UIDAI-authorized DigiLocker / Aadhaar OTP fast-path.",
-      "In strict compliance with UIDAI regulations and the Aadhaar Act 2016, raw unmasked 12-digit Aadhaar numbers and biometric data are never stored. Only the masked UID (last 4 digits) is retained."
+      "In strict compliance with UIDAI regulations and the Digital Personal Data Protection (DPDP) Act, 2023, raw 12-digit Aadhaar numbers are never stored in cleartext. Only masked identifiers (last 4 digits) are displayed. Verification records and uploaded documents are encrypted at rest using AES-256-GCM and retained strictly for the duration of tenancy under residential police verification obligations, with irreversible erasure upon verified consent revocation or account closure."
     ]
   },
   {
