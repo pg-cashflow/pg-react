@@ -126,7 +126,16 @@ export const RefundModal: React.FC<RefundModalProps> = ({
     } catch (err: unknown) {
       const apiErr = err as { message?: string; status?: number; code?: string };
       const msg = formatApiError(err, t);
-      if (apiErr.status === 401 && (msg.toLowerCase().includes("step-up") || msg.toLowerCase().includes("otp"))) {
+      const isStepUp =
+        apiErr.status === 401 &&
+        (apiErr.code === "auth.stepUpRequired" ||
+          apiErr.code === "auth.invalidOtp" ||
+          apiErr.code === "auth.otpExpired" ||
+          apiErr.code === "auth.otpLocked" ||
+          msg.toLowerCase().includes("step-up") ||
+          msg.toLowerCase().includes("otp") ||
+          Boolean(apiErr.message && /step-up|otp|approval code/i.test(apiErr.message)));
+      if (isStepUp) {
         setNeedsStepUp(true);
         setErrorMessage(msg);
       } else {

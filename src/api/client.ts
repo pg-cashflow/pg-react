@@ -127,13 +127,68 @@ export async function requestTokenRefresh(failedToken: string | null): Promise<s
   return activeRefreshPromise;
 }
 
+export function isStepUpAuthChallenge(status: number, code?: string, message?: string): boolean {
+  if (status !== 401) return false;
+  const c = (code || "").toLowerCase();
+  const m = (message || "").toLowerCase();
+  return (
+    c.startsWith("auth.otp") ||
+    c === "auth.invalidotp" ||
+    c === "auth.otpexpired" ||
+    c === "auth.otplocked" ||
+    c === "auth.stepuprequired" ||
+    m.includes("step-up") ||
+    m.includes("approval code") ||
+    m.includes("payout approval") ||
+    m.includes("valid otp")
+  );
+}
+
+function getIdempotencyHeader(headers?: HeadersInit): string | undefined {
+  if (!headers) return undefined;
+  if (typeof Headers !== "undefined" && headers instanceof Headers) {
+    return headers.get("idempotency-key") || headers.get("x-idempotency-key") || undefined;
+  }
+  if (Array.isArray(headers)) {
+    for (const [key, value] of headers) {
+      const lower = key.toLowerCase();
+      if (lower === "idempotency-key" || lower === "x-idempotency-key") return value;
+    }
+    return undefined;
+  }
+  const obj = headers as Record<string, string>;
+  for (const [key, value] of Object.entries(obj)) {
+    const lower = key.toLowerCase();
+    if (lower === "idempotency-key" || lower === "x-idempotency-key") return value;
+  }
+  return undefined;
+}
+
 async function handleResponse<T>(
   res: Response,
   parse: () => Promise<T>,
   opts: { allowSessionClearOn401?: boolean } = { allowSessionClearOn401: true }
 ): Promise<T> {
   if (res.status === 401) {
-    if (opts.allowSessionClearOn401 !== false) {
+    let errorMsg = "Session expired or unauthorized";
+    let errorCode: string | undefined;
+    let details: Record<string, unknown> | undefined;
+    try {
+      const data = await res.json();
+      errorMsg = data.message || data.error || errorMsg;
+      if (typeof data.code === "string") {
+        errorCode = data.code;
+      }
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        details = data as Record<string, unknown>;
+      }
+    } catch {
+      // ignore
+    }
+
+    const isStepUp = isStepUpAuthChallenge(401, errorCode, errorMsg);
+
+    if (opts.allowSessionClearOn401 !== false && !isStepUp) {
       const hadPriorSession = Boolean(getAccessToken() || getStoredUser());
       setAccessToken(null);
       setStoredUser(null);
@@ -144,19 +199,8 @@ async function handleResponse<T>(
         );
       }
     }
-    let errorMsg = "Session expired or unauthorized";
-    let errorCode: string | undefined;
-    try {
-      const data = await res.json();
-      errorMsg = data.message || data.error || errorMsg;
-      if (typeof data.code === "string") {
-        errorCode = data.code;
-      }
-    } catch {
-      // ignore
-    }
-    const mapped = mapApiErrorMessage(401, errorMsg);
-    throw new ApiError(401, mapped, errorCode);
+    const mapped = isStepUp ? errorMsg : mapApiErrorMessage(401, errorMsg);
+    throw new ApiError(401, mapped, errorCode, details);
   }
 
   if (!res.ok) {
@@ -331,15 +375,38 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     const isSafeMethod = method === "GET" || method === "HEAD" || method === "OPTIONS";
 
     if (res.status === 401 && !isAuthEndpoint) {
+      const clone = typeof res.clone === "function" ? res.clone() : null;
+      let isStepUp = false;
+      let errorMsg = "";
+      let errorCode: string | undefined;
+      let details: Record<string, unknown> | undefined;
+      if (clone) {
+        try {
+          const data = await clone.json();
+          errorMsg = data.message || data.error || "";
+          if (typeof data.code === "string") errorCode = data.code;
+          if (data && typeof data === "object" && !Array.isArray(data)) details = data as Record<string, unknown>;
+          if (isStepUpAuthChallenge(401, errorCode, errorMsg)) {
+            isStepUp = true;
+          }
+        } catch {
+          // not json
+        }
+      }
+
+      if (isStepUp) {
+        throw new ApiError(401, errorMsg || "Step-up authorization required", errorCode, details);
+      }
+
       const originalToken = getAccessToken();
       const hasPriorSession = Boolean(originalToken || getStoredUser());
       if (!hasPriorSession) {
         throw new ApiError(401, "Session expired or unauthorized");
       }
       const newToken = await requestTokenRefresh(originalToken);
-      // Automatically replay safe, idempotent methods only.
-      // Non-idempotent methods (POST, PATCH, DELETE) must not be silently replayed.
-      if (newToken && isSafeMethod) {
+      const canReplay = isSafeMethod || Boolean(getIdempotencyHeader(options.headers));
+
+      if (newToken && canReplay) {
         const retryRes = await timedFetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
@@ -354,6 +421,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
       }
       if (lastRefreshError && isNetworkFailure(lastRefreshError)) {
         throw new ApiError(0, networkFailureMessage());
+      }
+      if (newToken && !canReplay) {
+        throw new ApiError(401, "Authorization refreshed. Please retry submitting.", "auth.replayRequiresConfirmation");
       }
       throw new ApiError(401, "Session expired or unauthorized");
     }
@@ -382,9 +452,33 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
     const isSafeMethod = method === "GET" || method === "HEAD" || method === "OPTIONS";
 
     if (res.status === 401 && !isAuthEndpoint) {
+      const clone = typeof res.clone === "function" ? res.clone() : null;
+      let isStepUp = false;
+      let errorMsg = "";
+      let errorCode: string | undefined;
+      let details: Record<string, unknown> | undefined;
+      if (clone) {
+        try {
+          const data = await clone.json();
+          errorMsg = data.message || data.error || "";
+          if (typeof data.code === "string") errorCode = data.code;
+          if (data && typeof data === "object" && !Array.isArray(data)) details = data as Record<string, unknown>;
+          if (isStepUpAuthChallenge(401, errorCode, errorMsg)) {
+            isStepUp = true;
+          }
+        } catch {
+          // not json
+        }
+      }
+
+      if (isStepUp) {
+        throw new ApiError(401, errorMsg || "Step-up authorization required", errorCode, details);
+      }
+
       const originalToken = getAccessToken();
       const newToken = await requestTokenRefresh(originalToken);
-      if (newToken && isSafeMethod) {
+      const canReplay = isSafeMethod || Boolean(getIdempotencyHeader(options.headers));
+      if (newToken && canReplay) {
         const retryRes = await timedFetch(url, {
           ...options,
           credentials: options.credentials ?? "include",
@@ -399,6 +493,9 @@ export async function apiFetchBlob(path: string, options: RequestInit = {}): Pro
       }
       if (lastRefreshError && isNetworkFailure(lastRefreshError)) {
         throw new ApiError(0, networkFailureMessage());
+      }
+      if (newToken && !canReplay) {
+        throw new ApiError(401, "Authorization refreshed. Please retry submitting.", "auth.replayRequiresConfirmation");
       }
       throw new ApiError(401, "Session expired or unauthorized");
     }
@@ -521,7 +618,23 @@ export async function apiUpload<T>(
     opts: { allowSessionClearOn401?: boolean } = { allowSessionClearOn401: true }
   ): T => {
     if (status === 401) {
-      if (opts.allowSessionClearOn401 !== false) {
+      let errorMsg = "Session expired or unauthorized";
+      let errorCode: string | undefined;
+      let details: Record<string, unknown> | undefined;
+      try {
+        const data = JSON.parse(responseText);
+        errorMsg = data.message || data.error || errorMsg;
+        if (typeof data.code === "string") errorCode = data.code;
+        if (data && typeof data === "object" && !Array.isArray(data)) {
+          details = data as Record<string, unknown>;
+        }
+      } catch {
+        // ignore
+      }
+
+      const isStepUp = isStepUpAuthChallenge(status, errorCode, errorMsg);
+
+      if (opts.allowSessionClearOn401 !== false && !isStepUp) {
         const hadPriorSession = Boolean(getAccessToken() || getStoredUser());
         setAccessToken(null);
         setStoredUser(null);
@@ -532,17 +645,8 @@ export async function apiUpload<T>(
           );
         }
       }
-      let errorMsg = "Session expired or unauthorized";
-      let errorCode: string | undefined;
-      try {
-        const data = JSON.parse(responseText);
-        errorMsg = data.message || data.error || errorMsg;
-        if (typeof data.code === "string") errorCode = data.code;
-      } catch {
-        // ignore
-      }
-      const mapped = mapApiErrorMessage(401, errorMsg);
-      throw new ApiError(401, mapped, errorCode);
+      const mapped = isStepUp ? errorMsg : mapApiErrorMessage(401, errorMsg);
+      throw new ApiError(401, mapped, errorCode, details);
     }
 
     if (status < 200 || status >= 300) {

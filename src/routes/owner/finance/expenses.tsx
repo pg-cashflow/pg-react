@@ -7,14 +7,6 @@ import {
   useVoidExpense,
 } from "@/lib/useFinance";
 import { createIdempotencyKey } from "@/api/finance";
-import { createIdempotencyKey } from "@/api/finance";
-import { Plus, X, Ban, CreditCard, AlertCircle } from "lucide-react";
-import {
-  useCreateExpense,
-  useExpenses,
-  useRecordExpensePayment,
-  useVoidExpense,
-} from "@/lib/useFinance";
 import { QueryState } from "@/components/shared/QueryState";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { FinanceNav } from "@/components/owner/FinanceNav";

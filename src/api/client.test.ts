@@ -273,7 +273,96 @@ describe("api/client proactive refresh", () => {
 
     window.removeEventListener("pg:unauthorized", unauthorizedSpy);
   });
+
+  it("apiFetch handles step-up 401 without clearing session or triggering refresh", async () => {
+    setAccessToken("owner-token");
+    setStoredUser({ id: "owner-1", role: "owner", phone: "+919000000000" });
+    const unauthorizedSpy = vi.fn();
+    window.addEventListener("pg:unauthorized", unauthorizedSpy);
+
+    const fetchMock = vi.fn().mockImplementation((url) => {
+      if (url.includes("/auth/refresh")) {
+        throw new Error("Refresh should not be called on step-up challenge");
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 401,
+        clone: () => ({
+          json: async () => ({
+            error: "step-up authentication required: valid otp must be provided",
+            code: "auth.stepUpRequired",
+          }),
+        }),
+        json: async () => ({
+          error: "step-up authentication required: valid otp must be provided",
+          code: "auth.stepUpRequired",
+        }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      apiFetch("/owner/refunds", {
+        method: "POST",
+        body: JSON.stringify({ amount_paise: 5000 }),
+      })
+    ).rejects.toMatchObject({
+      status: 401,
+      code: "auth.stepUpRequired",
+      message: "step-up authentication required: valid otp must be provided",
+    });
+
+    expect(unauthorizedSpy).not.toHaveBeenCalled();
+    expect(getAccessToken()).toBe("owner-token");
+    expect(getStoredUser()).not.toBeNull();
+
+    window.removeEventListener("pg:unauthorized", unauthorizedSpy);
+  });
+
+  it("apiFetch replays idempotent writes after token refresh", async () => {
+    setAccessToken("expired-token");
+    setStoredUser({ id: "owner-1", role: "owner", phone: "+919000000000" });
+
+    let callCount = 0;
+    const fetchMock = vi.fn().mockImplementation((url, init) => {
+      if (url.includes("/auth/refresh")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ token: "new-token-after-refresh", user: { id: "owner-1", role: "owner" } }),
+        });
+      }
+      callCount++;
+      if (callCount === 1) {
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          clone: () => ({ json: async () => ({ error: "Token expired", code: "auth.invalidToken" }) }),
+          json: async () => ({ error: "Token expired", code: "auth.invalidToken" }),
+        });
+      }
+      const auth = init && init.headers ? init.headers["Authorization"] : "";
+      expect(auth).toBe("Bearer new-token-after-refresh");
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true, refund_id: "ref-123" }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await apiFetch("/owner/refunds", {
+      method: "POST",
+      headers: { "Idempotency-Key": "idemp-key-xyz" },
+      body: JSON.stringify({ amount_paise: 1000 }),
+    });
+
+    expect(result).toEqual({ success: true, refund_id: "ref-123" });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(getAccessToken()).toBe("new-token-after-refresh");
+  });
 });
+
 
 describe("api/client non-JSON error bodies", () => {
   beforeEach(() => {
