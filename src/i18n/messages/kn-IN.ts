@@ -575,9 +575,9 @@ export const knIN: Record<MessageKey, string> = {
   "owner.payouts.thType": "ಮಾದರಿ",
   "owner.payouts.thPaymentDetails": "ಪಾವತಿ ವಿವರಗಳು",
   "owner.payouts.thVerification": "ಪರಿಶೀಲನೆ",
-  "owner.payouts.verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+  "owner.payouts.verified": "ಮಾಲೀಕರಿಂದ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
   "owner.payouts.pendingVerification": "ಪರಿಶೀಲನೆ ಬಾಕಿ ಇದೆ",
-  "owner.payouts.verifyPayeeAction": "ಸ್ವೀಕೃತಿದಾರರನ್ನು ಪರಿಶೀಲಿಸಿ",
+  "owner.payouts.verifyPayeeAction": "ಪರಿಶೀಲಿಸಿ",
   "owner.payouts.noPaymentInfo": "ಯಾವುದೇ ಪಾವತಿ ವಿವರಗಳಿಲ್ಲ",
 
   // PayPanel extended

@@ -574,9 +574,9 @@ export const taIN: Record<MessageKey, string> = {
   "owner.payouts.thType": "வகை",
   "owner.payouts.thPaymentDetails": "கட்டண விவரங்கள்",
   "owner.payouts.thVerification": "சரிபார்ப்பு",
-  "owner.payouts.verified": "சரிபார்க்கப்பட்டது",
+  "owner.payouts.verified": "உரிமையாளர் சரிபார்த்தார்",
   "owner.payouts.pendingVerification": "சரிபார்ப்பு நிலுவையில் உள்ளது",
-  "owner.payouts.verifyPayeeAction": "பெறுநரைச் சரிபார்",
+  "owner.payouts.verifyPayeeAction": "சரிபார்க்கவும்",
   "owner.payouts.noPaymentInfo": "கட்டணத் தகவல் இல்லை",
 
   // PayPanel extended

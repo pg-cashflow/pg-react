@@ -571,9 +571,9 @@ export const enIN = {
   "owner.payouts.thType": "Type",
   "owner.payouts.thPaymentDetails": "Payment Details",
   "owner.payouts.thVerification": "Verification",
-  "owner.payouts.verified": "Verified",
+  "owner.payouts.verified": "Owner Attested",
   "owner.payouts.pendingVerification": "Pending Verification",
-  "owner.payouts.verifyPayeeAction": "Verify Payee",
+  "owner.payouts.verifyPayeeAction": "Attest Payee",
   "owner.payouts.noPaymentInfo": "No payment info",
 
   // PayPanel extended

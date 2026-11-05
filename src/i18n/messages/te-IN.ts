@@ -574,9 +574,9 @@ export const teIN: Record<MessageKey, string> = {
   "owner.payouts.thType": "రకం",
   "owner.payouts.thPaymentDetails": "చెల్లింపు వివరాలు",
   "owner.payouts.thVerification": "ధృవీకరణ",
-  "owner.payouts.verified": "ధృవీకరించబడింది",
+  "owner.payouts.verified": "యజమాని ధృవీకరించారు",
   "owner.payouts.pendingVerification": "ధృవీకరణ పెండింగ్‌లో ఉంది",
-  "owner.payouts.verifyPayeeAction": "గ్రహీతను ధృవీకరించండి",
+  "owner.payouts.verifyPayeeAction": "ధృవీకరించండి",
   "owner.payouts.noPaymentInfo": "చెల్లింపు సమాచారం లేదు",
 
   // PayPanel extended
