@@ -79,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sessionStatusRef = useRef<SessionStatus>(sessionStatus);
   sessionStatusRef.current = sessionStatus;
   const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryAttemptRef = useRef<number>(0);
 
   const clearRetryTimer = useCallback(() => {
     if (retryTimeoutRef.current) {
@@ -90,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const endSession = useCallback((callServerLogout = false) => {
     stopProactiveRefresh();
     clearRetryTimer();
+    retryAttemptRef.current = 0;
     queryClient.clear();
     clearPassbookCache();
     clearServiceWorkerCaches().catch(() => {});
@@ -131,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applySession = useCallback((rawToken: string, sessionUser: User, payload?: AuthTokenPayload) => {
     clearRetryTimer();
+    retryAttemptRef.current = 0;
     if (getStoredUser()?.id !== sessionUser.id) {
       queryClient.clear();
       clearPassbookCache();
@@ -212,9 +215,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSessionStatus("degraded");
             setIsLoading(false);
             clearRetryTimer();
+            const attempt = retryAttemptRef.current;
+            retryAttemptRef.current += 1;
+            const delay = Math.min(30000, 2000 * Math.pow(1.5, attempt)) + Math.random() * 500;
             retryTimeoutRef.current = setTimeout(() => {
               void evaluateStored();
-            }, 10000);
+            }, delay);
             return;
           }
         }

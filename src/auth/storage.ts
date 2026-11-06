@@ -60,7 +60,14 @@ export const setStoredUser = (user: User | null): void => {
       sessionStorage.removeItem(USER_KEY);
       return;
     }
-    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    const minimalUser: User = {
+      id: user.id,
+      role: user.role,
+      phone: user.phone,
+      property_id: user.property_id,
+      tenant_id: user.tenant_id,
+    };
+    sessionStorage.setItem(USER_KEY, JSON.stringify(minimalUser));
   } catch {
     // ignore
   }
