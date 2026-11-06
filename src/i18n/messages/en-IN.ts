@@ -5,6 +5,8 @@ export const enIN = {
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.retry": "Retry",
+  "common.sessionUnstable": "Connection is unstable",
+  "common.sessionDegradedDesc": "Your session is being restored. Some information may be out of date. Changes are not queued while offline; retry after your connection returns.",
   "common.loading": "Loading...",
   "common.error": "An error occurred",
   "common.success": "Success",

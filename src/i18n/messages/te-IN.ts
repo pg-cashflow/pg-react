@@ -7,6 +7,8 @@ export const teIN: Record<MessageKey, string> = {
   "common.save": "భద్రపరచు",
   "common.cancel": "రద్దు చేయి",
   "common.retry": "మళ్ళీ ప్రయత్నించు",
+  "common.sessionUnstable": "కనెక్షన్ స్థిరంగా లేదు",
+  "common.sessionDegradedDesc": "మీ సెషన్‌ను మళ్లీ పునరుద్ధరిస్తున్నాం. కొన్ని సమాచారం పాతదై ఉండవచ్చు. ఆఫ్‌లైన్‌లో మార్పులు నిల్వ చేయబడవు; కనెక్షన్ తిరిగి వచ్చిన తర్వాత మళ్లీ ప్రయత్నించండి.",
   "common.loading": "లోడ్ అవుతోంది...",
   "common.error": "సమస్య ఎదురైంది",
   "common.success": "విజయవంతమైంది",

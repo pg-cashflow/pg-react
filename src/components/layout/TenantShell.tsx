@@ -5,6 +5,7 @@ import { TenantBottomNav } from "./TenantBottomNav";
 import { TopBar } from "./TopBar";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { AppLoadingScreen } from "./AppLoadingScreen";
+import { SessionHealthBanner } from "@/components/common/SessionHealthBanner";
 import { useLocale } from "@/i18n";
 import type { MessageKey } from "@/i18n";
 
@@ -54,6 +55,7 @@ export const TenantShell: React.FC = () => {
           searchRole="tenant"
         />
 
+        <SessionHealthBanner />
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
           <ErrorBoundary fallbackTitle={t("common.errorLoadingPage", { page: pageTitle })}>
             <React.Suspense fallback={<AppLoadingScreen />}>

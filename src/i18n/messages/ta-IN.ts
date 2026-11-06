@@ -7,6 +7,8 @@ export const taIN: Record<MessageKey, string> = {
   "common.save": "சேமி",
   "common.cancel": "ரத்து செய்",
   "common.retry": "மீண்டும் முயற்சி செய்",
+  "common.sessionUnstable": "இணைப்பு நிலையாக இல்லை",
+  "common.sessionDegradedDesc": "உங்கள் அமர்வு மீட்டமைக்கப்படுகிறது. சில தகவல்கள் புதுப்பிக்கப்படாமல் இருக்கலாம். இணையம் இல்லாதபோது மாற்றங்கள் வரிசைப்படுத்தப்படாது; இணைப்பு திரும்பியதும் மீண்டும் முயற்சிக்கவும்.",
   "common.loading": "ஏற்றுகிறது...",
   "common.error": "பிழை ஏற்பட்டது",
   "common.success": "வெற்றி",

@@ -10,6 +10,7 @@ import { getReconciliation } from "@/api/payments";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AddPropertyModal } from "@/components/owner/AddPropertyModal";
 import { AppLoadingScreen } from "./AppLoadingScreen";
+import { SessionHealthBanner } from "@/components/common/SessionHealthBanner";
 import { useLocale } from "@/i18n";
 import type { MessageKey } from "@/i18n/messages/en-IN";
 
@@ -137,6 +138,7 @@ export const AppShell: React.FC = () => {
           onToggleSidebarPinned={handleToggleSidebarPinned}
         />
 
+        <SessionHealthBanner />
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
           <ErrorBoundary fallbackTitle={`Error loading ${pageTitle}`}>
             <React.Suspense fallback={<AppLoadingScreen />}>

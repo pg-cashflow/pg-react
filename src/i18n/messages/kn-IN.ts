@@ -7,6 +7,8 @@ export const knIN: Record<MessageKey, string> = {
   "common.save": "ಉಳಿಸಿ",
   "common.cancel": "ರದ್ದುಮಾಡಿ",
   "common.retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+  "common.sessionUnstable": "ಸಂಪರ್ಕ ಸ್ಥಿರವಾಗಿಲ್ಲ",
+  "common.sessionDegradedDesc": "ನಿಮ್ಮ ಸೆಷನ್ ಮರುಸ್ಥಾಪನೆಯಾಗುತ್ತಿದೆ. ಕೆಲವು ಮಾಹಿತಿ ಹಳೆಯದಾಗಿರಬಹುದು. ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ಬದಲಾವಣೆಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗುವುದಿಲ್ಲ; ಸಂಪರ್ಕ ಮರಳಿದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
   "common.loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
   "common.error": "ದೋಷ ಸಂಭವಿಸಿದೆ",
   "common.success": "ಯಶಸ್ವಿ",

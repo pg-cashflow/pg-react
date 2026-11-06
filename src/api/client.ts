@@ -86,7 +86,9 @@ export async function executeRefresh(failedToken: string | null): Promise<string
     const data = await res.json();
     if (revision !== getAccessTokenRevision()) return getAccessToken();
     if (data?.token) {
-      setAccessToken(data.token);
+      // Do not broadcast SESSION_ACTIVE during routine silent refresh;
+      // other tabs retain their own valid access tokens and rotate independently.
+      setAccessToken(data.token, false);
       if (data.user) {
         setStoredUser(data.user);
       }

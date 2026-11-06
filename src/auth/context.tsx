@@ -250,7 +250,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    const handleSessionChanged = () => void evaluateStored();
+    const handleSessionChanged = () => {
+      if (sessionStatusRef.current !== "online" || !getAccessToken()) {
+        void evaluateStored();
+      }
+    };
     window.addEventListener("pg:unauthorized", handleUnauthorized);
     window.addEventListener("online", handleOnline);
     window.addEventListener("pg:session_changed", handleSessionChanged);

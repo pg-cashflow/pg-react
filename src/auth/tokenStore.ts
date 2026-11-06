@@ -2,26 +2,39 @@ let accessToken: string | null = null;
 let accessTokenRevision = 0;
 const listeners = new Set<(t: string | null) => void>();
 
+export function handleSyncMessage(event: { data?: unknown }): void {
+  if (!event || typeof event.data !== "object" || event.data === null) {
+    return;
+  }
+  const type = (event.data as { type?: unknown }).type;
+  if (typeof type !== "string") {
+    return;
+  }
+  if (type === "SESSION_ENDED") {
+    if (accessToken !== null) {
+      accessToken = null;
+      accessTokenRevision++;
+      notifyListeners(null);
+    }
+  } else if (type === "SESSION_ACTIVE" || type === "REFRESH_REQUIRED") {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("pg:session_changed"));
+    }
+  }
+}
+
 let authSyncChannel: BroadcastChannel | null = null;
 if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
   try {
     authSyncChannel = new BroadcastChannel("pg_token_sync");
-    authSyncChannel.onmessage = (event) => {
-      if (event.data?.type === "SESSION_ENDED") {
-        if (accessToken !== null) {
-          accessToken = null;
-          accessTokenRevision++;
-          notifyListeners(null);
-        }
-      } else if (event.data?.type === "SESSION_ACTIVE" || event.data?.type === "REFRESH_REQUIRED") {
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("pg:session_changed"));
-        }
-      }
-    };
+    authSyncChannel.onmessage = handleSyncMessage;
   } catch {
     // BroadcastChannel blocked or unavailable in restrictive contexts
   }
+}
+
+export function getAuthSyncChannelForTest(): BroadcastChannel | null {
+  return authSyncChannel;
 }
 
 function notifyListeners(token: string | null): void {
