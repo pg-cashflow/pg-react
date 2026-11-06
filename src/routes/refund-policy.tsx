@@ -31,13 +31,13 @@ export const RefundPolicyPage: React.FC = () => {
           Security deposits collected at the time of onboarding are held by the property owner and settled upon departure after formal move-out inspection and deduction of pending utility bills, damages, or unpaid dues.
         </p>
         <div className="space-y-2 t-body-sm text-ink-muted">
-          <p><strong>Two-Tier Gateway Settlement Processing:</strong></p>
+          <p><strong>Gateway Settlement Processing:</strong></p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
               <strong>Source Reversal (Within 120 Days):</strong> If the move-out settlement occurs within 120 days of the deposit payment, the refund is initiated via the Payment Gateway Source Refund API directly back to the original funding instrument (UPI ID, debit/credit card, or netbanking account).
             </li>
             <li>
-              <strong>Direct Payout Rail (Over 120 Days):</strong> For tenancies where the original payment exceeds 120 to 180 days (standard card network and banking reversal limits), the platform automatically transitions to Direct Payout transfer (via IMPS / NEFT / verified UPI VPA) to ensure the tenant receives their deposit without gateway expiration failures.
+              <strong>Payments Exceeding 120 Days:</strong> In accordance with payment gateway and banking regulations, gateway refund requests cannot be accepted after 120 days. Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed.
             </li>
           </ul>
         </div>

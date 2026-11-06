@@ -13,21 +13,17 @@ import { TenantKYCOnboardingGate } from "@/components/shared/TenantKYCOnboarding
 import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { homeForRole } from "@/auth/roles";
 
-// Helper to catch chunk loading errors after new deployments and refresh once
-if (typeof window !== "undefined") {
-  window.addEventListener("load", () => {
-    try {
-      sessionStorage.removeItem("pg_chunk_reload");
-    } catch {}
-  });
-}
-
+// Helper to catch chunk loading errors after new deployments and refresh once using URL retry marker
 function safeImport<T>(loader: () => Promise<T>): Promise<T> {
   return loader()
     .then((result) => {
       if (typeof window !== "undefined") {
         try {
-          sessionStorage.removeItem("pg_chunk_reload");
+          const url = new URL(window.location.href);
+          if (url.searchParams.has("_chunk_retry")) {
+            url.searchParams.delete("_chunk_retry");
+            window.history.replaceState({}, "", url.toString());
+          }
         } catch {}
       }
       return result;
@@ -38,15 +34,14 @@ function safeImport<T>(loader: () => Promise<T>): Promise<T> {
         /loading chunk/i.test(error?.message || "") ||
         /failed to fetch dynamically imported module/i.test(error?.message || "");
       if (isChunkLoadFailed && typeof window !== "undefined") {
-        const reloadKey = "pg_chunk_reload";
         try {
-          if (!sessionStorage.getItem(reloadKey)) {
-            sessionStorage.setItem(reloadKey, "1");
-            window.location.reload();
+          const url = new URL(window.location.href);
+          if (!url.searchParams.has("_chunk_retry")) {
+            url.searchParams.set("_chunk_retry", "1");
+            window.location.replace(url.toString());
+            return new Promise<T>(() => {});
           }
-        } catch {
-          window.location.reload();
-        }
+        } catch {}
       }
       throw error;
     });

@@ -212,10 +212,18 @@ const landingHtml = `
 </div>
 `.trim();
 
+function stripModuleScripts(html) {
+  return html
+    .replace(/<script\s+type="module"[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<link\s+rel="modulepreload"[^>]*>/gi, "");
+}
+
 const currentHtml = fs.readFileSync(distHtmlPath, "utf-8");
-const updatedHtml = currentHtml.replace(
-  '<div id="root"></div>',
-  `<div id="root">${landingHtml}</div>`
+const updatedHtml = stripModuleScripts(
+  currentHtml.replace(
+    '<div id="root"></div>',
+    `<div id="root">${landingHtml}</div>`
+  )
 );
 
 const landingHtmlPath = path.resolve(__dirname, "../dist/landing.html");
@@ -282,7 +290,9 @@ function writeStaticPage(routeSlug, title, subtitle, sections) {
   </footer>
 </div>`.trim();
 
-  const rendered = currentHtml.replace('<div id="root"></div>', `<div id="root">${pageHtml}</div>`);
+  const rendered = stripModuleScripts(
+    currentHtml.replace('<div id="root"></div>', `<div id="root">${pageHtml}</div>`)
+  );
   const flatPath = path.resolve(__dirname, `../dist/${routeSlug}.html`);
   fs.writeFileSync(flatPath, rendered, "utf-8");
 
@@ -348,10 +358,10 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
     ]
   },
   {
-    heading: "2. Security Deposit Refunds & Two-Tier Processing",
+    heading: "2. Security Deposit Refunds & Gateway Processing",
     paragraphs: [
       "Security deposits are settled upon departure after move-out inspection and deduction of pending utility bills.",
-      "Within 120 days of deposit payment, refunds are reversed via the Payment Gateway Source Refund API directly to the original payment instrument. Beyond 120-180 days, refunds are settled via Direct Payout (IMPS / UPI) to prevent gateway expiration failures."
+      "Within 120 days of deposit payment, refunds are reversed via the Payment Gateway Source Refund API directly to the original payment instrument. Payments exceeding 120 days cannot be refunded via the payment gateway and require explicit operational review."
     ]
   },
   {

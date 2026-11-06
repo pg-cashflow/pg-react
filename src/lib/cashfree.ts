@@ -23,7 +23,8 @@ export interface CashfreeCheckoutRawResponse {
 export type CashfreeCheckoutResult =
   | { kind: "completed"; details: CashfreePaymentDetails }
   | { kind: "redirect" }
-  | { kind: "error"; error?: CashfreeError };
+  | { kind: "error"; error?: CashfreeError }
+  | { kind: "ambiguous" };
 
 interface CashfreeInstance {
   checkout: (opts: { paymentSessionId: string; redirectTarget: string }) => Promise<CashfreeCheckoutRawResponse>;
@@ -143,5 +144,5 @@ export async function startCashfreeCheckout(
     return { kind: "error", error: res.error };
   }
 
-  return { kind: "completed", details: {} };
+  return { kind: "ambiguous" };
 }

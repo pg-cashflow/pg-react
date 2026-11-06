@@ -195,7 +195,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
         clearTimer();
         setState("REDIRECTING");
         optionsRef.current.onRedirect?.();
-      } else if (result.kind === "error") {
+      } else if (result.kind === "error" || result.kind === "ambiguous") {
         enterChecking();
       }
     } catch (err: unknown) {

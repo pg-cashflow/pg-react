@@ -78,6 +78,17 @@ describe("Cashfree checkout precedence and result mapping", () => {
       redirectTarget: "_self",
     });
   });
+
+  it("treats empty or unknown SDK response as ambiguous", async () => {
+    const mockCheckout = vi.fn().mockResolvedValue({});
+
+    (window as any).Cashfree = vi.fn().mockReturnValue({
+      checkout: mockCheckout,
+    });
+
+    const result = await startCashfreeCheckout("sess_123");
+    expect(result.kind).toBe("ambiguous");
+  });
 });
 
 describe("Payment history formatting and localization", () => {
