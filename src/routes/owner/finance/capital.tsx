@@ -122,7 +122,7 @@ export const FinanceCapitalView: React.FC = () => {
                       <h3 className="text-base font-semibold text-ink truncate">
                         {tx.purpose || KIND_LABEL[tx.kind]}
                       </h3>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-muted text-ink-muted border border-hairline">
+                      <span className="px-2 py-0.5 rounded-full t-micro font-semibold bg-surface-muted text-ink-muted border border-hairline">
                         {KIND_LABEL[tx.kind]}
                       </span>
                     </div>

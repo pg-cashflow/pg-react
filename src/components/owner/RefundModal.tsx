@@ -301,7 +301,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                     className="w-full pl-8 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-sm text-ink focus:outline-none focus:ring-1 focus:ring-accent"
                   />
                 </div>
-                <p className="mt-1 text-[11px] text-ink-muted">
+                <p className="mt-1 t-micro text-ink-muted">
                   {t("owner.refund.maxRefundable", { amount: formatPaise(payment.amount) })}
                 </p>
               </div>
@@ -320,7 +320,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   disabled={isSubmitting || attemptPending}
                   className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-sm text-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
-                <p className="mt-1 text-[11px] text-ink-muted">
+                <p className="mt-1 t-micro text-ink-muted">
                   {t("owner.refund.reasonHint")}
                 </p>
               </div>

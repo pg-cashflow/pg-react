@@ -131,7 +131,7 @@ export const FinanceCloseView: React.FC = () => {
               {/* Three Way Balancer Numbers */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-hairline">
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-4 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">
+                  <span className="t-micro font-semibold text-ink-muted uppercase">
                     Reconciliation Collections Total
                   </span>
                   <div>
@@ -140,7 +140,7 @@ export const FinanceCloseView: React.FC = () => {
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-4 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">
+                  <span className="t-micro font-semibold text-ink-muted uppercase">
                     Journal Ledger Total
                   </span>
                   <div>
@@ -150,7 +150,7 @@ export const FinanceCloseView: React.FC = () => {
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-4 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.difference")}</span>
+                    <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.difference")}</span>
                     {isBalanced ? (
                       <CheckCircle2 size={14} className="text-success" />
                     ) : (
@@ -196,14 +196,14 @@ export const FinanceCloseView: React.FC = () => {
                             {item.category.replace(/_/g, " ")}
                           </span>
                           {item.unresolved_months ? (
-                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-danger/10 text-danger border border-danger/20">
+                            <span className="px-2 py-0.5 rounded-full t-micro font-semibold bg-danger/10 text-danger border border-danger/20">
                               Unresolved for {item.unresolved_months}m
                             </span>
                           ) : null}
                         </div>
                         {item.note && <p className="text-xs text-ink-muted">{item.note}</p>}
                         {item.source_id && (
-                          <p className="text-[11px] text-ink-muted">Source: {item.source_id}</p>
+                          <p className="t-micro text-ink-muted">Source: {item.source_id}</p>
                         )}
                       </div>
 

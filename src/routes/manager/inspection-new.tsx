@@ -286,7 +286,7 @@ export const InspectionNewView: React.FC = () => {
                       />
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-ink truncate">{current.photo?.name}</p>
-                        <p className="text-[11px] text-success font-medium">
+                        <p className="t-micro text-success font-medium">
                           ✓ Validated ({(Number(current.photo?.size || 0) / 1024).toFixed(0)} KB)
                         </p>
                       </div>

@@ -82,7 +82,7 @@ export const EventsView: React.FC = () => {
                     </p>
                   )}
                   {evt.payload && (
-                    <pre className="mt-2 p-2 rounded-lg bg-bg text-[11px] font-mono text-ink-muted overflow-x-auto border border-hairline/60">
+                    <pre className="mt-2 p-2 rounded-lg bg-bg t-micro font-mono text-ink-muted overflow-x-auto border border-hairline/60">
                       {JSON.stringify(evt.payload, null, 2)}
                     </pre>
                   )}

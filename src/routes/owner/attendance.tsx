@@ -346,7 +346,7 @@ export const AttendanceView: React.FC = () => {
                               {payee ? (
                                 <div className="text-xs">
                                   <div className="font-medium text-text">{payee.name}</div>
-                                  <div className="text-text-muted font-mono text-[11px]">
+                                  <div className="text-text-muted font-mono t-micro">
                                     {payee.upi_vpa ? `UPI: ${payee.upi_vpa}` : `A/C: ****${payee.account_number_last4 || ""}`}
                                     {payee.is_verified ? (
                                       <span className="text-emerald-600 dark:text-emerald-400 ml-1">{t("owner.attendance.verified")}</span>
@@ -457,7 +457,7 @@ export const AttendanceView: React.FC = () => {
                         <tr key={staff.id} className="hover:bg-surface-elevated/20">
                           <td className="px-3 py-2 text-left font-medium text-text sticky left-0 bg-surface z-10 border-r border-border">
                             <div>{staff.name}</div>
-                            <div className="text-[10px] text-text-muted">{staff.role}</div>
+                            <div className="t-micro text-text-muted">{staff.role}</div>
                           </td>
                           {monthDays.map((d) => {
                             const status = staffDays?.get(d.dateStr);
@@ -484,7 +484,7 @@ export const AttendanceView: React.FC = () => {
                             return (
                               <td
                                 key={d.dateStr}
-                                className={`px-1 py-1.5 font-mono text-[11px] ${
+                                className={`px-1 py-1.5 font-mono t-micro ${
                                   d.isSunday ? "bg-rose-500/5" : ""
                                 }`}
                               >

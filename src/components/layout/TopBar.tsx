@@ -84,7 +84,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {subtitle && <p className="t-caption text-ink-muted">{subtitle}</p>}
         </div>
         {isStandalone && (
-          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-tint text-accent text-[10px] font-medium border border-accent/20">
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-tint text-accent t-micro font-medium border border-accent/20">
             <Smartphone className="w-3 h-3" /> PWA
           </span>
         )}

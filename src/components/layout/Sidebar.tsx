@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <h1 className="font-bold text-ink text-sm leading-tight truncate">
                 {t("common.appName")}
               </h1>
-              <p className="text-[11px] text-ink-muted truncate">{t("common.ownerLedger")}</p>
+              <p className="t-micro text-ink-muted truncate">{t("common.ownerLedger")}</p>
             </div>
           </div>
 

@@ -165,6 +165,7 @@ body {
 .t-body { font-size: 14px; line-height: 20px; font-weight: 400; }
 .t-body-sm { font-size: 13px; line-height: 18px; font-weight: 400; }
 .t-caption { font-size: 12px; line-height: 16px; font-weight: 500; }
+.t-micro { font-size: 12px; line-height: 16px; font-weight: 500; }
 .t-amount { font-size: 15px; line-height: 20px; font-weight: 500; font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; user-select: text; -webkit-user-select: text; }
 .t-amount-lg { font-size: 26px; line-height: 30px; font-weight: 500; font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; user-select: text; -webkit-user-select: text; }
 .t-code { font-size: 14px; line-height: 20px; font-weight: 400; font-family: "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.5px; user-select: all; -webkit-user-select: all; }
@@ -264,7 +265,10 @@ body {
 
 :lang(te-IN) .t-caption,
 :lang(ta-IN) .t-caption,
-:lang(kn-IN) .t-caption {
+:lang(kn-IN) .t-caption,
+:lang(te-IN) .t-micro,
+:lang(ta-IN) .t-micro,
+:lang(kn-IN) .t-micro {
   font-size: 13px;
   line-height: 1.6;
 }

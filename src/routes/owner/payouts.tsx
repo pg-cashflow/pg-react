@@ -493,7 +493,7 @@ export const PayoutsView: React.FC = () => {
                             {p.ifsc && <span> • IFSC: {p.ifsc}</span>}
                             {p.bank_name && <div>{p.bank_name}</div>}
                             {p.name_at_bank && (
-                              <div className="text-[11px] text-accent mt-0.5">
+                              <div className="t-micro text-accent mt-0.5">
                                 Bank Registered Name: {p.name_at_bank}
                               </div>
                             )}
@@ -502,7 +502,7 @@ export const PayoutsView: React.FC = () => {
                           <div>
                             <div className="font-mono text-ink">UPI: {p.upi_vpa}</div>
                             {p.name_at_bank && (
-                              <div className="text-[11px] text-accent mt-0.5">
+                              <div className="t-micro text-accent mt-0.5">
                                 Bank Registered Name: {p.name_at_bank}
                               </div>
                             )}

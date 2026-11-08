@@ -41,7 +41,7 @@ export function LanguageToggle() {
 
       {open && (
         <div className="absolute right-0 mt-2 w-48 rounded-xl bg-surface border border-hairline shadow-xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted uppercase tracking-wider border-b border-hairline mb-1">
+          <div className="px-2.5 py-1.5 t-micro font-semibold text-ink-muted uppercase tracking-wider border-b border-hairline mb-1">
             {t("settings.languageMenuTitle")}
           </div>
           {locales.map((opt) => {
@@ -62,7 +62,7 @@ export function LanguageToggle() {
               >
                 <div className="flex flex-col text-left">
                   <span>{opt.nativeName}</span>
-                  <span className="text-[10px] text-ink-muted">{opt.name}</span>
+                  <span className="t-micro text-ink-muted">{opt.name}</span>
                 </div>
                 {isSelected && <Check size={14} className="text-accent" />}
               </button>
@@ -93,7 +93,7 @@ export function LanguageSegmentedControl() {
             }`}
           >
             <span className="text-sm">{opt.nativeName}</span>
-            <span className={`text-[10px] ${active ? "text-white/80" : "text-ink-muted"}`}>
+            <span className={`t-micro ${active ? "text-white/80" : "text-ink-muted"}`}>
               {opt.name}
             </span>
           </button>

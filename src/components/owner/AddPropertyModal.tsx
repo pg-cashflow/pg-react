@@ -279,7 +279,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
               <div className="space-y-4 bg-accent-tint/30 border border-accent/20 rounded-2xl p-4">
                 {/* Presets */}
                 <div>
-                  <label className="block text-[11px] font-medium text-ink-muted mb-2">
+                  <label className="block t-micro font-medium text-ink-muted mb-2">
                     Quick Presets:
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -311,7 +311,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {/* Floors Count */}
                   <div className="bg-surface border border-hairline rounded-xl p-3">
-                    <span className="block text-[11px] text-ink-muted mb-1 flex items-center gap-1">
+                    <span className="block t-micro text-ink-muted mb-1 flex items-center gap-1">
                       <Layers className="w-3.5 h-3.5 text-accent" /> Floors
                     </span>
                     <div className="flex items-center justify-between">
@@ -341,7 +341,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
 
                   {/* Rooms Count */}
                   <div className="bg-surface border border-hairline rounded-xl p-3">
-                    <span className="block text-[11px] text-ink-muted mb-1 flex items-center gap-1">
+                    <span className="block t-micro text-ink-muted mb-1 flex items-center gap-1">
                       <DoorOpen className="w-3.5 h-3.5 text-accent" /> Total Rooms
                     </span>
                     <div className="flex items-center justify-between">
@@ -371,7 +371,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
 
                   {/* Beds per Room */}
                   <div className="bg-surface border border-hairline rounded-xl p-3">
-                    <span className="block text-[11px] text-ink-muted mb-1 flex items-center gap-1">
+                    <span className="block t-micro text-ink-muted mb-1 flex items-center gap-1">
                       <Users className="w-3.5 h-3.5 text-accent" /> Beds / Room
                     </span>
                     <div className="flex items-center justify-between">
@@ -395,7 +395,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
 
                   {/* Start Floor */}
                   <div className="bg-surface border border-hairline rounded-xl p-3">
-                    <span className="block text-[11px] text-ink-muted mb-1">{t("owner.layout.startFloor")}</span>
+                    <span className="block t-micro text-ink-muted mb-1">{t("owner.layout.startFloor")}</span>
                     <select
                       value={startFloor}
                       onChange={(e) => {
@@ -426,7 +426,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setCustomEditing(!customEditing)}
-                    className="flex items-center gap-1 text-[11px] text-accent hover:underline"
+                    className="flex items-center gap-1 t-micro text-accent hover:underline"
                   >
                     <Settings2 className="w-3 h-3" />
                     <span>{customEditing ? "Revert to auto" : "Customize rooms"}</span>
@@ -440,7 +440,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                       key={fl.floor_number}
                       className="p-2.5 bg-surface rounded-xl border border-hairline space-y-1.5"
                     >
-                      <div className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center justify-between t-micro">
                         <span className="font-bold text-ink">{fl.name}</span>
                         <span className="text-ink-muted">
                           {fl.rooms.length} rooms · {fl.rooms.length * (fl.capacity || capacityPerRoom)} beds
@@ -454,12 +454,12 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                               type="text"
                               value={rm}
                               onChange={(e) => handleRoomChange(fIdx, rIdx, e.target.value)}
-                              className="w-14 px-1.5 py-0.5 text-center text-[11px] font-medium bg-surface-elevated border border-hairline rounded-md text-ink"
+                              className="w-14 px-1.5 py-0.5 text-center t-micro font-medium bg-surface-elevated border border-hairline rounded-md text-ink"
                             />
                           ) : (
                             <span
                               key={rIdx}
-                              className="px-2 py-0.5 text-[11px] font-medium bg-surface-elevated border border-hairline rounded-md text-ink"
+                              className="px-2 py-0.5 t-micro font-medium bg-surface-elevated border border-hairline rounded-md text-ink"
                             >
                               {rm}
                             </span>
@@ -481,7 +481,7 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                 3. Rent Collection & Payment Mode
               </h3>
             </div>
-            <p className="text-[11px] text-ink-muted">
+            <p className="t-micro text-ink-muted">
               Select how tenants will pay dues for this property. You can change this anytime later in Settings.
             </p>
 
@@ -502,15 +502,15 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                       <ShieldCheck className="w-3.5 h-3.5 text-accent" />
                       Cashfree Checkout
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast">
+                    <span className="t-micro font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast">
                       Primary
                     </span>
                   </div>
-                  <p className="text-[11px] text-ink-muted leading-relaxed">
+                  <p className="t-micro text-ink-muted leading-relaxed">
                     Automated modal checkout (UPI apps, Cards, Netbanking). Instant ledger settlement with zero manual UTR verification.
                   </p>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-hairline/60 text-[10px] font-medium">
+                <div className="mt-2.5 pt-2 border-t border-hairline/60 t-micro font-medium">
                   <span className={paymentMode === "cashfree" ? "text-accent font-semibold" : "text-ink-muted"}>
                     {paymentMode === "cashfree" ? "● Selected" : "Select"}
                   </span>
@@ -533,15 +533,15 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({
                       <QrCode className="w-3.5 h-3.5 text-ink-muted" />
                       Manual UPI QR
                     </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-bg-muted border border-hairline text-ink-muted">
+                    <span className="t-micro font-medium px-1.5 py-0.5 rounded-full bg-bg-muted border border-hairline text-ink-muted">
                       Fallback
                     </span>
                   </div>
-                  <p className="text-[11px] text-ink-muted leading-relaxed">
+                  <p className="t-micro text-ink-muted leading-relaxed">
                     Tenants scan the property UPI QR code and submit a 12-digit UTR reference number for manual owner verification.
                   </p>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-hairline/60 text-[10px] font-medium">
+                <div className="mt-2.5 pt-2 border-t border-hairline/60 t-micro font-medium">
                   <span className={paymentMode === "manual" ? "text-accent font-semibold" : "text-ink-muted"}>
                     {paymentMode === "manual" ? "● Selected" : "Select"}
                   </span>

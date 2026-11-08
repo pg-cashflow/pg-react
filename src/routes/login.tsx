@@ -208,12 +208,12 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowTestHelper(!showTestHelper)}
-              className="text-[11px] underline text-accent hover:opacity-80"
+              className="t-micro underline text-accent hover:opacity-80"
             >
               {showTestHelper ? "Hide" : "Show test numbers"}
             </button>
           </div>
-          <p className="text-[11px] text-ink-muted leading-relaxed">
+          <p className="t-micro text-ink-muted leading-relaxed">
             Real SMS requires Firebase Blaze. On the free Spark plan, use your Firebase test phone numbers configured in Console.
           </p>
           {showTestHelper && (
@@ -221,21 +221,21 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => fillTestNumber("+918008281429", "123456")}
-                className="px-2.5 py-1 rounded-lg bg-surface border border-hairline text-[11px] text-ink font-mono hover:bg-accent-tint transition"
+                className="px-2.5 py-1 rounded-lg bg-surface border border-hairline t-micro text-ink font-mono hover:bg-accent-tint transition"
               >
                 Owner: +91 80082 81429
               </button>
               <button
                 type="button"
                 onClick={() => fillTestNumber("+919000000000", "123456")}
-                className="px-2.5 py-1 rounded-lg bg-surface border border-hairline text-[11px] text-ink font-mono hover:bg-accent-tint transition"
+                className="px-2.5 py-1 rounded-lg bg-surface border border-hairline t-micro text-ink font-mono hover:bg-accent-tint transition"
               >
                 Tenant: +91 90000 00000
               </button>
               <button
                 type="button"
                 onClick={() => fillTestNumber("+919111111111", "123456")}
-                className="px-2.5 py-1 rounded-lg bg-surface border border-hairline text-[11px] text-ink font-mono hover:bg-accent-tint transition"
+                className="px-2.5 py-1 rounded-lg bg-surface border border-hairline t-micro text-ink font-mono hover:bg-accent-tint transition"
               >
                 Warden: +91 91111 11111
               </button>
@@ -288,7 +288,7 @@ export const LoginPage: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-ink placeholder-ink-faint text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition"
                 />
               </div>
-              <p className="text-[11px] text-ink-faint mt-1.5">
+              <p className="t-micro text-ink-faint mt-1.5">
                 {t("auth.phoneHelper")}
               </p>
             </div>
@@ -310,7 +310,7 @@ export const LoginPage: React.FC = () => {
 
             <div className="flex items-center gap-3 py-1">
               <div className="h-px flex-1 bg-hairline" />
-              <span className="text-[11px] uppercase tracking-wider text-ink-faint">{t("auth.or")}</span>
+              <span className="t-micro uppercase tracking-wider text-ink-faint">{t("auth.or")}</span>
               <div className="h-px flex-1 bg-hairline" />
             </div>
 

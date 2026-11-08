@@ -478,7 +478,7 @@ export const OwnerFacilityView: React.FC = () => {
                   <div key={r.id} className="p-3 flex items-center justify-between text-xs">
                     <div>
                       <span className="font-bold text-ink">Room {r.room_number}</span>
-                      <span className="text-ink-muted text-[11px] block">Capacity: {r.capacity} beds</span>
+                      <span className="text-ink-muted t-micro block">Capacity: {r.capacity} beds</span>
                     </div>
                     <span className="font-mono text-ink-muted">{r.included_units} kWh included</span>
                   </div>
@@ -508,7 +508,7 @@ export const OwnerFacilityView: React.FC = () => {
                   placeholder="e.g. 9876543210 or +919876543210"
                   className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink font-mono"
                 />
-                <span className="text-[10px] text-ink-muted mt-1 block">
+                <span className="t-micro text-ink-muted mt-1 block">
                   Standard 10-digit Indian mobile number or international + format.
                 </span>
               </div>
@@ -543,19 +543,19 @@ export const OwnerFacilityView: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-xs font-bold text-ink font-mono">{m.phone}</div>
-                          <div className="text-[10px] text-ink-muted">
+                          <div className="t-micro text-ink-muted">
                             Active Warden · Added {new Date(m.created_at).toLocaleDateString()}
                           </div>
                         </div>
                         {hasAll ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success bg-success-tint px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 t-micro font-semibold text-success bg-success-tint px-2 py-0.5 rounded-full">
                             <CheckCircle2 className="w-3 h-3" /> Full Access
                           </span>
                         ) : (
                           <button
                             onClick={() => updateCapsMutation.mutate({ managerId: m.id, grant: ALL_DELEGABLE_CAPS })}
                             disabled={updateCapsMutation.isPending}
-                            className="text-[11px] font-semibold text-accent hover:underline flex items-center gap-1"
+                            className="t-micro font-semibold text-accent hover:underline flex items-center gap-1"
                           >
                             {updateCapsMutation.isPending ? (
                               <Loader2 className="w-3 h-3 animate-spin" />
@@ -572,7 +572,7 @@ export const OwnerFacilityView: React.FC = () => {
                           return (
                             <span
                               key={cap}
-                              className={`text-[10px] px-2 py-0.5 rounded-md font-mono ${
+                              className={`t-micro px-2 py-0.5 rounded-md font-mono ${
                                 isGranted
                                   ? "bg-accent-tint text-accent font-semibold"
                                   : "bg-surface border border-hairline text-ink-muted line-through opacity-60"
@@ -613,7 +613,7 @@ export const OwnerFacilityView: React.FC = () => {
                 onChange={(e) => setSettings({ ...settings, point_value_paise: parseInt(e.target.value, 10) || 0 })}
                 className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
-              <span className="text-[10px] text-ink-muted">{t("owner.facility.pointValueNote")}</span>
+              <span className="t-micro text-ink-muted">{t("owner.facility.pointValueNote")}</span>
             </div>
 
             <div>
@@ -654,7 +654,7 @@ export const OwnerFacilityView: React.FC = () => {
                 onChange={(e) => setSettings({ ...settings, floor_bonus_threshold: parseInt(e.target.value, 10) || 0 })}
                 className="w-full px-3 py-2 bg-surface border border-hairline rounded-xl text-xs text-ink"
               />
-              <span className="text-[10px] text-ink-muted">{t("owner.facility.cleanlinessMultiplierNote")}</span>
+              <span className="t-micro text-ink-muted">{t("owner.facility.cleanlinessMultiplierNote")}</span>
             </div>
 
             <div>

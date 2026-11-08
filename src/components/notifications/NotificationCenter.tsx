@@ -207,7 +207,7 @@ export const NotificationCenter: React.FC = () => {
       >
         <Bell className="w-4 h-4 text-ink transition-transform duration-200 hover:rotate-6" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-accent-contrast text-[10px] font-bold flex items-center justify-center shadow-md animate-in zoom-in-50 duration-200">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-accent-contrast t-micro font-bold flex items-center justify-center shadow-md animate-in zoom-in-50 duration-200">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -221,7 +221,7 @@ export const NotificationCenter: React.FC = () => {
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-ink">{t("notifications.title")}</h3>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-tint text-accent">
+                <span className="px-2 py-0.5 rounded-full t-micro font-bold bg-accent-tint text-accent">
                   {unreadCount} new
                 </span>
               )}
@@ -301,12 +301,12 @@ export const NotificationCenter: React.FC = () => {
                           {notif.title}
                         </p>
                         {notif.is_action_required && (
-                          <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold tracking-wide uppercase bg-danger-tint text-rose-600 dark:text-danger border border-danger/20">
+                          <span className="inline-flex items-center px-1.5 py-0.2 rounded t-micro font-bold tracking-wide uppercase bg-danger-tint text-rose-600 dark:text-danger border border-danger/20">
                             Action
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-ink-muted">
+                      <div className="flex items-center gap-2 t-micro text-ink-muted">
                         <span>{formatRelativeTime(notif.created_at)}</span>
                         {notif.deep_link && (
                           <span className="opacity-0 group-hover:opacity-100 transition inline-flex items-center gap-0.5 text-accent font-normal">
@@ -329,7 +329,7 @@ export const NotificationCenter: React.FC = () => {
           {/* Panel Footer */}
           {notifications.length > 0 && (
             <div className="px-4 py-2 border-t border-hairline bg-surface/60 text-center">
-              <span className="text-[11px] text-ink-faint">
+              <span className="t-micro text-ink-faint">
                 Showing latest notifications
               </span>
             </div>

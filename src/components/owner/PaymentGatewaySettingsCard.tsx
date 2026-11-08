@@ -164,7 +164,7 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
                 <ShieldCheck className="w-4 h-4 text-accent" />
                 Cashfree Checkout
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent text-accent-contrast">
+              <span className="t-micro font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent text-accent-contrast">
                 Primary
               </span>
             </div>
@@ -198,7 +198,7 @@ export const PaymentGatewaySettingsCard: React.FC<{ className?: string; property
                 <QrCode className="w-4 h-4 text-ink-muted" />
                 Manual UPI QR Code
               </span>
-              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-bg-muted border border-hairline text-ink-muted">
+              <span className="t-micro font-medium px-2 py-0.5 rounded-full bg-bg-muted border border-hairline text-ink-muted">
                 Offline Fallback
               </span>
             </div>

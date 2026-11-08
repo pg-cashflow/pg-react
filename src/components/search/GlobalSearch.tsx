@@ -119,7 +119,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
       >
         <Search className="w-3.5 h-3.5" />
         <span>{t("common.search")}</span>
-        <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-bg border border-hairline">{/* lint-allow-i18n */}Ctrl K</kbd>
+        <kbd className="hidden lg:inline t-micro px-1.5 py-0.5 rounded bg-bg border border-hairline">{/* lint-allow-i18n */}Ctrl K</kbd>
       </button>
       <button
         type="button"
@@ -185,7 +185,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
                         <p className="text-sm font-medium text-ink truncate">{title}</p>
                         <p className="text-xs text-ink-muted truncate">{subtitle}</p>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wide text-ink-muted shrink-0">{badge}</span>
+                      <span className="t-micro uppercase tracking-wide text-ink-muted shrink-0">{badge}</span>
                       {idx === activeIndex && <CornerDownLeft className="w-3.5 h-3.5 text-ink-muted" />}
                     </button>
                   </li>

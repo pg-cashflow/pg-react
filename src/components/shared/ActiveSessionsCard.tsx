@@ -137,7 +137,7 @@ export const ActiveSessionsCard: React.FC<{ className?: string }> = ({ className
                     {s.is_current && (
                       <span
                         data-testid="current-device-badge"
-                        className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-tint text-accent border border-accent/20 shrink-0"
+                        className="px-2 py-0.5 rounded-full t-micro font-semibold bg-accent-tint text-accent border border-accent/20 shrink-0"
                       >
                         {t("sessions.thisDevice")}
                       </span>

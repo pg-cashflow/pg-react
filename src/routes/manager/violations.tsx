@@ -136,7 +136,7 @@ export const ViolationsView: React.FC = () => {
             <img src={photoPreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover border border-hairline" />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-ink truncate">{photo?.name}</p>
-              <p className="text-[11px] text-accent flex items-center gap-1 mt-0.5">
+              <p className="t-micro text-accent flex items-center gap-1 mt-0.5">
                 <CheckCircle2 className="w-3.5 h-3.5 inline" />
                 Validated ({(Number(photo?.size || 0) / 1024).toFixed(0)} KB)
               </p>

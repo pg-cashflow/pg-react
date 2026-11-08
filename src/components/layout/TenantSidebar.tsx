@@ -55,7 +55,7 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({
           </div>
           <div>
             <h1 className="font-bold text-ink text-sm leading-tight">{t("tenant.portal")}</h1>
-            <p className="text-[11px] text-ink-muted">{t("tenant.portalSubtitle")}</p>
+            <p className="t-micro text-ink-muted">{t("tenant.portalSubtitle")}</p>
           </div>
         </div>
 

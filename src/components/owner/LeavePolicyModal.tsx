@@ -117,7 +117,7 @@ export const LeavePolicyModal: React.FC<LeavePolicyModalProps> = ({
                 onChange={(e) => setFreeLeaves(parseInt(e.target.value, 10) || 0)}
                 className="w-full px-3 py-2 text-sm bg-surface-elevated border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
-              <p className="text-[11px] text-text-muted mt-1">
+              <p className="t-micro text-text-muted mt-1">
                 Leaves up to this limit do not cause wage deduction. Excess absent days deduct salary proportionally.
               </p>
             </div>

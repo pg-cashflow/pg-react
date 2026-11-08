@@ -148,7 +148,7 @@ export const PayrollPreviewModal: React.FC<PayrollPreviewModalProps> = ({
                             <div className="font-medium text-text">
                               {staff?.name || "Staff Member"}
                             </div>
-                            <div className="text-[10px] text-text-muted">
+                            <div className="t-micro text-text-muted">
                               {staff?.role || "Staff"}
                             </div>
                           </td>

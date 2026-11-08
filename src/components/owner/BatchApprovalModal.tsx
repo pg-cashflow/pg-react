@@ -175,13 +175,13 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
                             <td className="px-3.5 py-2.5">
                               <div className="font-semibold text-ink">{payee?.name || it.payee_id}</div>
                               {payee && (
-                                <span className="text-[10px] text-ink-muted capitalize">
+                                <span className="t-micro text-ink-muted capitalize">
                                   {payee.payee_type.replace("_", " ")}
                                   {payee.verification_status === "provider_verified" ? " • Bank Verified" : " • Attested"} {/* lint-allow-i18n */}
                                 </span>
                               )}
                             </td>
-                            <td className="px-3.5 py-2.5 font-mono text-[11px] text-ink-muted">
+                            <td className="px-3.5 py-2.5 font-mono t-micro text-ink-muted">
                               {payee?.account_number_last4 ? (
                                 <div>•••• {payee.account_number_last4} ({payee.ifsc || "Bank"})</div>
                               ) : payee?.upi_vpa ? (
@@ -192,7 +192,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
                             </td>
                             <td className="px-3.5 py-2.5">
                               <span className="font-medium text-ink capitalize">{it.purpose}</span>
-                              <div className="font-mono text-[10px] text-ink-muted">{it.reference_number}</div>
+                              <div className="font-mono t-micro text-ink-muted">{it.reference_number}</div>
                             </td>
                             <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-ink">
                               {formatPaise(it.amount_paise)}

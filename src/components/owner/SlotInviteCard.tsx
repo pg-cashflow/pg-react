@@ -241,7 +241,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                         Room {rm.room_number}
                       </span>
                       <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        className={`t-micro font-semibold px-2 py-0.5 rounded-full ${
                           isFull
                             ? "bg-danger/10 text-danger border border-danger/20"
                             : "bg-success/10 text-success border border-success/20"
@@ -257,7 +257,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                     </div>
 
                     {rm.tenant_names && rm.tenant_names.length > 0 && (
-                      <div className="text-[11px] text-ink-muted mt-2 border-t border-hairline/50 pt-1.5 truncate">
+                      <div className="t-micro text-ink-muted mt-2 border-t border-hairline/50 pt-1.5 truncate">
                         <span className="font-medium">{t("common.tenants")}:</span> {rm.tenant_names.join(", ")}
                       </div>
                     )}
@@ -276,7 +276,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
             <span className="text-xs font-semibold text-ink">
               Invite Settings for Room {selectedRoom.room_number}
             </span>
-            <span className="text-[11px] text-ink-muted">
+            <span className="t-micro text-ink-muted">
               Capacity: {selectedRoom.capacity} beds ({selectedRoom.occupied_beds} occupied)
             </span>
           </div>
@@ -400,7 +400,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
             <span className="text-xs font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
               <Check className="w-4 h-4" /> New Invite Link Created
             </span>
-            <span className="text-[11px] text-ink-muted font-mono">
+            <span className="t-micro text-ink-muted font-mono">
               Valid until: {new Date(successInvite.expires_at).toLocaleDateString()}
             </span>
           </div>
@@ -475,12 +475,12 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                             {formatPaise(inv.rent_paise)}/mo
                           </span>
                           <span className="text-ink-muted">·</span>
-                          <span className="text-[11px] text-ink-muted">
+                          <span className="t-micro text-ink-muted">
                             Due: {inv.due_day}th
                           </span>
                         </div>
                         {room && (
-                          <div className="flex items-center gap-1.5 text-[11px] text-ink font-medium">
+                          <div className="flex items-center gap-1.5 t-micro text-ink font-medium">
                             <span>Room {room.room_number}</span>
                             <span className="text-ink-muted">·</span>
                             <span className="text-ink-muted">
@@ -499,7 +499,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                             )}
                           </div>
                         )}
-                        <div className="text-[11px] text-ink-muted">
+                        <div className="t-micro text-ink-muted">
                           Expires: {new Date(inv.expires_at).toLocaleDateString()} {new Date(inv.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           {inv.allow_over_capacity && " · (Over-capacity allowed)"}
                         </div>
@@ -509,7 +509,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                       <button
                         type="button"
                         onClick={() => handleCopy(inv.code)}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-hairline text-ink hover:bg-hairline/20 transition text-[11px] font-medium"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-hairline text-ink hover:bg-hairline/20 transition t-micro font-medium"
                       >
                         {copiedCode === inv.code ? (
                           <Check className="w-3.5 h-3.5 text-success" />
@@ -527,7 +527,7 @@ export const SlotInviteCard: React.FC<{ className?: string }> = ({ className }) 
                             revokeMutation.mutate(inv.id);
                           }
                         }}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition text-[11px] font-medium disabled:opacity-50"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition t-micro font-medium disabled:opacity-50"
                       >
                         <XCircle className="w-3.5 h-3.5" />
                         Revoke

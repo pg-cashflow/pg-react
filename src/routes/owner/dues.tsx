@@ -62,7 +62,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
         <div className="flex items-center gap-2">
           <span>{tenantName}</span>
           {isSelected && (
-            <span className="inline-flex items-center text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-accent-contrast">
+            <span className="inline-flex items-center t-micro font-mono font-semibold px-1.5 py-0.2 rounded bg-accent text-accent-contrast">
               Active
             </span>
           )}
@@ -79,7 +79,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
       <td className="px-6 py-4 text-xs text-ink-muted">
         <div>{formatDate(due.due_date, locale)}</div>
         {isOverdue(due) && (
-          <div className="text-danger font-medium text-[11px] mt-0.5">
+          <div className="text-danger font-medium t-micro mt-0.5">
             {formatDaysOverdue(getDaysOverdue(due.due_date), t)}
           </div>
         )}
@@ -90,7 +90,7 @@ const DueTableRow = React.memo<DueTableRowProps>(function DueTableRow({
       <td className="px-6 py-4 text-right">
         <div className="flex items-center justify-end gap-2">
           {isSelected && isPayable && (
-            <span className="hidden sm:inline-flex items-center text-[11px] font-mono text-accent bg-surface border border-accent/40 px-1.5 py-0.5 rounded shadow-xs font-semibold mr-1">
+            <span className="hidden sm:inline-flex items-center t-micro font-mono text-accent bg-surface border border-accent/40 px-1.5 py-0.5 rounded shadow-xs font-semibold mr-1">
               {t("owner.dues.keyEnterToPay")}
             </span>
           )}

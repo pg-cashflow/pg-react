@@ -44,7 +44,7 @@ export const TenantBottomNav: React.FC<TenantBottomNavProps> = ({
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 tracking-tight">{tab.label}</span>
+              <span className="t-micro mt-0.5 tracking-tight">{tab.label}</span>
             </button>
           );
         })}

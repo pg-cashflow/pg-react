@@ -38,7 +38,10 @@ function safeImport<T>(loader: () => Promise<T>): Promise<T> {
           const url = new URL(window.location.href);
           if (!url.searchParams.has("_chunk_retry")) {
             url.searchParams.set("_chunk_retry", "1");
-            window.location.replace(url.toString());
+            const reload = () => window.location.replace(url.toString());
+            const clearCaches = "caches" in window ? caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))) : Promise.resolve();
+            const updateSW = "serviceWorker" in navigator ? navigator.serviceWorker.getRegistrations().then((regs) => Promise.all(regs.map((r) => r.update().catch(() => {})))) : Promise.resolve();
+            Promise.allSettled([clearCaches, updateSW]).finally(reload);
             return new Promise<T>(() => {});
           }
         } catch {}

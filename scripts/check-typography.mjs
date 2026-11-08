@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(process.cwd(), "src");
-const FORBIDDEN = /\btext-(xl|2xl|3xl|4xl|5xl)\b/;
+const FORBIDDEN = /\btext-(xl|2xl|3xl|4xl|5xl)\b|\btext-\[(?:[0-9]|1[01])px\]|\btext-(?:2xs|3xs)\b/;
 const SKIP = new Set(["assets"]);
 
 function walk(dir, acc = []) {
@@ -33,7 +33,7 @@ for (const f of files) {
 
 if (hits) {
   console.error(
-    `\n${hits} type-scale hit(s). Use .t-h1 / .t-display / .t-display-num (not text-xl / text-2xl).`
+    `\n${hits} type-scale hit(s). Use .t-h1 / .t-display / .t-display-num (not text-xl / text-2xl) and .t-micro (12px minimum, not text-[10px] / text-[11px]).`
   );
   process.exit(1);
 }

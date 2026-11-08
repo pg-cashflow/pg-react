@@ -71,7 +71,7 @@ export const TenantRewardsView: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             {/* Balance pill */}
             <div className="bg-surface/80 border border-hairline/80 rounded-2xl px-4 py-3 text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.balance")}</span>
+              <span className="t-micro uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.balance")}</span>
               <div className="flex items-baseline justify-center gap-1 mt-0.5">
                 <span className="t-display-num text-success">{balance}</span>
                 <span className="text-xs font-semibold text-success">{t("tenant.rewards.pts")}</span>
@@ -80,7 +80,7 @@ export const TenantRewardsView: React.FC = () => {
 
             {/* Streak flame */}
             <div className="bg-surface/80 border border-hairline/80 rounded-2xl px-4 py-3 text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.onTimeStreak")}</span>
+              <span className="t-micro uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.onTimeStreak")}</span>
               <div className="flex items-center justify-center gap-1 mt-0.5">
                 <Flame className="w-5 h-5 text-accent fill-accent animate-pulse" />
                 <span className="t-display-num text-ink">{streak}</span>
@@ -90,7 +90,7 @@ export const TenantRewardsView: React.FC = () => {
 
             {/* Freeze Tokens */}
             <div className="bg-surface/80 border border-hairline/80 rounded-2xl px-4 py-3 text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.freezeTokens")}</span>
+              <span className="t-micro uppercase font-bold text-ink-muted tracking-wider block">{t("tenant.rewards.freezeTokens")}</span>
               <div className="flex items-baseline justify-center gap-1 mt-0.5">
                 <span className="t-display-num text-accent">{freezes}</span>
                 <span className="t-caption font-semibold text-accent">{t("tenant.rewards.left")}</span>
@@ -153,7 +153,7 @@ export const TenantRewardsView: React.FC = () => {
                   </div>
 
                   {!isEligible && item.reason && (
-                    <div className="p-2 rounded-lg bg-danger-tint border border-danger/20 text-danger text-[11px] flex items-center gap-1.5">
+                    <div className="p-2 rounded-lg bg-danger-tint border border-danger/20 text-danger t-micro flex items-center gap-1.5">
                       <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>{item.reason}</span>
                     </div>
@@ -201,7 +201,7 @@ export const TenantRewardsView: React.FC = () => {
 
             {successRedemption.redemption.coupon_code && (
               <div className="p-3 bg-surface/80 rounded-2xl border border-dashed border-hairline">
-                <span className="text-[10px] uppercase font-bold text-ink-muted block mb-1">{t("tenant.rewards.couponCode")}</span>
+                <span className="t-micro uppercase font-bold text-ink-muted block mb-1">{t("tenant.rewards.couponCode")}</span>
                 <span className="font-mono text-lg font-bold text-accent tracking-wider">
                   {successRedemption.redemption.coupon_code}
                 </span>

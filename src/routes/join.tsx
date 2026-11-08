@@ -230,7 +230,7 @@ export const JoinWaitingPage: React.FC = () => {
               {inviteQuery.data?.property_name || "PG / Hostel Onboarding"}
             </span>
             {inviteQuery.data?.owner_name && (
-              <span className="text-[11px] text-ink-muted">Owner: {inviteQuery.data.owner_name}</span>
+              <span className="t-micro text-ink-muted">Owner: {inviteQuery.data.owner_name}</span>
             )}
           </div>
         </div>
@@ -298,7 +298,7 @@ export const JoinWaitingPage: React.FC = () => {
                 )}
               </div>
               {!isPhoneFixed && (
-                <p className="text-[11px] text-ink-faint mt-1">
+                <p className="t-micro text-ink-faint mt-1">
                   {t("join.phoneHelper")}
                 </p>
               )}
@@ -445,7 +445,7 @@ export const JoinWaitingPage: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2.5 bg-surface/40 border border-hairline/50 rounded-xl text-ink-muted text-sm cursor-not-allowed"
                 />
               </div>
-              <p className="text-[11px] text-ink-muted mt-1">{t("join.joinDateHelper")}</p>
+              <p className="t-micro text-ink-muted mt-1">{t("join.joinDateHelper")}</p>
             </div>
 
             <label className="flex items-start gap-2.5 text-xs text-ink cursor-pointer pt-2">

@@ -489,7 +489,7 @@ function EODBalanceDetails({ balance }: { balance: DailySettlementBalance }) {
 function SeverityBadge({ severity }: { severity: "critical" | "warning" | "info" }) {
   if (severity === "critical") {
     return (
-      <span className="text-[10px] font-bold text-danger bg-surface border border-hairline px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+      <span className="t-micro font-bold text-danger bg-surface border border-hairline px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
         <AlertTriangle className="w-3 h-3 text-danger" />
         Critical
       </span>
@@ -497,14 +497,14 @@ function SeverityBadge({ severity }: { severity: "critical" | "warning" | "info"
   }
   if (severity === "warning") {
     return (
-      <span className="text-[10px] font-bold text-accent bg-surface border border-hairline px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+      <span className="t-micro font-bold text-accent bg-surface border border-hairline px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
         <AlertTriangle className="w-3 h-3 text-accent" />
         Warning
       </span>
     );
   }
   return (
-    <span className="text-[10px] font-bold text-ink-muted bg-surface border border-hairline px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+    <span className="t-micro font-bold text-ink-muted bg-surface border border-hairline px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
       <Info className="w-3 h-3 text-ink-muted" />
       Info
     </span>

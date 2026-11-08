@@ -51,7 +51,7 @@ export const TenantDuesView: React.FC = () => {
                     <p className="t-code text-ink-muted">{d.due_code}</p>
                     <p className="t-date text-ink-muted">{formatDate(d.due_date, locale)}</p>
                     {isOverdue(d) && (
-                      <p className="text-danger text-[11px] font-medium mt-0.5">
+                      <p className="text-danger t-micro font-medium mt-0.5">
                         {formatDaysOverdue(getDaysOverdue(d.due_date), t)}
                       </p>
                     )}

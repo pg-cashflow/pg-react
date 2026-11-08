@@ -45,7 +45,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 tracking-tight">{t(tab.key)}</span>
+              <span className="t-micro mt-0.5 tracking-tight">{t(tab.key)}</span>
             </button>
           );
         })}
@@ -68,7 +68,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           >
             <MoreHorizontal className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">{t("nav.more")}</span>
+          <span className="t-micro mt-0.5 tracking-tight">{t("nav.more")}</span>
         </button>
       </div>
     </nav>

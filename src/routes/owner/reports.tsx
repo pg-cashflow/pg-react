@@ -184,7 +184,7 @@ export const ReportsView: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-ink">{tenantMap.get(r.tenant_id) || t("owner.reports.tenantFallback")}</p>
                         {isSelected && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-contrast">
+                          <span className="inline-flex items-center gap-1 t-micro font-mono font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-contrast">
                             {t("owner.reports.activeHint")}
                           </span>
                         )}
@@ -205,7 +205,7 @@ export const ReportsView: React.FC = () => {
                       className="px-3.5 py-2 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success/90 active:scale-95 transition disabled:opacity-50 flex items-center gap-1.5"
                     >
                       <span>{t("common.confirm")}</span>
-                      {isSelected && <span className="text-[10px] opacity-80 font-mono">{t("common.keyEnterParen")}</span>}
+                      {isSelected && <span className="t-micro opacity-80 font-mono">{t("common.keyEnterParen")}</span>}
                     </button>
                     <button
                       onClick={(e) => {

@@ -226,7 +226,7 @@ export const TenantCommunityView: React.FC = () => {
             <label className="p-3.5 rounded-xl bg-bg border border-hairline/60 flex items-center justify-between cursor-pointer hover:bg-accent-tint transition">
               <div>
                 <span className="font-semibold text-xs text-ink block">{t("tenant.community.mealBreakfast")}</span>
-                <span className="text-[11px] text-ink-muted">{t("tenant.community.mealBreakfastTime")}</span>
+                <span className="t-micro text-ink-muted">{t("tenant.community.mealBreakfastTime")}</span>
               </div>
               <input
                 type="checkbox"
@@ -239,7 +239,7 @@ export const TenantCommunityView: React.FC = () => {
             <label className="p-3.5 rounded-xl bg-bg border border-hairline/60 flex items-center justify-between cursor-pointer hover:bg-accent-tint transition">
               <div>
                 <span className="font-semibold text-xs text-ink block">{t("tenant.community.mealLunch")}</span>
-                <span className="text-[11px] text-ink-muted">{t("tenant.community.mealLunchTime")}</span>
+                <span className="t-micro text-ink-muted">{t("tenant.community.mealLunchTime")}</span>
               </div>
               <input
                 type="checkbox"
@@ -252,7 +252,7 @@ export const TenantCommunityView: React.FC = () => {
             <label className="p-3.5 rounded-xl bg-bg border border-hairline/60 flex items-center justify-between cursor-pointer hover:bg-accent-tint transition">
               <div>
                 <span className="font-semibold text-xs text-ink block">{t("tenant.community.mealDinner")}</span>
-                <span className="text-[11px] text-ink-muted">{t("tenant.community.mealDinnerTime")}</span>
+                <span className="t-micro text-ink-muted">{t("tenant.community.mealDinnerTime")}</span>
               </div>
               <input
                 type="checkbox"
@@ -301,7 +301,7 @@ export const TenantCommunityView: React.FC = () => {
                 >
                   <div>
                     <h4 className="text-xs font-bold text-ink">{opt.title}</h4>
-                    {opt.description && <p className="text-[11px] text-ink-muted mt-0.5">{opt.description}</p>}
+                    {opt.description && <p className="t-micro text-ink-muted mt-0.5">{opt.description}</p>}
                   </div>
                   <button
                     onClick={() => voteMutation.mutate({ pollId: pollQuery.data!.poll!.id, optionId: opt.id })}
@@ -343,7 +343,7 @@ export const TenantCommunityView: React.FC = () => {
                       <span className="text-xs font-bold text-ink capitalize block">
                         {ins.inspection_type} Inspection
                       </span>
-                      <span className="text-[11px] text-ink-muted font-mono">
+                      <span className="t-micro text-ink-muted font-mono">
                         {new Date(ins.inspected_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -374,16 +374,16 @@ export const TenantCommunityView: React.FC = () => {
                               setDisputingItemId(it.id);
                               setDisputeNote("");
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-surface hover:bg-surface border border-hairline text-[10px] text-ink"
+                            className="px-2.5 py-1 rounded-lg bg-surface hover:bg-surface border border-hairline t-micro text-ink"
                           >
                             Dispute (48h)
                           </button>
                         )}
                         {it.resolution_status === "disputed" && (
-                          <span className="text-[10px] text-accent font-medium">{t("tenant.community.underReview")}</span>
+                          <span className="t-micro text-accent font-medium">{t("tenant.community.underReview")}</span>
                         )}
                         {it.resolution_status === "overturned" && (
-                          <span className="text-[10px] text-success font-medium">{t("tenant.community.disputeUpheld")}</span>
+                          <span className="t-micro text-success font-medium">{t("tenant.community.disputeUpheld")}</span>
                         )}
                       </div>
                     ))}

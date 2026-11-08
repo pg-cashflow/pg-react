@@ -48,7 +48,7 @@ export const TenantPaymentsView: React.FC = () => {
                   <p className="text-xs text-ink-muted">{formatDate(p.matched_at)}</p>
                   {refId && (
                     <div className="flex items-center gap-1.5 pt-0.5">
-                      <span className="text-[11px] font-mono text-ink-muted select-all">
+                      <span className="t-micro font-mono text-ink-muted select-all">
                         Ref: {refId}
                       </span>
                       <button

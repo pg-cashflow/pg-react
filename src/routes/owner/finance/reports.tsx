@@ -117,28 +117,28 @@ export const FinanceReportsView: React.FC = () => {
           {drift && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.grossCollected")}</span>
+                <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.grossCollected")}</span>
                 <div>
                   <AmountBadge amount={drift.total_gross_collected_paise} className="font-bold text-base" />
                 </div>
               </div>
 
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.grossSettled")}</span>
+                <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.grossSettled")}</span>
                 <div>
                   <AmountBadge amount={drift.total_gross_settled_paise} className="font-bold text-base" />
                 </div>
               </div>
 
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.netUncleared")}</span>
+                <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.netUncleared")}</span>
                 <div>
                   <AmountBadge amount={drift.net_uncleared_paise} className="font-bold text-base" />
                 </div>
               </div>
 
               <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.agingOver3Days")}</span>
+                <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.agingOver3Days")}</span>
                 <div>
                   <AmountBadge
                     amount={drift.aging_past_3_days_paise}
@@ -194,7 +194,7 @@ export const FinanceReportsView: React.FC = () => {
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">
+                  <span className="t-micro font-semibold text-ink-muted uppercase">
                     Deposit Liability
                   </span>
                   <div>
@@ -203,7 +203,7 @@ export const FinanceReportsView: React.FC = () => {
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">
+                  <span className="t-micro font-semibold text-ink-muted uppercase">
                     Bank Cash Balance
                   </span>
                   <div>
@@ -212,7 +212,7 @@ export const FinanceReportsView: React.FC = () => {
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">
+                  <span className="t-micro font-semibold text-ink-muted uppercase">
                     {reserve.is_deficit ? "Deficit" : "Surplus"}
                   </span>
                   <div>
@@ -281,28 +281,28 @@ export const FinanceReportsView: React.FC = () => {
             <div className="space-y-3">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.invested")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.invested")}</span>
                   <div>
                     <AmountBadge amount={payback.total_invested_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.withdrawn")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.withdrawn")}</span>
                   <div>
                     <AmountBadge amount={payback.total_withdrawn_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.cumulativeOcf")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.cumulativeOcf")}</span>
                   <div>
                     <AmountBadge amount={payback.cumulative_ocf_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.unrecoveredCapital")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.unrecoveredCapital")}</span>
                   <div>
                     <AmountBadge
                       amount={payback.unrecovered_capital_paise}
@@ -354,21 +354,21 @@ export const FinanceReportsView: React.FC = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.budgetedOcf")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.budgetedOcf")}</span>
                   <div>
                     <AmountBadge amount={variance.budgeted_ocf_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.actualOcf")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.actualOcf")}</span>
                   <div>
                     <AmountBadge amount={variance.actual_ocf_paise} className="font-bold text-base" />
                   </div>
                 </div>
 
                 <div className="bg-surface-muted/30 border border-hairline rounded-xl p-3.5 space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-muted uppercase">{t("owner.finance.residualUnexplained")}</span>
+                  <span className="t-micro font-semibold text-ink-muted uppercase">{t("owner.finance.residualUnexplained")}</span>
                   <div>
                     <AmountBadge amount={variance.residual_paise} className="font-bold text-base" />
                   </div>
@@ -416,7 +416,7 @@ export const FinanceReportsView: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-ink">{item.item_type}</span>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning/10 text-warning border border-warning/20">
+                    <span className="px-2 py-0.5 rounded-full t-micro font-semibold bg-warning/10 text-warning border border-warning/20">
                       {item.age_bucket} ({item.age_days}d)
                     </span>
                   </div>

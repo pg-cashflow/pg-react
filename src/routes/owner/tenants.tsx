@@ -197,19 +197,19 @@ export const TenantsView: React.FC = () => {
                       <td className="px-6 py-4">{tItem.due_day != null ? t("owner.tenants.dayPrefix", { day: tItem.due_day }) : "—"}</td>
                       <td className="px-6 py-4 text-xs">
                         {tItem.status === "active" ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-semibold bg-success-tint text-success border border-success/20">
                             {t("common.active")}
                           </span>
                         ) : tItem.status === "pending_allocation" ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-semibold bg-warning-tint text-warning border border-warning/20">
                             {t("owner.tenants.awaitingRoom")}
                           </span>
                         ) : tItem.status === "vacated" ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-medium bg-hairline/30 text-ink-muted border border-hairline">
                             {t("common.vacated")}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg text-ink border border-hairline capitalize">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-medium bg-bg text-ink border border-hairline capitalize">
                             {tItem.status}
                           </span>
                         )}
@@ -235,15 +235,15 @@ export const TenantsView: React.FC = () => {
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-ink">{selected.name}</h3>
                 {selected.status === "active" ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-tint text-success border border-success/20">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-semibold bg-success-tint text-success border border-success/20">
                     Active
                   </span>
                 ) : selected.status === "pending_allocation" ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-tint text-warning border border-warning/20">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-semibold bg-warning-tint text-warning border border-warning/20">
                     Awaiting Room
                   </span>
                 ) : (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-hairline/30 text-ink-muted border border-hairline capitalize">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full t-micro font-medium bg-hairline/30 text-ink-muted border border-hairline capitalize">
                     {selected.status}
                   </span>
                 )}

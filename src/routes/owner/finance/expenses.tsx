@@ -116,19 +116,19 @@ export const FinanceExpensesView: React.FC = () => {
                     {e.description || "Expense"}
                   </h3>
                   <span
-                    className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                    className={`inline-block px-2.5 py-0.5 rounded-full t-micro font-semibold border ${
                       STATUS_BADGE_STYLE[e.status]
                     }`}
                   >
                     {STATUS_LABEL[e.status]}
                   </span>
                   {e.emergency && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-danger/10 text-danger border border-danger/20">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full t-micro font-semibold bg-danger/10 text-danger border border-danger/20">
                       <AlertCircle size={10} /> Emergency
                     </span>
                   )}
                   {e.is_recurring && (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-muted text-ink-muted">
+                    <span className="px-2 py-0.5 rounded-full t-micro font-medium bg-surface-muted text-ink-muted">
                       Recurring
                     </span>
                   )}
