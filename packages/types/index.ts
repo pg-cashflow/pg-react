@@ -61,6 +61,10 @@ export const ERROR_CODES = [
   "payment.ambiguousMatch",
   "payment.noMatch",
   "payment.invalidAmount",
+  "payment.refundShortfall",
+  "payment.refundExceedsBalance",
+  "payment.refundInFlight",
+  "payment.refundNotEligible",
   "finance.duplicateRequest",
   "finance.idempotencyRequired",
   "finance.invalidAmount",
@@ -94,6 +98,10 @@ export const ERROR_CODES = [
   "push.endpointConflict",
   "payment.refundReasonLength",
   "payment.refundReasonCharacters",
+  "payment.refundManagerLimitExceeded",
+  "payment.bankAccountInvalid",
+  "payment.bankNameMismatch",
+  "payment.bankVerifierUnavailable",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -739,9 +747,17 @@ export interface Referral {
 // --- M7 Money Out / Payout Models ---
 export type PayeeType = "staff" | "vendor" | "tenant_deposit" | "guardian_deposit";
 
+export type PayeeVerificationStatus =
+  | "unverified"
+  | "owner_attested"
+  | "provider_pending"
+  | "provider_verified"
+  | "provider_failed";
+
 export interface PayoutPayee {
   id: string;
   property_id: string;
+  tenant_id?: string | null;
   payee_type: PayeeType;
   name: string;
   phone?: string | null;
@@ -751,6 +767,12 @@ export interface PayoutPayee {
   upi_vpa?: string | null;
   key_version: number;
   is_verified: boolean;
+  verification_status?: PayeeVerificationStatus;
+  verification_method?: string | null;
+  verification_ref?: string | null;
+  name_at_bank?: string | null;
+  name_match_score?: number | null;
+  name_match_result?: string | null;
   verified_by?: string | null;
   verified_at?: string | null;
   created_at: string;

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { X, UserPlus, Building, Smartphone, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useCreatePayee } from "@/lib/usePayouts";
+import { getTenants } from "@/api/tenants";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 import type { PayeeType } from "@pg/types";
 import { useLocale } from "@/i18n";
 
@@ -24,7 +27,14 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
   const [ifsc, setIfsc] = useState("");
   const [bankName, setBankName] = useState("");
   const [upiVpa, setUpiVpa] = useState("");
+  const [tenantId, setTenantId] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { data: tenants = [], isLoading: isTenantsLoading } = useQuery({
+    queryKey: QUERY_KEYS.tenants,
+    queryFn: getTenants,
+    enabled: isOpen && payeeType === "tenant_deposit",
+  });
 
   const createPayeeMutation = useCreatePayee();
 
@@ -33,6 +43,11 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    if (payeeType === "tenant_deposit" && !tenantId) {
+      setErrorMessage("Please select a tenant for deposit refunds.");
+      return;
+    }
 
     if (!name.trim()) {
       setErrorMessage("Please enter payee name.");
@@ -51,11 +66,24 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
       }
     }
 
+    let cleanPhone = phone.trim();
+    if (cleanPhone) {
+      const digits = cleanPhone.replace(/\D/g, "");
+      if (digits.length === 10) {
+        cleanPhone = digits;
+      } else if (digits.length === 11 && digits.startsWith("0")) {
+        cleanPhone = digits.slice(1);
+      } else if (digits.length === 12 && digits.startsWith("91")) {
+        cleanPhone = digits.slice(2);
+      }
+    }
+
     createPayeeMutation.mutate(
       {
+        tenant_id: payeeType === "tenant_deposit" ? tenantId : undefined,
         name: name.trim(),
         payee_type: payeeType,
-        phone: phone.trim() || undefined,
+        phone: cleanPhone || undefined,
         account_number: transferType === "bank" ? accountNumber.trim() : undefined,
         ifsc: transferType === "bank" ? ifsc.trim().toUpperCase() : undefined,
         bank_name: transferType === "bank" ? bankName.trim() || undefined : undefined,
@@ -124,6 +152,42 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
               ))}
             </div>
           </div>
+
+          {payeeType === "tenant_deposit" && (
+            <div>
+              <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1">
+                Select Tenant * {/* lint-allow-i18n */}
+              </label>
+              {isTenantsLoading ? (
+                <div className="flex items-center gap-2 px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-ink-muted text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Loading tenants...</span> {/* lint-allow-i18n */}
+                </div>
+              ) : (
+                <select
+                  required
+                  value={tenantId}
+                  onChange={(e) => {
+                    const tid = e.target.value;
+                    setTenantId(tid);
+                    const selected = tenants.find((t) => t.id === tid);
+                    if (selected) {
+                      if (!name.trim()) setName(selected.name);
+                      if (!phone.trim() && selected.phone) setPhone(selected.phone);
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-bg border border-hairline rounded-xl text-ink text-sm focus:outline-none focus:border-accent"
+                >
+                  <option value="">-- Choose Tenant --</option> {/* lint-allow-i18n */}
+                  {tenants.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} {t.room_number ? `(Room ${t.room_number})` : ""} {t.status === "vacated" ? "[Vacated]" : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1">

@@ -3,7 +3,7 @@ import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { OtpInput } from "@/components/shared/OtpInput";
 import { useLocale } from "@/i18n";
-import { useRequestPayoutBatchOTP, useApprovePayoutBatch } from "@/lib/usePayouts";
+import { useRequestPayoutBatchOTP, useApprovePayoutBatch, usePayoutBatch, usePayees } from "@/lib/usePayouts";
 import type { PayoutBatch } from "@pg/types";
 
 interface BatchApprovalModalProps {
@@ -25,6 +25,16 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   const [otp, setOtp] = useState("");
   const [otpSentInfo, setOtpSentInfo] = useState<{ channel: string; destination: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { data: batchDetails, isLoading: isBatchLoading } = usePayoutBatch(batch.id);
+  const { data: payees = [] } = usePayees();
+
+  const payeeMap = React.useMemo(
+    () => new Map(payees.map((p) => [p.id, p])),
+    [payees]
+  );
+
+  const items = batchDetails?.items || [];
 
   const requestOTPMutation = useRequestPayoutBatchOTP();
   const approveMutation = useApprovePayoutBatch();
@@ -87,7 +97,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface border border-hairline rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-surface border border-hairline rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-hairline flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -108,7 +118,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleApprove} className="p-6 space-y-6">
+        <form onSubmit={handleApprove} className="p-6 space-y-6 overflow-y-auto">
           {errorMessage && (
             <div className="p-3 rounded-xl bg-danger/10 border border-danger/25 text-danger text-sm font-medium">
               {errorMessage}
@@ -124,6 +134,76 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
             <div>
               <p className="text-xs text-ink-muted font-medium uppercase tracking-wider">{t("owner.batch.totalAmount")}</p>
               <p className="t-h2 font-mono text-ink mt-0.5">{formatPaise(batch.total_amount_paise)}</p>
+            </div>
+          </div>
+
+          {/* Itemized Payout Instructions Table */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-ink uppercase tracking-wider">
+                Payout Instructions Review ({items.length || batch.item_count}) {/* lint-allow-i18n */}
+              </label>
+              <span className="text-xs text-ink-muted">Inspect payees & amounts before authorizing</span> {/* lint-allow-i18n */}
+            </div>
+
+            <div className="border border-hairline rounded-xl overflow-hidden bg-bg">
+              {isBatchLoading ? (
+                <div className="p-6 text-center text-xs text-ink-muted flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Loading batch instructions...</span> {/* lint-allow-i18n */}
+                </div>
+              ) : items.length === 0 ? (
+                <div className="p-6 text-center text-xs text-ink-muted">
+                  <span>No items found in this batch.</span> {/* lint-allow-i18n */}
+                </div>
+              ) : (
+                <div className="max-h-52 overflow-y-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-surface text-ink-muted uppercase font-semibold sticky top-0 border-b border-hairline">
+                      <tr>
+                        <th className="px-3.5 py-2">{t("owner.payouts.thPayee")}</th>
+                        <th className="px-3.5 py-2">{t("owner.payouts.thPaymentDetails")}</th>
+                        <th className="px-3.5 py-2">{t("owner.payouts.thPurpose")}</th>
+                        <th className="px-3.5 py-2 text-right">{t("owner.payouts.thAmount")}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-hairline">
+                      {items.map((it) => {
+                        const payee = payeeMap.get(it.payee_id);
+                        return (
+                          <tr key={it.id} className="hover:bg-surface/50">
+                            <td className="px-3.5 py-2.5">
+                              <div className="font-semibold text-ink">{payee?.name || it.payee_id}</div>
+                              {payee && (
+                                <span className="text-[10px] text-ink-muted capitalize">
+                                  {payee.payee_type.replace("_", " ")}
+                                  {payee.verification_status === "provider_verified" ? " • Bank Verified" : " • Attested"} {/* lint-allow-i18n */}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3.5 py-2.5 font-mono text-[11px] text-ink-muted">
+                              {payee?.account_number_last4 ? (
+                                <div>•••• {payee.account_number_last4} ({payee.ifsc || "Bank"})</div>
+                              ) : payee?.upi_vpa ? (
+                                <div>UPI: {payee.upi_vpa}</div>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                            <td className="px-3.5 py-2.5">
+                              <span className="font-medium text-ink capitalize">{it.purpose}</span>
+                              <div className="font-mono text-[10px] text-ink-muted">{it.reference_number}</div>
+                            </td>
+                            <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-ink">
+                              {formatPaise(it.amount_paise)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
 

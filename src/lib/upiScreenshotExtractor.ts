@@ -12,6 +12,14 @@ async function ensureTesseract(): Promise<boolean> {
   tesseractLoadAttempted = true;
 
   try {
+    // Verify file exists and is JavaScript before appending script (prevents executing SPA fallback index.html)
+    const check = await fetch("/vendor/tesseract/tesseract.min.js", { method: "HEAD" });
+    const contentType = check.headers.get("content-type") || "";
+    if (!check.ok || contentType.includes("text/html")) {
+      tesseractAvailable = false;
+      return false;
+    }
+
     await new Promise<void>((resolve, reject) => {
       const script = document.createElement("script");
       script.src = "/vendor/tesseract/tesseract.min.js";
@@ -29,6 +37,7 @@ async function ensureTesseract(): Promise<boolean> {
     });
     return true;
   } catch {
+    tesseractAvailable = false;
     return false;
   }
 }

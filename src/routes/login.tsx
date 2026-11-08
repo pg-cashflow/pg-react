@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/auth/context";
 import { getInviteCode, setInviteCode } from "@/auth/storage";
-import { resetFirebasePhoneAuth } from "@/auth/firebasePhone";
 import { Building2, ArrowRight, Phone, AlertCircle, Loader2, Sparkles, X } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import AuthLayout from "@/components/layout/AuthLayout";
@@ -389,7 +388,7 @@ export const LoginPage: React.FC = () => {
                 setOtp("");
                 setResendCooldown(0);
                 setError(null);
-                resetFirebasePhoneAuth();
+                void import("@/auth/firebasePhone").then((m) => m.resetFirebasePhoneAuth());
               }}
               className="w-full text-center text-xs text-ink-muted hover:text-ink transition py-1"
             >

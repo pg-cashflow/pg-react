@@ -5,10 +5,12 @@ import {
   FileCheck2,
   Download,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   Clock,
   Layers,
   UserCheck,
+  ShieldCheck,
   Loader2,
   RefreshCw,
 } from "lucide-react";
@@ -237,7 +239,19 @@ export const PayoutsView: React.FC = () => {
 
       {/* Tab 1: Payout Batches */}
       {activeTab === "batches" && (
-        <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
+        <div className="space-y-4">
+          {batches.some((b) => b.status === "dispatch_unknown") && (
+            <div className="p-4 rounded-2xl bg-warning-tint border border-warning/30 text-ink text-sm flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-warning">Reconciliation Polling In Progress</p> {/* lint-allow-i18n */}
+                <p className="text-xs text-ink-muted mt-0.5"> {/* lint-allow-i18n */}
+                  One or more payout batches have an ambiguous dispatch status. The system is actively querying Cashfree to verify whether transfers settled. Do not re-initiate or duplicate instructions while reconciliation is running.
+                </p>
+              </div>
+            </div>
+          )}
+          <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
           <QueryState
             isLoading={isBatchesLoading}
             isError={isBatchesError}
@@ -279,6 +293,8 @@ export const PayoutsView: React.FC = () => {
                               ? "bg-accent-tint text-accent"
                               : b.status === "processing"
                               ? "bg-warning-tint text-warning"
+                              : b.status === "dispatch_unknown"
+                              ? "bg-warning-tint text-warning border border-warning/30"
                               : b.status === "failed"
                               ? "bg-danger/10 text-danger"
                               : "bg-bg text-ink-muted border border-hairline"
@@ -287,7 +303,8 @@ export const PayoutsView: React.FC = () => {
                           {b.status === "completed" && <CheckCircle2 className="w-3.5 h-3.5" />}
                           {b.status === "approved" && <FileCheck2 className="w-3.5 h-3.5" />}
                           {b.status === "processing" && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                          {b.status.replace("_", " ")}
+                          {b.status === "dispatch_unknown" && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
+                          {b.status === "dispatch_unknown" ? "Polling Gateway" : b.status.replace("_", " ")}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-xs text-ink-muted font-medium">
@@ -342,6 +359,7 @@ export const PayoutsView: React.FC = () => {
               </table>
             </div>
           </QueryState>
+        </div>
         </div>
       )}
 
@@ -474,18 +492,40 @@ export const PayoutsView: React.FC = () => {
                             <span className="font-semibold text-ink">A/C: •••• {p.account_number_last4}</span>
                             {p.ifsc && <span> • IFSC: {p.ifsc}</span>}
                             {p.bank_name && <div>{p.bank_name}</div>}
+                            {p.name_at_bank && (
+                              <div className="text-[11px] text-accent mt-0.5">
+                                Bank Registered Name: {p.name_at_bank}
+                              </div>
+                            )}
                           </div>
                         ) : p.upi_vpa ? (
-                          <div className="font-mono text-ink">UPI: {p.upi_vpa}</div>
+                          <div>
+                            <div className="font-mono text-ink">UPI: {p.upi_vpa}</div>
+                            {p.name_at_bank && (
+                              <div className="text-[11px] text-accent mt-0.5">
+                                Bank Registered Name: {p.name_at_bank}
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           t("owner.payouts.noPaymentInfo")
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        {p.is_verified ? (
+                        {p.verification_status === "provider_verified" ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            {t("owner.payouts.verified")}
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            Bank Verified
+                          </span>
+                        ) : p.verification_status === "owner_attested" || (p.is_verified && !p.verification_status) ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent-tint text-accent border border-accent/20">
+                            <UserCheck className="w-3.5 h-3.5" />
+                            Owner Attested
+                          </span>
+                        ) : p.verification_status === "provider_failed" ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-danger/10 text-danger">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Verification Failed
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-tint text-warning">

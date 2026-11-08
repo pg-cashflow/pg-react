@@ -45,6 +45,10 @@
   "payment.ambiguousMatch",
   "payment.noMatch",
   "payment.invalidAmount",
+  "payment.refundShortfall",
+  "payment.refundExceedsBalance",
+  "payment.refundInFlight",
+  "payment.refundNotEligible",
   "finance.duplicateRequest",
   "finance.idempotencyRequired",
   "finance.invalidAmount",
@@ -77,5 +81,9 @@
   "push.endpointInvalid",
   "push.endpointConflict",
   "payment.refundReasonLength",
-  "payment.refundReasonCharacters"
+  "payment.refundReasonCharacters",
+  "payment.refundManagerLimitExceeded",
+  "payment.bankAccountInvalid",
+  "payment.bankNameMismatch",
+  "payment.bankVerifierUnavailable"
 ]
