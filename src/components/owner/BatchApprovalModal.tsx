@@ -3,6 +3,7 @@ import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { OtpInput } from "@/components/shared/OtpInput";
 import { useLocale } from "@/i18n";
+import { useAuth } from "@/auth/context";
 import { useRequestPayoutBatchOTP, useApprovePayoutBatch, usePayoutBatch, usePayees } from "@/lib/usePayouts";
 import type { PayoutBatch } from "@pg/types";
 
@@ -20,11 +21,14 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   onApproved,
 }) => {
   const { t } = useLocale();
+  const { userId } = useAuth();
   const [itemCountInput, setItemCountInput] = useState("");
   const [rupeesInput, setRupeesInput] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSentInfo, setOtpSentInfo] = useState<{ channel: string; destination: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const isMaker = Boolean(userId && batch.created_by && userId === batch.created_by);
 
   const { data: batchDetails, isLoading: isBatchLoading } = usePayoutBatch(batch.id);
   const { data: payees = [] } = usePayees();
@@ -89,7 +93,15 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
           onClose();
         },
         onError: (err: any) => {
-          setErrorMessage(err.message || "Batch approval failed.");
+          if (
+            err.status === 403 ||
+            err.message?.toLowerCase().includes("dual control") ||
+            err.message?.toLowerCase().includes("different owner")
+          ) {
+            setErrorMessage("Dual-control security policy requires this batch to be approved by a different property owner.");
+          } else {
+            setErrorMessage(err.message || "Batch approval failed.");
+          }
         },
       }
     );
@@ -119,6 +131,16 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleApprove} className="p-6 space-y-6 overflow-y-auto">
+          {isMaker && (
+            <div className="p-3.5 rounded-xl bg-accent-tint border border-accent/20 text-ink text-xs flex items-start gap-2.5">
+              <ShieldAlert className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <div>
+                <span className="font-semibold text-accent">Maker-Checker Notice:</span>{" "}
+                You created this payout batch. If this property operates under dual-control policy with multiple owners, a different owner must authorize it.
+              </div>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="p-3 rounded-xl bg-danger/10 border border-danger/25 text-danger text-sm font-medium">
               {errorMessage}

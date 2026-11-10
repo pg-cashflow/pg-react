@@ -43,4 +43,29 @@ describe("refund recovery safety", () => {
     expect(container.textContent).toContain("Refund Initiated");
     expect(container.querySelector("form")).toBeNull();
   });
+  it("limits maximum refund to remaining balance returned by refund history", async () => {
+    vi.spyOn(payments, "getPaymentRefundHistory").mockResolvedValue({
+      payment_id: "payment-1",
+      original_amount_paise: 100000,
+      refunded_amount_paise: 60000,
+      reserved_amount_paise: 0,
+      remaining_refundable_paise: 40000,
+      refunds: [],
+      pending_operation: null,
+    });
+    await open();
+    expect(container.textContent).toContain("400.00");
+  });
+  it("blocks submission and shows expiration warning if payment is older than refund window", async () => {
+    const expiredPayment = {
+      id: "payment-old",
+      amount: 100000,
+      matched_by: "cashfree",
+      created_at: new Date(Date.now() - 130 * 24 * 60 * 60 * 1000).toISOString(),
+    } as Payment;
+    await act(async () => root.render(<RefundModal payment={expiredPayment} tenantName="Old tenant" isOpen onClose={() => {}} />));
+    expect(container.textContent).toContain("cannot be refunded via gateway");
+    const submitBtn = container.querySelector('button[type="submit"]') as HTMLButtonElement;
+    expect(submitBtn.disabled).toBe(true);
+  });
 });

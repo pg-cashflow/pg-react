@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, UserPlus, Building, Smartphone, Loader2 } from "lucide-react";
+import { X, UserPlus, Building, Smartphone, Loader2, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCreatePayee } from "@/lib/usePayouts";
 import { getTenants } from "@/api/tenants";
@@ -289,6 +289,13 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
                 />
               </div>
             )}
+          </div>
+
+          <div className="p-3 bg-bg border border-hairline rounded-xl text-ink-muted text-xs flex items-start gap-2">
+            <Clock className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+            <span>
+              <strong>24-Hour Cooling-Off:</strong> Newly registered payees have a mandatory 24-hour security cooling-off window before they can be added to a payout batch.
+            </span>
           </div>
 
           <div className="pt-4 border-t border-hairline flex items-center justify-end gap-3">

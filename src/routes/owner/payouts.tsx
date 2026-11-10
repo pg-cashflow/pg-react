@@ -31,6 +31,16 @@ import { CreatePayeeModal } from "@/components/owner/CreatePayeeModal";
 import { useLocale } from "@/i18n";
 import type { PayoutBatch } from "@pg/types";
 
+const getCoolingOffRemainingHours = (createdAt?: string): number => {
+  if (!createdAt) return 0;
+  const createdTime = new Date(createdAt).getTime();
+  const elapsedHours = (Date.now() - createdTime) / (1000 * 60 * 60);
+  if (elapsedHours < 24) {
+    return Math.max(1, Math.ceil(24 - elapsedHours));
+  }
+  return 0;
+};
+
 export const PayoutsView: React.FC = () => {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"batches" | "unbatched" | "payees">("batches");
@@ -71,6 +81,13 @@ export const PayoutsView: React.FC = () => {
     () => new Map(payees.map((p) => [p.id, p])),
     [payees]
   );
+
+  const coolingOffItemsCount = React.useMemo(() => {
+    return unbatchedItems.filter((it) => {
+      const p = payeeMap.get(it.payee_id);
+      return getCoolingOffRemainingHours(p?.created_at) > 0;
+    }).length;
+  }, [unbatchedItems, payeeMap]);
 
   const handleCreateBatch = () => {
     setActionError(null);
@@ -381,13 +398,24 @@ export const PayoutsView: React.FC = () => {
             {unbatchedItems.length > 0 && (
               <button
                 onClick={handleCreateBatch}
-                disabled={createBatchMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:opacity-90 transition shadow-sm"
+                disabled={createBatchMutation.isPending || coolingOffItemsCount > 0}
+                className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:opacity-90 transition shadow-sm disabled:opacity-50"
+                title={coolingOffItemsCount > 0 ? "Blocked: one or more payees are in 24-hour cooling-off" : undefined}
               >
                 {t("owner.payouts.createBatch")}
               </button>
             )}
           </div>
+
+          {coolingOffItemsCount > 0 && (
+            <div className="p-3.5 rounded-xl bg-warning-tint border border-warning/30 text-ink text-xs flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+              <div>
+                <span className="font-semibold text-warning">Cooling-Off Period Active:</span>{" "}
+                {coolingOffItemsCount} unbatched item(s) are linked to payees registered within the last 24 hours. Batch generation will unlock once the mandatory 24-hour security window finishes.
+              </div>
+            </div>
+          )}
 
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
             <QueryState
@@ -418,9 +446,17 @@ export const PayoutsView: React.FC = () => {
                           <td className="px-6 py-4">
                             <div className="font-semibold text-ink">{payee?.name || item.payee_id}</div>
                             {payee && (
-                              <span className="text-xs text-ink-muted capitalize">
-                                {payee.payee_type.replace("_", " ")}
-                              </span>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-xs text-ink-muted capitalize">
+                                  {payee.payee_type.replace("_", " ")}
+                                </span>
+                                {getCoolingOffRemainingHours(payee.created_at) > 0 && (
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-micro font-medium bg-warning-tint text-warning border border-warning/30">
+                                    <Clock className="w-2.5 h-2.5" />
+                                    {getCoolingOffRemainingHours(payee.created_at)}h cooling-off
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </td>
                           <td className="px-6 py-4">
@@ -532,6 +568,14 @@ export const PayoutsView: React.FC = () => {
                             <Clock className="w-3.5 h-3.5" />
                             {t("owner.payouts.pendingVerification")}
                           </span>
+                        )}
+                        {getCoolingOffRemainingHours(p.created_at) > 0 && (
+                          <div className="mt-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning-tint text-warning font-medium t-micro border border-warning/30">
+                              <Clock className="w-3 h-3" />
+                              Cooling off ({getCoolingOffRemainingHours(p.created_at)}h left)
+                            </span>
+                          </div>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">

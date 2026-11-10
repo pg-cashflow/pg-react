@@ -18,6 +18,29 @@ export const getPayments = async (matchedBy?: MatchedBy): Promise<Payment[]> => 
 export const requestRefundOTP = (paymentId: string): Promise<{ channel: string; destination: string }> =>
   apiFetch(`/owner/payments/${paymentId}/refund/request-otp`, { method: "POST", body: "{}" });
 
+export interface PaymentRefundSummary {
+  id: string;
+  refund_reference?: string;
+  amount_paise: number;
+  status: string;
+  reason: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentRefundHistory {
+  payment_id: string;
+  original_amount_paise: number;
+  refunded_amount_paise: number;
+  reserved_amount_paise: number;
+  remaining_refundable_paise: number;
+  refunds: PaymentRefundSummary[];
+  pending_operation?: PaymentRefundSummary | null;
+}
+
+export const getPaymentRefundHistory = (paymentId: string): Promise<PaymentRefundHistory> =>
+  apiFetch<PaymentRefundHistory>(`/owner/payments/${paymentId}/refunds`);
+
 export const refundPayment = async (
   paymentId: string,
   input: OwnerRefundInput,

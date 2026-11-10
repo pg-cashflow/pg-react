@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
-import { refundPayment, requestRefundOTP } from "@/api/payments";
+import { refundPayment, requestRefundOTP, getPaymentRefundHistory } from "@/api/payments";
+import { REFUND_WINDOW_DAYS } from "@/lib/constants";
 import type { Payment, GatewayRefund } from "@pg/types";
 import { useLocale, formatApiError } from "@/i18n";
 
@@ -32,6 +33,9 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   const [sendingOTP, setSendingOTP] = useState(false);
   const [otpDestination, setOtpDestination] = useState("");
   const [attemptPending, setAttemptPending] = useState(false);
+  const [remainingPaise, setRemainingPaise] = useState<number | null>(null);
+  const [hasPendingOp, setHasPendingOp] = useState(false);
+  const [isExpiredWindow, setIsExpiredWindow] = useState(false);
 
   const generateNewKey = () => {
     if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -42,7 +46,6 @@ export const RefundModal: React.FC<RefundModalProps> = ({
 
   useEffect(() => {
     if (isOpen && payment) {
-      setRupeesInput((payment.amount / 100).toString());
       setReason("");
       setOtp("");
       setNeedsStepUp(false);
@@ -51,6 +54,30 @@ export const RefundModal: React.FC<RefundModalProps> = ({
       setRefundResult(null);
       setIdempotencyKey(generateNewKey());
       setAttemptPending(false);
+      setRemainingPaise(payment.amount);
+      setHasPendingOp(false);
+
+      const paymentDate = new Date(payment.matched_at || payment.created_at || Date.now());
+      const expired = Date.now() - paymentDate.getTime() > REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+      setIsExpiredWindow(expired);
+      if (expired) {
+        setErrorMessage(`Payment is older than ${REFUND_WINDOW_DAYS} days and cannot be refunded via gateway.`);
+      }
+
+      getPaymentRefundHistory(payment.id)
+        .then((hist) => {
+          setRemainingPaise(hist.remaining_refundable_paise);
+          setHasPendingOp(Boolean(hist.pending_operation));
+          setRupeesInput((hist.remaining_refundable_paise / 100).toString());
+          if (hist.remaining_refundable_paise <= 0) {
+            setErrorMessage("This payment has already been fully refunded.");
+          }
+        })
+        .catch(() => {
+          setRemainingPaise(payment.amount);
+          setRupeesInput((payment.amount / 100).toString());
+        });
+
       try {
         const raw = sessionStorage.getItem(`pg_refund_attempt:${payment.id}`);
         const saved = raw ? JSON.parse(raw) : null;
@@ -66,20 +93,26 @@ export const RefundModal: React.FC<RefundModalProps> = ({
 
   if (!isOpen || !payment) return null;
 
-  const maxAmountRupees = payment.amount / 100;
+  const effectiveMaxPaise = remainingPaise !== null ? remainingPaise : payment.amount;
+  const maxAmountRupees = effectiveMaxPaise / 100;
   const requestedPaise = rupeesToPaise(rupeesInput);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
+    if (isExpiredWindow) {
+      setErrorMessage(`Payment is older than ${REFUND_WINDOW_DAYS} days and cannot be refunded via gateway.`);
+      return;
+    }
+
     if (requestedPaise <= 0) {
       setErrorMessage("Refund amount must be greater than zero.");
       return;
     }
 
-    if (requestedPaise > payment.amount) {
-      setErrorMessage(`Refund amount cannot exceed payment total of ${formatPaise(payment.amount)}.`);
+    if (requestedPaise > effectiveMaxPaise) {
+      setErrorMessage(`Refund amount cannot exceed remaining balance of ${formatPaise(effectiveMaxPaise)}.`);
       return;
     }
 
@@ -209,6 +242,15 @@ export const RefundModal: React.FC<RefundModalProps> = ({
             </div>
           </div>
 
+          {hasPendingOp && (
+            <div className="p-3.5 bg-warning-tint border border-warning/30 rounded-xl flex items-start gap-3 text-xs text-warning">
+              <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                A refund operation is currently reserved or processing for this payment. Additional refunds are paused until reconciliation finishes.
+              </div>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="p-3.5 bg-danger/10 border border-danger/20 rounded-xl flex items-start gap-3 text-xs text-danger">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -302,7 +344,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                   />
                 </div>
                 <p className="mt-1 t-micro text-ink-muted">
-                  {t("owner.refund.maxRefundable", { amount: formatPaise(payment.amount) })}
+                  {t("owner.refund.maxRefundable", { amount: formatPaise(effectiveMaxPaise) })}
                 </p>
               </div>
 
@@ -367,7 +409,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || requestedPaise <= 0 || reason.trim().length < 3}
+                  disabled={isSubmitting || requestedPaise <= 0 || reason.trim().length < 3 || isExpiredWindow || effectiveMaxPaise <= 0 || hasPendingOp}
                   className="px-5 py-2.5 bg-danger text-white rounded-xl text-sm font-semibold hover:bg-danger/90 transition flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}

@@ -14,3 +14,14 @@ export const API_BASE = normalizeApiBase(
 /** Must match pg-go CASHFREE_ENV (sandbox | production). */
 export const CASHFREE_ENV =
   import.meta.env.VITE_CASHFREE_ENV === "production" ? "production" : "sandbox";
+
+/**
+ * Refund window in days. Must equal pg-go REFUND_WINDOW_DAYS (1..120).
+ * Falls back to 120, the backend default, when unset or invalid.
+ */
+const parsedRefundWindow = Number(import.meta.env.VITE_REFUND_WINDOW_DAYS);
+export const REFUND_WINDOW_DAYS =
+  Number.isInteger(parsedRefundWindow) && parsedRefundWindow >= 1 && parsedRefundWindow <= 120
+    ? parsedRefundWindow
+    : 120;
+

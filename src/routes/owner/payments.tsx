@@ -9,6 +9,7 @@ import { formatDate, formatMatchedBy } from "@/lib/utils";
 import { Search, CheckCircle2, RotateCcw } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { RefundModal } from "@/components/owner/RefundModal";
+import { REFUND_WINDOW_DAYS } from "@/lib/constants";
 import type { Payment } from "@pg/types";
 import { useLocale } from "@/i18n";
 
@@ -98,6 +99,9 @@ export const PaymentsView: React.FC = () => {
                   const p = filteredPayments[virtualRow.index];
                   if (!p) return null;
                   const isCashfree = p.matched_by === "cashfree";
+                  const paymentDate = new Date(p.matched_at || p.created_at || Date.now());
+                  const isEligibleWindow =
+                    Date.now() - paymentDate.getTime() <= REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
                   return (
                     <tr
                       key={p.id}
@@ -122,15 +126,24 @@ export const PaymentsView: React.FC = () => {
                       <td className="px-6 py-4 text-xs text-ink-muted">{p.raw_note || "—"}</td>
                       <td className="px-6 py-4 text-right">
                         {isCashfree ? (
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPaymentForRefund(p)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg text-xs font-medium text-ink hover:text-danger hover:border-danger/30 transition shadow-xs"
-                            title="Initiate gateway refund"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            Refund
-                          </button>
+                          isEligibleWindow ? (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPaymentForRefund(p)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg text-xs font-medium text-ink hover:text-danger hover:border-danger/30 transition shadow-xs"
+                              title="Initiate gateway refund"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              Refund
+                            </button>
+                          ) : (
+                            <span
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-bg border border-hairline rounded-lg text-xs text-ink-muted cursor-not-allowed"
+                              title={`Payment exceeds ${REFUND_WINDOW_DAYS}-day gateway refund limit`}
+                            >
+                              Expired
+                            </span>
+                          )
                         ) : (
                           <span className="text-xs text-ink-muted">—</span>
                         )}
