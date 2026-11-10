@@ -367,7 +367,7 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
   {
     heading: "3. Duplicate Transactions & Timelines",
     paragraphs: [
-      "Duplicate deductions caused by network timeouts are automatically reconciled within 24 to 48 hours. Gateway UPI refunds credit within 24-48 hours; cards and netbanking credit within 3 to 7 business days."
+      "Duplicate deductions caused by network timeouts are automatically reconciled within 24 to 48 hours. The platform submits authorized refunds immediately to Cashfree Payments. Receiving banks typically credit customer accounts within 5 to 7 working days after initiation, subject to banking clearance and acquiring bank exceptions."
     ]
   }
 ]);

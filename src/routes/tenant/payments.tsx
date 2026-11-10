@@ -7,10 +7,13 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate, formatMatchedBy } from "@/lib/utils";
 import { useLocale } from "@/i18n";
+import { getPassbookLastSync } from "@/lib/passbookCache";
 
 export const TenantPaymentsView: React.FC = () => {
   const { t } = useLocale();
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+  const lastSync = getPassbookLastSync();
   const { data: payments = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.tenantPayments,
     queryFn: getMyPayments,
@@ -29,6 +32,14 @@ export const TenantPaymentsView: React.FC = () => {
 
   return (
     <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
+      {isOffline && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300">
+          <span className="font-medium">Offline Snapshot</span>
+          <span className="text-muted">
+            {lastSync ? `Last synced: ${formatDate(new Date(lastSync).toISOString())}` : "Offline view"}
+          </span>
+        </div>
+      )}
       <QueryState
         isLoading={isLoading}
         isError={isError}

@@ -7,6 +7,10 @@ import {
   clearPassbookCache,
   setupPassbookCache,
   PASSBOOK_STORAGE_KEY,
+  PASSBOOK_MAX_AGE_MS,
+  isPassbookOfflineDisabled,
+  setPassbookOfflineDisabled,
+  getPassbookLastSync,
 } from "../lib/passbookCache";
 
 describe("passbookCache", () => {
@@ -66,15 +70,42 @@ describe("passbookCache", () => {
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
   });
 
-  it("removes cached finance records after the 24-hour offline limit", () => {
+  it("removes cached finance records after the 1-hour offline limit (PASSBOOK_MAX_AGE_MS)", () => {
     client.setQueryData(["tenant", "dues"], [{ id: "expired-due" }]);
     savePassbookCache(client);
     const data = JSON.parse(localStorage.getItem(PASSBOOK_STORAGE_KEY)!);
-    data.savedAt -= 25 * 60 * 60 * 1000;
+    // Move savedAt back by 65 minutes (exceeding PASSBOOK_MAX_AGE_MS = 60 mins)
+    data.savedAt -= PASSBOOK_MAX_AGE_MS + 5 * 60 * 1000;
     localStorage.setItem(PASSBOOK_STORAGE_KEY, JSON.stringify(data));
     const fresh = new QueryClient();
     restorePassbookCache(fresh);
     expect(fresh.getQueryData(["tenant", "dues"])).toBeUndefined();
+    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+  });
+
+  it("handles user opt-out to disable offline passbook caching", () => {
+    expect(isPassbookOfflineDisabled()).toBe(false);
+
+    setPassbookOfflineDisabled(true);
+    expect(isPassbookOfflineDisabled()).toBe(true);
+
+    client.setQueryData(["tenant", "dues"], [{ id: "due_opt_out" }]);
+    savePassbookCache(client);
+    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+
+    setPassbookOfflineDisabled(false);
+    expect(isPassbookOfflineDisabled()).toBe(false);
+  });
+
+  it("tracks getPassbookLastSync correctly", () => {
+    expect(getPassbookLastSync()).toBeNull();
+
+    client.setQueryData(["tenant", "dues"], [{ id: "due_sync_check" }]);
+    savePassbookCache(client);
+
+    const lastSync = getPassbookLastSync();
+    expect(lastSync).toBeTypeOf("number");
+    expect(Date.now() - lastSync!).toBeLessThan(5000);
   });
 
   it("handles corrupted json gracefully without throwing", () => {
@@ -99,4 +130,3 @@ describe("passbookCache", () => {
     vi.useRealTimers();
   });
 });
-

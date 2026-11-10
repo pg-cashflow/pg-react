@@ -2,6 +2,13 @@ import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
 import { getStoredUser } from "@/auth/storage";
 
 export const PASSBOOK_STORAGE_KEY = "pg_passbook_cache";
+export const PASSBOOK_OPT_OUT_STORAGE_KEY = "pg_passbook_offline_disabled";
+
+/**
+ * Maximum time financial records remain in offline browser storage.
+ * Invariant: Financial data retention is capped at 1 hour (down from 24h) to limit local exposure.
+ */
+export const PASSBOOK_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
 const PASSBOOK_QUERY_PREFIXES = new Set(["dues", "payments", "points"]);
 
@@ -14,11 +21,58 @@ function isPassbookKey(queryKey: readonly unknown[]): boolean {
 }
 
 /**
+ * Returns true if the user has opted out of offline passbook storage.
+ */
+export function isPassbookOfflineDisabled(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(PASSBOOK_OPT_OUT_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Sets user preference for offline passbook storage. If disabled, purges cached passbook data.
+ */
+export function setPassbookOfflineDisabled(disabled: boolean): void {
+  try {
+    if (typeof window === "undefined") return;
+    if (disabled) {
+      localStorage.setItem(PASSBOOK_OPT_OUT_STORAGE_KEY, "true");
+      clearPassbookCache();
+    } else {
+      localStorage.removeItem(PASSBOOK_OPT_OUT_STORAGE_KEY);
+    }
+  } catch {}
+}
+
+/**
+ * Returns the timestamp when passbook data was last saved to offline storage, or null if empty.
+ */
+export function getPassbookLastSync(): number | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem(PASSBOOK_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed.savedAt === "number" ? parsed.savedAt : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Dehydrates passbook queries and persists them to localStorage for instant offline cold-boot.
  */
 export function savePassbookCache(client: QueryClient): void {
   try {
     if (typeof window === "undefined") return;
+    if (isPassbookOfflineDisabled()) {
+      localStorage.removeItem(PASSBOOK_STORAGE_KEY);
+      return;
+    }
+
     const user = getStoredUser();
     if (!user?.id || user.role !== "tenant") return;
     const dehydrated = dehydrate(client, {
@@ -46,14 +100,25 @@ export function savePassbookCache(client: QueryClient): void {
 export function restorePassbookCache(client: QueryClient): void {
   try {
     if (typeof window === "undefined") return;
+    if (isPassbookOfflineDisabled()) {
+      clearPassbookCache();
+      return;
+    }
+
     const raw = localStorage.getItem(PASSBOOK_STORAGE_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw);
     const user = getStoredUser();
-    if (raw.length > 500_000 || parsed.version !== 1 || user?.role !== "tenant" ||
-        parsed.userId !== user.id || !Number.isFinite(parsed.savedAt) ||
-        Date.now() - parsed.savedAt > 24 * 60 * 60 * 1000 || parsed.savedAt > Date.now() ||
-        !Array.isArray(parsed.state?.queries)) {
+    if (
+      raw.length > 500_000 ||
+      parsed.version !== 1 ||
+      user?.role !== "tenant" ||
+      parsed.userId !== user.id ||
+      !Number.isFinite(parsed.savedAt) ||
+      Date.now() - parsed.savedAt > PASSBOOK_MAX_AGE_MS ||
+      parsed.savedAt > Date.now() ||
+      !Array.isArray(parsed.state?.queries)
+    ) {
       clearPassbookCache();
       return;
     }
@@ -110,4 +175,3 @@ export function setupPassbookCache(client: QueryClient): () => void {
     unsubscribe();
   };
 }
-

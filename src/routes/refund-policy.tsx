@@ -46,10 +46,10 @@ export const RefundPolicyPage: React.FC = () => {
       <section className="space-y-3">
         <h2 className="t-h2 text-ink font-semibold">4. Duplicate or Erroneous Transactions</h2>
         <p className="t-body-sm text-ink-muted leading-relaxed">
-          If your account is debited twice for a single due code (e.g., due to an intermittent mobile connection or network timeout at checkout):
+          If your account is debited twice for a single due code (for example, due to an intermittent mobile connection or network timeout at checkout):
         </p>
         <ul className="list-disc pl-5 space-y-1.5 t-body-sm text-ink-muted">
-          <li>Our automated polling and reconciliation system detects duplicate receipts and initiates a refund within 24 to 48 hours.</li>
+          <li>Our automated polling and reconciliation system detects duplicate receipts and initiates a refund request within 24 to 48 hours.</li>
           <li>Alternatively, you can report the transaction ID to support@pgcashflow.in for immediate verification and manual initiation.</li>
         </ul>
       </section>
@@ -57,12 +57,12 @@ export const RefundPolicyPage: React.FC = () => {
       <section className="space-y-3">
         <h2 className="t-h2 text-ink font-semibold">5. Refund Timelines &amp; Banking Credits</h2>
         <p className="t-body-sm text-ink-muted leading-relaxed">
-          Once an authorized refund is committed by the PG owner:
+          The platform initiates authorized refunds immediately upon owner approval through our licensed payment aggregator (Cashfree Payments). Actual credit to your account depends on banking settlement cycles:
         </p>
         <ul className="list-disc pl-5 space-y-1.5 t-body-sm text-ink-muted">
-          <li><strong>UPI Transactions:</strong> Typically credited within 24 to 48 hours.</li>
-          <li><strong>Netbanking / Debit Cards:</strong> Typically credited within 3 to 7 working days, subject to the issuing bank&apos;s processing cycles.</li>
-          <li><strong>Direct IMPS Payouts:</strong> Credited within minutes of release by the property owner.</li>
+          <li><strong>UPI, Cards &amp; Netbanking:</strong> Credit to the customer account typically takes 5 to 7 working days after initiation, subject to receiving bank clearance and acquiring bank exceptions.</li>
+          <li><strong>Direct IMPS Payouts:</strong> Credited within minutes of release by the property owner, subject to beneficiary bank network availability.</li>
+          <li><strong>Gateway Cutoff Limit:</strong> Payment gateway source refunds are permitted only within 120 days of payment. Transactions older than 120 days require offline verification and settlement.</li>
         </ul>
       </section>
 
