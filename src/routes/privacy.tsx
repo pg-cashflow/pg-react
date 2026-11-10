@@ -36,7 +36,7 @@ export const PrivacyPage: React.FC = () => {
         <ul className="list-disc pl-5 space-y-1.5 t-body-sm text-ink-muted">
           <li>We <strong>never</strong> store raw, unmasked 12-digit Aadhaar numbers or biometric data.</li>
           <li>Aadhaar verification is entirely voluntary; tenants are entitled to provide approved alternative identification (Voter ID, Driving Licence, or Passport).</li>
-          <li>Where document photos are submitted as a secondary verification fallback, redaction is enforced to conceal the first 8 digits and QR code before long-term archiving.</li>
+          <li>Where document photos are submitted as a secondary verification fallback, uploaded documents are encrypted at rest using AES-256-GCM and retained strictly for the duration of tenancy under residential police verification obligations, with irreversible erasure upon verified consent revocation or account closure.</li>
         </ul>
       </section>
 

@@ -331,9 +331,10 @@ const READ_TIMEOUT_MS = 20_000;
 const WRITE_TIMEOUT_MS = 45_000;
 
 /**
- * fetch with a time-to-response-headers budget. A stalled mobile connection would
- * otherwise leave the UI in a loading state forever. A caller-supplied signal still
- * wins and surfaces as a normal AbortError; only our own timeout becomes ApiError(0).
+ * fetch with an end-to-end timeout budget covering both headers and response body.
+ * A stalled mobile connection would otherwise leave the UI in a loading state forever.
+ * A caller-supplied signal still wins and surfaces as a normal AbortError; only our own
+ * timeout becomes ApiError(0).
  */
 async function timedFetch(url: string, init: RequestInit): Promise<Response> {
   const method = (init.method || "GET").toUpperCase();
@@ -350,16 +351,49 @@ async function timedFetch(url: string, init: RequestInit): Promise<Response> {
     if (external.aborted) controller.abort();
     else external.addEventListener("abort", onExternalAbort, { once: true });
   }
+
+  const clearTimer = () => {
+    clearTimeout(timer);
+    external?.removeEventListener("abort", onExternalAbort);
+  };
+
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    const res = await fetch(url, { ...init, signal: controller.signal });
+
+    // If there is no response body to consume (e.g. 204 No Content, HEAD), clear timer immediately.
+    if (res.status === 204 || method === "HEAD" || !res.body) {
+      clearTimer();
+      return res;
+    }
+
+    // Wrap body consumption methods so the timeout budget bounds body transfer as well
+    const wrapBodyConsumer = <R>(origFn: () => Promise<R>): (() => Promise<R>) => {
+      return async () => {
+        try {
+          return await origFn();
+        } catch (err) {
+          if (timedOut && !external?.aborted) {
+            throw new ApiError(0, networkFailureMessage());
+          }
+          throw err;
+        } finally {
+          clearTimer();
+        }
+      };
+    };
+
+    if (typeof res.json === "function") res.json = wrapBodyConsumer(res.json.bind(res));
+    if (typeof res.text === "function") res.text = wrapBodyConsumer(res.text.bind(res));
+    if (typeof res.blob === "function") res.blob = wrapBodyConsumer(res.blob.bind(res));
+    if (typeof res.arrayBuffer === "function") res.arrayBuffer = wrapBodyConsumer(res.arrayBuffer.bind(res));
+
+    return res;
   } catch (err) {
+    clearTimer();
     if (timedOut && !external?.aborted) {
       throw new ApiError(0, networkFailureMessage());
     }
     throw err;
-  } finally {
-    clearTimeout(timer);
-    external?.removeEventListener("abort", onExternalAbort);
   }
 }
 

@@ -72,6 +72,16 @@ export const RefundPolicyPage: React.FC = () => {
           If a prospective tenant reserves a bed/room and cancels prior to physical check-in, the refund of any advance booking fee is determined by the specific cancellation window established by the property owner in the room code offer. If eligible, refunds are processed within 5 business days.
         </p>
       </section>
+
+      <section className="space-y-3">
+        <h2 className="t-h2 text-ink font-semibold">7. Support &amp; Grievance Redressal</h2>
+        <p className="t-body-sm text-ink-muted leading-relaxed">
+          For refund escalations or payment queries, contact our Helpdesk Line at +91 (080) 4567-8900 or email support@pgcashflow.in.
+        </p>
+        <p className="t-body-sm text-ink-muted leading-relaxed">
+          Grievance Officer: grievance@pgcashflow.in | Registered Address: PG Cashflow Technologies Private Limited, Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India.
+        </p>
+      </section>
     </PublicPolicyLayout>
   );
 };

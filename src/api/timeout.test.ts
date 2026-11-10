@@ -63,4 +63,28 @@ describe("apiFetch timeout", () => {
     ctrl.abort();
     await assertion;
   });
+
+  it("bounds a stalled response body read and throws ApiError(0)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      ((_url: RequestInfo | URL, init?: RequestInit) => {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          body: {},
+          json: () =>
+            new Promise((_resolve, reject) => {
+              init?.signal?.addEventListener("abort", () =>
+                reject(new DOMException("aborted", "AbortError"))
+              );
+            }),
+        });
+      }) as typeof fetch
+    );
+
+    const p = apiFetch("/tenant/dues");
+    const assertion = expect(p).rejects.toMatchObject({ name: "ApiError", status: 0 });
+    await vi.advanceTimersByTimeAsync(20_001);
+    await assertion;
+  });
 });

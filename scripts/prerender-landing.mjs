@@ -369,6 +369,13 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
     paragraphs: [
       "Duplicate deductions caused by network timeouts are automatically reconciled within 24 to 48 hours. The platform submits authorized refunds immediately to Cashfree Payments. Receiving banks typically credit customer accounts within 5 to 7 working days after initiation, subject to banking clearance and acquiring bank exceptions."
     ]
+  },
+  {
+    heading: "4. Support & Grievance Contact",
+    paragraphs: [
+      "For refund escalation or payment queries, contact our Helpdesk Line at +91 (080) 4567-8900 or email support@pgcashflow.in.",
+      "Grievance Officer: grievance@pgcashflow.in | Registered Address: PG Cashflow Technologies Private Limited, Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India."
+    ]
   }
 ]);
 

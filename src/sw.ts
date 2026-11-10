@@ -59,14 +59,11 @@ registerRoute(
 );
 
 // Runtime caching for immutable hashed assets (downloaded on demand per role)
-// Restrict strictly to same-origin to prevent pinning third-party SDKs (e.g. Cashfree)
+// Restrict strictly to same-origin /assets/ to prevent pinning unhashed scripts or third-party SDKs
 registerRoute(
-  ({ request, url }) =>
+  ({ url }) =>
     url.origin === self.location.origin &&
-    (request.destination === "script" ||
-      request.destination === "style" ||
-      url.pathname.startsWith("/assets/")) &&
-    !url.pathname.startsWith("/api/"),
+    url.pathname.startsWith("/assets/"),
   new CacheFirst({
     cacheName: "pg-assets-cache",
     plugins: [
