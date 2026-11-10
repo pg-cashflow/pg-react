@@ -1026,4 +1026,18 @@ export const knIN: Record<MessageKey, string> = {
   "owner.finance.colDebit": "ಡೆಬಿಟ್",
   "owner.finance.colCredit": "ಕ್ರೆಡಿಟ್",
   "owner.finance.colNetBalance": "ನಿವ್ವಳ ಬಾಕಿ",
+
+  // Payout cooling off & notice keys
+  "owner.payouts.coolingOffTitle": "ಕೂಲಿಂಗ್-ಆಫ್ ಅವಧಿ ಸಕ್ರಿಯವಾಗಿದೆ:",
+  "owner.payouts.coolingOffDesc": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ನೋಂದಾಯಿಸಲಾದ ಫಲಾನುಭವಿಗಳಿಗೆ {count} ಐಟಂಗಳು ಲಿಂಕ್ ಆಗಿವೆ. ಕಡ್ಡಾಯ 24 ಗಂಟೆಗಳ ಭದ್ರತಾ ಅವಧಿ ಮುಗಿದ ನಂತರ ಬ್ಯಾಚ್ ಉತ್ಪಾದನೆ ಅನ್‌ಲಾಕ್ ಆಗುತ್ತದೆ.",
+  "tenant.offlineSnapshot": "ಆಫ್‌ಲೈನ್ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್",
+  "tenant.lastSynced": "ಕೊನೆಯದಾಗಿ ಸಿಂಕ್ ಮಾಡಲಾಗಿದೆ: {time}",
+  "tenant.offlineView": "ಆಫ್‌ಲೈನ್ ನೋಟ",
+  "owner.batch.makerCheckerNoticeTitle": "ಮೇಕರ್-ಚೆಕರ್ ಸೂಚನೆ:",
+  "owner.batch.makerCheckerNoticeDesc": "ನೀವು ಈ ಪಾವತಿ ಬ್ಯಾಚ್ ಅನ್ನು ರಚಿಸಿದ್ದೀರಿ. ಬಹು ಮಾಲೀಕರೊಂದಿಗೆ ದ್ವಿ-ನಿಯಂತ್ರಣ ನೀತಿಯಲ್ಲಿ ಬೇರೊಬ್ಬ ಮಾಲೀಕರು ಅನುಮೋದಿಸಬೇಕು.",
+  "owner.payee.coolingOffNoticeTitle": "24-ಗಂಟೆಗಳ ಕೂಲಿಂಗ್-ಆಫ್:",
+  "owner.payee.coolingOffNoticeDesc": "ಹೊಸದಾಗಿ ನೋಂದಾಯಿಸಲಾದ ಫಲಾನುಭವಿಗಳಿಗೆ ಪಾವತಿ ಬ್ಯಾಚ್‌ಗೆ ಸೇರಿಸುವ ಮೊದಲು ಕಡ್ಡಾಯ 24 ಗಂಟೆಗಳ ಭದ್ರತಾ ಕೂಲಿಂಗ್-ಆಫ್ ಅವಧಿ ಇರುತ್ತದೆ.",
+  "owner.refund.needsReviewTitle": "ಪರಿಶೀಲನೆಯಲ್ಲಿರುವ ಮರುಪಾವತಿ",
+  "owner.refund.needsReviewDesc": "ಈ ಮರುಪಾವತಿಯನ್ನು ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆಯಲ್ಲಿ ಇರಿಸಲಾಗಿದೆ. ಪೂರೈಕೆದಾರರ ಸ್ಥಿತಿಯನ್ನು ಪರಿಶೀಲಿಸುವವರೆಗೆ ಹಣವನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ.",
+  "error.payment.refundHistoryFailed": "ಮರುಪಾವತಿಸಬಹುದಾದ ಬಾಕಿಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
 };

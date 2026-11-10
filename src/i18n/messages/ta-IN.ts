@@ -1025,4 +1025,18 @@ export const taIN: Record<MessageKey, string> = {
   "owner.finance.colDebit": "பற்று",
   "owner.finance.colCredit": "வரவு",
   "owner.finance.colNetBalance": "நிகர இருப்பு",
+
+  // Payout cooling off & notice keys
+  "owner.payouts.coolingOffTitle": "கூலிங்-ஆஃப் காலம் செயலில் உள்ளது:",
+  "owner.payouts.coolingOffDesc": "கடந்த 24 மணிநேரத்தில் பதிவு செய்யப்பட்ட பயனாளிகளுடன் {count} உருப்படிகள் இணைக்கப்பட்டுள்ளன. கட்டாய 24 மணிநேர பாதுகாப்பு காலம் முடிந்ததும் தொகுதி உருவாக்கம் திறக்கப்படும்.",
+  "tenant.offlineSnapshot": "ஆஃப்லைன் ஸ்னாப்ஷாட்",
+  "tenant.lastSynced": "கடைசியாக ஒத்திசைக்கப்பட்டது: {time}",
+  "tenant.offlineView": "ஆஃப்லைன் காட்சி",
+  "owner.batch.makerCheckerNoticeTitle": "மேக்கர்-செக்கர் அறிவிப்பு:",
+  "owner.batch.makerCheckerNoticeDesc": "நீங்கள் இந்த பட்டுவாடா தொகுதியை உருவாக்கினீர்கள். இரட்டைக் கட்டுப்பாட்டுக் கொள்கையில் மற்றொரு உரிமையாளர் அங்கீகரிக்க வேண்டும்.",
+  "owner.payee.coolingOffNoticeTitle": "24-மணிநேர கூலிங்-ஆஃப்:",
+  "owner.payee.coolingOffNoticeDesc": "புதிதாகப் பதிவுசெய்யப்பட்ட பயனாளிகளுக்கு பட்டுவாடா தொகுப்பில் சேர்க்கப்படும் முன் கட்டாய 24 மணிநேர பாதுகாப்புக் காலம் உண்டு.",
+  "owner.refund.needsReviewTitle": "மதிப்பாய்வில் உள்ள பணத்தைத் திரும்பப் பெறுதல்",
+  "owner.refund.needsReviewDesc": "இந்த பணத்தைத் திரும்பப் பெறுதல் கைமுறை மதிப்பாய்வில் வைக்கப்பட்டுள்ளது. சேவை வழங்குநர் நிலை சரிபார்க்கப்படும் வரை நிதி ஒதுக்கப்பட்டுள்ளது.",
+  "error.payment.refundHistoryFailed": "திரும்பப்பெறக்கூடிய நிலுவைத் தொகையை சரிபார்க்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
 };

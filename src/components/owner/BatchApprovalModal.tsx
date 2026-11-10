@@ -135,8 +135,8 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
             <div className="p-3.5 rounded-xl bg-accent-tint border border-accent/20 text-ink text-xs flex items-start gap-2.5">
               <ShieldAlert className="w-4 h-4 text-accent shrink-0 mt-0.5" />
               <div>
-                <span className="font-semibold text-accent">Maker-Checker Notice:</span>{" "}
-                You created this payout batch. If this property operates under dual-control policy with multiple owners, a different owner must authorize it.
+                <span className="font-semibold text-accent">{t("owner.batch.makerCheckerNoticeTitle")}</span>{" "}
+                {t("owner.batch.makerCheckerNoticeDesc")}
               </div>
             </div>
           )}

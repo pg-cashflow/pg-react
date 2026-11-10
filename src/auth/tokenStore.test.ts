@@ -57,13 +57,19 @@ describe("tokenStore", () => {
     expect(getAccessToken()).toBe("jwt-initial");
   });
 
-  it("clears access token on SESSION_ENDED broadcast message", () => {
+  it("clears access token on SESSION_ENDED broadcast message and dispatches pg:session_ended", () => {
     setAccessToken("jwt-active", false);
     expect(getAccessToken()).toBe("jwt-active");
+
+    const onSessionEnded = vi.fn();
+    window.addEventListener("pg:session_ended", onSessionEnded);
 
     handleSyncMessage({ data: { type: "SESSION_ENDED" } });
 
     expect(getAccessToken()).toBeNull();
+    expect(onSessionEnded).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener("pg:session_ended", onSessionEnded);
   });
 
   it("dispatches pg:session_changed event on SESSION_ACTIVE and REFRESH_REQUIRED broadcast messages", () => {

@@ -76,11 +76,11 @@ const landingHtml = `
             <span class="w-2.5 h-2.5 rounded-full bg-hairline"></span>
             <span class="w-2.5 h-2.5 rounded-full bg-hairline"></span>
             <span class="w-2.5 h-2.5 rounded-full bg-hairline"></span>
-            <span class="ml-2 t-caption font-semibold text-ink-muted hidden sm:inline">Greenfield PG · Koramangala 4th Block, Bengaluru</span>
+            <span class="ml-2 t-caption font-semibold text-ink-muted hidden sm:inline">Illustrative Demo · Sample PG Property</span>
           </div>
           <div class="flex items-center gap-2 t-caption text-ink-muted font-medium">
             <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-            <span>Ledger in sync</span>
+            <span>Illustrative sample preview</span>
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-hairline bg-surface">

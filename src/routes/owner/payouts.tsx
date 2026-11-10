@@ -411,8 +411,8 @@ export const PayoutsView: React.FC = () => {
             <div className="p-3.5 rounded-xl bg-warning-tint border border-warning/30 text-ink text-xs flex items-start gap-2.5">
               <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
               <div>
-                <span className="font-semibold text-warning">Cooling-Off Period Active:</span>{" "}
-                {coolingOffItemsCount} unbatched item(s) are linked to payees registered within the last 24 hours. Batch generation will unlock once the mandatory 24-hour security window finishes.
+                <span className="font-semibold text-warning">{t("owner.payouts.coolingOffTitle")}</span>{" "}
+                {t("owner.payouts.coolingOffDesc", { count: coolingOffItemsCount })}
               </div>
             </div>
           )}

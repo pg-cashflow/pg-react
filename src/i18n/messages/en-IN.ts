@@ -1022,6 +1022,20 @@ export const enIN = {
   "owner.finance.colDebit": "Debit",
   "owner.finance.colCredit": "Credit",
   "owner.finance.colNetBalance": "Net Balance",
+
+  // Payout cooling off & notice keys
+  "owner.payouts.coolingOffTitle": "Cooling-Off Period Active:",
+  "owner.payouts.coolingOffDesc": "{count} unbatched item(s) are linked to payees registered within the last 24 hours. Batch generation will unlock once the mandatory 24-hour security window finishes.",
+  "tenant.offlineSnapshot": "Offline Snapshot",
+  "tenant.lastSynced": "Last synced: {time}",
+  "tenant.offlineView": "Offline view",
+  "owner.batch.makerCheckerNoticeTitle": "Maker-Checker Notice:",
+  "owner.batch.makerCheckerNoticeDesc": "You created this payout batch. If this property operates under dual-control policy with multiple owners, a different owner must authorize it.",
+  "owner.payee.coolingOffNoticeTitle": "24-Hour Cooling-Off:",
+  "owner.payee.coolingOffNoticeDesc": "Newly registered payees have a mandatory 24-hour security cooling-off window before they can be added to a payout batch.",
+  "owner.refund.needsReviewTitle": "Refund Held for Review",
+  "owner.refund.needsReviewDesc": "This refund is held under manual review. The funds remain reserved while provider status is being verified.",
+  "error.payment.refundHistoryFailed": "Unable to verify refundable balance. Please try again.",
 };
 
 export type MessageKey = keyof typeof enIN;

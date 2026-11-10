@@ -209,28 +209,28 @@ export const LandingPage: React.FC = () => {
                 <span className="w-2.5 h-2.5 rounded-full bg-hairline" />
                 <span className="w-2.5 h-2.5 rounded-full bg-hairline" />
                 <span className="ml-2 t-caption font-semibold text-ink-muted hidden sm:inline">
-                  Greenfield PG · Koramangala 4th Block, Bengaluru
+                  Illustrative Demo · Sample PG Property
                 </span>
               </div>
               <div className="flex items-center gap-2 t-caption text-ink-muted font-medium">
                 <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span>Ledger in sync</span>
+                <span>Illustrative sample preview</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-hairline bg-surface">
               <div className="p-5">
-                <div className="t-caption text-ink-muted">Rent collected this month</div>
+                <div className="t-caption text-ink-muted">Rent collected this month (Sample)</div>
                 <div className="t-amount-lg text-ink mt-1">₹4,20,000</div>
                 <div className="t-caption text-success font-semibold mt-1">↑ 96% on-time · 32/34 rooms settled</div>
               </div>
               <div className="p-5">
-                <div className="t-caption text-ink-muted">Occupancy</div>
+                <div className="t-caption text-ink-muted">Occupancy (Sample)</div>
                 <div className="t-amount-lg text-ink mt-1">38 / 40</div>
                 <div className="t-caption text-accent font-semibold mt-1">↑ 2 tenants verified today</div>
               </div>
               <div className="p-5">
-                <div className="t-caption text-ink-muted">Identity verified</div>
+                <div className="t-caption text-ink-muted">Identity verified (Sample)</div>
                 <div className="t-amount-lg text-ink mt-1">100%</div>
                 <div className="t-caption text-ink-muted font-semibold mt-1">UIDAI Aadhaar OTP · 0 paper forms</div>
               </div>
@@ -242,11 +242,11 @@ export const LandingPage: React.FC = () => {
                 <div className="flex items-center justify-between py-1.5 px-3 rounded-[8px] bg-surface border border-hairline t-body-sm">
                   <div className="flex items-center gap-3">
                     <span className="t-code font-medium text-ink">Room 204-B</span>
-                    <span className="text-ink font-semibold">Rahul Verma</span>
+                    <span className="text-ink font-semibold">Tenant A (Sample)</span>
                     <span className="rounded-full bg-accent-tint px-2 py-0.5 t-caption text-accent font-medium">Aadhaar verified</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="t-code text-ink-muted">UTR: 429188201948</span>
+                    <span className="t-code text-ink-muted">Sample UPI Match</span>
                     <span className="t-amount text-ink font-semibold">₹8,500</span>
                     <span className="inline-flex items-center gap-1 text-success t-caption font-semibold">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Reconciled
@@ -260,7 +260,7 @@ export const LandingPage: React.FC = () => {
                 <div className="flex items-center justify-between py-1.5 px-3 rounded-[8px] bg-surface border border-hairline t-body-sm">
                   <div className="flex items-center gap-3">
                     <span className="t-code font-medium text-ink">Room 102-A</span>
-                    <span className="text-ink font-semibold">Priya Nambiar</span>
+                    <span className="text-ink font-semibold">Tenant B (Sample)</span>
                     <span className="rounded-full bg-accent-tint px-2 py-0.5 t-caption text-accent font-medium">Aadhaar verified</span>
                   </div>
                   <div className="flex items-center gap-4">

@@ -261,13 +261,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         void evaluateStored();
       }
     };
+    const handleSessionEnded = () => {
+      clearLocalSession();
+    };
     window.addEventListener("pg:unauthorized", handleUnauthorized);
     window.addEventListener("online", handleOnline);
     window.addEventListener("pg:session_changed", handleSessionChanged);
+    window.addEventListener("pg:session_ended", handleSessionEnded);
     return () => {
       window.removeEventListener("pg:unauthorized", handleUnauthorized);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("pg:session_changed", handleSessionChanged);
+      window.removeEventListener("pg:session_ended", handleSessionEnded);
       clearRetryTimer();
     };
   }, [evaluateStored, clearLocalSession, clearRetryTimer]);

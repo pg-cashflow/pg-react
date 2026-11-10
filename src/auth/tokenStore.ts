@@ -11,10 +11,11 @@ export function handleSyncMessage(event: { data?: unknown }): void {
     return;
   }
   if (type === "SESSION_ENDED") {
-    if (accessToken !== null) {
-      accessToken = null;
-      accessTokenRevision++;
-      notifyListeners(null);
+    accessToken = null;
+    accessTokenRevision++;
+    notifyListeners(null);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("pg:session_ended"));
     }
   } else if (type === "SESSION_ACTIVE" || type === "REFRESH_REQUIRED") {
     if (typeof window !== "undefined") {

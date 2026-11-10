@@ -33,10 +33,10 @@ export const TenantPaymentsView: React.FC = () => {
   return (
     <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
       {isOffline && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300">
-          <span className="font-medium">Offline Snapshot</span>
+        <div className="bg-warning-tint border-b border-warning/30 px-4 py-2 flex items-center justify-between text-xs text-warning">
+          <span className="font-medium">{t("tenant.offlineSnapshot")}</span>
           <span className="text-muted">
-            {lastSync ? `Last synced: ${formatDate(new Date(lastSync).toISOString())}` : "Offline view"}
+            {lastSync ? t("tenant.lastSynced", { time: formatDate(new Date(lastSync).toISOString()) }) : t("tenant.offlineView")}
           </span>
         </div>
       )}

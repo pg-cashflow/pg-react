@@ -54,7 +54,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
       setRefundResult(null);
       setIdempotencyKey(generateNewKey());
       setAttemptPending(false);
-      setRemainingPaise(payment.amount);
+      setRemainingPaise(null);
       setHasPendingOp(false);
 
       const paymentDate = new Date(payment.matched_at || payment.created_at || Date.now());
@@ -74,8 +74,9 @@ export const RefundModal: React.FC<RefundModalProps> = ({
           }
         })
         .catch(() => {
-          setRemainingPaise(payment.amount);
-          setRupeesInput((payment.amount / 100).toString());
+          setRemainingPaise(0);
+          setRupeesInput("0");
+          setErrorMessage(t("error.payment.refundHistoryFailed") || "Unable to verify refundable balance. Please try again.");
         });
 
       try {
@@ -93,7 +94,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
 
   if (!isOpen || !payment) return null;
 
-  const effectiveMaxPaise = remainingPaise !== null ? remainingPaise : payment.amount;
+  const effectiveMaxPaise = remainingPaise !== null ? remainingPaise : 0;
   const maxAmountRupees = effectiveMaxPaise / 100;
   const requestedPaise = rupeesToPaise(rupeesInput);
 

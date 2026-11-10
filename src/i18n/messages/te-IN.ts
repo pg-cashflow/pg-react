@@ -1025,4 +1025,18 @@ export const teIN: Record<MessageKey, string> = {
   "owner.finance.colDebit": "డెబిట్",
   "owner.finance.colCredit": "క్రెడిట్",
   "owner.finance.colNetBalance": "నికర బ్యాలెన్స్",
+
+  // Payout cooling off & notice keys
+  "owner.payouts.coolingOffTitle": "కూలింగ్-ఆఫ్ వ్యవధి సక్రియంగా ఉంది:",
+  "owner.payouts.coolingOffDesc": "గత 24 గంటల్లో నమోదు చేసిన చెల్లింపుదారులతో {count} బ్యాచ్ చేయని అంశాలు అనుసంధానించబడి ఉన్నాయి. తప్పనిసరి 24 గంటల భద్రతా వ్యవధి పూర్తయిన తర్వాత బ్యాచ్ ఉత్పత్తి అన్‌లాక్ అవుతుంది.",
+  "tenant.offlineSnapshot": "ఆఫ్‌లైన్ స్నాప్‌షాట్",
+  "tenant.lastSynced": "చివరి సమకాలీకరణ: {time}",
+  "tenant.offlineView": "ఆఫ్‌లైన్ వీక్షణ",
+  "owner.batch.makerCheckerNoticeTitle": "మేకర్-చెకర్ నోటీసు:",
+  "owner.batch.makerCheckerNoticeDesc": "మీరు ఈ చెల్లింపు బ్యాచ్‌ను సృష్టించారు. బహుళ యజమానులతో ద్వంద్వ నియంత్రణ విధానంలో పనిచేస్తే, వేరే యజమాని దీనిని ఆమోదించాలి.",
+  "owner.payee.coolingOffNoticeTitle": "24-గంటల కూలింగ్-ఆఫ్:",
+  "owner.payee.coolingOffNoticeDesc": "కొత్తగా నమోదైన చెల్లింపుదారులు చెల్లింపు బ్యాచ్‌కు జోడించడానికి ముందు తప్పనిసరిగా 24 గంటల భద్రతా వ్యవధి ఉంటుంది.",
+  "owner.refund.needsReviewTitle": "సమీక్షలో ఉన్న రీఫండ్",
+  "owner.refund.needsReviewDesc": "ఈ రీఫండ్ మాన్యువల్ సమీక్షలో నిలిపివేయబడింది. ప్రొవైడర్ స్థితిని ధృవీకరించే వరకు నిధులు రిజర్వ్ చేయబడి ఉంటాయి.",
+  "error.payment.refundHistoryFailed": "రీఫండ్ చేయగల బ్యాలెన్స్‌ను ధృవీకరించడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.",
 };
