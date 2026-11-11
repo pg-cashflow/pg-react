@@ -268,6 +268,27 @@ export const PayoutsView: React.FC = () => {
               </div>
             </div>
           )}
+          {batches.some((b) => b.status === "processing") && (
+            <div className="p-4 rounded-2xl bg-warning-tint/30 border border-warning/30 text-ink text-sm flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-warning">Cashfree Payout Protect Notice</p> {/* lint-allow-i18n */}
+                  <p className="text-xs text-ink-muted mt-0.5"> {/* lint-allow-i18n */}
+                    Batches in processing may contain transfers held for manual risk approval. If held, approve them directly in the Cashfree Merchant Dashboard.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="https://merchant.cashfree.com/merchants/payouts"
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl border border-warning/40 bg-surface font-semibold text-xs text-ink hover:bg-bg shrink-0 transition"
+              >
+                Cashfree Dashboard ↗ {/* lint-allow-i18n */}
+              </a>
+            </div>
+          )}
           <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
           <QueryState
             isLoading={isBatchesLoading}
