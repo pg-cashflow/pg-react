@@ -215,22 +215,15 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                 />
               </div>
 
-              {/* Explicit re-check + fallback — helps when webhook is delayed (esp. sandbox) */}
-              <div className="flex gap-2 pt-2 border-t border-hairline">
+              {/* Explicit re-check — helps when webhook is delayed */}
+              <div className="pt-2 border-t border-hairline">
                 <button
                   type="button"
                   onClick={checkAgain}
-                  className="flex-1 h-11 rounded-[10px] border border-hairline bg-surface text-ink font-semibold t-body-sm flex items-center justify-center gap-2 hover:bg-bg transition"
+                  className="w-full h-11 rounded-[10px] border border-hairline bg-surface text-ink font-semibold t-body-sm flex items-center justify-center gap-2 hover:bg-bg transition"
                 >
                   <RefreshCw className="w-4 h-4" />
                   {t("paypanel.alreadyPaidCheckNow")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowFallbackForm(true)}
-                  className="px-4 h-11 rounded-[10px] border border-hairline text-ink-muted t-caption hover:text-ink transition"
-                >
-                  {t("paypanel.uploadProofBtn")}
                 </button>
               </div>
             </div>
@@ -246,21 +239,23 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="space-y-2">
                 <button
                   type="button"
                   onClick={checkAgain}
-                  className="flex-1 h-12 rounded-[10px] border border-hairline bg-surface text-ink font-semibold t-body-sm flex items-center justify-center gap-2 hover:bg-bg transition"
+                  className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm flex items-center justify-center gap-2 hover:bg-accent/90 transition"
                 >
                   <RefreshCw className="w-4 h-4" /> {t("paypanel.checkAgainBtn")}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowFallbackForm(true)}
-                  className="flex-1 h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm hover:bg-accent/90 transition"
-                >
-                  {t("paypanel.submitScreenshotBtn")}
-                </button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowFallbackForm(true)}
+                    className="t-caption text-ink-muted hover:text-ink min-h-[44px] inline-flex items-center"
+                  >
+                    {t("paypanel.paidNotShowing")}
+                  </button>
+                </div>
               </div>
 
               <p className="t-caption text-ink-muted text-center">

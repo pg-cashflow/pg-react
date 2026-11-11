@@ -251,6 +251,59 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     if (!file.type.startsWith("image/") || file.type.includes("svg")) {
       return file;
     }
+
+    // Modern async off-thread decoding via createImageBitmap & OffscreenCanvas
+    if (typeof createImageBitmap === "function") {
+      try {
+        const bitmap = await createImageBitmap(file);
+        let { width, height } = bitmap;
+        if (width <= maxDim && height <= maxDim && file.size <= 2 * 1024 * 1024) {
+          bitmap.close();
+          return file;
+        }
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        let blob: Blob | null = null;
+        if (typeof OffscreenCanvas !== "undefined") {
+          const offscreen = new OffscreenCanvas(width, height);
+          const ctx = offscreen.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(bitmap, 0, 0, width, height);
+            bitmap.close();
+            blob = await offscreen.convertToBlob({ type: "image/jpeg", quality });
+          }
+        }
+        if (!blob) {
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(bitmap, 0, 0, width, height);
+            bitmap.close();
+            blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", quality));
+          } else {
+            bitmap.close();
+          }
+        }
+        if (blob) {
+          return new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
+        }
+      } catch {
+        // Fall back to Image pipeline below on decoding error
+      }
+    }
+
     return new Promise((resolve) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
