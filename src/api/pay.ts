@@ -10,6 +10,29 @@ export const getTenantDuePay = (dueId: string): Promise<PayIntent> =>
 export const getPayQrBlob = (qrPngUrl: string): Promise<Blob> => apiFetchBlob(qrPngUrl);
 
 /**
+ * Triggers synchronous order verification with Cashfree by provider order ID.
+ * Returns { paid: true, status: string, due_ids: string[] } if ledger transitioned to paid.
+ */
+export const verifyTenantOrderPay = async (
+  orderId: string
+): Promise<{ paid: boolean; status: string; due_ids?: string[] }> => {
+  try {
+    return await apiFetch<{ paid: boolean; status: string; due_ids?: string[] }>(
+      `/tenant/payments/orders/${encodeURIComponent(orderId)}/verify`,
+      {
+        method: "POST",
+        body: "{}",
+      }
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      return { paid: false, status: "NOT_FOUND" };
+    }
+    throw err;
+  }
+};
+
+/**
  * Triggers synchronous order verification with Cashfree.
  * Returns { paid: true } if ledger transitioned to paid.
  * Tolerates 404 if pg-go verify endpoint has not yet shipped, falling back gracefully to polling.

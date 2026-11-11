@@ -41,6 +41,14 @@ export const verifyPayee = async (payeeId: string): Promise<PayoutPayee> => {
   return data.payee;
 };
 
+export const verifyPayeeProvider = async (payeeId: string): Promise<PayoutPayee> => {
+  const data = await apiFetch<{ payee: PayoutPayee }>(`/owner/payouts/payees/${payeeId}/verify-provider`, {
+    method: "POST",
+    body: "{}",
+  });
+  return data.payee;
+};
+
 export const listUnbatchedPayoutItems = async (): Promise<PayoutItem[]> => {
   const data = await apiFetch<{ items: PayoutItem[] }>("/owner/payouts/items/unbatched");
   return unwrapList(data, "items");

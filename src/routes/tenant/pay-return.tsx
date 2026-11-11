@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import { verifyTenantDuePay } from "@/api/pay";
+import { verifyTenantDuePay, verifyTenantOrderPay } from "@/api/pay";
 import { getMyDues } from "@/api/tenant";
 import { useLocale } from "@/i18n";
 import type { Due } from "@pg/types";
@@ -40,10 +40,12 @@ export const TenantPayReturnView: React.FC = () => {
         staleTime: 0,
       });
       const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
-      const match = dues.find((d: Due) => d.id === dueId);
-      if (match && (match.status === "paid" || match.status === "waived")) {
-        markPaid();
-        return true;
+      if (dueId) {
+        const match = dues.find((d: Due) => d.id === dueId);
+        if (match && (match.status === "paid" || match.status === "waived")) {
+          markPaid();
+          return true;
+        }
       }
     } catch {
       // transient query error
@@ -54,35 +56,46 @@ export const TenantPayReturnView: React.FC = () => {
   useEffect(() => {
     let active = true;
     const deadline = Date.now() + 60 * 1000;
+    let delay = 1500;
 
-    // 1. Immediate verify if dueId is provided
-    if (dueId) {
-      verifyTenantDuePay(dueId)
-        .then((res) => {
+    const executeVerify = async (): Promise<boolean> => {
+      // 1. Order-ID-based verification (standard Cashfree return flow)
+      if (orderId) {
+        try {
+          const res = await verifyTenantOrderPay(orderId);
           if (active && res.paid) {
             markPaid();
+            return true;
           }
-        })
-        .catch(() => {
-          // ignore error; proceed to dues polling
-        });
-    }
+        } catch {
+          // ignore error; proceed to due verify or dues polling
+        }
+      }
 
-    // 2. Polling backstop
-    const poll = async () => {
-      if (!active) return;
+      // 2. Due-ID-based verification fallback
       if (dueId) {
         try {
           const res = await verifyTenantDuePay(dueId);
           if (active && res.paid) {
             markPaid();
-            return;
+            return true;
           }
         } catch {
           // ignore error; proceed to dues polling
         }
       }
-      const isPaid = await checkStatus();
+
+      // 3. Check dues list for settled status
+      return await checkStatus();
+    };
+
+    // Immediate initial verification
+    executeVerify();
+
+    // Polling backstop with progressive backoff (1.5s -> 2s -> 3s -> 4s)
+    const poll = async () => {
+      if (!active) return;
+      const isPaid = await executeVerify();
       if (isPaid || !active) return;
 
       if (Date.now() >= deadline) {
@@ -90,10 +103,11 @@ export const TenantPayReturnView: React.FC = () => {
         return;
       }
 
-      pollTimerRef.current = setTimeout(poll, 2000);
+      delay = Math.min(delay + 500, 4000);
+      pollTimerRef.current = setTimeout(poll, delay);
     };
 
-    pollTimerRef.current = setTimeout(poll, 1500);
+    pollTimerRef.current = setTimeout(poll, delay);
 
     return () => {
       active = false;
@@ -101,7 +115,7 @@ export const TenantPayReturnView: React.FC = () => {
         clearTimeout(pollTimerRef.current);
       }
     };
-  }, [checkStatus, dueId, markPaid]);
+  }, [checkStatus, dueId, orderId, markPaid]);
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-6 pt-12">

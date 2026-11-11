@@ -48,9 +48,15 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   const expectedPaise = rupeesToPaise(rupeesInput);
   const parsedItemCount = parseInt(itemCountInput, 10);
 
+  const unverifiedPayees = items.filter((it) => {
+    const payee = payeeMap.get(it.payee_id);
+    return !payee || payee.verification_status !== "provider_verified";
+  });
+  const hasUnverifiedPayees = unverifiedPayees.length > 0;
+
   const isCountMatched = parsedItemCount === batch.item_count;
   const isAmountMatched = expectedPaise === batch.total_amount_paise;
-  const canRequestOTP = isCountMatched && isAmountMatched;
+  const canRequestOTP = isCountMatched && isAmountMatched && !hasUnverifiedPayees;
 
   const handleRequestOTP = () => {
     setErrorMessage(null);
@@ -144,6 +150,18 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
           {errorMessage && (
             <div className="p-3 rounded-xl bg-danger/10 border border-danger/25 text-danger text-sm font-medium">
               {errorMessage}
+            </div>
+          )}
+
+          {hasUnverifiedPayees && (
+            <div className="p-3.5 rounded-xl bg-warning-tint border border-warning/30 text-warning text-sm font-medium flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Batch contains unverified payees</p>
+                <p className="text-xs text-ink-muted mt-0.5">
+                  Cashfree Transfers V2 requires all payees to be Provider Verified (penny-drop verified) before approval and dispatch. Please verify all payees under Payee Directory.
+                </p>
+              </div>
             </div>
           )}
 

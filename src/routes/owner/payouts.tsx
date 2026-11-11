@@ -21,6 +21,7 @@ import {
   useCreatePayoutBatch,
   useDispatchPayoutBatch,
   useVerifyPayee,
+  useVerifyPayeeProvider,
 } from "@/lib/usePayouts";
 import { exportPayoutBatchCSV } from "@/api/payouts";
 import { formatPaise, formatDate } from "@/lib/utils";
@@ -76,6 +77,7 @@ export const PayoutsView: React.FC = () => {
   const createBatchMutation = useCreatePayoutBatch();
   const dispatchBatchMutation = useDispatchPayoutBatch();
   const verifyPayeeMutation = useVerifyPayee();
+  const verifyPayeeProviderMutation = useVerifyPayeeProvider();
 
   const payeeMap = React.useMemo(
     () => new Map(payees.map((p) => [p.id, p])),
@@ -142,7 +144,19 @@ export const PayoutsView: React.FC = () => {
         refetchPayees();
       },
       onError: (err: any) => {
-        setActionError(err.message || "Failed to verify payee.");
+        setActionError(err.message || "Failed to attest payee.");
+      },
+    });
+  };
+
+  const handleVerifyPayeeProvider = (payeeId: string) => {
+    setActionError(null);
+    verifyPayeeProviderMutation.mutate(payeeId, {
+      onSuccess: () => {
+        refetchPayees();
+      },
+      onError: (err: any) => {
+        setActionError(err.message || "Penny-drop bank verification failed.");
       },
     });
   };
@@ -600,14 +614,30 @@ export const PayoutsView: React.FC = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {!p.is_verified && (
-                          <button
-                            onClick={() => handleVerifyPayee(p.id)}
-                            disabled={verifyPayeeMutation.isPending}
-                            className="px-3 py-1.5 rounded-xl border border-hairline text-ink hover:bg-bg font-medium text-xs transition"
-                          >
-                            {t("owner.payouts.verifyPayeeAction")}
-                          </button>
+                        {p.verification_status !== "provider_verified" && (
+                          <div className="flex items-center justify-end gap-2">
+                            {p.verification_status !== "owner_attested" && (
+                              <button
+                                onClick={() => handleVerifyPayee(p.id)}
+                                disabled={verifyPayeeMutation.isPending || verifyPayeeProviderMutation.isPending}
+                                className="px-3 py-1.5 rounded-xl border border-hairline text-ink hover:bg-bg font-medium text-xs transition"
+                              >
+                                {t("owner.payouts.verifyPayeeAction")}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleVerifyPayeeProvider(p.id)}
+                              disabled={verifyPayeeMutation.isPending || verifyPayeeProviderMutation.isPending}
+                              className="px-3 py-1.5 rounded-xl bg-accent text-accent-contrast font-medium text-xs transition flex items-center gap-1.5"
+                            >
+                              {verifyPayeeProviderMutation.isPending ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                              )}
+                              Verify Bank
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>

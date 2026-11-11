@@ -4,6 +4,7 @@ import {
   listPayees,
   createPayee,
   verifyPayee,
+  verifyPayeeProvider,
   listUnbatchedPayoutItems,
   listPayoutBatches,
   getPayoutBatch,
@@ -36,6 +37,16 @@ export function useVerifyPayee() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payeeId: string) => verifyPayee(payeeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.payoutPayees });
+    },
+  });
+}
+
+export function useVerifyPayeeProvider() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payeeId: string) => verifyPayeeProvider(payeeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.payoutPayees });
     },
