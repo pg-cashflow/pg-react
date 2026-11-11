@@ -69,14 +69,16 @@ export const RefundModal: React.FC<RefundModalProps> = ({
           setRemainingPaise(hist.remaining_refundable_paise);
           setHasPendingOp(Boolean(hist.pending_operation));
           setRupeesInput((hist.remaining_refundable_paise / 100).toString());
-          if (hist.remaining_refundable_paise <= 0) {
+          if (!expired && hist.remaining_refundable_paise <= 0) {
             setErrorMessage("This payment has already been fully refunded.");
           }
         })
         .catch(() => {
           setRemainingPaise(0);
           setRupeesInput("0");
-          setErrorMessage(t("error.payment.refundHistoryFailed") || "Unable to verify refundable balance. Please try again.");
+          if (!expired) {
+            setErrorMessage(t("error.payment.refundHistoryFailed") || "Unable to verify refundable balance. Please try again.");
+          }
         });
 
       try {
@@ -90,7 +92,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
         }
       } catch { /* Storage may be unavailable; same-open retries still reuse the key. */ }
     }
-  }, [isOpen, payment]);
+  }, [isOpen, payment, t]);
 
   if (!isOpen || !payment) return null;
 

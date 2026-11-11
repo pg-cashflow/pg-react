@@ -13,6 +13,15 @@ beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
+  vi.spyOn(payments, "getPaymentRefundHistory").mockResolvedValue({
+    payment_id: "payment-1",
+    original_amount_paise: 100000,
+    refunded_amount_paise: 0,
+    reserved_amount_paise: 0,
+    remaining_refundable_paise: 100000,
+    refunds: [],
+    pending_operation: null,
+  });
 });
 afterEach(() => { act(() => root.unmount()); container.remove(); vi.restoreAllMocks(); });
 async function open() {
