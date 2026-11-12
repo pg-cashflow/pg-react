@@ -235,15 +235,12 @@ export const CreatePayeeModal: React.FC<CreatePayeeModalProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setTransferType("upi")}
-                className={`py-2.5 px-3 text-xs font-medium rounded-xl border flex items-center justify-center gap-2 transition ${
-                  transferType === "upi"
-                    ? "bg-accent-tint text-accent border-accent/40 font-semibold"
-                    : "bg-bg text-ink-muted border-hairline hover:text-ink"
-                }`}
+                disabled
+                title="UPI verification is coming soon. Please use Bank Account verification."
+                className="py-2.5 px-3 text-xs font-medium rounded-xl border flex items-center justify-center gap-2 transition bg-bg text-ink-muted/50 border-hairline cursor-not-allowed opacity-60"
               >
                 <Smartphone className="w-4 h-4" />
-                {t("owner.payees.upiVpa")}
+                {t("owner.payees.upiVpa")} (Soon)
               </button>
             </div>
 
