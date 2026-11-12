@@ -135,6 +135,7 @@ const TenantRewardsView = lazyView(() => import("@/routes/tenant/rewards"), "Ten
 const TenantCommunityView = lazyView(() => import("@/routes/tenant/community"), "TenantCommunityView");
 const TenantProfileView = lazyView(() => import("@/routes/tenant/profile"), "TenantProfileView");
 const TenantPayReturnView = lazyView(() => import("@/routes/tenant/pay-return"), "TenantPayReturnView");
+const PaymentReturnView = lazyView(() => import("@/routes/payment/return"), "PaymentReturnView");
 
 // Lazy-loaded Manager Views
 const KitchenHeadcountView = lazyView(() => import("@/routes/manager/kitchen"), "KitchenHeadcountView");
@@ -353,6 +354,12 @@ const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/contact",
   component: ContactPage,
+});
+
+const paymentReturnRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/payment/return",
+  component: PaymentReturnView,
 });
 
 const ownerRoute = createRoute({
@@ -718,6 +725,7 @@ const routeTree = rootRoute.addChildren([
   privacyRoute,
   refundPolicyRoute,
   contactRoute,
+  paymentReturnRoute,
   rootDashboard,
   rootJoinRequests,
   rootJoins,
