@@ -1031,6 +1031,8 @@ export const enIN = {
   "tenant.offlineView": "Offline view",
   "owner.batch.makerCheckerNoticeTitle": "Maker-Checker Notice:",
   "owner.batch.makerCheckerNoticeDesc": "You created this payout batch. If this property operates under dual-control policy with multiple owners, a different owner must authorize it.",
+  "owner.batch.unverifiedPayeesTitle": "Batch contains unverified payees",
+  "owner.batch.unverifiedPayeesDesc": "All payees must be verified before approval and dispatch. Please verify payees under Payee Directory.",
   "owner.payee.coolingOffNoticeTitle": "24-Hour Cooling-Off:",
   "owner.payee.coolingOffNoticeDesc": "Newly registered payees have a mandatory 24-hour security cooling-off window before they can be added to a payout batch.",
   "owner.refund.needsReviewTitle": "Refund Held for Review",

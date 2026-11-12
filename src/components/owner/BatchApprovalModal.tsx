@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight, AlertCircle } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { OtpInput } from "@/components/shared/OtpInput";
 import { useLocale } from "@/i18n";
@@ -157,9 +157,9 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
             <div className="p-3.5 rounded-xl bg-warning-tint border border-warning/30 text-warning text-sm font-medium flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold">Batch contains unverified payees</p>
+                <p className="font-semibold">{t("owner.batch.unverifiedPayeesTitle")}</p>
                 <p className="text-xs text-ink-muted mt-0.5">
-                  Cashfree Transfers V2 requires all payees to be Provider Verified (penny-drop verified) before approval and dispatch. Please verify all payees under Payee Directory.
+                  {t("owner.batch.unverifiedPayeesDesc")}
                 </p>
               </div>
             </div>

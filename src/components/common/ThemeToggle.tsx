@@ -32,6 +32,7 @@ export function ThemeToggle() {
 
 export function ThemeSegmentedControl() {
   const { theme, setTheme } = useTheme();
+  const { t } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<Theme, HTMLButtonElement | null>>({
     system: null,
@@ -73,9 +74,9 @@ export function ThemeSegmentedControl() {
   }, [updateIndicator]);
 
   const options: Array<{ value: Theme; label: string; icon: typeof Sun }> = [
-    { value: "system", label: "System", icon: Laptop },
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
+    { value: "system", label: t("settings.themeSystem"), icon: Laptop },
+    { value: "light", label: t("settings.themeLight"), icon: Sun },
+    { value: "dark", label: t("settings.themeDark"), icon: Moon },
   ];
 
   return (

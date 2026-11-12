@@ -1034,6 +1034,8 @@ export const taIN: Record<MessageKey, string> = {
   "tenant.offlineView": "ஆஃப்லைன் காட்சி",
   "owner.batch.makerCheckerNoticeTitle": "மேக்கர்-செக்கர் அறிவிப்பு:",
   "owner.batch.makerCheckerNoticeDesc": "நீங்கள் இந்த பட்டுவாடா தொகுதியை உருவாக்கினீர்கள். இரட்டைக் கட்டுப்பாட்டுக் கொள்கையில் மற்றொரு உரிமையாளர் அங்கீகரிக்க வேண்டும்.",
+  "owner.batch.unverifiedPayeesTitle": "தொகுதியில் சரிபார்க்கப்படாத பயனாளிகள் உள்ளனர்",
+  "owner.batch.unverifiedPayeesDesc": "அங்கீகரித்து அனுப்புவதற்கு முன் அனைத்து பயனாளிகளும் சரிபார்க்கப்பட வேண்டும். பயனாளி கோப்பகத்தில் சரிபார்க்கவும்.",
   "owner.payee.coolingOffNoticeTitle": "24-மணிநேர கூலிங்-ஆஃப்:",
   "owner.payee.coolingOffNoticeDesc": "புதிதாகப் பதிவுசெய்யப்பட்ட பயனாளிகளுக்கு பட்டுவாடா தொகுப்பில் சேர்க்கப்படும் முன் கட்டாய 24 மணிநேர பாதுகாப்புக் காலம் உண்டு.",
   "owner.refund.needsReviewTitle": "மதிப்பாய்வில் உள்ள பணத்தைத் திரும்பப் பெறுதல்",

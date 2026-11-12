@@ -1035,6 +1035,8 @@ export const knIN: Record<MessageKey, string> = {
   "tenant.offlineView": "ಆಫ್‌ಲೈನ್ ನೋಟ",
   "owner.batch.makerCheckerNoticeTitle": "ಮೇಕರ್-ಚೆಕರ್ ಸೂಚನೆ:",
   "owner.batch.makerCheckerNoticeDesc": "ನೀವು ಈ ಪಾವತಿ ಬ್ಯಾಚ್ ಅನ್ನು ರಚಿಸಿದ್ದೀರಿ. ಬಹು ಮಾಲೀಕರೊಂದಿಗೆ ದ್ವಿ-ನಿಯಂತ್ರಣ ನೀತಿಯಲ್ಲಿ ಬೇರೊಬ್ಬ ಮಾಲೀಕರು ಅನುಮೋದಿಸಬೇಕು.",
+  "owner.batch.unverifiedPayeesTitle": "ಬ್ಯಾಚ್ ದೃಢೀಕರಿಸದ ಫಲಾನುಭವಿಗಳನ್ನು ಒಳಗೊಂಡಿದೆ",
+  "owner.batch.unverifiedPayeesDesc": "ಅನುಮೋದನೆ ಮತ್ತು ರವಾನಿಸುವ ಮೊದಲು ಎಲ್ಲಾ ಫಲಾನುಭವಿಗಳನ್ನು ದೃಢೀಕರಿಸಬೇಕು. ದಯವಿಟ್ಟು ಫಲಾನುಭವಿ ಡೈರೆಕ್ಟರಿಯಲ್ಲಿ ಪರಿಶೀಲಿಸಿ.",
   "owner.payee.coolingOffNoticeTitle": "24-ಗಂಟೆಗಳ ಕೂಲಿಂಗ್-ಆಫ್:",
   "owner.payee.coolingOffNoticeDesc": "ಹೊಸದಾಗಿ ನೋಂದಾಯಿಸಲಾದ ಫಲಾನುಭವಿಗಳಿಗೆ ಪಾವತಿ ಬ್ಯಾಚ್‌ಗೆ ಸೇರಿಸುವ ಮೊದಲು ಕಡ್ಡಾಯ 24 ಗಂಟೆಗಳ ಭದ್ರತಾ ಕೂಲಿಂಗ್-ಆಫ್ ಅವಧಿ ಇರುತ್ತದೆ.",
   "owner.refund.needsReviewTitle": "ಪರಿಶೀಲನೆಯಲ್ಲಿರುವ ಮರುಪಾವತಿ",

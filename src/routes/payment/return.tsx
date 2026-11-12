@@ -30,8 +30,8 @@ export const PaymentReturnView: React.FC = () => {
     }
     setStatus("PAID");
     if (role === "owner") {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerDues });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ownerDashboard });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dues() });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.payments() });
     } else {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantDues });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantPayments });
@@ -71,7 +71,7 @@ export const PaymentReturnView: React.FC = () => {
       // 1. Order-ID-based verification
       if (orderId) {
         try {
-          const res = await verifyOrderPay(orderId, role || "tenant");
+          const res = await verifyOrderPay(orderId);
           if (active && res.paid) {
             markPaid();
             return true;
@@ -145,37 +145,37 @@ export const PaymentReturnView: React.FC = () => {
         <div className="p-6 rounded-[16px] bg-success-tint border border-success/20 text-center space-y-4">
           <CheckCircle2 className="w-12 h-12 text-success mx-auto" />
           <div>
-            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.success_title")}</h2>
-            <p className="t-body text-ink-muted mt-1">{t("payreturn.success_desc")}</p>
+            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.received")}</h2>
+            <p className="t-body text-ink-muted mt-1">{t("payreturn.receivedDesc")}</p>
           </div>
           <button
             onClick={handleReturn}
             className="w-full h-11 inline-flex items-center justify-center rounded-[10px] bg-accent text-white font-semibold hover:opacity-95 transition-opacity"
           >
-            {t("payreturn.back_to_dues")}
+            {t("payreturn.backToDues")}
           </button>
         </div>
       ) : status === "CONFIRMING" ? (
         <div className="p-6 rounded-[16px] bg-surface border border-hairline text-center space-y-4">
           <Loader2 className="w-12 h-12 text-accent animate-spin mx-auto" />
           <div>
-            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.confirming_title")}</h2>
-            <p className="t-body text-ink-muted mt-1">{t("payreturn.confirming_desc")}</p>
+            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.verifying")}</h2>
+            <p className="t-body text-ink-muted mt-1">{t("payreturn.verifyingDesc")}</p>
           </div>
         </div>
       ) : (
         <div className="p-6 rounded-[16px] bg-surface border border-hairline text-center space-y-4">
           <AlertCircle className="w-12 h-12 text-accent mx-auto" />
           <div>
-            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.still_pending_title")}</h2>
-            <p className="t-body text-ink-muted mt-1">{t("payreturn.still_pending_desc")}</p>
+            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.inProgress")}</h2>
+            <p className="t-body text-ink-muted mt-1">{t("payreturn.inProgressDesc")}</p>
           </div>
           <button
             onClick={handleReturn}
             className="w-full h-11 inline-flex items-center justify-center rounded-[10px] border border-hairline bg-surface text-ink font-semibold hover:bg-bg transition-colors gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            {t("payreturn.back_to_dues")}
+            {t("payreturn.backToDues")}
           </button>
         </div>
       )}
