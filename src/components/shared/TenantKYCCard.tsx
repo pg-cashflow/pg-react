@@ -25,6 +25,7 @@ import {
 import { ApiError } from "@/api/client";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { formatDate } from "@/lib/utils";
+import { validateAadhaarNumber, formatAadhaarNumber } from "@/lib/aadhaar";
 import { useLocale, formatKYCError } from "@/i18n";
 
 export interface TenantKYCCardProps {
@@ -233,15 +234,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       setUiError(err instanceof Error ? err.message : "Revocation failed");
     },
   });
-
-  const formatAadhaarNumber = (val: string) => {
-    const digits = val.replace(/\D/g, "").slice(0, 12);
-    const parts: string[] = [];
-    for (let i = 0; i < digits.length; i += 4) {
-      parts.push(digits.slice(i, i + 4));
-    }
-    return parts.join(" ");
-  };
 
   const handleAadhaarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAadhaarInput(formatAadhaarNumber(e.target.value));
@@ -666,10 +658,16 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     maxLength={14}
                     className="w-full h-11 px-3 rounded-[10px] border border-hairline bg-surface t-code text-ink placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-accent"
                   />
+                  {aadhaarInput.replace(/\s+/g, "").length === 12 &&
+                    !validateAadhaarNumber(aadhaarInput).valid && (
+                      <p className="t-caption text-danger">
+                        {t("kyc.reason.INVALID_AADHAAR")}
+                      </p>
+                    )}
                   <button
                     type="button"
                     disabled={
-                      aadhaarInput.replace(/\s+/g, "").length !== 12 ||
+                      !validateAadhaarNumber(aadhaarInput).valid ||
                       !consentChecked ||
                       requestOtpMutation.isPending
                     }
