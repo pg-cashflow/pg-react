@@ -780,6 +780,8 @@ export const knIN: Record<MessageKey, string> = {
   "payreturn.title": "ಪಾವತಿ ದೃಢೀಕರಣ",
   "payreturn.received": "ಪಾವತಿ ಸ್ವೀಕರಿಸಲಾಗಿದೆ!",
   "payreturn.receivedDesc": "ನಿಮ್ಮ ಬಾಡಿಗೆ ಬಾಕಿಯನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು ಲೆಡ್ಜರ್‌ನಲ್ಲಿ ಪಾವತಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ.",
+  "payreturn.waived": "ಬಾಕಿ ಮನ್ನಾ ಮಾಡಲಾಗಿದೆ",
+  "payreturn.waivedDesc": "ಈ ಬಾಕಿಯನ್ನು ಮನ್ನಾ ಮಾಡಲಾಗಿದೆ. ಯಾವುದೇ ಪಾವತಿಯ ಅಗತ್ಯವಿಲ್ಲ.",
   "payreturn.viewDues": "ನನ್ನ ಬಾಕಿಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
   "payreturn.inProgress": "ದೃಢೀಕರಣ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿದೆ",
   "payreturn.inProgressDesc": "ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಇನ್ನೂ ಬ್ಯಾಂಕ್ ಅಥವಾ ಗೇಟ್‌ವೇ ಮೂಲಕ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ. ಅದು ಇತ್ಯರ್ಥವಾದ ತಕ್ಷಣ ನಿಮಗೆ ಅಪ್‌ಡೇಟ್ ಸಿಗುತ್ತದೆ.",

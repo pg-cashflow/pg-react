@@ -776,6 +776,8 @@ export const enIN = {
   "payreturn.title": "Payment Confirmation",
   "payreturn.received": "Payment Received!",
   "payreturn.receivedDesc": "Your rent due has been updated and marked as paid on the ledger.",
+  "payreturn.waived": "Due Waived",
+  "payreturn.waivedDesc": "This due has been waived. No payment is required.",
   "payreturn.viewDues": "View My Dues",
   "payreturn.inProgress": "Confirmation in Progress",
   "payreturn.inProgressDesc": "Your payment is still being processed by the bank or gateway. You will receive an update as soon as it settles.",

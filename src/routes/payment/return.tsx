@@ -15,7 +15,7 @@ export const PaymentReturnView: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [status, setStatus] = useState<"CONFIRMING" | "PAID" | "STILL_PENDING">("CONFIRMING");
+  const [status, setStatus] = useState<"CONFIRMING" | "PAID" | "WAIVED" | "STILL_PENDING">("CONFIRMING");
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Extract query params from location search
@@ -39,6 +39,19 @@ export const PaymentReturnView: React.FC = () => {
     }
   }, [queryClient, role]);
 
+  const markWaived = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    setStatus("WAIVED");
+    if (role === "owner") {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dues() });
+    } else {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantDues });
+    }
+  }, [queryClient, role]);
+
   const checkStatus = useCallback(async (): Promise<boolean> => {
     if (role !== "owner") {
       try {
@@ -50,9 +63,15 @@ export const PaymentReturnView: React.FC = () => {
         const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
         if (dueId) {
           const match = dues.find((d: Due) => d.id === dueId);
-          if (match && (match.status === "paid" || match.status === "waived")) {
-            markPaid();
-            return true;
+          if (match) {
+            if (match.status === "paid") {
+              markPaid();
+              return true;
+            }
+            if (match.status === "waived") {
+              markWaived();
+              return true;
+            }
           }
         }
       } catch {
@@ -60,52 +79,56 @@ export const PaymentReturnView: React.FC = () => {
       }
     }
     return false;
-  }, [dueId, markPaid, queryClient, role]);
+  }, [dueId, markPaid, markWaived, queryClient, role]);
 
   useEffect(() => {
     let active = true;
     const deadline = Date.now() + 60 * 1000;
     let delay = 1500;
+    let inFlight = false;
 
     const executeVerify = async (): Promise<boolean> => {
-      // 1. Order-ID-based verification
-      if (orderId) {
-        try {
-          const res = await verifyOrderPay(orderId);
-          if (active && res.paid) {
-            markPaid();
-            return true;
+      if (inFlight) return false;
+      inFlight = true;
+      try {
+        // 1. Order-ID-based verification
+        if (orderId) {
+          try {
+            const res = await verifyOrderPay(orderId);
+            if (active && res.paid) {
+              markPaid();
+              return true;
+            }
+          } catch {
+            // ignore error; proceed to dues polling
           }
-        } catch {
-          // ignore error; proceed to dues polling
         }
-      }
 
-      // 2. Due-ID-based verification fallback for tenant
-      if (dueId && role !== "owner") {
-        try {
-          const res = await verifyTenantDuePay(dueId);
-          if (active && res.paid) {
-            markPaid();
-            return true;
+        // 2. Due-ID-based verification fallback for tenant
+        if (dueId && role !== "owner") {
+          try {
+            const res = await verifyTenantDuePay(dueId);
+            if (active && res.paid) {
+              markPaid();
+              return true;
+            }
+          } catch {
+            // ignore error; proceed to dues polling
           }
-        } catch {
-          // ignore error; proceed to dues polling
         }
-      }
 
-      // 3. Check dues list for settled status
-      return await checkStatus();
+        // 3. Check dues list for settled status
+        return await checkStatus();
+      } finally {
+        inFlight = false;
+      }
     };
 
-    // Immediate initial verification
-    executeVerify();
-
-    // Polling backstop with progressive backoff (1.5s -> 2s -> 3s -> 4s)
+    // Sequential polling loop with backoff (no overlapping executions)
     const poll = async () => {
       if (!active) return;
-      const isPaid = await executeVerify();
-      if (isPaid || !active) return;
+      const isSettled = await executeVerify();
+      if (isSettled || !active) return;
 
       if (Date.now() >= deadline) {
         setStatus("STILL_PENDING");
@@ -116,7 +139,12 @@ export const PaymentReturnView: React.FC = () => {
       pollTimerRef.current = setTimeout(poll, delay);
     };
 
-    pollTimerRef.current = setTimeout(poll, delay);
+    // Kick off immediate first check, then backstop polling triggers only after
+    executeVerify().then((settled) => {
+      if (!settled && active) {
+        pollTimerRef.current = setTimeout(poll, delay);
+      }
+    });
 
     return () => {
       active = false;
@@ -147,6 +175,20 @@ export const PaymentReturnView: React.FC = () => {
           <div>
             <h2 className="t-h3 font-semibold text-ink">{t("payreturn.received")}</h2>
             <p className="t-body text-ink-muted mt-1">{t("payreturn.receivedDesc")}</p>
+          </div>
+          <button
+            onClick={handleReturn}
+            className="w-full h-11 inline-flex items-center justify-center rounded-[10px] bg-accent text-white font-semibold hover:opacity-95 transition-opacity"
+          >
+            {t("payreturn.backToDues")}
+          </button>
+        </div>
+      ) : status === "WAIVED" ? (
+        <div className="p-6 rounded-[16px] bg-surface border border-hairline text-center space-y-4">
+          <CheckCircle2 className="w-12 h-12 text-accent mx-auto" />
+          <div>
+            <h2 className="t-h3 font-semibold text-ink">{t("payreturn.waived")}</h2>
+            <p className="t-body text-ink-muted mt-1">{t("payreturn.waivedDesc")}</p>
           </div>
           <button
             onClick={handleReturn}

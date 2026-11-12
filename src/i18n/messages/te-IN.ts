@@ -779,6 +779,8 @@ export const teIN: Record<MessageKey, string> = {
   "payreturn.title": "చెల్లింపు నిర్ధారణ",
   "payreturn.received": "చెల్లింపు అందింది!",
   "payreturn.receivedDesc": "మీ అద్దె బాకీ అప్‌డేట్ చేయబడింది మరియు లెడ్జర్‌లో చెల్లించినట్లుగా గుర్తించబడింది.",
+  "payreturn.waived": "బాకీ రద్దు చేయబడింది",
+  "payreturn.waivedDesc": "ఈ బాకీ రద్దు చేయబడింది. ఎటువంటి చెల్లింపు అవసరం లేదు.",
   "payreturn.viewDues": "నా బకాయిలను చూడండి",
   "payreturn.inProgress": "నిర్ధారణ పురోగతిలో ఉంది",
   "payreturn.inProgressDesc": "మీ చెల్లింపు ఇంకా బ్యాంక్ లేదా గేట్‌వే ద్వారా ప్రాసెస్ చేయబడుతోంది. అది పరిష్కారం కాగానే మీకు అప్‌డేట్ వస్తుంది.",

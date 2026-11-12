@@ -39,6 +39,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   );
 
   const items = batchDetails?.items || [];
+  const itemsFullyLoaded = !isBatchLoading && Boolean(batchDetails) && items.length === batch.item_count;
 
   const requestOTPMutation = useRequestPayoutBatchOTP();
   const approveMutation = useApprovePayoutBatch();
@@ -56,7 +57,8 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
 
   const isCountMatched = parsedItemCount === batch.item_count;
   const isAmountMatched = expectedPaise === batch.total_amount_paise;
-  const canRequestOTP = isCountMatched && isAmountMatched && !hasUnverifiedPayees;
+  // PAY-04 & PAY-05: Require full item list loaded + count match, and block maker from requesting OTP
+  const canRequestOTP = itemsFullyLoaded && isCountMatched && isAmountMatched && !hasUnverifiedPayees && !isMaker;
 
   const handleRequestOTP = () => {
     setErrorMessage(null);

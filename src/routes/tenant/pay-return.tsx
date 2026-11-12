@@ -13,7 +13,7 @@ export const TenantPayReturnView: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [status, setStatus] = useState<"CONFIRMING" | "PAID" | "STILL_PENDING">("CONFIRMING");
+  const [status, setStatus] = useState<"CONFIRMING" | "PAID" | "WAIVED" | "STILL_PENDING">("CONFIRMING");
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Extract query params from location search
@@ -32,6 +32,15 @@ export const TenantPayReturnView: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantProfile });
   }, [queryClient]);
 
+  const markWaived = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    setStatus("WAIVED");
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantDues });
+  }, [queryClient]);
+
   const checkStatus = useCallback(async (): Promise<boolean> => {
     try {
       const data = await queryClient.fetchQuery<Due[]>({
@@ -42,61 +51,71 @@ export const TenantPayReturnView: React.FC = () => {
       const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
       if (dueId) {
         const match = dues.find((d: Due) => d.id === dueId);
-        if (match && (match.status === "paid" || match.status === "waived")) {
-          markPaid();
-          return true;
+        if (match) {
+          if (match.status === "paid") {
+            markPaid();
+            return true;
+          }
+          if (match.status === "waived") {
+            markWaived();
+            return true;
+          }
         }
       }
     } catch {
       // transient query error
     }
     return false;
-  }, [dueId, markPaid, queryClient]);
+  }, [dueId, markPaid, markWaived, queryClient]);
 
   useEffect(() => {
     let active = true;
     const deadline = Date.now() + 60 * 1000;
     let delay = 1500;
+    let inFlight = false;
 
     const executeVerify = async (): Promise<boolean> => {
-      // 1. Order-ID-based verification (standard Cashfree return flow)
-      if (orderId) {
-        try {
-          const res = await verifyTenantOrderPay(orderId);
-          if (active && res.paid) {
-            markPaid();
-            return true;
+      if (inFlight) return false;
+      inFlight = true;
+      try {
+        // 1. Order-ID-based verification (standard Cashfree return flow)
+        if (orderId) {
+          try {
+            const res = await verifyTenantOrderPay(orderId);
+            if (active && res.paid) {
+              markPaid();
+              return true;
+            }
+          } catch {
+            // ignore error; proceed to due verify or dues polling
           }
-        } catch {
-          // ignore error; proceed to due verify or dues polling
         }
-      }
 
-      // 2. Due-ID-based verification fallback
-      if (dueId) {
-        try {
-          const res = await verifyTenantDuePay(dueId);
-          if (active && res.paid) {
-            markPaid();
-            return true;
+        // 2. Due-ID-based verification fallback
+        if (dueId) {
+          try {
+            const res = await verifyTenantDuePay(dueId);
+            if (active && res.paid) {
+              markPaid();
+              return true;
+            }
+          } catch {
+            // ignore error; proceed to dues polling
           }
-        } catch {
-          // ignore error; proceed to dues polling
         }
-      }
 
-      // 3. Check dues list for settled status
-      return await checkStatus();
+        // 3. Check dues list for settled status
+        return await checkStatus();
+      } finally {
+        inFlight = false;
+      }
     };
-
-    // Immediate initial verification
-    executeVerify();
 
     // Polling backstop with progressive backoff (1.5s -> 2s -> 3s -> 4s)
     const poll = async () => {
       if (!active) return;
-      const isPaid = await executeVerify();
-      if (isPaid || !active) return;
+      const isSettled = await executeVerify();
+      if (isSettled || !active) return;
 
       if (Date.now() >= deadline) {
         setStatus("STILL_PENDING");
@@ -107,7 +126,12 @@ export const TenantPayReturnView: React.FC = () => {
       pollTimerRef.current = setTimeout(poll, delay);
     };
 
-    pollTimerRef.current = setTimeout(poll, delay);
+    // Sequential: verify immediately first, then poll backstop
+    executeVerify().then((settled) => {
+      if (!settled && active) {
+        pollTimerRef.current = setTimeout(poll, delay);
+      }
+    });
 
     return () => {
       active = false;
@@ -138,6 +162,27 @@ export const TenantPayReturnView: React.FC = () => {
             onClick={() => navigate({ to: "/tenant/dues" })}
             className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm inline-flex items-center justify-center gap-2"
           >
+            {t("payreturn.backToDues")}
+          </button>
+        </div>
+      ) : status === "WAIVED" ? (
+        <div className="p-6 rounded-[16px] bg-surface border border-hairline text-center space-y-4">
+          <CheckCircle2 className="w-12 h-12 text-accent mx-auto" />
+          <div>
+            <p className="t-h2 font-semibold text-ink">{t("payreturn.waived")}</p>
+            <p className="t-body-sm text-ink-muted mt-1">
+              {t("payreturn.waivedDesc")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/tenant/dues" })}
+            className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm inline-flex items-center justify-center gap-2"
+          >
+            {t("payreturn.backToDues")}
+          </button>
+        </div>
+      ) : status === "CONFIRMING" ? (
             <ArrowLeft className="w-4 h-4" /> {t("payreturn.viewDues")}
           </button>
         </div>
