@@ -12,6 +12,7 @@ import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 
 import { getTenantKYCStatus } from "@/api/kyc";
 import { useLocale } from "@/i18n";
+import { isPassbookOfflineDisabled, setPassbookOfflineDisabled } from "@/lib/passbookCache";
 
 export const TenantProfileView: React.FC = () => {
   const { t } = useLocale();
@@ -19,9 +20,16 @@ export const TenantProfileView: React.FC = () => {
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
   const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
   const [msg, setMsg] = useState<string | null>(null);
+  const [offlineDisabled, setOfflineDisabled] = useState(() => isPassbookOfflineDisabled());
   const profile = profileQuery.data;
   const isVerified = kycQuery.data?.verification?.status === "verified";
   const isPendingReview = kycQuery.data?.verification?.status === "pending_manual_review";
+
+  const handleToggleOffline = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const disabled = !e.target.checked;
+    setPassbookOfflineDisabled(disabled);
+    setOfflineDisabled(disabled);
+  };
 
   return (
     <QueryState
@@ -97,6 +105,24 @@ export const TenantProfileView: React.FC = () => {
           <h2 className="t-h3">{t("tenant.languageTitle")}</h2>
           <p className="t-caption text-ink-muted">{t("tenant.languageDesc")}</p>
           <LanguageSegmentedControl />
+        </section>
+
+        <section className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
+          <h2 className="t-h3">{t("tenant.offlinePassbookTitle")}</h2>
+          <p className="t-caption text-ink-muted">
+            {t("tenant.offlinePassbookDesc")}
+          </p>
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={!offlineDisabled}
+              onChange={handleToggleOffline}
+              className="h-5 w-5 rounded border-hairline text-accent focus:ring-accent"
+            />
+            <span className="t-body font-medium">
+              {t("tenant.offlinePassbookToggle")}
+            </span>
+          </label>
         </section>
 
         <ActiveSessionsCard />

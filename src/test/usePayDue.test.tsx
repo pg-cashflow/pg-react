@@ -66,6 +66,16 @@ const server = setupServer(
       note: "Rent Due",
     });
   }),
+  http.post(`${API_BASE}/tenant/dues/:id/pay`, () => {
+    return HttpResponse.json({
+      mode: "cashfree",
+      payable: true,
+      amount_paise: 500000,
+      due_code: "RENT-01",
+      payment_session_id: "sess_test_123",
+      note: "Rent Due",
+    });
+  }),
   http.post(`${API_BASE}/tenant/dues/:id/pay/verify`, () => {
     if (verifyStatus === 404) {
       return HttpResponse.json({ error: "not found" }, { status: 404 });
@@ -113,7 +123,10 @@ describe("usePayDue State Machine", () => {
 
   it("does not label a policy-blocked non-payable due as paid", async () => {
     verifyShouldSucceed = false;
-    server.use(http.get(`${API_BASE}/tenant/dues/:id/pay`, () => HttpResponse.json({ payable: false, mode: "manual" })));
+    server.use(
+      http.get(`${API_BASE}/tenant/dues/:id/pay`, () => HttpResponse.json({ payable: false, mode: "manual" })),
+      http.post(`${API_BASE}/tenant/dues/:id/pay`, () => HttpResponse.json({ payable: false, mode: "manual" }))
+    );
     const hook = renderHook(() => usePayDue(dueId), { wrapper });
     await act(async () => { await hook.result.current.startPayment(); });
     expect(hook.result.current.state).toBe("READY");
@@ -217,5 +230,32 @@ describe("usePayDue State Machine", () => {
 
     expect(result.current.state).toBe("REDIRECTING");
     expect(onRedirect).toHaveBeenCalled();
+  });
+
+  it("enters CHECKING when Cashfree SDK throws or rejects after launch (F-10)", async () => {
+    verifyShouldSucceed = false;
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockRejectedValue(
+      new Error("SDK bridge crashed or network timeout")
+    );
+
+    const { result } = renderHook(() => usePayDue(dueId), { wrapper });
+
+    await act(async () => {
+      await result.current.startPayment();
+    });
+
+    // Must NOT immediately fail to READY; enters ambiguous CHECKING state to verify with server
+    expect(result.current.state).toBe("CHECKING");
+
+    // Advance through quiet checking window (10s)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(11000);
+    });
+
+    expect(result.current.state).toBe("READY");
+    expect(result.current.error).toBeNull();
+    vi.useRealTimers();
   });
 });

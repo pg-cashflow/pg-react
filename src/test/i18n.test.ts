@@ -34,6 +34,21 @@ describe("i18n message completeness", () => {
     expect(knKeys).toEqual(baseKeys);
   });
 
+  it("kyc.card.consentText matches canonical DPDP catalog across all 4 locales byte-for-byte", () => {
+    expect(enIN["kyc.card.consentText"]).toBe(
+      "I agree to my identity details being verified and stored for PG occupancy records in compliance with the DPDP Act."
+    );
+    expect(teIN["kyc.card.consentText"]).toBe(
+      "నేను DPDP చట్టానికి అనుగుణంగా PG ఆక్యుపెన్సీ రికార్డుల కోసం నా గుర్తింపు వివరాలను ధృవీకరించడానికి మరియు నిల్వ చేయడానికి అంగీకరిస్తున్నాను."
+    );
+    expect(taIN["kyc.card.consentText"]).toBe(
+      "DPDP சட்டத்திற்கு இணங்க, PG தங்குமிடம் பதிவுகளுக்காக எனது அடையாள விவரங்கள் சரிபார்க்கப்பட்டு சேமிக்கப்படுவதை நான் ஒப்புக்கொள்கிறேன்."
+    );
+    expect(knIN["kyc.card.consentText"]).toBe(
+      "DPDP ಕಾಯ್ದೆಗೆ ಅನುಗುಣವಾಗಿ PG ವಾಸದ ದಾಖಲೆಗಳಿಗಾಗಿ ನನ್ನ ಗುರುತಿನ ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ಸಂಗ್ರಹಿಸಲು ನಾನು ಸಮ್ಮತಿಸುತ್ತೇನೆ."
+    );
+  });
+
   it("identifies supported locales correctly", () => {
     expect(isSupportedLocale("en-IN")).toBe(true);
     expect(isSupportedLocale("te-IN")).toBe(true);
@@ -426,6 +441,47 @@ describe("i18n message completeness", () => {
 
       // 5. Unknown value falls back to common.error
       expect(formatApiError(null, tMock)).toBe("An error occurred");
+    });
+  });
+
+  describe("F-12 Returning user locale loading without English flash", () => {
+    it("does not render English fallback when mounting with saved regional locale", async () => {
+      const { createRoot } = await import("react-dom/client");
+      const React = await import("react");
+      const { LocaleProvider, useLocale } = await import("../i18n");
+
+      // Set saved locale to kn-IN in localStorage
+      localStorage.setItem("pg_locale", "kn-IN");
+
+      const renderedTexts: string[] = [];
+      function TestConsumer() {
+        const { t } = useLocale();
+        const text = t("nav.passbook");
+        renderedTexts.push(text);
+        return React.createElement("span", null, text);
+      }
+
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = createRoot(container);
+
+      await React.act(async () => {
+        root.render(
+          React.createElement(LocaleProvider, null, React.createElement(TestConsumer))
+        );
+      });
+
+      // After loading, it must have rendered the localized Kannada text "ಪಾಸ್‌ಬುಕ್"
+      // and renderedTexts must NEVER contain the English "Passbook"!
+      expect(renderedTexts.length).toBeGreaterThan(0);
+      expect(renderedTexts).not.toContain("Passbook");
+      expect(renderedTexts[renderedTexts.length - 1]).toBe("ಪಾಸ್‌ಬುಕ್");
+
+      await React.act(async () => {
+        root.unmount();
+        container.remove();
+        localStorage.removeItem("pg_locale");
+      });
     });
   });
 });

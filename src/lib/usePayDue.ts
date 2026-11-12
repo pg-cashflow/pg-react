@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import { getTenantDuePay, verifyTenantDuePay } from "@/api/pay";
+import { createTenantDuePay, verifyTenantDuePay } from "@/api/pay";
 import { getMyDues } from "@/api/tenant";
 import { startCashfreeCheckout, preloadCashfreeSdk } from "@/lib/cashfree";
 import type { Due, PayIntent } from "@pg/types";
@@ -166,9 +166,10 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
 
     setState("OPENING");
     setError(null);
+    let checkoutLaunched = false;
 
     try {
-      const p = await getTenantDuePay(dueId);
+      const p = await createTenantDuePay(dueId);
       setIntent(p);
 
       if (!p.payable) {
@@ -186,6 +187,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       }
 
       setState("CHECKOUT_OPEN");
+      checkoutLaunched = true;
       const result = await startCashfreeCheckout(p.payment_session_id, optionsRef.current.environment);
 
       // Precedence order per ADR-017 & Cashfree docs:
@@ -200,8 +202,15 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       }
     } catch (err: unknown) {
       clearTimer();
-      setState("READY");
-      setError(err instanceof Error ? err.message : "Payment initialization failed");
+      if (checkoutLaunched) {
+        // Defect F-10: If the Cashfree SDK promise throws or rejects after checkout was launched,
+        // treat the outcome as ambiguous rather than definite failure. Verify the
+        // ledger with backend polling before allowing a retry.
+        enterChecking();
+      } else {
+        setState("READY");
+        setError(err instanceof Error ? err.message : "Payment initialization failed");
+      }
     } finally {
       paymentInFlightRef.current = false;
     }

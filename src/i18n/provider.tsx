@@ -189,6 +189,7 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
       .catch((err) => {
         console.warn(`[i18n] Failed to load messages for ${locale}:`, err);
         if (isMounted) {
+          loadedMessages[locale] = enIN;
           setMessages(enIN);
             }
       });
@@ -202,6 +203,14 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  // Defect F-12: Prevent brief flash of English for returning users whose saved locale
+  // dictionary is still loading. Do not render children with enIN fallback if a non-default
+  // locale was selected and its dictionary has not loaded yet.
+  const isReady = locale === DEFAULT_LOCALE || Boolean(loadedMessages[locale]) || messages !== enIN;
+  if (!isReady) {
+    return null;
+  }
 
 
 
