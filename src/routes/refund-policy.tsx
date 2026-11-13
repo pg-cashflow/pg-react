@@ -1,5 +1,6 @@
 import React from "react";
 import { PublicPolicyLayout } from "@/components/layout/PublicPolicyLayout";
+import company from "@/config/company.json";
 
 export const RefundPolicyPage: React.FC = () => {
   return (
@@ -50,7 +51,7 @@ export const RefundPolicyPage: React.FC = () => {
         </p>
         <ul className="list-disc pl-5 space-y-1.5 t-body-sm text-ink-muted">
           <li>Our automated polling and reconciliation system detects duplicate receipts and initiates a refund request within 24 to 48 hours.</li>
-          <li>Alternatively, you can report the transaction ID to support@pgcashflow.in for immediate verification and manual initiation.</li>
+          <li>Alternatively, you can report the transaction ID to {company.supportEmail} for immediate verification and manual initiation.</li>
         </ul>
       </section>
 
@@ -76,10 +77,10 @@ export const RefundPolicyPage: React.FC = () => {
       <section className="space-y-3">
         <h2 className="t-h2 text-ink font-semibold">7. Support &amp; Grievance Redressal</h2>
         <p className="t-body-sm text-ink-muted leading-relaxed">
-          For refund escalations or payment queries, contact our Helpdesk Line at +91 (080) 4567-8900 or email support@pgcashflow.in.
+          For refund escalations or payment queries, contact our Helpdesk Line at {company.helpdeskPhone} or email {company.supportEmail}.
         </p>
         <p className="t-body-sm text-ink-muted leading-relaxed">
-          Grievance Officer: grievance@pgcashflow.in | Registered Address: PG Cashflow Technologies Private Limited, Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India.
+          Grievance Officer: {company.grievanceEmail} | Registered Address: {company.legalName}, {company.address}.
         </p>
       </section>
     </PublicPolicyLayout>

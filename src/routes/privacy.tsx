@@ -1,5 +1,6 @@
 import React from "react";
 import { PublicPolicyLayout } from "@/components/layout/PublicPolicyLayout";
+import company from "@/config/company.json";
 
 export const PrivacyPage: React.FC = () => {
   return (
@@ -73,9 +74,9 @@ export const PrivacyPage: React.FC = () => {
           If you have questions, feedback, or grievances regarding your data, contact our designated Grievance Officer:
         </p>
         <div className="rounded-[10px] border border-hairline bg-bg p-4 t-body-sm text-ink-muted space-y-1">
-          <p><strong>Grievance Redressal Officer:</strong> Data Protection Cell, PG Cashflow</p>
-          <p><strong>Email:</strong> privacy@pgcashflow.in</p>
-          <p><strong>Response Turnaround:</strong> Acknowledged within 48 hours; resolved within 15 business days.</p>
+          <p><strong>Grievance Redressal Officer:</strong> Data Protection Cell, {company.legalName}</p>
+          <p><strong>Email:</strong> {company.privacyEmail || company.grievanceEmail}</p>
+          <p><strong>Response Turnaround:</strong> Acknowledged within {company.ackTimelineHours} hours; resolved within {company.resolutionTimelineDays} business days.</p>
         </div>
       </section>
     </PublicPolicyLayout>

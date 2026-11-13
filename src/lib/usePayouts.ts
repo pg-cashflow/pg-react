@@ -64,6 +64,13 @@ export function usePayoutBatches() {
   return useQuery({
     queryKey: QUERY_KEYS.payoutBatches,
     queryFn: listPayoutBatches,
+    refetchInterval: (query) => {
+      const batches = query.state.data;
+      if (batches?.some((b) => b.status === "processing" || b.status === "dispatch_unknown")) {
+        return 5000;
+      }
+      return false;
+    },
   });
 }
 

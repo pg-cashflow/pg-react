@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight, AlertCircle } from "lucide-react";
+import { X, ShieldAlert, CheckCircle2, Loader2, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { OtpInput } from "@/components/shared/OtpInput";
 import { useLocale } from "@/i18n";
@@ -30,7 +30,12 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
 
   const isMaker = Boolean(userId && batch.created_by && userId === batch.created_by);
 
-  const { data: batchDetails, isLoading: isBatchLoading } = usePayoutBatch(batch.id);
+  const {
+    data: batchDetails,
+    isLoading: isBatchLoading,
+    isError: isBatchError,
+    refetch: refetchBatch,
+  } = usePayoutBatch(batch.id);
   const { data: payees = [] } = usePayees();
 
   const payeeMap = React.useMemo(
@@ -39,7 +44,7 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   );
 
   const items = batchDetails?.items || [];
-  const itemsFullyLoaded = !isBatchLoading && Boolean(batchDetails) && items.length === batch.item_count;
+  const itemsFullyLoaded = !isBatchLoading && !isBatchError && Boolean(batchDetails) && items.length === batch.item_count;
 
   const requestOTPMutation = useRequestPayoutBatchOTP();
   const approveMutation = useApprovePayoutBatch();
@@ -55,10 +60,12 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
   });
   const hasUnverifiedPayees = unverifiedPayees.length > 0;
 
-  const isCountMatched = parsedItemCount === batch.item_count;
-  const isAmountMatched = expectedPaise === batch.total_amount_paise;
-  // PAY-04 & PAY-05: Require full item list loaded + count match, and block maker from requesting OTP
-  const canRequestOTP = itemsFullyLoaded && isCountMatched && isAmountMatched && !hasUnverifiedPayees && !isMaker;
+  const hasItemCountInput = itemCountInput.trim() !== "";
+  const hasRupeesInput = rupeesInput.trim() !== "";
+  const isCountMatched = hasItemCountInput && parsedItemCount === batch.item_count;
+  const isAmountMatched = hasRupeesInput && expectedPaise === batch.total_amount_paise;
+  // Solo owners approve via step-up OTP; multi-owner properties enforce dual-control on the server.
+  const canRequestOTP = itemsFullyLoaded && isCountMatched && isAmountMatched && !hasUnverifiedPayees;
 
   const handleRequestOTP = () => {
     setErrorMessage(null);
@@ -193,6 +200,21 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
                 <div className="p-6 text-center text-xs text-ink-muted flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Loading batch instructions...</span> {/* lint-allow-i18n */}
+                </div>
+              ) : isBatchError ? (
+                <div className="p-6 text-center text-xs text-danger flex flex-col items-center justify-center gap-2">
+                  <div className="flex items-center gap-2 font-medium">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Failed to load batch instructions.</span> {/* lint-allow-i18n */}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => refetchBatch()}
+                    className="mt-1 px-3 py-1 rounded-lg border border-hairline bg-surface text-ink hover:bg-bg inline-flex items-center gap-1.5 transition text-xs"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Retry {/* lint-allow-i18n */}
+                  </button>
                 </div>
               ) : items.length === 0 ? (
                 <div className="p-6 text-center text-xs text-ink-muted">

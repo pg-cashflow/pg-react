@@ -4,6 +4,26 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distHtmlPath = path.resolve(__dirname, "../dist/index.html");
+const companyConfigPath = path.resolve(__dirname, "../src/config/company.json");
+
+let company = {
+  legalName: "PG Cashflow Technologies Private Limited",
+  address: "Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India",
+  supportEmail: "support@pgcashflow.in",
+  helpdeskPhone: "+91 (080) 4567-8900",
+  grievanceEmail: "grievance@pgcashflow.in",
+  privacyEmail: "grievance@pgcashflow.in",
+  ackTimelineHours: 48,
+  resolutionTimelineDays: 15,
+};
+
+if (fs.existsSync(companyConfigPath)) {
+  try {
+    company = { ...company, ...JSON.parse(fs.readFileSync(companyConfigPath, "utf-8")) };
+  } catch (e) {
+    console.warn("Could not read company.json, falling back to defaults", e.message);
+  }
+}
 
 if (!fs.existsSync(distHtmlPath)) {
   console.error("dist/index.html not found. Run vite build first.");
@@ -345,7 +365,7 @@ writeStaticPage("privacy", "Privacy Policy", "How PG Cashflow handles, protects,
   {
     heading: "3. Grievance Redressal",
     paragraphs: [
-      "Data principals may contact our designated Grievance Officer at privacy@pgcashflow.in. Complaints are acknowledged within 48 hours and resolved within 15 business days."
+      `Data principals may contact our designated Grievance Officer at ${company.privacyEmail || company.grievanceEmail}. Complaints are acknowledged within ${company.ackTimelineHours} hours and resolved within ${company.resolutionTimelineDays} business days.`
     ]
   }
 ]);
@@ -373,8 +393,8 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
   {
     heading: "4. Support & Grievance Contact",
     paragraphs: [
-      "For refund escalation or payment queries, contact our Helpdesk Line at +91 (080) 4567-8900 or email support@pgcashflow.in.",
-      "Grievance Officer: grievance@pgcashflow.in | Registered Address: PG Cashflow Technologies Private Limited, Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India."
+      `For refund escalation or payment queries, contact our Helpdesk Line at ${company.helpdeskPhone} or email ${company.supportEmail}.`,
+      `Grievance Officer: ${company.grievanceEmail} | Registered Address: ${company.legalName}, ${company.address}.`
     ]
   }
 ]);
@@ -383,15 +403,15 @@ writeStaticPage("contact", "Contact Us & Grievance Redressal", "Reach out to the
   {
     heading: "1. Customer & Operations Support",
     paragraphs: [
-      "General Support: support@pgcashflow.in (Mon-Sat, 9:00 AM - 7:00 PM IST)",
-      "Helpdesk Line: +91 (080) 4567-8900",
-      "Registered Address: PG Cashflow Technologies Private Limited, Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India"
+      `General Support: ${company.supportEmail} (Mon-Sat, 9:00 AM - 7:00 PM IST)`,
+      `Helpdesk Line: ${company.helpdeskPhone}`,
+      `Registered Address: ${company.legalName}, ${company.address}`
     ]
   },
   {
     heading: "2. Grievance Officer Details",
     paragraphs: [
-      "Designated Grievance & Compliance Officer: grievance@pgcashflow.in (acknowledged within 48 hours; resolved within 15 business days per DPDP requirements)."
+      `Designated Grievance & Compliance Officer: ${company.grievanceEmail} (acknowledged within ${company.ackTimelineHours} hours; resolved within ${company.resolutionTimelineDays} business days per DPDP requirements).`
     ]
   }
 ]);

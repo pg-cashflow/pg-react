@@ -1,6 +1,7 @@
 import React from "react";
 import { PublicPolicyLayout } from "@/components/layout/PublicPolicyLayout";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import company from "@/config/company.json";
 
 export const ContactPage: React.FC = () => {
   return (
@@ -20,10 +21,9 @@ export const ContactPage: React.FC = () => {
             <Mail className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div>
               <div className="t-caption font-semibold text-ink">General Support</div>
-              <a href="mailto:support@pgcashflow.in" className="t-body-sm text-accent hover:underline">
-                support@pgcashflow.in
+              <a href={`mailto:${company.supportEmail}`} className="t-body-sm text-accent hover:underline">
+                {company.supportEmail}
               </a>
-              <p className="t-caption text-ink-muted mt-1">Average response within 4 hours</p>
             </div>
           </div>
 
@@ -31,8 +31,8 @@ export const ContactPage: React.FC = () => {
             <Phone className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div>
               <div className="t-caption font-semibold text-ink">Helpdesk Line</div>
-              <a href="tel:+918045678900" className="t-body-sm text-accent hover:underline">
-                +91 (080) 4567-8900
+              <a href={`tel:${company.helpdeskPhone.replace(/[^0-9+]/g, "")}`} className="t-body-sm text-accent hover:underline">
+                {company.helpdeskPhone}
               </a>
               <p className="t-caption text-ink-muted mt-1">Mon-Sat, 9:00 AM - 7:00 PM IST</p>
             </div>
@@ -45,9 +45,8 @@ export const ContactPage: React.FC = () => {
         <div className="rounded-[12px] border border-hairline bg-bg p-5 flex items-start gap-3">
           <MapPin className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="t-body-sm text-ink-muted space-y-1">
-            <p className="font-semibold text-ink">PG Cashflow Technologies Private Limited</p>
-            <p>Innovate Tech Park, 4th Block, Koramangala,</p>
-            <p>Bengaluru, Karnataka 560034, India</p>
+            <p className="font-semibold text-ink">{company.legalName}</p>
+            <p>{company.address}</p>
           </div>
         </div>
       </section>
@@ -65,8 +64,8 @@ export const ContactPage: React.FC = () => {
           </div>
           <p><strong>Name:</strong> Grievance Cell Officer</p>
           <p><strong>Designation:</strong> Head of Trust, Safety &amp; Compliance</p>
-          <p><strong>Email:</strong> grievance@pgcashflow.in</p>
-          <p><strong>Escalation SLA:</strong> Receipt acknowledged within 48 hours; full resolution within 15 working days.</p>
+          <p><strong>Email:</strong> {company.grievanceEmail}</p>
+          <p><strong>Escalation SLA:</strong> Receipt acknowledged within {company.ackTimelineHours} hours; full resolution within {company.resolutionTimelineDays} working days.</p>
         </div>
       </section>
 

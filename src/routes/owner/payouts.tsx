@@ -91,6 +91,16 @@ export const PayoutsView: React.FC = () => {
     }).length;
   }, [unbatchedItems, payeeMap]);
 
+  const unverifiedItemsCount = React.useMemo(() => {
+    return unbatchedItems.filter((it) => {
+      const p = payeeMap.get(it.payee_id);
+      return !p || p.verification_status !== "provider_verified";
+    }).length;
+  }, [unbatchedItems, payeeMap]);
+
+  const isBatchCreationBlocked =
+    createBatchMutation.isPending || coolingOffItemsCount > 0 || unverifiedItemsCount > 0;
+
   const handleCreateBatch = () => {
     setActionError(null);
     createBatchMutation.mutate(undefined, {
@@ -188,7 +198,14 @@ export const PayoutsView: React.FC = () => {
           {unbatchedItems.length > 0 && (
             <button
               onClick={handleCreateBatch}
-              disabled={createBatchMutation.isPending}
+              disabled={isBatchCreationBlocked}
+              title={
+                coolingOffItemsCount > 0
+                  ? "Blocked: one or more payees are in 24-hour cooling-off"
+                  : unverifiedItemsCount > 0
+                  ? "Blocked: one or more payees require bank verification"
+                  : undefined
+              }
               className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:opacity-90 flex items-center gap-2 transition shadow-sm disabled:opacity-50"
             >
               {createBatchMutation.isPending ? (
@@ -393,7 +410,7 @@ export const PayoutsView: React.FC = () => {
                             </>
                           )}
 
-                          {b.status !== "draft" && b.status !== "approved" && (
+                          {b.status === "completed" && (
                             <button
                               onClick={() => handleExportCSV(b)}
                               disabled={exportingBatchId === b.id}
@@ -433,9 +450,15 @@ export const PayoutsView: React.FC = () => {
             {unbatchedItems.length > 0 && (
               <button
                 onClick={handleCreateBatch}
-                disabled={createBatchMutation.isPending || coolingOffItemsCount > 0}
+                disabled={isBatchCreationBlocked}
                 className="px-4 py-2 rounded-xl bg-accent text-accent-contrast font-semibold text-sm hover:opacity-90 transition shadow-sm disabled:opacity-50"
-                title={coolingOffItemsCount > 0 ? "Blocked: one or more payees are in 24-hour cooling-off" : undefined}
+                title={
+                  coolingOffItemsCount > 0
+                    ? "Blocked: one or more payees are in 24-hour cooling-off"
+                    : unverifiedItemsCount > 0
+                    ? "Blocked: one or more payees require bank verification"
+                    : undefined
+                }
               >
                 {t("owner.payouts.createBatch")}
               </button>
@@ -449,6 +472,26 @@ export const PayoutsView: React.FC = () => {
                 <span className="font-semibold text-warning">{t("owner.payouts.coolingOffTitle")}</span>{" "}
                 {t("owner.payouts.coolingOffDesc", { count: coolingOffItemsCount })}
               </div>
+            </div>
+          )}
+
+          {unverifiedItemsCount > 0 && (
+            <div className="p-3.5 rounded-xl bg-warning-tint border border-warning/30 text-ink text-xs flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-warning">Unverified Payees Detected</span>{" "} {/* lint-allow-i18n */}
+                  <span className="text-ink-muted">
+                    {unverifiedItemsCount} unbatched instruction{unverifiedItemsCount > 1 ? "s" : ""} belong to payees awaiting penny-drop bank verification. Verify them in the Payees tab before generating a batch.
+                  </span> {/* lint-allow-i18n */}
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab("payees")}
+                className="px-3 py-1 rounded-lg bg-surface border border-hairline text-xs font-semibold text-ink hover:bg-bg shrink-0 transition"
+              >
+                Go to Payees {/* lint-allow-i18n */}
+              </button>
             </div>
           )}
 
@@ -485,6 +528,17 @@ export const PayoutsView: React.FC = () => {
                                 <span className="text-xs text-ink-muted capitalize">
                                   {payee.payee_type.replace("_", " ")}
                                 </span>
+                                {payee.verification_status === "provider_verified" ? (
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-micro font-medium bg-success/10 text-success">
+                                    <ShieldCheck className="w-2.5 h-2.5" />
+                                    Bank Verified
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-micro font-medium bg-warning-tint text-warning border border-warning/30">
+                                    <AlertCircle className="w-2.5 h-2.5" />
+                                    Unverified
+                                  </span>
+                                )}
                                 {getCoolingOffRemainingHours(payee.created_at) > 0 && (
                                   <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-micro font-medium bg-warning-tint text-warning border border-warning/30">
                                     <Clock className="w-2.5 h-2.5" />
