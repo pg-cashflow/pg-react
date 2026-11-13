@@ -5,7 +5,7 @@ import {
   sanitizeImageUrl,
   isBot,
   extractInviteCode,
-} from "../../../pg-go/deploy/cloudflare-worker-og.js";
+} from "../lib/cloudflare-worker-og.js";
 
 describe("Cloudflare Worker OpenGraph: Security and Sanitization", () => {
   describe("escapeHtmlAttr (XSS and Attribute Injection Prevention)", () => {

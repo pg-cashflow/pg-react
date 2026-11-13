@@ -129,20 +129,16 @@ export async function requestTokenRefresh(failedToken: string | null): Promise<s
   return activeRefreshPromise;
 }
 
-export function isStepUpAuthChallenge(status: number, code?: string, message?: string): boolean {
-  if (status !== 401) return false;
-  const c = (code || "").toLowerCase();
-  const m = (message || "").toLowerCase();
+export function isStepUpAuthChallenge(status: number, code?: string, _message?: string): boolean {
+  if (status !== 401 || !code) return false;
+  const c = code.toLowerCase();
   return (
     c.startsWith("auth.otp") ||
     c === "auth.invalidotp" ||
     c === "auth.otpexpired" ||
     c === "auth.otplocked" ||
     c === "auth.stepuprequired" ||
-    m.includes("step-up") ||
-    m.includes("approval code") ||
-    m.includes("payout approval") ||
-    m.includes("valid otp")
+    c.startsWith("auth.step_up")
   );
 }
 
