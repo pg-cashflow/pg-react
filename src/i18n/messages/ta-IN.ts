@@ -782,6 +782,7 @@ export const taIN: Record<MessageKey, string> = {
   "payreturn.waived": "நிலுவை தள்ளுபடி செய்யப்பட்டது",
   "payreturn.waivedDesc": "இந்த நிலுவை தள்ளுபடி செய்யப்பட்டுள்ளது. பணம் செலுத்த வேண்டியதில்லை.",
   "payreturn.viewDues": "எனது நிலுவைகளைக் காண்க",
+  "payreturn.reference": "குறிப்பு எண்",
   "payreturn.inProgress": "உறுதிப்படுத்தல் செயல்பாட்டில் உள்ளது",
   "payreturn.inProgressDesc": "உங்கள் கட்டணம் இன்னும் வங்கி அல்லது நுழைவாயிலால் செயலாக்கப்படுகிறது. அது தீர்ந்தவுடன் உங்களுக்கு அறிவிப்பு வரும்.",
   "payreturn.backToDues": "நிலுவைகளுக்குத் திரும்பு",

@@ -145,7 +145,7 @@ export const TenantPayReturnView: React.FC = () => {
     <div className="max-w-md mx-auto p-4 space-y-6 pt-12">
       <div className="text-center space-y-2">
         <h1 className="t-h2 font-bold text-ink">{t("payreturn.title")}</h1>
-        {orderId && <p className="t-caption text-ink-muted">Reference: {orderId}</p>}
+        {orderId && <p className="t-caption text-ink-muted">{t("payreturn.reference")}: {orderId}</p>}
       </div>
 
       {status === "PAID" ? (
@@ -183,7 +183,18 @@ export const TenantPayReturnView: React.FC = () => {
           </button>
         </div>
       ) : status === "CONFIRMING" ? (
-            <ArrowLeft className="w-4 h-4" /> {t("payreturn.viewDues")}
+        <div className="p-8 rounded-[16px] border border-hairline bg-surface text-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" aria-hidden="true" />
+          <div role="status" aria-live="polite">
+            <p className="t-h3 font-semibold text-ink">{t("payreturn.verifying")}</p>
+            <p className="t-body-sm text-ink-muted mt-1">{t("payreturn.verifyingDesc")}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/tenant/dues" })}
+            className="w-full h-12 rounded-[10px] border border-hairline text-ink font-semibold t-body-sm inline-flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" /> {t("payreturn.viewDues")}
           </button>
         </div>
       ) : status === "STILL_PENDING" ? (

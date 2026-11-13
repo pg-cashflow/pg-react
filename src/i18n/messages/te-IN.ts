@@ -782,6 +782,7 @@ export const teIN: Record<MessageKey, string> = {
   "payreturn.waived": "బాకీ రద్దు చేయబడింది",
   "payreturn.waivedDesc": "ఈ బాకీ రద్దు చేయబడింది. ఎటువంటి చెల్లింపు అవసరం లేదు.",
   "payreturn.viewDues": "నా బకాయిలను చూడండి",
+  "payreturn.reference": "రిఫరెన్స్",
   "payreturn.inProgress": "నిర్ధారణ పురోగతిలో ఉంది",
   "payreturn.inProgressDesc": "మీ చెల్లింపు ఇంకా బ్యాంక్ లేదా గేట్‌వే ద్వారా ప్రాసెస్ చేయబడుతోంది. అది పరిష్కారం కాగానే మీకు అప్‌డేట్ వస్తుంది.",
   "payreturn.backToDues": "బకాయిలకు తిరిగి వెళ్ళండి",
