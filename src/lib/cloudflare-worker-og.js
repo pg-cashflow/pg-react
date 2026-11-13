@@ -117,7 +117,7 @@ export default {
           }
         }
       }
-    } catch (err) {
+    } catch {
       // Graceful fallback to default metadata if backend lookup fails
     }
 
