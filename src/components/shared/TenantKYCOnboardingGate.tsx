@@ -82,7 +82,7 @@ export const TenantKYCOnboardingGate: React.FC<{ children: React.ReactNode }> = 
             {t("kyc.onboarding.desc")}
           </p>
         </div>
-        <TenantKYCCard defaultTab="otp" onSuccess={() => refetch()} />
+        <TenantKYCCard defaultTab="upload" onSuccess={() => refetch()} />
       </main>
     </div>
   );

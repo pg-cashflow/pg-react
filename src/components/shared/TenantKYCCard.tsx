@@ -38,7 +38,9 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
 }) => {
   const { t, locale } = useLocale();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"qr" | "upload">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"qr" | "upload">(
+    defaultTab === "qr" ? "qr" : "upload"
+  );
 
   // Form states
   const [qrInput, setQrInput] = useState("");
