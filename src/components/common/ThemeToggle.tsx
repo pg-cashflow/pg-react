@@ -83,7 +83,7 @@ export function ThemeSegmentedControl() {
     <div
       ref={containerRef}
       role="radiogroup"
-      aria-label="Theme selection"
+      aria-label={t("settings.themeToggleLabel")}
       className="relative flex items-center p-1 rounded-xl bg-surface border border-hairline gap-1 select-none"
     >
       {/* Sliding Active Indicator Pill */}

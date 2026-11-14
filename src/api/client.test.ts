@@ -361,6 +361,48 @@ describe("api/client proactive refresh", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(getAccessToken()).toBe("new-token-after-refresh");
   });
+
+  it("normalizes Headers instance and tuple array headers without dropping custom headers", async () => {
+    setAccessToken("initial-token");
+    setStoredUser({ id: "user-1", role: "tenant", phone: "+919000000000" });
+    let capturedHeadersInstance: any;
+    let capturedTupleHeaders: any;
+
+    const fetchMock = vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
+      if (!capturedHeadersInstance) {
+        capturedHeadersInstance = init?.headers;
+      } else {
+        capturedTupleHeaders = init?.headers;
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({ ok: true }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    // Call 1: With a Headers instance
+    const h = new Headers();
+    h.set("Idempotency-Key", "headers-instance-key-1");
+    h.set("X-Custom-Trace", "trace-123");
+    await apiFetch("/test/headers-instance", { method: "POST", headers: h, body: "{}" });
+
+    // Call 2: With a tuple array
+    const tuples: [string, string][] = [
+      ["Idempotency-Key", "tuple-key-2"],
+      ["X-Custom-Tuple", "tuple-456"],
+    ];
+    await apiFetch("/test/tuples", { method: "POST", headers: tuples, body: "{}" });
+
+    expect(capturedHeadersInstance["idempotency-key"]).toBe("headers-instance-key-1");
+    expect(capturedHeadersInstance["x-custom-trace"]).toBe("trace-123");
+    expect(capturedHeadersInstance["Authorization"]).toBe("Bearer initial-token");
+
+    expect(capturedTupleHeaders["Idempotency-Key"]).toBe("tuple-key-2");
+    expect(capturedTupleHeaders["X-Custom-Tuple"]).toBe("tuple-456");
+    expect(capturedTupleHeaders["Authorization"]).toBe("Bearer initial-token");
+  });
 });
 
 

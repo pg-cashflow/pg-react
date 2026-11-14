@@ -144,22 +144,24 @@ export function isStepUpAuthChallenge(status: number, code?: string, _message?: 
 
 function getIdempotencyHeader(headers?: HeadersInit): string | undefined {
   if (!headers) return undefined;
-  if (typeof Headers !== "undefined" && headers instanceof Headers) {
-    return headers.get("idempotency-key") || headers.get("x-idempotency-key") || undefined;
-  }
-  if (Array.isArray(headers)) {
-    for (const [key, value] of headers) {
+  try {
+    const h = new Headers(headers);
+    return h.get("idempotency-key") || h.get("x-idempotency-key") || undefined;
+  } catch {
+    if (Array.isArray(headers)) {
+      for (const [key, value] of headers) {
+        const lower = key.toLowerCase();
+        if (lower === "idempotency-key" || lower === "x-idempotency-key") return value;
+      }
+      return undefined;
+    }
+    const obj = headers as Record<string, string>;
+    for (const [key, value] of Object.entries(obj)) {
       const lower = key.toLowerCase();
       if (lower === "idempotency-key" || lower === "x-idempotency-key") return value;
     }
     return undefined;
   }
-  const obj = headers as Record<string, string>;
-  for (const [key, value] of Object.entries(obj)) {
-    const lower = key.toLowerCase();
-    if (lower === "idempotency-key" || lower === "x-idempotency-key") return value;
-  }
-  return undefined;
 }
 
 async function handleResponse<T>(
@@ -298,18 +300,31 @@ function isNetworkFailure(err: unknown): boolean {
 
 function authHeaders(options: RequestInit): Record<string, string> {
   const token = getAccessToken();
-  const headers: Record<string, string> = {
-    ...(options.headers as Record<string, string>),
-  };
+  const headers: Record<string, string> = {};
+  if (options.headers) {
+    if (typeof Headers !== "undefined" && options.headers instanceof Headers) {
+      options.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+    } else if (Array.isArray(options.headers)) {
+      for (const [key, value] of options.headers) {
+        headers[key] = value;
+      }
+    } else {
+      Object.assign(headers, options.headers);
+    }
+  }
   const hasBody = options.body !== undefined && options.body !== null;
-  if (!headers["Content-Type"] && hasBody && !(options.body instanceof FormData)) {
+  const hasContentType = Object.keys(headers).some((k) => k.toLowerCase() === "content-type");
+  if (!hasContentType && hasBody && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
   const locale = getStoredLocale();
-  if (locale && !headers["Accept-Language"]) {
+  const hasAcceptLang = Object.keys(headers).some((k) => k.toLowerCase() === "accept-language");
+  if (locale && !hasAcceptLang) {
     headers["Accept-Language"] = locale;
   }
   return headers;
