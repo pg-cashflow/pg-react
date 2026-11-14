@@ -3,7 +3,10 @@ import React, { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TenantKYCOnboardingGate } from "@/components/shared/TenantKYCOnboardingGate";
+import { TenantDashboardView } from "@/routes/tenant/dashboard";
 import * as kycApi from "@/api/kyc";
+import * as tenantApi from "@/api/tenant";
+import * as gamificationApi from "@/api/gamification";
 
 // ThemeToggle needs a ThemeProvider (matchMedia, etc.) that's orthogonal to what
 // this file tests — the gating logic. Stub it out like other layout chrome.
@@ -17,6 +20,16 @@ let queryClient: QueryClient;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.matchMedia = vi.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
   queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: 0 },
@@ -126,5 +139,99 @@ describe("TenantKYCOnboardingGate", () => {
     await renderGate();
 
     expect(container?.querySelector("[data-testid='dashboard']")).not.toBeNull();
+  });
+});
+
+describe("Tenant Dashboard Inline KYC Flow (KYC-03)", () => {
+  const mockTenantProfile = {
+    id: "t-1",
+    name: "Aarav Sharma",
+    phone: "+919876543210",
+    room_number: "204",
+    status: "active",
+    active_dues: [],
+  };
+
+  const renderDashboard = async () => {
+    await act(async () => {
+      root?.render(
+        <QueryClientProvider client={queryClient}>
+          <TenantDashboardView onNavigate={() => {}} />
+        </QueryClientProvider>
+      );
+    });
+    await flushQueries();
+  };
+
+  it("renders tenant dashboard with inline KYC reminder banner when unverified", async () => {
+    vi.spyOn(tenantApi, "getMyProfile").mockResolvedValue(mockTenantProfile as any);
+    vi.spyOn(tenantApi, "getMyDues").mockResolvedValue([]);
+    vi.spyOn(tenantApi, "getMyPayments").mockResolvedValue([]);
+    vi.spyOn(gamificationApi, "getTenantPoints").mockResolvedValue({
+      points: 100,
+      on_time_months: 2,
+    } as any);
+    vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
+      verification: null,
+      consent_active: false,
+    });
+
+    await renderDashboard();
+
+    expect(container?.textContent).toContain("204");
+    expect(container?.textContent).toContain("Identity Verification Required");
+  });
+
+  it("renders tenant dashboard with review-pending banner when verification is in review", async () => {
+    vi.spyOn(tenantApi, "getMyProfile").mockResolvedValue(mockTenantProfile as any);
+    vi.spyOn(tenantApi, "getMyDues").mockResolvedValue([]);
+    vi.spyOn(tenantApi, "getMyPayments").mockResolvedValue([]);
+    vi.spyOn(gamificationApi, "getTenantPoints").mockResolvedValue({
+      points: 100,
+      on_time_months: 2,
+    } as any);
+    vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
+      verification: {
+        id: "v-rev",
+        status: "pending_manual_review",
+        method: "ocr",
+        created_at: "2026-10-17T11:59:00Z",
+        updated_at: "2026-10-17T11:59:00Z",
+      },
+      consent_active: true,
+    });
+
+    await renderDashboard();
+
+    expect(container?.textContent).toContain("204");
+    expect(container?.textContent).toContain("KYC Document Under Review");
+  });
+
+  it("renders tenant dashboard without reminder banner when verified", async () => {
+    vi.spyOn(tenantApi, "getMyProfile").mockResolvedValue(mockTenantProfile as any);
+    vi.spyOn(tenantApi, "getMyDues").mockResolvedValue([]);
+    vi.spyOn(tenantApi, "getMyPayments").mockResolvedValue([]);
+    vi.spyOn(gamificationApi, "getTenantPoints").mockResolvedValue({
+      points: 100,
+      on_time_months: 2,
+    } as any);
+    vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
+      verification: {
+        id: "v-ok",
+        status: "verified",
+        method: "aadhaar_otp",
+        masked_uid: "1234",
+        verified_at: "2026-10-17T12:00:00Z",
+        created_at: "2026-10-17T11:59:00Z",
+        updated_at: "2026-10-17T12:00:00Z",
+      },
+      consent_active: true,
+    });
+
+    await renderDashboard();
+
+    expect(container?.textContent).toContain("204");
+    expect(container?.textContent).not.toContain("Identity Verification Required");
+    expect(container?.textContent).not.toContain("KYC Document Under Review");
   });
 });

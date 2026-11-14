@@ -9,7 +9,6 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { useAuth } from "@/auth/context";
-import { TenantKYCOnboardingGate } from "@/components/shared/TenantKYCOnboardingGate";
 import { AppLoadingScreen } from "@/components/layout/AppLoadingScreen";
 import { homeForRole } from "@/auth/roles";
 
@@ -212,11 +211,9 @@ export function RequireTenant() {
   }, [isAuthenticated, isLoading, role, isPendingJoin, navigate]);
   if (isLoading || role !== "tenant" || isPendingJoin) return <AppLoadingScreen />;
   return (
-    <TenantKYCOnboardingGate>
-      <React.Suspense fallback={<AppLoadingScreen />}>
-        <LazyTenantShell />
-      </React.Suspense>
-    </TenantKYCOnboardingGate>
+    <React.Suspense fallback={<AppLoadingScreen />}>
+      <LazyTenantShell />
+    </React.Suspense>
   );
 }
 
