@@ -23,7 +23,7 @@ export const PrivacyPage: React.FC = () => {
         </p>
         <ul className="list-disc pl-5 space-y-2 t-body-sm text-ink-muted">
           <li><strong>Contact Identifiers:</strong> Mobile phone number (used for one-time password authentication and essential transactional push notifications).</li>
-          <li><strong>Identity Proof (Aadhaar / Government ID):</strong> Processed via UIDAI-authorized Aadhaar OTP fast-path (or document upload fallback) through certified verification gateways. We collect full name, date of birth, and <em>masked UID</em> (only the last 4 digits, e.g., XXXX-XXXX-1234).</li>
+          <li><strong>Identity Proof (Aadhaar / Government ID):</strong> Processed via Smart OCR document upload or offline UIDAI Secure QR through certified verification gateways. We collect full name, date of birth, and <em>masked UID</em> (only the last 4 digits, e.g., XXXX-XXXX-1234).</li>
           <li><strong>Payment &amp; Ledger Records:</strong> Payment transaction references, payment mode (UPI, card, netbanking), due identifiers, payment status, and settlement timestamps. Bank account details for refund/payout settlement are processed directly through certified payment aggregators.</li>
           <li><strong>Tenancy &amp; Operational Metadata:</strong> Building, room, and bed allocation, move-in and exit dates, meal RSVPs, and maintenance logs.</li>
         </ul>

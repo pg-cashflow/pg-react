@@ -12,16 +12,6 @@ export interface KYCConsentPayload {
   locale?: string;
 }
 
-export interface AadhaarOTPRequestPayload {
-  aadhaar_number: string;
-}
-
-export interface AadhaarOTPVerifyPayload {
-  ref_id: string;
-  otp: string;
-}
-
-
 export interface RejectKYCPayload {
   reason: string;
 }
@@ -40,23 +30,6 @@ export const submitKYCConsent = (payload: KYCConsentPayload): Promise<{ ok: bool
   apiFetch<{ ok: boolean }>("/tenant/kyc/consent", {
     method: "POST",
     body: JSON.stringify(payload),
-  });
-
-export const requestAadhaarOTP = (
-  aadhaarNumber: string
-): Promise<{ ref_id: string }> =>
-  apiFetch<{ ref_id: string }>("/tenant/kyc/aadhaar/otp/request", {
-    method: "POST",
-    body: JSON.stringify({ aadhaar_number: aadhaarNumber }),
-  });
-
-export const verifyAadhaarOTP = (
-  refId: string,
-  otp: string
-): Promise<KYCVerification> =>
-  apiFetch<KYCVerification>("/tenant/kyc/aadhaar/otp/verify", {
-    method: "POST",
-    body: JSON.stringify({ ref_id: refId, otp }),
   });
 
 export const verifySecureQR = (

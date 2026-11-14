@@ -20,7 +20,7 @@ const FUNDAMENTALS = [
   {
     icon: ShieldCheck,
     title: "Real identity, not a selfie photo",
-    description: "UIDAI Aadhaar OTP verification as the first gate. DPDP Act 2023 compliant, zero plain-text storage.",
+    description: "Smart OCR document verification and Secure QR as the entry gate. DPDP Act 2023 compliant, zero plain-text storage.",
   },
   {
     icon: QrCode,
@@ -52,13 +52,13 @@ const VERIFICATION_STEPS = [
   },
   {
     step: "03",
-    title: "Aadhaar OTP — ~20s fast path",
-    description: "Government-backed check confirms your real name, DOB, and masked UID. Zero document photos required.",
+    title: "Smart OCR & Secure QR — fast verification",
+    description: "Check confirms your real name, DOB, and masked UID via Smart OCR or Secure QR.",
   },
   {
     step: "04",
     title: "Manual review fallback",
-    description: "If Aadhaar OTP cannot complete, upload documents for manual review by your owner. Never left in limbo.",
+    description: "If automated verification needs review, documents route to manual review by your owner. Never left in limbo.",
   },
 ];
 
@@ -73,7 +73,7 @@ export const LandingPage: React.FC = () => {
       description: t("landing.tenantsDesc"),
       benefits: [
         "Room & floor-bound invite code",
-        "UIDAI Aadhaar OTP verification in 20 seconds",
+        "Smart OCR & Secure QR verification in 20 seconds",
         "Pay dues via UPI QR or deep link with instant UTR slip",
         "Keep your on-time streak flame burning to earn perks",
       ],
@@ -88,7 +88,7 @@ export const LandingPage: React.FC = () => {
       benefits: [
         "Consolidated live dues ledger across all rooms",
         "Automated bank statement CSV and 12-digit UTR reconciliation",
-        "Every tenant identity-checked via Aadhaar before move-in",
+        "Every tenant identity-checked before move-in",
         "Provision wardens with restricted property-level access",
       ],
       ctaText: t("landing.ownerLogin"),
@@ -131,7 +131,7 @@ export const LandingPage: React.FC = () => {
           <div className="hidden md:flex items-center gap-6 t-body-sm font-medium text-ink-muted">
             <a href="#roles" className="hover:text-ink transition-colors">Portals</a>
             <a href="#fundamentals" className="hover:text-ink transition-colors">The Ledger</a>
-            <a href="#verification" className="hover:text-ink transition-colors">Aadhaar KYC</a>
+            <a href="#verification" className="hover:text-ink transition-colors">ID Verification</a>
             <a href="#security" className="hover:text-ink transition-colors">Security</a>
           </div>
 
@@ -158,7 +158,7 @@ export const LandingPage: React.FC = () => {
         <section className="pt-12 sm:pt-20 pb-12 px-4 sm:px-6 mx-auto max-w-5xl text-center">
           {/* <div className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1.5 t-caption text-ink-muted mb-6 shadow-xs">
             <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
-            <span>Now verifying with Aadhaar OTP in under 30 seconds · DPDP Act 2023 compliant</span>
+            <span>Now verifying with Smart OCR in under 30 seconds · DPDP Act 2023 compliant</span>
           </div> */}
 
           <h1 className="t-display sm:leading-tight font-bold tracking-tight text-ink max-w-[22ch] mx-auto">
@@ -189,7 +189,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mt-10 t-caption text-ink-muted">
             <div className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
-              <span>Aadhaar-verified tenants</span>
+              <span>Verified tenants</span>
             </div>
             <div className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
@@ -232,7 +232,7 @@ export const LandingPage: React.FC = () => {
               <div className="p-5">
                 <div className="t-caption text-ink-muted">Identity verified (Sample)</div>
                 <div className="t-amount-lg text-ink mt-1">100%</div>
-                <div className="t-caption text-ink-muted font-semibold mt-1">UIDAI Aadhaar OTP · 0 paper forms</div>
+                <div className="t-caption text-ink-muted font-semibold mt-1">Smart OCR &amp; Secure QR · 0 paper forms</div>
               </div>
             </div>
 
@@ -243,7 +243,7 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="t-code font-medium text-ink">Room 204-B</span>
                     <span className="text-ink font-semibold">Tenant A (Sample)</span>
-                    <span className="rounded-full bg-accent-tint px-2 py-0.5 t-caption text-accent font-medium">Aadhaar verified</span>
+                    <span className="rounded-full bg-accent-tint px-2 py-0.5 t-caption text-accent font-medium">Verified</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="t-code text-ink-muted">Sample UPI Match</span>
@@ -261,7 +261,7 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="t-code font-medium text-ink">Room 102-A</span>
                     <span className="text-ink font-semibold">Tenant B (Sample)</span>
-                    <span className="rounded-full bg-accent-tint px-2 py-0.5 t-caption text-accent font-medium">Aadhaar verified</span>
+                    <span className="rounded-full bg-accent-tint px-2 py-0.5 t-caption text-accent font-medium">Verified</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="t-code text-ink-muted">UPI QR Match</span>
@@ -418,7 +418,7 @@ export const LandingPage: React.FC = () => {
 
                 <div className="mt-6 pt-5 border-t border-hairline">
                   <div className="t-caption text-ink-muted">Authorized Integration</div>
-                  <div className="t-body-sm font-semibold text-ink mt-0.5">UIDAI Aadhaar OTP · Cashfree Verification Gateway</div>
+                  <div className="t-body-sm font-semibold text-ink mt-0.5">Smart OCR &amp; Secure QR · Cashfree Verification Gateway</div>
                 </div>
               </div>
             </div>

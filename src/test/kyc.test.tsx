@@ -123,7 +123,7 @@ describe("TenantKYCCard", () => {
     expect(container?.textContent).toContain("Document photo is blurry and unreadable");
   });
 
-  it("renders unverified action buttons for Aadhaar OTP and manual upload", async () => {
+  it("renders unverified action buttons for document upload and secure QR", async () => {
     vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
       verification: null,
       consent_active: false,
@@ -138,10 +138,9 @@ describe("TenantKYCCard", () => {
     });
     await flushQueries();
 
-    expect(container?.textContent).toContain("Verify via Aadhaar OTP");
     expect(container?.textContent).toContain("Upload ID Document");
-    expect(container?.textContent).toContain("Instant Automatic UIDAI Verification");
-    expect(container?.textContent).toContain("Aadhaar OTP not working? Upload your ID document instead");
+    expect(container?.textContent).toContain("Verify via Secure QR");
+    expect(container?.textContent).toContain("Manual ID Photo Upload");
   });
 
   it("renders Secure QR tab when defaultTab is qr", async () => {

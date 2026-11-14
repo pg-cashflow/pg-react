@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   FileText,
   Upload,
-  KeyRound,
   QrCode,
   Loader2,
   CheckCircle2,
@@ -16,40 +15,33 @@ import {
 import {
   getTenantKYCStatus,
   submitKYCConsent,
-  requestAadhaarOTP,
-  verifyAadhaarOTP,
   verifySecureQR,
   uploadKYCDocument,
   revokeKYCConsent,
 } from "@/api/kyc";
-import { ApiError } from "@/api/client";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { formatDate } from "@/lib/utils";
-import { validateAadhaarNumber, formatAadhaarNumber } from "@/lib/aadhaar";
 import { useLocale, formatKYCError } from "@/i18n";
 
 export interface TenantKYCCardProps {
   isModal?: boolean;
   onClose?: () => void;
   onSuccess?: () => void;
-  defaultTab?: "qr" | "otp" | "upload";
+  defaultTab?: "qr" | "upload";
 }
 
 export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   isModal,
   onClose,
   onSuccess,
-  defaultTab = "otp",
+  defaultTab = "upload",
 }) => {
   const { t, locale } = useLocale();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"qr" | "otp" | "upload">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"qr" | "upload">(defaultTab);
 
   // Form states
-  const [aadhaarInput, setAadhaarInput] = useState("");
   const [qrInput, setQrInput] = useState("");
-  const [otpRefId, setOtpRefId] = useState<string | null>(null);
-  const [otpCode, setOtpCode] = useState("");
   const [consentChecked, setConsentChecked] = useState(false);
   const [consentRecorded, setConsentRecorded] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -57,17 +49,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   const [uiError, setUiError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
-  const [cooldownSeconds, setCooldownSeconds] = useState(0);
-  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (cooldownSeconds <= 0) return;
-    const timer = setInterval(() => {
-      setCooldownSeconds((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [cooldownSeconds]);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: QUERY_KEYS.tenantKYCStatus,
@@ -131,73 +113,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     },
   });
 
-  const requestOtpMutation = useMutation({
-    mutationFn: async (rawAadhaar: string) => {
-      setUiError(null);
-      setSuccessMsg(null);
-      await ensureConsent();
-      const clean = rawAadhaar.replace(/\s+/g, "");
-      return requestAadhaarOTP(clean);
-    },
-    onSuccess: (res) => {
-      setOtpRefId(res.ref_id);
-      setSuccessMsg(t("kyc.card.otpSentSuccess"));
-      setCooldownSeconds(0);
-      setAttemptsRemaining(null);
-    },
-    onError: (err: unknown) => {
-      if (err instanceof ApiError && err.details) {
-        const details = err.details as { cooldown_seconds?: number };
-        if (typeof details.cooldown_seconds === "number" && details.cooldown_seconds > 0) {
-          setCooldownSeconds(details.cooldown_seconds);
-        }
-      }
-      setUiError(formatKYCError(err, t, "kyc.card.unableToLoad"));
-    },
-  });
-
-  const verifyOtpMutation = useMutation({
-    mutationFn: async () => {
-      if (!otpRefId) throw new Error("Please request OTP first");
-      setUiError(null);
-      return verifyAadhaarOTP(otpRefId, otpCode.trim());
-    },
-    onSuccess: (res) => {
-      if (res && (res as any).status === "failed") {
-        setUiError(t("kyc.card.otpFailed") || "Verification failed");
-        return;
-      }
-      setSuccessMsg(t("kyc.card.verifiedInstantSuccess"));
-      setOtpRefId(null);
-      setOtpCode("");
-      setAadhaarInput("");
-      setCooldownSeconds(0);
-      setAttemptsRemaining(null);
-      refreshKYC();
-      onSuccess?.();
-    },
-    onError: (err: unknown) => {
-      let remainingSuffix = "";
-      if (err instanceof ApiError && err.details) {
-        const details = err.details as {
-          reason_code?: string;
-          cooldown_seconds?: number;
-          attempts_remaining?: number;
-          retryable?: boolean;
-        };
-        if (typeof details.cooldown_seconds === "number" && details.cooldown_seconds > 0) {
-          setCooldownSeconds(details.cooldown_seconds);
-        }
-        if (typeof details.attempts_remaining === "number") {
-          setAttemptsRemaining(details.attempts_remaining);
-          remainingSuffix = ` (${details.attempts_remaining} attempts remaining)`;
-        }
-      }
-      const formatted = formatKYCError(err, t, "kyc.card.unableToLoad");
-      setUiError(`${formatted}${remainingSuffix}`);
-    },
-  });
-
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       setUiError(null);
@@ -234,10 +149,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       setUiError(err instanceof Error ? err.message : "Revocation failed");
     },
   });
-
-  const handleAadhaarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAadhaarInput(formatAadhaarNumber(e.target.value));
-  };
 
   const compressImage = async (file: File, maxDim = 1600, quality = 0.85): Promise<File> => {
     if (!file.type.startsWith("image/") || file.type.includes("svg")) {
@@ -524,38 +435,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       {/* Action View: Unverified or Rejected */}
       {(!isVerified && !isPendingReview) && (
         <div className="space-y-3 pt-1">
-          {/* Three Verification Options: Secure QR, Aadhaar OTP & Document Upload */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("qr");
-                setUiError(null);
-              }}
-              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
-                activeTab === "qr"
-                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
-                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
-              }`}
-            >
-              <QrCode className="w-4 h-4 shrink-0" />
-              <span className="truncate">{t("kyc.card.tabQr")}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("otp");
-                setUiError(null);
-              }}
-              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
-                activeTab === "otp"
-                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
-                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
-              }`}
-            >
-              <KeyRound className="w-4 h-4 shrink-0" />
-              <span className="truncate">{t("kyc.card.tabOtp")}</span>
-            </button>
+          {/* Two Verification Options: Document Upload & Secure QR */}
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => {
@@ -570,6 +451,21 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             >
               <Upload className="w-4 h-4 shrink-0" />
               <span className="truncate">{t("kyc.card.tabUpload")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("qr");
+                setUiError(null);
+              }}
+              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
+                activeTab === "qr"
+                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
+                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
+              }`}
+            >
+              <QrCode className="w-4 h-4 shrink-0" />
+              <span className="truncate">{t("kyc.card.tabQr")}</span>
             </button>
           </div>
 
@@ -619,148 +515,12 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    setActiveTab("otp");
-                    setUiError(null);
-                  }}
-                  className="t-caption text-ink-muted hover:text-accent underline transition"
-                >
-                  {t("kyc.card.qrFallbackLink")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 2: Direct Aadhaar OTP */}
-          {activeTab === "otp" && (
-            <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
-              <div>
-                <span className="t-caption font-semibold text-ink flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-accent" />
-                  {t("kyc.card.otpHeading")}
-                </span>
-                <p className="t-caption text-ink-muted mt-0.5">
-                  {t("kyc.card.otpSubtitle")}
-                </p>
-              </div>
-
-              {!otpRefId ? (
-                <div className="space-y-2">
-                  <label className="t-caption font-medium text-ink-muted block">
-                    {t("kyc.card.aadhaarLabel")}
-                  </label>
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    value={aadhaarInput}
-                    onChange={handleAadhaarChange}
-                    placeholder="XXXX XXXX XXXX"
-                    maxLength={14}
-                    className="w-full h-11 px-3 rounded-[10px] border border-hairline bg-surface t-code text-ink placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
-                  {aadhaarInput.replace(/\s+/g, "").length === 12 &&
-                    !validateAadhaarNumber(aadhaarInput).valid && (
-                      <p className="t-caption text-danger">
-                        {t("kyc.reason.INVALID_AADHAAR")}
-                      </p>
-                    )}
-                  <button
-                    type="button"
-                    disabled={
-                      !validateAadhaarNumber(aadhaarInput).valid ||
-                      !consentChecked ||
-                      requestOtpMutation.isPending
-                    }
-                    onClick={() => requestOtpMutation.mutate(aadhaarInput)}
-                    className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
-                  >
-                    {requestOtpMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      t("kyc.card.sendOtpBtn")
-                    )}
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="t-caption font-medium text-ink-muted">
-                      {t("kyc.card.enterOtpLabel")}
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setOtpRefId(null)}
-                      className="t-caption text-accent hover:underline"
-                    >
-                      {t("kyc.card.changeNumber")}
-                    </button>
-                  </div>
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    pattern="[0-9]*"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder={t("kyc.card.otpInputPlaceholder")}
-                    maxLength={6}
-                    className="w-full h-11 px-3 rounded-[10px] border border-hairline bg-surface t-code text-center tracking-widest text-ink focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
-                  {cooldownSeconds > 0 && (
-                    <p className="t-caption text-warning font-medium">
-                      {t("kyc.card.cooldownWait", { seconds: cooldownSeconds })}
-                    </p>
-                  )}
-                  {attemptsRemaining !== null && attemptsRemaining <= 1 && (
-                    <p className="t-caption text-danger font-medium">
-                      {attemptsRemaining === 0
-                        ? t("kyc.card.attemptsNone")
-                        : t("kyc.card.attemptsWarning")}
-                    </p>
-                  )}
-                  <button
-                    type="button"
-                    disabled={
-                      otpCode.length !== 6 ||
-                      verifyOtpMutation.isPending ||
-                      cooldownSeconds > 0 ||
-                      attemptsRemaining === 0
-                    }
-                    onClick={() => verifyOtpMutation.mutate()}
-                    className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
-                  >
-                    {verifyOtpMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      t("kyc.card.verifyConfirmBtn")
-                    )}
-                  </button>
-                  <div className="flex justify-end pt-1">
-                    <button
-                      type="button"
-                      disabled={cooldownSeconds > 0 || requestOtpMutation.isPending}
-                      onClick={() => requestOtpMutation.mutate(aadhaarInput)}
-                      className="t-caption text-ink-muted hover:text-accent disabled:opacity-50 transition"
-                    >
-                      {cooldownSeconds > 0
-                        ? t("kyc.card.resendOtpCooldownBtn", { seconds: cooldownSeconds })
-                        : t("kyc.card.resendOtpBtn")}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Direct fallback to upload if OTP doesn't arrive or fails */}
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => {
                     setActiveTab("upload");
                     setUiError(null);
                   }}
                   className="t-caption text-ink-muted hover:text-accent underline transition"
                 >
-                  {t("kyc.card.otpFallbackLink")}
+                  {t("kyc.card.uploadInsteadBtn")}
                 </button>
               </div>
             </div>
@@ -867,26 +627,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             <AlertTriangle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
             <div className="space-y-1 flex-1">
               <p className="t-caption font-semibold text-danger">{uiError}</p>
-              {activeTab === "otp" && (
-                <p className="t-caption text-ink-muted">
-                  {t("kyc.card.sandboxFallback")}
-                </p>
-              )}
             </div>
           </div>
-          {activeTab === "otp" && (
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("upload");
-                setUiError(null);
-              }}
-              className="w-full py-2 px-3 rounded-lg bg-surface border border-hairline hover:bg-hairline/20 t-caption font-semibold text-ink flex items-center justify-center gap-1.5 transition"
-            >
-              <Upload className="w-4 h-4 text-accent" />
-              <span>{t("kyc.card.uploadInsteadBtn")}</span>
-            </button>
-          )}
         </div>
       )}
       {successMsg && <p className="t-caption text-success font-medium">{successMsg}</p>}
