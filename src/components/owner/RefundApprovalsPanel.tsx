@@ -135,7 +135,7 @@ export const RefundApprovalsPanel: React.FC = () => {
           onClick={() => refetch()}
           className="underline font-medium hover:text-danger-emphasis"
         >
-          Retry
+          {t("common.retry") || "Retry"}
         </button>
       </div>
     );
@@ -163,7 +163,7 @@ export const RefundApprovalsPanel: React.FC = () => {
           </div>
         </div>
         <span className="px-2.5 py-1 rounded-full bg-accent text-white text-xs font-semibold">
-          {requests.length} Pending
+          {t("owner.refundApprovals.pendingCount", { count: requests.length })}
         </span>
       </div>
 
@@ -206,7 +206,7 @@ export const RefundApprovalsPanel: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-tint text-warning border border-warning/30">
-                      {req.approvals.length} of {req.required_approvals} Approved
+                      {req.approvals.length} / {req.required_approvals}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -215,7 +215,7 @@ export const RefundApprovalsPanel: React.FC = () => {
                         className="inline-flex items-center gap-1 text-xs text-ink-muted italic bg-bg px-2.5 py-1 rounded-lg border border-hairline"
                         title={t("owner.refundApprovals.selfApprovalBlocked")}
                       >
-                        Self-Approval Prohibited
+                        {t("owner.refundApprovals.selfApprovalBlocked")}
                       </span>
                     ) : (
                       <div className="inline-flex items-center gap-2">
