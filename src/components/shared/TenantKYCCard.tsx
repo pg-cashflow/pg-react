@@ -46,6 +46,9 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   const [qrInput, setQrInput] = useState("");
   const [consentChecked, setConsentChecked] = useState(false);
   const [consentRecorded, setConsentRecorded] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState<
+    "aadhaar" | "pan" | "passport" | "voter_id" | "driving_licence"
+  >("aadhaar");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [compressing, setCompressing] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
@@ -122,6 +125,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       setUploadProgress(0);
       await ensureConsent();
       return uploadKYCDocument(file, {
+        documentType: selectedDocType,
         onProgress: (percent) => setUploadProgress(percent),
       });
     },
@@ -541,6 +545,38 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 </p>
               </div>
 
+              {/* Document Type Selector (Voluntary Non-Aadhaar Route per Aadhaar Act) */}
+              <div className="space-y-1.5">
+                <span className="t-caption font-semibold text-ink block text-xs">
+                  Document Type
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {[
+                    { id: "aadhaar", label: "Aadhaar Card" },
+                    { id: "pan", label: "PAN Card" },
+                    { id: "passport", label: "Passport" },
+                    { id: "voter_id", label: "Voter ID" },
+                    { id: "driving_licence", label: "Driving Licence" },
+                  ].map((doc) => (
+                    <button
+                      key={doc.id}
+                      type="button"
+                      onClick={() => setSelectedDocType(doc.id as any)}
+                      className={`px-2 py-1.5 rounded-lg border t-caption text-center font-medium transition text-xs ${
+                        selectedDocType === doc.id
+                          ? "bg-accent-tint text-accent border-accent font-semibold"
+                          : "bg-surface text-ink-muted border-hairline hover:bg-hairline/20"
+                      }`}
+                    >
+                      {doc.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="t-caption text-ink-faint text-[11px] leading-tight">
+                  Aadhaar is voluntary under the Aadhaar Act. You may choose PAN, Passport, Voter ID, or Driving Licence.
+                </p>
+              </div>
+
               <div className="border border-dashed border-hairline rounded-xl p-3 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-ink truncate min-w-0 pr-2">
                   <Upload className="w-4 h-4 text-ink-muted shrink-0" />
@@ -557,6 +593,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   <input
                     type="file"
                     accept=".pdf,application/pdf,.jpg,.jpeg,image/jpeg,.png,image/png"
+                    capture="environment"
                     onChange={handleFileChange}
                     className="hidden"
                   />

@@ -17,6 +17,7 @@ export interface RejectKYCPayload {
 }
 
 export interface UploadKYCOptions {
+  documentType?: string;
   onProgress?: (percent: number) => void;
   signal?: AbortSignal;
 }
@@ -47,6 +48,9 @@ export const uploadKYCDocument = (
 ): Promise<KYCVerification> => {
   const fd = new FormData();
   fd.append("file", file);
+  if (options?.documentType) {
+    fd.append("document_type", options.documentType);
+  }
   if (options?.onProgress) {
     return apiUpload<KYCVerification>("/tenant/kyc/upload", fd, {
       onProgress: (p) => options.onProgress?.(p.percent),
