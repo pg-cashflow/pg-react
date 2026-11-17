@@ -348,27 +348,26 @@ writeStaticPage("terms", "Terms of Service", "Operating terms and conditions gov
   }
 ]);
 
-writeStaticPage("privacy", "Privacy Policy", "How PG Cashflow handles, protects, and stores personal data under the Digital Personal Data Protection (DPDP) Act, 2023.", [
-  {
-    heading: "1. Data Fiduciary & Compliance",
-    paragraphs: [
-      "This Privacy Notice outlines how PG Cashflow operates as a Data Fiduciary under the Digital Personal Data Protection Act, 2023. We are committed to data minimization, purpose limitation, and absolute transparency regarding personal data."
-    ]
-  },
-  {
-    heading: "2. Data We Collect & Masking Standards",
-    paragraphs: [
-      "We collect contact identifiers (mobile number for OTP authentication), payment transaction references, and identity proof processed through UIDAI-authorized DigiLocker / Aadhaar OTP fast-path.",
-      "In strict compliance with UIDAI regulations and the Digital Personal Data Protection (DPDP) Act, 2023, raw 12-digit Aadhaar numbers are never stored in cleartext. Only masked identifiers (last 4 digits) are displayed. Verification records and uploaded documents are encrypted at rest using AES-256-GCM and retained strictly for the duration of tenancy under residential police verification obligations, with irreversible erasure upon verified consent revocation or account closure."
-    ]
-  },
-  {
-    heading: "3. Grievance Redressal",
-    paragraphs: [
-      `Data principals may contact our designated Grievance Officer at ${company.privacyEmail || company.grievanceEmail}. Complaints are acknowledged within ${company.ackTimelineHours} hours and resolved within ${company.resolutionTimelineDays} business days.`
-    ]
+const privacyPolicyPath = path.resolve(__dirname, "../src/config/privacy-policy.json");
+const privacyPolicy = JSON.parse(fs.readFileSync(privacyPolicyPath, "utf-8"));
+
+const privacySections = privacyPolicy.sections.map((sec) => {
+  const item = {
+    heading: sec.heading,
+    paragraphs: [...sec.paragraphs],
+  };
+  if (sec.bullets) {
+    item.list = sec.bullets;
   }
-]);
+  if (sec.contactDetails) {
+    item.paragraphs.push(
+      `Grievance Redressal Officer: ${sec.contactDetails.title}, ${company.legalName}. Email: ${company.privacyEmail || company.grievanceEmail}. Response Turnaround: Acknowledged within ${company.ackTimelineHours} hours; resolved within ${company.resolutionTimelineDays} business days.`
+    );
+  }
+  return item;
+});
+
+writeStaticPage("privacy", privacyPolicy.title, privacyPolicy.subtitle, privacySections);
 
 writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensive rules, timelines, and payment rail processing for rent dues, security deposits, and duplicate charges.", [
   {

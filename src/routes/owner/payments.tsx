@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPayments } from "@/api/payments";
 import { getTenants } from "@/api/tenants";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -9,12 +9,14 @@ import { formatDate, formatMatchedBy } from "@/lib/utils";
 import { Search, CheckCircle2, RotateCcw } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { RefundModal } from "@/components/owner/RefundModal";
+import { RefundApprovalsPanel } from "@/components/owner/RefundApprovalsPanel";
 import { REFUND_WINDOW_DAYS } from "@/lib/constants";
 import type { Payment } from "@pg/types";
 import { useLocale } from "@/i18n";
 
 export const PaymentsView: React.FC = () => {
   const { t } = useLocale();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [selectedPaymentForRefund, setSelectedPaymentForRefund] = useState<Payment | null>(null);
 
@@ -55,6 +57,8 @@ export const PaymentsView: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <RefundApprovalsPanel />
+
       <div className="relative flex-1 max-w-md">
         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
         <input
@@ -168,6 +172,10 @@ export const PaymentsView: React.FC = () => {
         tenantName={selectedPaymentForRefund ? tenantMap.get(selectedPaymentForRefund.tenant_id) || "Tenant" : ""}
         onClose={() => setSelectedPaymentForRefund(null)}
         onRefundComplete={() => {
+          refetch();
+        }}
+        onApprovalSubmitted={() => {
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.refundApprovals() });
           refetch();
         }}
       />

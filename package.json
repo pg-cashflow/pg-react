@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/check-company.mjs && tsc -b && vite build && node scripts/prerender-landing.mjs",
-    "lint": "oxlint && node scripts/check-palette.mjs && node scripts/check-typography.mjs && node scripts/check-i18n.mjs",
+    "lint": "oxlint && node scripts/check-palette.mjs && node scripts/check-typography.mjs && node scripts/check-i18n.mjs && node scripts/check-policy-parity.mjs",
     "lint:palette": "node scripts/check-palette.mjs",
     "lint:type": "node scripts/check-typography.mjs",
     "lint:i18n": "node scripts/check-i18n.mjs",
     "lint:i18n:ratchet": "node scripts/check-i18n.mjs --update-baseline",
+    "lint:policy": "node scripts/check-policy-parity.mjs",
     "preview": "vite preview",
     "test": "tsc -b && vitest run",
     "check:error-codes": "node scripts/check-error-codes.mjs"

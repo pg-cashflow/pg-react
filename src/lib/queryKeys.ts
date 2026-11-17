@@ -62,6 +62,8 @@ export const QUERY_KEYS = {
   unbatchedPayoutItems: ["owner", "payouts", "items", "unbatched"] as const,
   payoutBatches: ["owner", "payouts", "batches"] as const,
   payoutBatch: (id: string) => ["owner", "payouts", "batches", id] as const,
+  refundApprovals: (status?: string) =>
+    ["owner", "refund-approvals", status || "all"] as const,
 
   // Finance & Ledger (M6)
   financeSummary: (period?: string) =>

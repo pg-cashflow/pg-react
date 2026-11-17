@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2, ShieldAlert } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
-import { refundPayment, requestRefundOTP, getPaymentRefundHistory } from "@/api/payments";
+import { refundPayment, requestRefundOTP, getPaymentRefundHistory, createRefundApprovalRequest } from "@/api/payments";
 import { REFUND_WINDOW_DAYS } from "@/lib/constants";
 import type { Payment, GatewayRefund } from "@pg/types";
 import { useLocale, formatApiError } from "@/i18n";
@@ -12,6 +12,7 @@ interface RefundModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRefundComplete?: (refund: GatewayRefund) => void;
+  onApprovalSubmitted?: () => void;
 }
 
 export const RefundModal: React.FC<RefundModalProps> = ({
@@ -20,6 +21,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   isOpen,
   onClose,
   onRefundComplete,
+  onApprovalSubmitted,
 }) => {
   const { t } = useLocale();
   const [rupeesInput, setRupeesInput] = useState("");
@@ -36,6 +38,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   const [remainingPaise, setRemainingPaise] = useState<number | null>(null);
   const [hasPendingOp, setHasPendingOp] = useState(false);
   const [isExpiredWindow, setIsExpiredWindow] = useState(false);
+  const [dualControlRequired, setDualControlRequired] = useState(false);
+  const [approvalSubmitted, setApprovalSubmitted] = useState(false);
 
   const generateNewKey = () => {
     if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -56,6 +60,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
       setAttemptPending(false);
       setRemainingPaise(null);
       setHasPendingOp(false);
+      setDualControlRequired(false);
+      setApprovalSubmitted(false);
 
       const paymentDate = new Date(payment.matched_at || payment.created_at || Date.now());
       const expired = Date.now() - paymentDate.getTime() > REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
@@ -162,28 +168,66 @@ export const RefundModal: React.FC<RefundModalProps> = ({
     } catch (err: unknown) {
       const apiErr = err as { message?: string; status?: number; code?: string };
       const msg = formatApiError(err, t);
-      const isStepUp =
-        apiErr.status === 401 &&
-        (apiErr.code === "auth.stepUpRequired" ||
-          apiErr.code === "auth.invalidOtp" ||
-          apiErr.code === "auth.otpExpired" ||
-          apiErr.code === "auth.otpLocked" ||
-          msg.toLowerCase().includes("step-up") ||
-          msg.toLowerCase().includes("otp") ||
-          Boolean(apiErr.message && /step-up|otp|approval code/i.test(apiErr.message)));
-      if (isStepUp) {
-        setNeedsStepUp(true);
-        setErrorMessage(msg);
+      const isDualControl =
+        apiErr.code === "refund.dual_control_required" ||
+        apiErr.code === "finance.dual_control_required" ||
+        /dual[- ]control|maker[- ]checker|approval required/i.test(apiErr.message || "") ||
+        /dual[- ]control|maker[- ]checker|approval required/i.test(msg);
+
+      if (isDualControl) {
+        setDualControlRequired(true);
+        setErrorMessage(
+          "This refund exceeds the single-owner threshold. A maker-checker approval request is required."
+        );
       } else {
-        // A transport error does not prove that the refund was rejected. Keep
-        // the operation identity so retry cannot create another refund.
-        if (apiErr.status === 400 || apiErr.status === 422) {
-          // These responses are validation failures before gateway dispatch.
-          setAttemptPending(false);
-          try { sessionStorage.removeItem(`pg_refund_attempt:${payment.id}`); } catch { /* best effort */ }
+        const isStepUp =
+          apiErr.status === 401 &&
+          (apiErr.code === "auth.stepUpRequired" ||
+            apiErr.code === "auth.invalidOtp" ||
+            apiErr.code === "auth.otpExpired" ||
+            apiErr.code === "auth.otpLocked" ||
+            msg.toLowerCase().includes("step-up") ||
+            msg.toLowerCase().includes("otp") ||
+            Boolean(apiErr.message && /step-up|otp|approval code/i.test(apiErr.message)));
+        if (isStepUp) {
+          setNeedsStepUp(true);
+          setErrorMessage(msg);
+        } else {
+          // A transport error does not prove that the refund was rejected. Keep
+          // the operation identity so retry cannot create another refund.
+          if (apiErr.status === 400 || apiErr.status === 422) {
+            // These responses are validation failures before gateway dispatch.
+            setAttemptPending(false);
+            try { sessionStorage.removeItem(`pg_refund_attempt:${payment.id}`); } catch { /* best effort */ }
+          }
+          setErrorMessage(msg);
         }
-        setErrorMessage(msg);
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateApprovalRequest = async () => {
+    if (!payment) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    try {
+      await createRefundApprovalRequest(
+        payment.id,
+        {
+          amount_paise: requestedPaise,
+          reason: reason.trim().normalize("NFC"),
+        },
+        idempotencyKey
+      );
+      setApprovalSubmitted(true);
+      setDualControlRequired(false);
+      if (onApprovalSubmitted) {
+        onApprovalSubmitted();
+      }
+    } catch (err: unknown) {
+      setErrorMessage(formatApiError(err, t));
     } finally {
       setIsSubmitting(false);
     }
@@ -261,8 +305,44 @@ export const RefundModal: React.FC<RefundModalProps> = ({
             </div>
           )}
 
+          {dualControlRequired && (
+            <div className="p-4 bg-accent-tint border border-accent/30 rounded-xl space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-accent">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{t("owner.refund.dualControlTitle")}</span>
+              </div>
+              <p className="text-xs text-ink-muted">
+                {t("owner.refund.dualControlDesc")}
+              </p>
+              <button
+                type="button"
+                onClick={handleCreateApprovalRequest}
+                disabled={isSubmitting}
+                className="w-full py-2.5 px-4 bg-accent text-white rounded-xl text-xs font-semibold hover:bg-accent/90 transition flex items-center justify-center gap-2"
+              >
+                {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{t("owner.refund.submitApprovalBtn")}</span>
+              </button>
+            </div>
+          )}
+
           {/* Refund Result Display */}
-          {refundResult ? (
+          {approvalSubmitted ? (
+            <div className="p-4 bg-success/10 border border-success/20 rounded-xl text-center space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-success mx-auto" />
+              <h3 className="font-semibold text-sm text-ink">{t("owner.refund.approvalSubmittedTitle")}</h3>
+              <p className="text-xs text-ink-muted">
+                {t("owner.refund.approvalSubmittedDesc")}
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-2 px-4 py-2 bg-surface border border-hairline rounded-xl text-xs font-semibold text-ink hover:bg-bg transition"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          ) : refundResult ? (
             <div className="space-y-4 py-2">
               {refundResult.status === "succeeded" && (
                 <div className="p-4 bg-success/10 border border-success/20 rounded-xl text-center space-y-2">

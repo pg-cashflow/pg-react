@@ -572,8 +572,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                     </button>
                   ))}
                 </div>
-                <p className="t-caption text-ink-faint text-[11px] leading-tight">
-                  Aadhaar is voluntary under the Aadhaar Act. You may choose PAN, Passport, Voter ID, or Driving Licence.
+                <p className="t-micro text-ink-faint leading-tight">
+                  {t("kyc.card.aadhaarVoluntaryNotice")}
                 </p>
               </div>
 

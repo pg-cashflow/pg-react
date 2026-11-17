@@ -41,6 +41,88 @@ export interface PaymentRefundHistory {
 export const getPaymentRefundHistory = (paymentId: string): Promise<PaymentRefundHistory> =>
   apiFetch<PaymentRefundHistory>(`/owner/payments/${paymentId}/refunds`);
 
+export interface RefundApprovalDecision {
+  approver_id: string;
+  approver_role: string;
+  approved_at: string;
+  note?: string;
+}
+
+export interface RefundApprovalRequest {
+  id: string;
+  property_id: string;
+  payment_id: string;
+  tenant_id: string;
+  amount_paise: number;
+  reason: string;
+  idempotency_key: string;
+  requested_by: string;
+  requested_by_role: string;
+  status: "pending" | "partially_approved" | "approved" | "rejected" | "dispatched" | "cancelled";
+  required_approvals: number;
+  approvals: RefundApprovalDecision[];
+  rejected_by?: string | null;
+  rejected_at?: string | null;
+  rejection_reason?: string | null;
+  refund_id?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const listRefundApprovalRequests = (
+  status?: string
+): Promise<{ refund_requests: RefundApprovalRequest[] }> => {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiFetch<{ refund_requests: RefundApprovalRequest[] }>(`/owner/refund-requests${query}`);
+};
+
+export const createRefundApprovalRequest = (
+  paymentId: string,
+  input: { amount_paise: number; reason: string },
+  idempotencyKey?: string
+): Promise<{ message: string; refund_request: RefundApprovalRequest }> => {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (idempotencyKey) {
+    headers["X-Idempotency-Key"] = idempotencyKey;
+  }
+  return apiFetch<{ message: string; refund_request: RefundApprovalRequest }>(
+    `/owner/payments/${paymentId}/refund/requests`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify(input),
+    }
+  );
+};
+
+export const approveRefundApprovalRequest = (
+  requestId: string,
+  input?: { note?: string; otp?: string }
+): Promise<{ message: string; refund_request: RefundApprovalRequest }> => {
+  return apiFetch<{ message: string; refund_request: RefundApprovalRequest }>(
+    `/owner/refund-requests/${requestId}/approve`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input || {}),
+    }
+  );
+};
+
+export const rejectRefundApprovalRequest = (
+  requestId: string,
+  reason: string
+): Promise<{ message: string; refund_request: RefundApprovalRequest }> => {
+  return apiFetch<{ message: string; refund_request: RefundApprovalRequest }>(
+    `/owner/refund-requests/${requestId}/reject`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason }),
+    }
+  );
+};
+
 export const refundPayment = async (
   paymentId: string,
   input: OwnerRefundInput,
