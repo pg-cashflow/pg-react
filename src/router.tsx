@@ -142,6 +142,7 @@ const TenantRewardsView = lazyView(() => import("@/routes/tenant/rewards"), "Ten
 const TenantCommunityView = lazyView(() => import("@/routes/tenant/community"), "TenantCommunityView");
 const TenantProfileView = lazyView(() => import("@/routes/tenant/profile"), "TenantProfileView");
 const TenantPayReturnView = lazyView(() => import("@/routes/tenant/pay-return"), "TenantPayReturnView");
+const TenantKYCReturnView = lazyView(() => import("@/routes/tenant/kyc-return"), "TenantKYCReturnView");
 const PaymentReturnView = lazyView(() => import("@/routes/payment/return"), "PaymentReturnView");
 
 // Lazy-loaded Manager Views
@@ -585,6 +586,11 @@ const tenantPayReturn = createRoute({
   path: "/pay-return",
   component: TenantPayReturnView,
 });
+const tenantKYCReturn = createRoute({
+  getParentRoute: () => tenantRoute,
+  path: "/kyc/return",
+  component: TenantKYCReturnView,
+});
 const tenantKYC = createRoute({
   getParentRoute: () => tenantRoute,
   path: "/kyc",
@@ -784,6 +790,7 @@ const routeTree = rootRoute.addChildren([
     tenantCommunity,
     tenantProfile,
     tenantPayReturn,
+    tenantKYCReturn,
     tenantKYC,
     tenantHazards,
     tenantInspections,

@@ -123,7 +123,7 @@ describe("TenantKYCCard", () => {
     expect(container?.textContent).toContain("Document photo is blurry and unreadable");
   });
 
-  it("renders unverified action buttons for document upload and secure QR", async () => {
+  it("renders unverified action buttons and defaults to DigiLocker tab", async () => {
     vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
       verification: null,
       consent_active: false,
@@ -138,8 +138,29 @@ describe("TenantKYCCard", () => {
     });
     await flushQueries();
 
+    expect(container?.textContent).toContain("DigiLocker");
     expect(container?.textContent).toContain("Upload ID Document");
     expect(container?.textContent).toContain("Verify via Secure QR");
+    expect(container?.textContent).toContain("Official DigiLocker Verification");
+    expect(container?.textContent).toContain("Verify with DigiLocker");
+  });
+
+  it("renders Upload tab when defaultTab is upload", async () => {
+    vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
+      verification: null,
+      consent_active: false,
+    });
+
+    await act(async () => {
+      root?.render(
+        <QueryClientProvider client={queryClient}>
+          <TenantKYCCard defaultTab="upload" />
+        </QueryClientProvider>
+      );
+    });
+    await flushQueries();
+
+    expect(container?.textContent).toContain("Upload ID Document");
     expect(container?.textContent).toContain("Manual ID Photo Upload");
   });
 

@@ -409,7 +409,7 @@ export type KYCStatus =
   | "expired"
   | "revoked";
 
-export type KYCMethod = "aadhaar_otp" | "ocr" | "qr";
+export type KYCMethod = "aadhaar_otp" | "ocr" | "qr" | "digilocker";
 
 export interface KYCVerification {
   id: string;

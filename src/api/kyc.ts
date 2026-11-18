@@ -33,6 +33,24 @@ export const submitKYCConsent = (payload: KYCConsentPayload): Promise<{ ok: bool
     body: JSON.stringify(payload),
   });
 
+export interface DigiLockerInitResponse {
+  ok: boolean;
+  verification_id: string;
+  redirect_url: string;
+  status: string;
+}
+
+export const initiateDigiLocker = (
+  userFlow?: "signin" | "signup"
+): Promise<DigiLockerInitResponse> =>
+  apiFetch<DigiLockerInitResponse>("/tenant/kyc/digilocker/init", {
+    method: "POST",
+    body: JSON.stringify(userFlow ? { user_flow: userFlow } : {}),
+  });
+
+export const getDigiLockerStatus = (): Promise<{ ok: boolean; verification: KYCVerification }> =>
+  apiFetch<{ ok: boolean; verification: KYCVerification }>("/tenant/kyc/digilocker/status");
+
 export const verifySecureQR = (
   qrPayload: string
 ): Promise<KYCVerification> =>
