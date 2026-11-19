@@ -311,7 +311,7 @@ export const taIN: Record<MessageKey, string> = {
   "kyc.card.submittedOn": "{date} அன்று சமர்ப்பிக்கப்பட்டது",
   "kyc.card.rejectedTitle": "ஆவண சரிபார்ப்பு நிராகரிக்கப்பட்டது",
   "kyc.card.rejectionReason": "காரணம்: {reason}",
-  "kyc.card.rejectedHelp": "தயவுசெய்து நேரடி ஆதார் OTP அல்லது தெளிவான புகைப்படத்தைப் பதிவேற்றி மீண்டும் சமர்ப்பிக்கவும்.",
+  "kyc.card.rejectedHelp": "டிஜிலாக்கர் வழியாக உங்கள் சரிபார்ப்பை மீண்டும் சமர்ப்பிக்கவும் அல்லது தெளிவான ஆவண புகைப்படத்தை பதிவேற்றவும்.",
   "kyc.card.tabOtp": "ஆதார் OTP மூலம் சரிபார்க்கவும்",
   "kyc.card.tabUpload": "அடையாள ஆவணத்தைப் பதிவேற்றவும்",
   "kyc.card.otpHeading": "உடனடி தானியங்கி UIDAI சரிபார்ப்பு",
@@ -381,6 +381,8 @@ export const taIN: Record<MessageKey, string> = {
   "kyc.digilocker.confirmingDesc": "அரசு பதிவேட்டில் இருந்து சான்றுகள் பெறப்படுகின்றன",
   "kyc.digilocker.stillPending": "செயலாக்கத்தில் உள்ளது",
   "kyc.digilocker.stillPendingDesc": "உங்கள் சரிபார்ப்பு வழக்கத்தை விட அதிக நேரம் எடுக்கிறது. முடிந்ததும் உங்களுக்கு அறிவிக்கப்படும்.",
+  "kyc.digilocker.manualReview": "கைமுறை சரிபார்ப்பு தேவை",
+  "kyc.digilocker.manualReviewDesc": "உங்கள் ஆவணம் உரிமையாளரின் கைமுறை மதிப்பாய்வுக்கு சமர்ப்பிக்கப்பட்டுள்ளது. இது மதிப்பாய்வு செய்யப்படும்போது உங்கள் டாஷ்போர்டை அணுகலாம்.",
   "payment.paidOnline": "ஆன்லைன் கட்டணம்",
 
   // Auto-added Error Codes & Screen Keys
@@ -678,10 +680,10 @@ export const taIN: Record<MessageKey, string> = {
 
   // Owner KYC Queue additions
   "kyc.queueTitle": "KYC கைமுறை மதிப்பாய்வு வரிசை",
-  "kyc.queueSubtitle": "உரிமையாளர் அல்லது மேலாளர் சரிபார்ப்பு தேவைப்படும் கைமுறை ஆவண புகைப்பட பதிவேற்றங்கள். (ஆதார் OTP தானாகவே சரிபார்க்கப்படுகிறது).",
+  "kyc.queueSubtitle": "உரிமையாளர் சரிபார்ப்பு தேவைப்படும் கைமுறை ஆவண புகைப்பட பதிவேற்றங்கள். (டிஜிலாக்கர் தானாகவே சரிபார்க்கிறது).",
   "kyc.pendingReviewCount": "{count} மதிப்பாய்வு நிலுவையில் உள்ளது",
   "kyc.searchPlaceholder": "வாடகைதாரர் பெயர், அறை எண் மூலம் தேடுங்கள்...",
-  "kyc.emptyManualQueue": "நிலுவையில் உள்ள கைமுறை மதிப்பாய்வுகள் இல்லை. ஆதார் OTP சரிபார்ப்புகள் UIDAI மூலம் தானாகவே அங்கீகரிக்கப்படுகின்றன.",
+  "kyc.emptyManualQueue": "நிலுவையில் உள்ள கைமுறை மதிப்பாய்வுகள் இல்லை. டிஜிலாக்கர் சரிபார்ப்புகள் தானாகவே அங்கீகரிக்கப்படுகின்றன.",
   "kyc.pendingApproval": "ஒப்புதல் நிலுவையில் உள்ளது",
   "kyc.duplicateDetected": "போலி அடையாளம் கண்டறியப்பட்டது",
   "kyc.submitted": "சமர்ப்பிக்கப்பட்டது",
@@ -717,7 +719,7 @@ export const taIN: Record<MessageKey, string> = {
   "tenant.dashboard.kycReviewTitle": "KYC ஆவணம் மதிப்பாய்வில் உள்ளது",
   "tenant.dashboard.kycRequiredTitle": "அடையாள சரிபார்ப்பு தேவை",
   "tenant.dashboard.kycReviewDesc": "நீங்கள் பதிவேற்றிய அடையாளத்தை நிர்வாகம் சரிபார்க்கிறது.",
-  "tenant.dashboard.kycRequiredDesc": "முழு பாஸ்புக் அம்சங்களையும் இயக்க ஆதார் OTP சரிபார்ப்பை முடிக்கவும்.",
+  "tenant.dashboard.kycRequiredDesc": "முழு பாஸ்புக் அம்சங்களை இயக்க அடையாள சரிபார்ப்பை முடிக்கவும்.",
   "tenant.dashboard.onTimeStreak": "சரியான நேர ஸ்ட்ரீக்",
   "tenant.dashboard.monthsOnTime": "{months} மாதங்கள் சரியான நேரத்தில்",
   "tenant.dashboard.ptsPassbook": "{points} புள்ளிகள் · பாஸ்புக்",

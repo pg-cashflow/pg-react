@@ -311,7 +311,7 @@ export const teIN: Record<MessageKey, string> = {
   "kyc.card.submittedOn": "{date} న సమర్పించబడింది",
   "kyc.card.rejectedTitle": "పత్రం ధృవీకరణ తిరస్కరించబడింది",
   "kyc.card.rejectionReason": "కారణం: {reason}",
-  "kyc.card.rejectedHelp": "దయచేసి డైరెక్ట్ ఆధార్ ఓటీపీని ఉపయోగించి లేదా స్పష్టమైన ఫోటోను అప్‌లోడ్ చేసి మళ్ళీ సమర్పించండి.",
+  "kyc.card.rejectedHelp": "దయచేసి డిజిలాకర్ ద్వారా మీ ధృవీకరణను మళ్లీ సమర్పించండి లేదా స్పష్టమైన పత్రం ఫోటోను అప్‌లోడ్ చేయండి.",
   "kyc.card.tabOtp": "ఆధార్ ఓటీపీ ద్వారా ధృవీకరించండి",
   "kyc.card.tabUpload": "ఐడీ పత్రాన్ని అప్‌లోడ్ చేయండి",
   "kyc.card.otpHeading": "తక్షణ ఆటోమేటిక్ UIDAI ధృవీకరణ",
@@ -381,6 +381,8 @@ export const teIN: Record<MessageKey, string> = {
   "kyc.digilocker.confirmingDesc": "ప్రభుత్వ రిజిస్ట్రీ నుండి ధృవీకరణ వివరాలను పొందుతోంది",
   "kyc.digilocker.stillPending": "ఇంకా ప్రాసెస్ అవుతోంది",
   "kyc.digilocker.stillPendingDesc": "మీ ధృవీకరణకు ఊహించిన దానికంటే ఎక్కువ సమయం పడుతోంది. పూర్తయిన తర్వాత మేము మీకు తెలియజేస్తాము.",
+  "kyc.digilocker.manualReview": "మాన్యువల్ ధృవీకరణ అవసరం",
+  "kyc.digilocker.manualReviewDesc": "మీ పత్రం యజమాని మాన్యువల్ సమీక్ష కోసం సమర్పించబడింది. ఇది సమీక్షించబడుతున్నప్పుడు మీరు మీ డ్యాష్‌బోర్డ్‌ను యాక్సెస్ చేయవచ్చు.",
   "payment.paidOnline": "ఆన్‌లైన్ చెల్లింపు",
 
   // Auto-added Error Codes & Screen Keys
@@ -678,10 +680,10 @@ export const teIN: Record<MessageKey, string> = {
 
   // Owner KYC Queue additions
   "kyc.queueTitle": "KYC మాన్యువల్ సమీక్ష క్యూ",
-  "kyc.queueSubtitle": "యజమాని లేదా మేనేజర్ ధృవీకరణ అవసరమయ్యే మాన్యువల్ పత్రం ఫోటో అప్‌లోడ్‌లు. (ఆధార్ OTP స్వయంచాలకంగా ధృవీకరించబడుతుంది).",
+  "kyc.queueSubtitle": "యజమాని ధృవీకరణ అవసరమయ్యే మాన్యువల్ పత్రం ఫోటో అప్‌లోడ్‌లు. (డిజిలాకర్ స్వయంచాలకంగా ధృవీకరిస్తుంది).",
   "kyc.pendingReviewCount": "{count} సమీక్ష పెండింగ్‌లో ఉంది",
   "kyc.searchPlaceholder": "అద్దెదారు పేరు, గది నంబర్ ద్వారా శోధించండి...",
-  "kyc.emptyManualQueue": "పెండింగ్‌లో ఉన్న మాన్యువల్ సమీక్షలు లేవు. ఆధార్ OTP ధృవీకరణలు UIDAI ద్వారా స్వయంచాలకంగా ప్రామాణీకరించబడతాయి.",
+  "kyc.emptyManualQueue": "పెండింగ్‌లో ఉన్న మాన్యువల్ సమీక్షలు లేవు. డిజిలాకర్ ధృవీకరణలు స్వయంచాలకంగా ప్రామాణీకరించబడతాయి.",
   "kyc.pendingApproval": "ఆమోదం పెండింగ్‌లో ఉంది",
   "kyc.duplicateDetected": "నకిలీ గుర్తింపు కనుగొనబడింది",
   "kyc.submitted": "సమర్పించబడింది",
@@ -717,7 +719,7 @@ export const teIN: Record<MessageKey, string> = {
   "tenant.dashboard.kycReviewTitle": "KYC పత్రం పరిశీలనలో ఉంది",
   "tenant.dashboard.kycRequiredTitle": "గుర్తింపు ధృవీకరణ అవసరం",
   "tenant.dashboard.kycReviewDesc": "మీరు అప్‌లోడ్ చేసిన గుర్తింపు కార్డును యాజమాన్యం పరిశీలిస్తోంది.",
-  "tenant.dashboard.kycRequiredDesc": "పూర్తి పాస్‌బుక్ ఫీచర్లను ప్రారంభించడానికి ఆధార్ OTP ధృవీకరణను పూర్తి చేయండి.",
+  "tenant.dashboard.kycRequiredDesc": "పూర్తి పాస్‌బుక్ ఫీచర్‌లను ప్రారంభించడానికి గుర్తింపు ధృవీకరణను పూర్తి చేయండి.",
   "tenant.dashboard.onTimeStreak": "సమయానికి చెల్లింపుల స్ట్రీక్",
   "tenant.dashboard.monthsOnTime": "{months} నెలలు సమయానికి",
   "tenant.dashboard.ptsPassbook": "{points} పాయింట్లు · పాస్‌బుక్",

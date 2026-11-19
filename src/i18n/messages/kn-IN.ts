@@ -312,7 +312,7 @@ export const knIN: Record<MessageKey, string> = {
   "kyc.card.submittedOn": "{date} ರಂದು ಸಲ್ಲಿಸಲಾಗಿದೆ",
   "kyc.card.rejectedTitle": "ದಾಖಲೆ ಪರಿಶೀಲನೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
   "kyc.card.rejectionReason": "ಕಾರಣ: {reason}",
-  "kyc.card.rejectedHelp": "ದಯವಿಟ್ಟು ನೇರ ಆಧಾರ್ OTP ಬಳಸಿ ಅಥವಾ ಸ್ಪಷ್ಟವಾದ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡುವ ಮೂಲಕ ಮರುಸಲ್ಲಿಸಿ.",
+  "kyc.card.rejectedHelp": "ದಯವಿಟ್ಟು ಡಿಜಿಲಾಕರ್ ಮೂಲಕ ನಿಮ್ಮ ಪರಿಶೀಲನೆಯನ್ನು ಮರುಸಲ್ಲಿಸಿ ಅಥವಾ ಸ್ಪಷ್ಟವಾದ ದಾಖಲೆಯ ಫೋಟೋವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
   "kyc.card.tabOtp": "ಆಧಾರ್ OTP ಮೂಲಕ ಪರಿಶೀಲಿಸಿ",
   "kyc.card.tabUpload": "ಗುರುತಿನ ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
   "kyc.card.otpHeading": "ತ್ವರಿತ ಸ್ವಯಂಚಾಲಿತ UIDAI ಪರಿಶೀಲನೆ",
@@ -382,6 +382,8 @@ export const knIN: Record<MessageKey, string> = {
   "kyc.digilocker.confirmingDesc": "ಸರ್ಕಾರಿ ರಿಜಿಸ್ಟ್ರಿಯಿಂದ ದೃಢೀಕೃತ ವಿವರಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ",
   "kyc.digilocker.stillPending": "ಇನ್ನೂ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿದೆ",
   "kyc.digilocker.stillPendingDesc": "ನಿಮ್ಮ ಪರಿಶೀಲನೆ ನಿರೀಕ್ಷೆಗಿಂತ ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿದೆ. ಪೂರ್ಣಗೊಂಡ ನಂತರ ನಾವು ನಿಮಗೆ ತಿಳಿಸುತ್ತೇವೆ.",
+  "kyc.digilocker.manualReview": "ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
+  "kyc.digilocker.manualReviewDesc": "ನಿಮ್ಮ ದಾಖಲೆಯನ್ನು ಮಾಲೀಕರ ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆಗಾಗಿ ಸಲ್ಲಿಸಲಾಗಿದೆ. ಇದನ್ನು ಪರಿಶೀಲಿಸುವಾಗ ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪ್ರವೇಶಿಸಬಹುದು.",
   "payment.paidOnline": "ಆನ್‌ಲೈನ್‌ ಪಾವತಿ",
 
   // Auto-added Error Codes & Screen Keys
@@ -679,10 +681,10 @@ export const knIN: Record<MessageKey, string> = {
 
   // Owner KYC Queue additions
   "kyc.queueTitle": "KYC ಮ್ಯಾನುಯಲ್ ಪರಿಶೀಲನೆ ಕ್ಯೂ",
-  "kyc.queueSubtitle": "ಮಾಲೀಕ ಅಥವಾ ಮ್ಯಾನೇಜರ್ ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿರುವ ಮ್ಯಾನುಯಲ್ ದಾಖಲೆ ಫೋಟೋ ಅಪ್‌ಲೋಡ್‌ಗಳು. (ಆಧಾರ್ OTP ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ).",
+  "kyc.queueSubtitle": "ಮಾಲೀಕರ ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿರುವ ಹಸ್ತಚಾಲಿತ ದಾಖಲೆ ಫೋಟೋ ಅಪ್‌ಲೋಡ್‌ಗಳು. (ಡಿಜಿಲಾಕರ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ).",
   "kyc.pendingReviewCount": "{count} ಪರಿಶೀಲನೆ ಬಾಕಿ ಇದೆ",
   "kyc.searchPlaceholder": "ಬಾಡಿಗೆದಾರರ ಹೆಸರು, ಕೊಠಡಿ ಸಂಖ್ಯೆಯ ಮೂಲಕ ಹುಡುಕಿ...",
-  "kyc.emptyManualQueue": "ಯಾವುದೇ ಬಾಕಿ ಮ್ಯಾನುಯಲ್ ಪರಿಶೀಲನೆಗಳಿಲ್ಲ. ಆಧಾರ್ OTP ಪರಿಶೀಲನೆಗಳನ್ನು UIDAI ಸ್ವಯಂಚಾಲಿತವಾಗಿ ದೃಢೀಕರಿಸುತ್ತದೆ.",
+  "kyc.emptyManualQueue": "ಯಾವುದೇ ಬಾಕಿ ಇರುವ ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆಗಳಿಲ್ಲ. ಡಿಜಿಲಾಕರ್ ಪರಿಶೀಲನೆಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ದೃಢೀಕರಿಸಲಾಗುತ್ತದೆ.",
   "kyc.pendingApproval": "ಅನುಮೋದನೆ ಬಾಕಿ ಇದೆ",
   "kyc.duplicateDetected": "ನಕಲಿ ಗುರುತು ಪತ್ತೆಯಾಗಿದೆ",
   "kyc.submitted": "ಸಲ್ಲಿಸಲಾಗಿದೆ",
@@ -718,7 +720,7 @@ export const knIN: Record<MessageKey, string> = {
   "tenant.dashboard.kycReviewTitle": "KYC ದಾಖಲೆ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ",
   "tenant.dashboard.kycRequiredTitle": "ಗುರುತು ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
   "tenant.dashboard.kycReviewDesc": "ನಿಮ್ಮ ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಗುರುತನ್ನು ನಿರ್ವಹಣೆ ಪರಿಶೀಲಿಸುತ್ತಿದೆ.",
-  "tenant.dashboard.kycRequiredDesc": "ಸಂಪೂರ್ಣ ಪಾಸ್‌ಬುಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಆಧಾರ್ OTP ಪರಿಶೀಲನೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.",
+  "tenant.dashboard.kycRequiredDesc": "ಸಂಪೂರ್ಣ ಪಾಸ್‌ಬುಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಗುರುತಿನ ಪರಿಶೀಲನೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.",
   "tenant.dashboard.onTimeStreak": "ಸಮಯಕ್ಕೆ ಸರಿಯಾದ ಸ್ಟ್ರೀಕ್",
   "tenant.dashboard.monthsOnTime": "{months} ತಿಂಗಳುಗಳು ಸಮಯಕ್ಕೆ ಸರಿಯಾಗಿ",
   "tenant.dashboard.ptsPassbook": "{points} ಅಂಕಗಳು · ಪಾಸ್‌ಬುಕ್",

@@ -308,7 +308,7 @@ export const enIN = {
   "kyc.card.submittedOn": "Submitted on {date}",
   "kyc.card.rejectedTitle": "Document Verification Rejected",
   "kyc.card.rejectionReason": "Reason: {reason}",
-  "kyc.card.rejectedHelp": "Please re-submit your verification using direct Aadhaar OTP or upload a clear, legible photo.",
+  "kyc.card.rejectedHelp": "Please re-submit your verification via DigiLocker or upload a clear, legible document photo.",
   "kyc.card.tabOtp": "Verify via Aadhaar OTP",
   "kyc.card.tabUpload": "Upload ID Document",
   "kyc.card.otpHeading": "Instant Automatic UIDAI Verification",
@@ -378,6 +378,8 @@ export const enIN = {
   "kyc.digilocker.confirmingDesc": "Retrieving verified credentials from government registry",
   "kyc.digilocker.stillPending": "Still Processing",
   "kyc.digilocker.stillPendingDesc": "Your verification is taking longer than expected. We will notify you once complete.",
+  "kyc.digilocker.manualReview": "Manual Verification Required",
+  "kyc.digilocker.manualReviewDesc": "Your document has been submitted for manual review by the owner. You can access your dashboard while this is reviewed.",
   "payment.paidOnline": "Paid online",
 
   // Auto-added Error Codes & Screen Keys
@@ -675,10 +677,10 @@ export const enIN = {
 
   // Owner KYC Queue additions
   "kyc.queueTitle": "KYC Manual Review Queue",
-  "kyc.queueSubtitle": "Manual document photo uploads requiring owner or manager verification. (Aadhaar OTP verifies automatically).",
+  "kyc.queueSubtitle": "Manual document photo uploads requiring owner verification. (DigiLocker verifies automatically).",
   "kyc.pendingReviewCount": "{count} Pending Review",
   "kyc.searchPlaceholder": "Search by tenant name, room number...",
-  "kyc.emptyManualQueue": "No pending manual reviews. Aadhaar OTP verifications are authenticated automatically by UIDAI.",
+  "kyc.emptyManualQueue": "No pending manual reviews. DigiLocker verifications are authenticated automatically.",
   "kyc.pendingApproval": "Pending Approval",
   "kyc.duplicateDetected": "Duplicate Identity Detected",
   "kyc.submitted": "Submitted",
@@ -714,7 +716,7 @@ export const enIN = {
   "tenant.dashboard.kycReviewTitle": "KYC Document Under Review",
   "tenant.dashboard.kycRequiredTitle": "Identity Verification Required",
   "tenant.dashboard.kycReviewDesc": "Your uploaded ID is being verified by management.",
-  "tenant.dashboard.kycRequiredDesc": "Complete Aadhaar OTP verification to enable full passbook features.",
+  "tenant.dashboard.kycRequiredDesc": "Complete identity verification to enable full passbook features.",
   "tenant.dashboard.onTimeStreak": "On-time streak",
   "tenant.dashboard.monthsOnTime": "{months} months on time",
   "tenant.dashboard.ptsPassbook": "{points} pts · passbook",
