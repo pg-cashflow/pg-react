@@ -29,18 +29,18 @@ export interface TenantKYCCardProps {
   isModal?: boolean;
   onClose?: () => void;
   onSuccess?: () => void;
-  defaultTab?: "digilocker" | "qr" | "upload";
+  defaultTab?: "upload" | "qr" | "digilocker";
 }
 
 export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   isModal,
   onClose,
   onSuccess,
-  defaultTab = "digilocker",
+  defaultTab = "upload",
 }) => {
   const { t, locale } = useLocale();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"digilocker" | "qr" | "upload">(
+  const [activeTab, setActiveTab] = useState<"upload" | "qr" | "digilocker">(
     defaultTab
   );
 
@@ -464,23 +464,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       {/* Action View: Unverified or Rejected */}
       {(!isVerified && !isPendingReview) && (
         <div className="space-y-3 pt-1">
-          {/* Three Verification Options: DigiLocker (Primary/Instant), Document Upload, Secure QR */}
+          {/* Three Verification Options: Document Upload (OCR), Secure QR, DigiLocker */}
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("digilocker");
-                setUiError(null);
-              }}
-              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
-                activeTab === "digilocker"
-                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
-                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
-            </button>
             <button
               type="button"
               onClick={() => {
@@ -511,121 +496,24 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <QrCode className="w-4 h-4 shrink-0" />
               <span className="truncate">{t("kyc.card.tabQr")}</span>
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("digilocker");
+                setUiError(null);
+              }}
+              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
+                activeTab === "digilocker"
+                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
+                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 shrink-0" />
+              <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
+            </button>
           </div>
 
-          {/* Tab 1: DigiLocker (Primary Instant Verification) */}
-          {activeTab === "digilocker" && (
-            <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
-              <div>
-                <span className="t-caption font-semibold text-ink flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-accent" />
-                  {t("kyc.digilocker.heading") || "Official DigiLocker Verification"}
-                </span>
-                <p className="t-caption text-ink-muted mt-0.5">
-                  {t("kyc.digilocker.description") || "Instant verification directly from Government of India records. No manual review required."}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-surface border border-hairline space-y-2">
-                <div className="flex items-center gap-2 text-ink t-caption font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                  <span>{t("kyc.digilocker.featureInstant") || "Instant verification — unlock rent payment immediately"}</span>
-                </div>
-                <div className="flex items-center gap-2 text-ink t-caption font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                  <span>{t("kyc.digilocker.featureOfficial") || "Government of India DigiLocker via Cashfree"}</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                disabled={!consentChecked || digiLockerMutation.isPending}
-                onClick={() => digiLockerMutation.mutate()}
-                className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
-              >
-                {digiLockerMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <ExternalLink className="w-4 h-4" />
-                    <span>{t("kyc.digilocker.button") || "Verify with DigiLocker"}</span>
-                  </>
-                )}
-              </button>
-
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("upload");
-                    setUiError(null);
-                  }}
-                  className="t-caption text-ink-muted hover:text-accent underline transition"
-                >
-                  {t("kyc.card.uploadInsteadBtn")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 1: Offline Secure QR */}
-          {activeTab === "qr" && (
-            <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
-              <div>
-                <span className="t-caption font-semibold text-ink flex items-center gap-1">
-                  <QrCode className="w-4 h-4 text-accent" />
-                  {t("kyc.card.qrHeading")}
-                </span>
-                <p className="t-caption text-ink-muted mt-0.5">
-                  {t("kyc.card.qrSubtitle")}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <textarea
-                  rows={3}
-                  value={qrInput}
-                  onChange={(e) => setQrInput(e.target.value)}
-                  placeholder={t("kyc.card.qrInputPlaceholder")}
-                  className="w-full p-2.5 rounded-[10px] border border-hairline bg-surface t-code text-xs text-ink placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-accent resize-none"
-                />
-                <p className="t-caption text-ink-faint">
-                  {t("kyc.card.qrHelp")}
-                </p>
-                <button
-                  type="button"
-                  disabled={
-                    !qrInput.trim() ||
-                    !consentChecked ||
-                    verifyQrMutation.isPending
-                  }
-                  onClick={() => verifyQrMutation.mutate(qrInput)}
-                  className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
-                >
-                  {verifyQrMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    t("kyc.card.qrVerifyBtn")
-                  )}
-                </button>
-              </div>
-
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("upload");
-                    setUiError(null);
-                  }}
-                  className="t-caption text-ink-muted hover:text-accent underline transition"
-                >
-                  {t("kyc.card.uploadInsteadBtn")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 2: Manual Upload */}
+          {/* Tab 1: Manual Upload (Primary Document Upload / OCR) */}
           {activeTab === "upload" && (
             <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
               <div>
@@ -732,6 +620,92 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   </>
                 ) : (
                   t("kyc.card.submitReviewBtn")
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Tab 2: Offline Secure QR */}
+          {activeTab === "qr" && (
+            <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
+              <div>
+                <span className="t-caption font-semibold text-ink flex items-center gap-1">
+                  <QrCode className="w-4 h-4 text-accent" />
+                  {t("kyc.card.qrHeading")}
+                </span>
+                <p className="t-caption text-ink-muted mt-0.5">
+                  {t("kyc.card.qrSubtitle")}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <textarea
+                  rows={3}
+                  value={qrInput}
+                  onChange={(e) => setQrInput(e.target.value)}
+                  placeholder={t("kyc.card.qrInputPlaceholder")}
+                  className="w-full p-2.5 rounded-[10px] border border-hairline bg-surface t-code text-xs text-ink placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+                />
+                <p className="t-caption text-ink-faint">
+                  {t("kyc.card.qrHelp")}
+                </p>
+                <button
+                  type="button"
+                  disabled={
+                    !qrInput.trim() ||
+                    !consentChecked ||
+                    verifyQrMutation.isPending
+                  }
+                  onClick={() => verifyQrMutation.mutate(qrInput)}
+                  className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
+                >
+                  {verifyQrMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    t("kyc.card.qrVerifyBtn")
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 3: DigiLocker (Optional Secondary Verification) */}
+          {activeTab === "digilocker" && (
+            <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
+              <div>
+                <span className="t-caption font-semibold text-ink flex items-center gap-1">
+                  <ShieldCheck className="w-4 h-4 text-accent" />
+                  {t("kyc.digilocker.heading") || "Official DigiLocker Verification"}
+                </span>
+                <p className="t-caption text-ink-muted mt-0.5">
+                  {t("kyc.digilocker.description") || "Instant verification directly from Government of India records. No manual review required."}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-surface border border-hairline space-y-2">
+                <div className="flex items-center gap-2 text-ink t-caption font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                  <span>{t("kyc.digilocker.featureInstant") || "Instant verification — unlock rent payment immediately"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-ink t-caption font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                  <span>{t("kyc.digilocker.featureOfficial") || "Government of India DigiLocker via Cashfree"}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={!consentChecked || digiLockerMutation.isPending}
+                onClick={() => digiLockerMutation.mutate()}
+                className="w-full h-11 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition"
+              >
+                {digiLockerMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <ExternalLink className="w-4 h-4" />
+                    <span>{t("kyc.digilocker.button") || "Verify with DigiLocker"}</span>
+                  </>
                 )}
               </button>
             </div>

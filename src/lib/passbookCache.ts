@@ -2,6 +2,7 @@ import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
 import { getStoredUser } from "@/auth/storage";
 
 export const PASSBOOK_STORAGE_KEY = "pg_passbook_cache";
+export const PASSBOOK_OPT_IN_STORAGE_KEY = "pg_passbook_offline_enabled";
 export const PASSBOOK_OPT_OUT_STORAGE_KEY = "pg_passbook_offline_disabled";
 
 /**
@@ -21,30 +22,49 @@ function isPassbookKey(queryKey: readonly unknown[]): boolean {
 }
 
 /**
- * Returns true if the user has opted out of offline passbook storage.
+ * Returns true if the user has explicitly opted into offline passbook storage in localStorage.
+ * Default is FALSE (TanStack Query in-memory caching only, zero localStorage exposure by default).
  */
-export function isPassbookOfflineDisabled(): boolean {
+export function isPassbookOfflineEnabled(): boolean {
   try {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem(PASSBOOK_OPT_OUT_STORAGE_KEY) === "true";
+    return localStorage.getItem(PASSBOOK_OPT_IN_STORAGE_KEY) === "true";
   } catch {
     return false;
   }
 }
 
 /**
- * Sets user preference for offline passbook storage. If disabled, purges cached passbook data.
+ * Returns true if offline passbook storage is disabled.
+ * In-memory by default, so offline localStorage is disabled unless opted in.
  */
-export function setPassbookOfflineDisabled(disabled: boolean): void {
+export function isPassbookOfflineDisabled(): boolean {
+  return !isPassbookOfflineEnabled();
+}
+
+/**
+ * Sets user preference for offline passbook storage.
+ * If enabling, sets opt-in key. If disabling, removes key and purges cached passbook data.
+ */
+export function setPassbookOfflineEnabled(enabled: boolean): void {
   try {
     if (typeof window === "undefined") return;
-    if (disabled) {
+    if (enabled) {
+      localStorage.setItem(PASSBOOK_OPT_IN_STORAGE_KEY, "true");
+      localStorage.removeItem(PASSBOOK_OPT_OUT_STORAGE_KEY);
+    } else {
+      localStorage.removeItem(PASSBOOK_OPT_IN_STORAGE_KEY);
       localStorage.setItem(PASSBOOK_OPT_OUT_STORAGE_KEY, "true");
       clearPassbookCache();
-    } else {
-      localStorage.removeItem(PASSBOOK_OPT_OUT_STORAGE_KEY);
     }
   } catch {}
+}
+
+/**
+ * Sets user preference for offline passbook storage (disabled = !enabled).
+ */
+export function setPassbookOfflineDisabled(disabled: boolean): void {
+  setPassbookOfflineEnabled(!disabled);
 }
 
 /**
@@ -68,7 +88,7 @@ export function getPassbookLastSync(): number | null {
 export function savePassbookCache(client: QueryClient): void {
   try {
     if (typeof window === "undefined") return;
-    if (isPassbookOfflineDisabled()) {
+    if (!isPassbookOfflineEnabled()) {
       localStorage.removeItem(PASSBOOK_STORAGE_KEY);
       return;
     }
@@ -100,7 +120,7 @@ export function savePassbookCache(client: QueryClient): void {
 export function restorePassbookCache(client: QueryClient): void {
   try {
     if (typeof window === "undefined") return;
-    if (isPassbookOfflineDisabled()) {
+    if (!isPassbookOfflineEnabled()) {
       clearPassbookCache();
       return;
     }
