@@ -36,7 +36,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   isModal,
   onClose,
   onSuccess,
-  defaultTab = "digilocker",
+  defaultTab = "upload",
 }) => {
   const { t, locale } = useLocale();
   const queryClient = useQueryClient();
@@ -464,23 +464,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       {/* Action View: Unverified or Rejected */}
       {(!isVerified && !isPendingReview) && (
         <div className="space-y-3 pt-1">
-          {/* Three Verification Options: DigiLocker (Primary Automated), Document Upload (OCR Fallback), Secure QR (Fallback) */}
+          {/* Verification Options: Document Upload (Primary OCR), Secure QR (Secondary Fast-Path), DigiLocker (Explicit Optional) */}
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("digilocker");
-                setUiError(null);
-              }}
-              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
-                activeTab === "digilocker"
-                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
-                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
-            </button>
             <button
               type="button"
               onClick={() => {
@@ -510,6 +495,21 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             >
               <QrCode className="w-4 h-4 shrink-0" />
               <span className="truncate">{t("kyc.card.tabQr")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("digilocker");
+                setUiError(null);
+              }}
+              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
+                activeTab === "digilocker"
+                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
+                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 shrink-0" />
+              <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
             </button>
           </div>
 

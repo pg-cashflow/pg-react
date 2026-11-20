@@ -111,7 +111,7 @@ export default {
         const data = await apiResp.json();
         if (data && data.property_name) {
           propertyMeta.name = String(data.property_name);
-          propertyMeta.details = `You're invited to join ${data.property_name}. Complete 1-tap Aadhaar KYC and view your room passbook.`;
+          propertyMeta.details = `You're invited to join ${data.property_name}. Complete verified Aadhaar KYC and view your room passbook.`;
           if (data.cover_image_url) {
             propertyMeta.coverImage = sanitizeImageUrl(data.cover_image_url, defaultImage);
           }

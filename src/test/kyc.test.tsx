@@ -123,7 +123,7 @@ describe("TenantKYCCard", () => {
     expect(container?.textContent).toContain("Document photo is blurry and unreadable");
   });
 
-  it("renders unverified action buttons and defaults to digilocker tab", async () => {
+  it("renders unverified action buttons and defaults to upload tab", async () => {
     vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
       verification: null,
       consent_active: false,
@@ -141,7 +141,8 @@ describe("TenantKYCCard", () => {
     expect(container?.textContent).toContain("Upload ID Document");
     expect(container?.textContent).toContain("Verify via Secure QR");
     expect(container?.textContent).toContain("DigiLocker");
-    expect(container?.textContent).toContain("Official DigiLocker Verification");
+    expect(container?.textContent).toContain("Manual ID Photo Upload (Direct Fallback)");
+    expect(container?.textContent).toContain("Document Type");
   });
 
   it("renders DigiLocker tab when defaultTab is digilocker", async () => {

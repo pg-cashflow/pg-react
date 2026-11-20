@@ -43,6 +43,15 @@ if (/aadhaar\s+otp\s+fast-path/i.test(privacy) || /direct\s+aadhaar\s+otp/i.test
   process.exit(1);
 }
 
+const landingPath = path.join(distDir, "landing.html");
+if (fs.existsSync(landingPath)) {
+  const landing = fs.readFileSync(landingPath, "utf8");
+  if (/aadhaar\s+otp/i.test(landing) || /instant\s+aadhaar/i.test(landing)) {
+    console.error("[FAIL] Retired Aadhaar OTP claims found in dist/landing.html");
+    process.exit(1);
+  }
+}
+
 // 3. Ensure SPA entry point is intact and clean
 if (!index.includes('id="root"')) {
   console.error("[FAIL] dist/index.html is missing root mount point");

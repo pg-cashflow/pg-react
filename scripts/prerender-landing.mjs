@@ -61,7 +61,7 @@ const landingHtml = `
         Live dignified. Settle transparently.
       </h1>
       <p class="t-body sm:t-h3 text-ink-muted mt-4 max-w-[56ch] mx-auto leading-relaxed">
-        From instant Aadhaar verification and zero-friction UPI rent to automated bank reconciliation and warden floor ops.
+        From smart Aadhaar verification and zero-friction UPI rent to automated bank reconciliation and warden floor ops.
       </p>
 
       <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
@@ -117,7 +117,7 @@ const landingHtml = `
           <div class="p-5">
             <div class="t-caption text-ink-muted">Identity verified</div>
             <div class="t-amount-lg text-ink mt-1">100%</div>
-            <div class="t-caption text-ink-muted font-semibold mt-1">UIDAI Aadhaar OTP · 0 paper forms</div>
+            <div class="t-caption text-ink-muted font-semibold mt-1">Smart OCR &amp; Secure QR · 0 paper forms</div>
           </div>
         </div>
       </div>
@@ -137,7 +137,7 @@ const landingHtml = `
             </div>
             <h3 class="t-h2 text-ink">Tenants</h3>
             <p class="t-caption text-accent font-medium mt-0.5">Move in with dignity, not paper registers</p>
-            <p class="t-body-sm text-ink-muted mt-2.5 leading-relaxed">Scan your room-bound code, complete instant Aadhaar verification, and pay rent with UPI.</p>
+            <p class="t-body-sm text-ink-muted mt-2.5 leading-relaxed">Scan your room-bound code, complete verified Aadhaar onboarding, and pay rent with UPI.</p>
           </div>
           <div class="mt-6 pt-4 border-t border-hairline">
             <a href="/" class="inline-flex items-center gap-1.5 t-body-sm font-semibold text-accent hover:underline">

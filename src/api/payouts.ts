@@ -3,6 +3,8 @@ import type {
   PayoutPayee,
   PayoutBatch,
   PayoutItem,
+  PayoutExceptionItem,
+  ReconcilePlatformPayoutItemInput,
   ApprovePayoutBatchInput,
   RequestPayoutBatchOTPResponse,
   PayeeType,
@@ -127,6 +129,50 @@ export const disburseDepartureCash = async (
 ): Promise<{ departure: TenantDeparture }> => {
   return apiFetch<{ departure: TenantDeparture }>(
     `/owner/departures/${departureId}/disburse-cash`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    }
+  );
+};
+
+export const listPlatformPayoutExceptions = async (
+  limit = 50,
+  offset = 0
+): Promise<PayoutExceptionItem[]> => {
+  const data = await apiFetch<{ exceptions: PayoutExceptionItem[] }>(
+    `/platform/payouts/exceptions?limit=${limit}&offset=${offset}`
+  );
+  return unwrapList(data, "exceptions");
+};
+
+export const listPlatformPayoutBatches = async (
+  status?: string,
+  limit = 50,
+  offset = 0
+): Promise<PayoutBatch[]> => {
+  const query = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (status) query.set("status", status);
+  const data = await apiFetch<{ batches: PayoutBatch[] }>(
+    `/platform/payouts/batches?${query.toString()}`
+  );
+  return unwrapList(data, "batches");
+};
+
+export const getPlatformPayoutBatch = async (
+  batchId: string
+): Promise<{ batch: PayoutBatch; items: PayoutItem[] }> => {
+  return apiFetch<{ batch: PayoutBatch; items: PayoutItem[] }>(
+    `/platform/payouts/batches/${batchId}`
+  );
+};
+
+export const reconcilePlatformPayoutItem = async (
+  itemId: string,
+  input: ReconcilePlatformPayoutItemInput
+): Promise<{ item: PayoutItem }> => {
+  return apiFetch<{ item: PayoutItem }>(
+    `/platform/payouts/items/${itemId}/reconcile`,
     {
       method: "POST",
       body: JSON.stringify(input),

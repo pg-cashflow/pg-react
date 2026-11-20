@@ -840,6 +840,23 @@ export interface PayoutItem {
   updated_at: string;
 }
 
+export interface PayoutExceptionItem extends PayoutItem {
+  property_id: string;
+  property_name: string;
+  payee_name: string;
+  payee_type: PayeeType;
+  batch_number?: string | null;
+}
+
+export interface ReconcilePlatformPayoutItemInput {
+  status: "succeeded" | "failed" | "rejected" | "reversed";
+  utr?: string;
+  cf_transfer_id?: string;
+  settled_at?: string;
+  failure_reason?: string;
+  notes: string;
+}
+
 export type DepartureStatus = "pending" | "inspected" | "approved" | "refunded" | "cancelled";
 export type SettlementMode = "payout" | "offline_cash";
 
