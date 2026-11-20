@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Copy, Check, ExternalLink, Loader2, Download, AlertCircle, CheckCircle2, RefreshCw, Phone } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { Copy, Check, ExternalLink, Loader2, Download, AlertCircle, CheckCircle2, RefreshCw, Phone, ShieldAlert, ShieldCheck } from "lucide-react";
 import { getTenantDuePay, getPayQrBlob } from "@/api/pay";
 import { formatPaise } from "@/lib/utils";
 import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
@@ -9,12 +9,16 @@ import { usePayDue } from "@/lib/usePayDue";
 import { Link } from "@tanstack/react-router";
 import type { PayIntent } from "@pg/types";
 import { useLocale, formatApiError } from "@/i18n";
+import { ApiError } from "@/api/client";
+import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 
 export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ dueId, onDone }) => {
   const { t } = useLocale();
   const [pay, setPay] = useState<PayIntent | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [initialError, setInitialError] = useState<string | null>(null);
+  const [isKycRequired, setIsKycRequired] = useState(false);
+  const [showKycModal, setShowKycModal] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [submittedManual, setSubmittedManual] = useState(false);
   const [showFallbackForm, setShowFallbackForm] = useState(false);
@@ -24,37 +28,47 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
     paymentMode: pay ? (pay.mode === "manual" ? "manual" : "cashfree") : undefined,
   });
 
-  useEffect(() => {
-    let active = true;
+  const fetchDuePay = useCallback(() => {
     let createdUrl: string | null = null;
     setInitialError(null);
+    setIsKycRequired(false);
 
     getTenantDuePay(dueId)
       .then(async (p) => {
-        if (!active) return;
         setPay(p);
         if (p.mode === "manual" && p.payable && p.qr_png_url) {
           try {
             const blob = await getPayQrBlob(p.qr_png_url);
-            if (!active) return;
             const url = URL.createObjectURL(blob);
             createdUrl = url;
             setQrUrl(url);
           } catch (err) {
-            if (!active) return;
             setInitialError(formatApiError(err, t));
           }
         }
       })
-      .catch((err: Error) => {
-        if (active) setInitialError(formatApiError(err, t));
+      .catch((err: unknown) => {
+        const isKyc =
+          err instanceof ApiError &&
+          (err.status === 403 || err.code === "auth.forbidden") &&
+          /kyc/i.test(err.message || "");
+        if (isKyc) {
+          setIsKycRequired(true);
+        }
+        setInitialError(formatApiError(err, t));
       });
 
     return () => {
-      active = false;
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
   }, [dueId, t]);
+
+  useEffect(() => {
+    const cleanup = fetchDuePay();
+    return () => {
+      cleanup?.();
+    };
+  }, [fetchDuePay]);
 
   const copy = async (label: string, value?: string) => {
     if (!value) return;
@@ -63,7 +77,44 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
     setTimeout(() => setCopied(null), 2000);
   };
 
-  if (initialError && !pay) return <p className="t-body-sm text-danger">{initialError}</p>;
+  if (initialError && !pay) {
+    if (isKycRequired) {
+      return (
+        <div className="p-4 rounded-[14px] bg-warning-tint/30 border border-warning/20 space-y-3">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="t-body font-semibold text-ink">
+                {t("tenant.dashboard.kycRequiredTitle")}
+              </p>
+              <p className="t-body-sm text-ink-muted">
+                {t("tenant.dashboard.kycRequiredDesc")}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowKycModal(true)}
+            className="h-10 px-4 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center gap-2 hover:opacity-95 transition"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>{t("kyc.card.title")}</span>
+          </button>
+          {showKycModal && (
+            <TenantKYCCard
+              isModal
+              onClose={() => setShowKycModal(false)}
+              onSuccess={() => {
+                setShowKycModal(false);
+                fetchDuePay();
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+    return <p className="t-body-sm text-danger">{initialError}</p>;
+  }
   if (!pay) return <Loader2 className="w-5 h-5 animate-spin text-ink-muted my-6 mx-auto" />;
   if (!pay.payable || gatewayState === "PAID") {
     return (

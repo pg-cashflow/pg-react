@@ -19,6 +19,12 @@ import { useLocale } from "@/i18n";
  * gate does not make them wait on it; TenantKYCCard shows the review-pending
  * state in that case and the dashboard is fully reachable past this point).
  *
+ * Note: The default routing tree (`RequireTenant` in router.tsx) uses an inline
+ * banner on `TenantDashboardView` and `TenantDuesView` to lower initial onboarding
+ * friction. This full-screen gate component is maintained for properties or
+ * deployment configurations requiring strict zero-dashboard access before identity
+ * submission.
+ *
  * This mirrors the server-side "kyc_required" onboarding stage
  * (GET /me/onboarding, internal/join/onboarding_state.go) — the frontend
  * check here is what makes the UX feel instant and seamless; the backend

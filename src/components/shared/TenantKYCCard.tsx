@@ -526,6 +526,13 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 </p>
               </div>
 
+              <div className="p-2.5 rounded-lg bg-accent-tint/40 border border-accent/20 flex items-start gap-2 text-ink-muted t-caption">
+                <Clock className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <span>
+                  {t("tenant.dashboard.kycReviewDesc")}
+                </span>
+              </div>
+
               {/* Document Type Selector (Voluntary Non-Aadhaar Route per Aadhaar Act) */}
               <div className="space-y-1.5">
                 <span className="t-caption font-semibold text-ink block text-xs">

@@ -1,19 +1,23 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getMyDues, getMyProfile } from "@/api/tenant";
+import { getTenantKYCStatus } from "@/api/kyc";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { QueryState } from "@/components/shared/QueryState";
 import { PayPanel } from "@/components/shared/PayPanel";
 import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
+import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 import { displayDueStatus, formatDate, formatDaysOverdue, getDaysOverdue, isOverdue } from "@/lib/utils";
 import { useLocale } from "@/i18n";
+import { ShieldCheck, Clock, ArrowRight } from "lucide-react";
 
 export const TenantDuesView: React.FC = () => {
   const { t, locale } = useLocale();
   const [openId, setOpenId] = useState<string | null>(null);
   const [utrIds, setUtrIds] = useState<Record<string, boolean>>({});
+  const [showKycModal, setShowKycModal] = useState(false);
 
   const profileQuery = useQuery({ queryKey: QUERY_KEYS.tenantProfile, queryFn: getMyProfile });
   const duesQuery = useQuery({
@@ -21,12 +25,61 @@ export const TenantDuesView: React.FC = () => {
     queryFn: getMyDues,
     refetchInterval: 30000,
   });
+  const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
 
   const dues = duesQuery.data ?? [];
   const awaitingAllocation = profileQuery.data?.status === "pending_allocation";
+  const kyc = kycQuery.data?.verification;
+  const isKycVerified = kyc?.status === "verified";
+  const isKycPendingReview = kyc?.status === "pending_manual_review";
 
   return (
     <div className="space-y-4">
+      {/* KYC Status Reminder Banner */}
+      {!isKycVerified && (
+        <div
+          onClick={() => setShowKycModal(true)}
+          className={`p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition ${
+            isKycPendingReview
+              ? "bg-warning-tint/30 border-warning/20 text-warning"
+              : "bg-accent-tint border-accent/20 text-accent hover:border-accent/40"
+          }`}
+        >
+          <div className="flex items-center gap-3 min-w-0 pr-2">
+            {isKycPendingReview ? (
+              <Clock className="w-5 h-5 shrink-0" />
+            ) : (
+              <ShieldCheck className="w-5 h-5 shrink-0" />
+            )}
+            <div className="min-w-0">
+              <p className="t-body font-semibold">
+                {isKycPendingReview
+                  ? t("tenant.dashboard.kycReviewTitle")
+                  : t("tenant.dashboard.kycRequiredTitle")}
+              </p>
+              <p className="t-caption text-ink-muted mt-0.5 truncate">
+                {isKycPendingReview
+                  ? t("tenant.dashboard.kycReviewDesc")
+                  : t("tenant.dashboard.kycRequiredDesc")}
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 shrink-0 text-ink-muted" />
+        </div>
+      )}
+
+      {showKycModal && (
+        <TenantKYCCard
+          isModal
+          onClose={() => setShowKycModal(false)}
+          onSuccess={() => {
+            setShowKycModal(false);
+            kycQuery.refetch();
+            duesQuery.refetch();
+          }}
+        />
+      )}
+
       {awaitingAllocation && (
         <div className="bg-accent-tint border border-accent/20 rounded-[14px] p-4 t-body-sm text-accent">
           {t("tenant.dues.awaitingRoomRent")}

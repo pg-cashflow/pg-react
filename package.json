@@ -13,7 +13,7 @@
     "lint:i18n:ratchet": "node scripts/check-i18n.mjs --update-baseline",
     "lint:policy": "node scripts/check-policy-parity.mjs",
     "preview": "vite preview",
-    "test": "tsc -b && vitest run",
+    "test": "node --test scripts/check-company.test.mjs && tsc -b && vitest run",
     "test:prerender": "node scripts/smoke-prerender.mjs",
     "check:error-codes": "node scripts/check-error-codes.mjs"
   },

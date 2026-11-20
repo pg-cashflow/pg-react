@@ -7,6 +7,7 @@ const PLACEHOLDER_PATTERNS = [
   /koramangala/i,
   /\+91\s*\(080\)\s*4567-8900/,
   /example\.com/i,
+  /pgcashflow\.in/i,
   /placeholder/i,
   /\bTODO\b/i,
   /\bTBD\b/i,

@@ -15,6 +15,20 @@ test("findPlaceholders detects known placeholder addresses and numbers", () => {
   assert.equal(placeholders[1].field, "helpdeskPhone");
 });
 
+test("findPlaceholders detects pgcashflow.in placeholder emails", () => {
+  const sample = {
+    legalName: "Real Corp Private Limited",
+    address: "Real Street 123",
+    helpdeskPhone: "+91 9876543210",
+    supportEmail: "support@pgcashflow.in",
+    grievanceEmail: "grievance@pgcashflow.in",
+  };
+  const placeholders = findPlaceholders(sample);
+  assert.equal(placeholders.length, 2);
+  assert.equal(placeholders[0].field, "supportEmail");
+  assert.equal(placeholders[1].field, "grievanceEmail");
+});
+
 test("validateCompanyConfig blocks when verified is false", () => {
   const company = {
     verified: false,
