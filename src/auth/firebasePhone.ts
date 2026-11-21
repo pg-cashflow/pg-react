@@ -127,7 +127,7 @@ export async function confirmFirebasePhoneOtp(otp: string): Promise<string> {
   }
   try {
     const credential = await pendingConfirmation.confirm(otp);
-    const idToken = await credential.user.getIdToken(true);
+    const idToken = await credential.user.getIdToken();
     pendingConfirmation = null;
     return idToken;
   } catch (err) {
