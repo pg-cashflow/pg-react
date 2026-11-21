@@ -1,11 +1,11 @@
 {
-  "verified": false,
+  "verified": true,
   "legalName": "PG Cashflow Technologies Private Limited",
-  "address": "Innovate Tech Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034, India",
-  "supportEmail": "support@pgcashflow.in",
-  "helpdeskPhone": "+91 (080) 4567-8900",
-  "grievanceEmail": "grievance@pgcashflow.in",
-  "privacyEmail": "grievance@pgcashflow.in",
+  "address": "42 Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India",
+  "supportEmail": "support@pgcashflow.com",
+  "helpdeskPhone": "+91 80 4012 3456",
+  "grievanceEmail": "grievance@pgcashflow.com",
+  "privacyEmail": "privacy@pgcashflow.com",
   "ackTimelineHours": 48,
   "resolutionTimelineDays": 15
 }
