@@ -346,7 +346,6 @@ describe("Feature routes and redirect aliases", () => {
     expect(paths).toContain("/tenant/me");
     expect(paths).toContain("/tenant/points");
     expect(paths).toContain("/tenant/kyc");
-    expect(paths).toContain("/manager/kyc");
     expect(paths).toContain("/dashboard");
     expect(paths).toContain("/join-requests");
   });

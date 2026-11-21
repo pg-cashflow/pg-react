@@ -121,7 +121,4 @@ export const getOwnerKYCDocumentBlob = (id: string, signal?: AbortSignal): Promi
 
 
 
-// --- Manager KYC Endpoints ---
 
-export const getManagerKYCDocumentBlob = (id: string, signal?: AbortSignal): Promise<Blob> =>
-  apiFetchBlob(`/manager/kyc/${id}/document`, { signal });
