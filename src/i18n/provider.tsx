@@ -204,12 +204,19 @@ export const LocaleProvider: FC<LocaleProviderProps> = ({ children }) => {
     document.documentElement.lang = locale;
   }, [locale]);
 
-  // Defect F-12: Prevent brief flash of English for returning users whose saved locale
-  // dictionary is still loading. Do not render children with enIN fallback if a non-default
-  // locale was selected and its dictionary has not loaded yet.
+  // Defect F-12 / I18N-UX-01: Prevent brief flash of English for returning users whose saved locale
+  // dictionary is still loading. Render an accessible loading shell matching the design system
+  // instead of a blank null render.
   const isReady = locale === DEFAULT_LOCALE || Boolean(loadedMessages[locale]) || messages !== enIN;
   if (!isReady) {
-    return null;
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center p-4" aria-busy="true" aria-label="Loading application">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+          <span className="t-caption text-ink-muted">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
 

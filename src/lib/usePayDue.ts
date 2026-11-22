@@ -152,11 +152,12 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
     startPolling(60 * 1000, "STILL_PENDING");
   }, [dueId, markPaid, startPolling]);
 
-  // Transition to CHECKING (after modal dismissal/error): poll for ~10s
-  const enterChecking = useCallback(() => {
+  // Transition to CHECKING: polls for verification. For user-initiated modal dismiss,
+  // falls back to READY after short poll; for ambiguous/crash outcomes, holds unresolved STILL_PENDING (PAY-UI-01).
+  const enterChecking = useCallback((onTimeoutState: PayDueState = "READY") => {
     setState("CHECKING");
     setError(null);
-    startPolling(10 * 1000, "READY");
+    startPolling(10 * 1000, onTimeoutState);
   }, [startPolling]);
 
   // Start payment flow: fetch intent, check payable, launch Cashfree modal
@@ -197,16 +198,19 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
         clearTimer();
         setState("REDIRECTING");
         optionsRef.current.onRedirect?.();
-      } else if (result.kind === "error" || result.kind === "ambiguous") {
-        enterChecking();
+      } else if (result.kind === "ambiguous") {
+        // PAY-UI-01: Ambiguous gateway state must remain in an unresolved state (STILL_PENDING)
+        // rather than resetting to READY where a user could duplicate payment.
+        enterChecking("STILL_PENDING");
+      } else if (result.kind === "error") {
+        enterChecking("READY");
       }
     } catch (err: unknown) {
       clearTimer();
       if (checkoutLaunched) {
-        // Defect F-10: If the Cashfree SDK promise throws or rejects after checkout was launched,
-        // treat the outcome as ambiguous rather than definite failure. Verify the
-        // ledger with backend polling before allowing a retry.
-        enterChecking();
+        // PAY-UI-01 / Defect F-10: If the Cashfree SDK bridge threw or crashed after checkout launched,
+        // outcome is ambiguous: do NOT reset to READY; keep unresolved state (STILL_PENDING).
+        enterChecking("STILL_PENDING");
       } else {
         setState("READY");
         setError(err instanceof Error ? err.message : "Payment initialization failed");

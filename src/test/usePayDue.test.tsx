@@ -254,8 +254,33 @@ describe("usePayDue State Machine", () => {
       await vi.advanceTimersByTimeAsync(11000);
     });
 
-    expect(result.current.state).toBe("READY");
+    // PAY-UI-01: Must hold unresolved STILL_PENDING state rather than resetting to READY
+    expect(result.current.state).toBe("STILL_PENDING");
     expect(result.current.error).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("transitions to STILL_PENDING on ambiguous outcome (PAY-UI-01)", async () => {
+    verifyShouldSucceed = false;
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({
+      kind: "ambiguous",
+    });
+
+    const { result } = renderHook(() => usePayDue(dueId), { wrapper });
+
+    await act(async () => {
+      await result.current.startPayment();
+    });
+
+    expect(result.current.state).toBe("CHECKING");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(11000);
+    });
+
+    expect(result.current.state).toBe("STILL_PENDING");
     vi.useRealTimers();
   });
 });

@@ -326,23 +326,50 @@ writeStaticPage("terms", "Terms of Service", "Operating terms and conditions gov
   {
     heading: "1. Platform Nature & Scope",
     paragraphs: [
-      "PG Cashflow is a technology platform providing digital ledger management, automated rent collection records, daily operational workflows, and verified tenant onboarding infrastructure for paying guest accommodations, co-living spaces, and student hostels across India.",
-      "The Platform acts solely as a technological intermediary connecting property owners/operators, designated managers, and residents."
+      "PG Cashflow (\"Platform\", \"we\", \"us\") is a technology application providing digital ledger management, automated rent collection records, daily operational workflows, and verified tenant onboarding infrastructure for paying guest (PG) accommodations, co-living spaces, and student hostels across India.",
+      "The Platform acts solely as a technological intermediary connecting property owners/operators (\"Owners\"), designated property managers or wardens (\"Managers\"), and residents (\"Tenants\"). The Platform does not own, lease, or manage real estate properties, nor does it act as a real estate broker."
     ]
   },
   {
-    heading: "2. Payments, Dues & Gateway Processing",
+    heading: "2. User Eligibility & Accounts",
     paragraphs: [
-      "All financial transactions (rent payments, security deposits, and operational dues) are routed through authorized, RBI-regulated payment aggregators (including Cashfree Payments India Pvt. Ltd.)."
+      "You must be at least 18 years of age and legally competent to enter into contracts under the Indian Contract Act, 1872. Accounts are established through phone authentication and assigned role-based permissions (Owner, Manager, Tenant).",
+      "You are responsible for safeguarding your login credentials and one-time passcodes. You agree to provide accurate, truthful, and updated identity information during onboarding."
+    ]
+  },
+  {
+    heading: "3. Payments, Dues & Gateway Processing",
+    paragraphs: [
+      "All financial transactions (rent payments, security deposits, and operational dues) are routed through authorized, RBI-regulated payment aggregators and payment gateways (including Cashfree Payments India Pvt. Ltd.)."
     ],
     list: [
       "Rent dues generated with specific reference identifiers (e.g., PG-XXXXXX) reflect contractual obligations set by the respective property owner.",
-      "The Platform records transaction receipts and updates ledgers upon receiving cryptographic confirmation from the payment gateway."
+      "The Platform records transaction receipts and updates ledgers upon receiving cryptographic confirmation from the payment gateway.",
+      "Convenience fees or payment processing charges, where applicable, are transparently presented before checkout completion."
     ]
   },
   {
-    heading: "3. Governing Law & Jurisdiction",
+    heading: "4. Tenancy & House Rules",
     paragraphs: [
+      "The physical tenancy contract, room allocations, notice periods, meal plans, and property rules remain an agreement strictly between the Owner and the Tenant. The Platform provides digital records of dues, occupancy, and inventory, but is not party to landlord-tenant disputes regarding physical accommodations."
+    ]
+  },
+  {
+    heading: "5. Prohibited Conduct",
+    paragraphs: [
+      "Users agree not to: (a) impersonate any individual or provide falsified identification documents; (b) attempt unauthorized access to another property's records or server infrastructure; (c) initiate fraudulent chargebacks or dispute validly settled rent obligations; (d) deploy automated scraping or reverse-engineering mechanisms against the application."
+    ]
+  },
+  {
+    heading: "6. Termination & Access Revocation",
+    paragraphs: [
+      "Owners may revoke Manager or Tenant access upon tenancy completion or breach of rules. We reserve the right to suspend or terminate accounts involved in payment fraud, security violations, or abuse of the services."
+    ]
+  },
+  {
+    heading: "7. Limitation of Liability & Governing Law",
+    paragraphs: [
+      "To the maximum extent permitted under applicable law, the Platform shall not be liable for indirect, incidental, or consequential damages arising from gateway downtime, network delays, or landlord-tenant disputes.",
       "These Terms are governed by the laws of India. Any disputes arising hereunder shall be subject to the exclusive jurisdiction of the competent courts in Bengaluru, Karnataka, India."
     ]
   }
@@ -371,46 +398,92 @@ writeStaticPage("privacy", privacyPolicy.title, privacyPolicy.subtitle, privacyS
 
 writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensive rules, timelines, and payment rail processing for rent dues, security deposits, and duplicate charges.", [
   {
-    heading: "1. Rent Dues & Monthly Payments",
+    heading: "1. Overview of Payment Processing",
     paragraphs: [
-      "Monthly rent payments made toward an active tenancy period are final and non-refundable once allocated to an invoice or ledger due."
+      "PG Cashflow provides payment reconciliation and automated ledger facilities between tenants and property owners through licensed payment aggregators (including Cashfree Payments). This policy defines how cancellations, adjustments, and refunds are initiated and executed."
     ]
   },
   {
-    heading: "2. Security Deposit Refunds & Gateway Processing",
+    heading: "2. Monthly Rent Dues",
     paragraphs: [
-      "Security deposits are settled upon departure after move-out inspection and deduction of pending utility bills.",
-      "Within 120 days of deposit payment, refunds are reversed via the Payment Gateway Source Refund API directly to the original payment instrument. Payments exceeding 120 days cannot be refunded via the payment gateway and require explicit operational review."
+      "Monthly rent payments made toward an active tenancy period are considered final and non-refundable once allocated to an invoice or ledger due.",
+      "In cases where a tenant moves out mid-cycle under an agreed pro-rata arrangement with the property owner, any rent adjustment or credit must be confirmed and authorized by the owner on the digital ledger prior to checkout."
     ]
   },
   {
-    heading: "3. Duplicate Transactions & Timelines",
+    heading: "3. Security Deposit Refunds & Settlement Flow",
     paragraphs: [
-      "Duplicate deductions caused by network timeouts are automatically reconciled within 24 to 48 hours. The platform submits authorized refunds immediately to Cashfree Payments. Receiving banks typically credit customer accounts within 5 to 7 working days after initiation, subject to banking clearance and acquiring bank exceptions."
+      "Security deposits collected at the time of onboarding are held by the property owner and settled upon departure after formal move-out inspection and deduction of pending utility bills, damages, or unpaid dues."
+    ],
+    list: [
+      "Source Reversal (Within 120 Days): If the move-out settlement occurs within 120 days of the deposit payment, the refund is initiated via the Payment Gateway Source Refund API directly back to the original funding instrument (UPI ID, debit/credit card, or netbanking account).",
+      "Payments Exceeding 120 Days: In accordance with payment gateway and banking regulations, gateway refund requests cannot be accepted after 120 days. Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed."
     ]
   },
   {
-    heading: "4. Support & Grievance Contact",
+    heading: "4. Duplicate or Erroneous Transactions",
     paragraphs: [
-      `For refund escalation or payment queries, contact our Helpdesk Line at ${company.helpdeskPhone} or email ${company.supportEmail}.`,
+      "If your account is debited twice for a single due code (for example, due to an intermittent mobile connection or network timeout at checkout):"
+    ],
+    list: [
+      "Our automated polling and reconciliation system detects duplicate receipts and initiates a refund request within 24 to 48 hours.",
+      `Alternatively, you can report the transaction ID to ${company.supportEmail} for immediate verification and manual initiation.`
+    ]
+  },
+  {
+    heading: "5. Refund Timelines & Banking Credits",
+    paragraphs: [
+      "The platform initiates authorized refunds immediately upon owner approval through our licensed payment aggregator (Cashfree Payments). Actual credit to your account depends on banking settlement cycles:"
+    ],
+    list: [
+      "UPI, Cards & Netbanking: Credit to the customer account typically takes 5 to 7 working days after initiation, subject to receiving bank clearance and acquiring bank exceptions.",
+      "Direct IMPS Payouts: Credited within minutes of release by the property owner, subject to beneficiary bank network availability.",
+      "Gateway Cutoff Limit: Payment gateway source refunds are permitted only within 120 days of payment. Transactions older than 120 days require offline verification and settlement."
+    ]
+  },
+  {
+    heading: "6. Cancellations & Booking Withdrawals",
+    paragraphs: [
+      "If a prospective tenant reserves a bed/room and cancels prior to physical check-in, the refund of any advance booking fee is determined by the specific cancellation window established by the property owner in the room code offer. If eligible, refunds are processed within 5 business days."
+    ]
+  },
+  {
+    heading: "7. Support & Grievance Redressal",
+    paragraphs: [
+      `For refund escalations or payment queries, contact our Helpdesk Line at ${company.helpdeskPhone} or email ${company.supportEmail}.`,
       `Grievance Officer: ${company.grievanceEmail} | Registered Address: ${company.legalName}, ${company.address}.`
     ]
   }
 ]);
 
-writeStaticPage("contact", "Contact Us & Grievance Redressal", "Reach out to the PG Cashflow support team or contact our compliance officers.", [
+writeStaticPage("contact", "Contact Us & Grievance Redressal", "Reach out to the PG Cashflow support team, report issues, or contact our customer support and compliance officers.", [
   {
     heading: "1. Customer & Operations Support",
     paragraphs: [
+      "For technical queries, ledger sync questions, payment receipt verification, or landlord onboarding support, our desk is available Monday through Saturday from 9:00 AM to 7:00 PM IST.",
       `General Support: ${company.supportEmail} (Mon-Sat, 9:00 AM - 7:00 PM IST)`,
       `Helpdesk Line: ${company.helpdeskPhone}`,
       `Registered Address: ${company.legalName}, ${company.address}`
     ]
   },
   {
-    heading: "2. Grievance Officer Details",
+    heading: "2. Registered Operational Address",
     paragraphs: [
-      `Designated Grievance & Compliance Officer: ${company.grievanceEmail} (acknowledged within ${company.ackTimelineHours} hours; resolved within ${company.resolutionTimelineDays} business days per DPDP requirements).`
+      `${company.legalName}`,
+      `${company.address}`
+    ]
+  },
+  {
+    heading: "3. DPDP Grievance Redressal Mechanism",
+    paragraphs: [
+      "Pursuant to the Digital Personal Data Protection Act, 2023 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, any unresolved consumer grievance or privacy complaint may be escalated to our designated officer:",
+      `Designated Grievance & Compliance Officer: ${company.grievanceEmail} (acknowledged within ${company.ackTimelineHours} hours; resolved within ${company.resolutionTimelineDays} working days per DPDP requirements).`
+    ]
+  },
+  {
+    heading: "4. Payment Gateway Inquiries",
+    paragraphs: [
+      "For transactions processed through Cashfree Payments, you can reference your unique Order ID or Reference (CF-XXXXXX) shown on your payment receipt for expedited tracing."
     ]
   }
 ]);

@@ -73,7 +73,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
 
   // Older servers send no "methods" field: treat DigiLocker as available (the server still enforces it).
   const digiLockerEnabled = data?.methods?.digilocker !== false;
-  // DigiLocker is the fastest path (no manual review), so it is the default when enabled.
+  // DigiLocker is an automated fast path, voluntary under Indian regulations (KYC-ADR-01).
+  // Default to digilocker if enabled, while offering Document Upload and Secure QR as voluntary alternate routes.
   const activeTab: "upload" | "qr" | "digilocker" =
     pickedTab === "digilocker" && !digiLockerEnabled
       ? "upload"
@@ -696,20 +697,24 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                   {t("kyc.digilocker.heading") || "Official DigiLocker Verification"}
                 </span>
                 <p className="t-caption text-ink-muted mt-0.5">
-                  {t("kyc.digilocker.description") || "Instant verification directly from Government of India records. No manual review required."}
+                  {t("kyc.digilocker.description") || "Digital verification via Government of India DigiLocker records. Submissions with mismatched details route to quick manual review."}
                 </p>
               </div>
 
               <div className="p-3 rounded-lg bg-surface border border-hairline space-y-2">
                 <div className="flex items-center gap-2 text-ink t-caption font-medium">
                   <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                  <span>{t("kyc.digilocker.featureInstant") || "Instant verification — unlock rent payment immediately"}</span>
+                  <span>{t("kyc.digilocker.featureInstant") || "Fast digital verification — unlocks rent payments once approved"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-ink t-caption font-medium">
                   <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                   <span>{t("kyc.digilocker.featureOfficial") || "Government of India DigiLocker via Cashfree"}</span>
                 </div>
               </div>
+
+              <p className="t-micro text-ink-faint text-center">
+                DigiLocker is voluntary. You can also verify by uploading any government ID in the Upload tab.
+              </p>
 
               <button
                 type="button"
