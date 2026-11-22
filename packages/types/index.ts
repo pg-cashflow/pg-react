@@ -451,6 +451,8 @@ export interface KYCStatusResponse {
   has_verification?: boolean;
   consent_version?: string;
   consent_given_at?: string;
+  /** Verification routes the server accepts. Absent on older servers: treat as all enabled. */
+  methods?: { digilocker: boolean; upload: boolean; qr: boolean };
 }
 
 export interface Event {

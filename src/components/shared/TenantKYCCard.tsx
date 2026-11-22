@@ -36,12 +36,13 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
   isModal,
   onClose,
   onSuccess,
-  defaultTab = "upload",
+  defaultTab,
 }) => {
   const { t, locale } = useLocale();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"upload" | "qr" | "digilocker">(
-    defaultTab
+  // The tab the tenant picked (or the caller requested). Null means "use the best method".
+  const [pickedTab, setActiveTab] = useState<"upload" | "qr" | "digilocker" | null>(
+    defaultTab ?? null
   );
 
   // Form states
@@ -69,6 +70,14 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       setConsentRecorded(true);
     }
   }, [data?.has_consent]);
+
+  // Older servers send no "methods" field: treat DigiLocker as available (the server still enforces it).
+  const digiLockerEnabled = data?.methods?.digilocker !== false;
+  // DigiLocker is the fastest path (no manual review), so it is the default when enabled.
+  const activeTab: "upload" | "qr" | "digilocker" =
+    pickedTab === "digilocker" && !digiLockerEnabled
+      ? "upload"
+      : (pickedTab ?? (digiLockerEnabled ? "digilocker" : "upload"));
 
   const kyc = data?.verification;
   const isVerified = kyc?.status === "verified";
@@ -464,8 +473,25 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       {/* Action View: Unverified or Rejected */}
       {(!isVerified && !isPendingReview) && (
         <div className="space-y-3 pt-1">
-          {/* Verification Options: Document Upload (Primary OCR), Secure QR (Secondary Fast-Path), DigiLocker (Explicit Optional) */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+          {/* Verification Options: Document Upload (fallback OCR), Secure QR (fallback), DigiLocker (primary when enabled) */}
+          <div className={`grid ${digiLockerEnabled ? "grid-cols-3" : "grid-cols-2"} gap-1.5 sm:gap-2`}>
+            {digiLockerEnabled && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("digilocker");
+                  setUiError(null);
+                }}
+                className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
+                  activeTab === "digilocker"
+                    ? "bg-accent text-accent-contrast border-accent shadow-sm"
+                    : "bg-surface text-ink border-hairline hover:bg-hairline/20"
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -495,21 +521,6 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             >
               <QrCode className="w-4 h-4 shrink-0" />
               <span className="truncate">{t("kyc.card.tabQr")}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("digilocker");
-                setUiError(null);
-              }}
-              className={`py-2 px-2 rounded-xl t-caption font-semibold flex items-center justify-center gap-1.5 transition border ${
-                activeTab === "digilocker"
-                  ? "bg-accent text-accent-contrast border-accent shadow-sm"
-                  : "bg-surface text-ink border-hairline hover:bg-hairline/20"
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
             </button>
           </div>
 
@@ -676,8 +687,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
             </div>
           )}
 
-          {/* Tab 3: DigiLocker (Optional Secondary Verification) */}
-          {activeTab === "digilocker" && (
+          {/* Tab: DigiLocker (primary verification method when enabled) */}
+          {activeTab === "digilocker" && digiLockerEnabled && (
             <div className="space-y-3 rounded-xl border border-hairline bg-bg p-3.5">
               <div>
                 <span className="t-caption font-semibold text-ink flex items-center gap-1">
