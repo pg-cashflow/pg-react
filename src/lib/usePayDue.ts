@@ -45,6 +45,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const deadlineRef = useRef<number>(0);
   const isCheckingRef = useRef(false);
   const paymentInFlightRef = useRef(false);
+  const lastConfirmedRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (pollTimerRef.current) {
@@ -66,11 +67,14 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const checkDueStatus = useCallback(async (): Promise<boolean> => {
     if (isCheckingRef.current) return false;
     isCheckingRef.current = true;
+    let serverQueried = false;
 
     try {
       try {
         const verifyRes = await verifyTenantDuePay(dueId);
+        serverQueried = true;
         if (verifyRes.paid) {
+          lastConfirmedRef.current = true;
           markPaid();
           return true;
         }
@@ -84,15 +88,18 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
           queryFn: getMyDues,
           staleTime: 0,
         });
+        serverQueried = true;
         const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
         const match = dues.find((d: Due) => d.id === dueId);
         if (match && (match.status === "paid" || match.status === "waived")) {
+          lastConfirmedRef.current = true;
           markPaid();
           return true;
         }
       } catch {
         // transient network blip; keep trying
       }
+      lastConfirmedRef.current = serverQueried;
       return false;
     } finally {
       isCheckingRef.current = false;
@@ -115,7 +122,13 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
         const now = Date.now();
         if (now >= deadlineRef.current) {
           clearTimer();
-          setState(onTimeoutState);
+          // PAY-UI-02: If server status could not be proven due to continuous network/query failures,
+          // remain in unresolved STILL_PENDING rather than resetting to READY.
+          if (!lastConfirmedRef.current) {
+            setState("STILL_PENDING");
+          } else {
+            setState(onTimeoutState);
+          }
           return;
         }
 
