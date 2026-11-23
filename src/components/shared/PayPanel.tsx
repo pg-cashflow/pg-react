@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Copy, Check, ExternalLink, Loader2, Download, AlertCircle, CheckCircle2, RefreshCw, Phone, ShieldAlert, ShieldCheck } from "lucide-react";
 import { getTenantDuePay, getPayQrBlob } from "@/api/pay";
 import { formatPaise } from "@/lib/utils";
@@ -28,26 +28,38 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
     paymentMode: pay ? (pay.mode === "manual" ? "manual" : "cashfree") : undefined,
   });
 
-  const fetchDuePay = useCallback(() => {
-    let createdUrl: string | null = null;
+  const qrUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+    let localCreatedUrl: string | null = null;
     setInitialError(null);
     setIsKycRequired(false);
 
     getTenantDuePay(dueId)
       .then(async (p) => {
+        if (isCancelled) return;
         setPay(p);
         if (p.mode === "manual" && p.payable && p.qr_png_url) {
           try {
             const blob = await getPayQrBlob(p.qr_png_url);
+            if (isCancelled) return;
             const url = URL.createObjectURL(blob);
-            createdUrl = url;
+            localCreatedUrl = url;
+            if (qrUrlRef.current) {
+              URL.revokeObjectURL(qrUrlRef.current);
+            }
+            qrUrlRef.current = url;
             setQrUrl(url);
           } catch (err) {
-            setInitialError(formatApiError(err, t));
+            if (!isCancelled) {
+              setInitialError(formatApiError(err, t));
+            }
           }
         }
       })
       .catch((err: unknown) => {
+        if (isCancelled) return;
         const isKyc =
           err instanceof ApiError &&
           (err.status === 403 || err.code === "auth.forbidden") &&
@@ -59,16 +71,24 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
       });
 
     return () => {
-      if (createdUrl) URL.revokeObjectURL(createdUrl);
+      isCancelled = true;
+      if (localCreatedUrl) {
+        URL.revokeObjectURL(localCreatedUrl);
+      }
+      if (qrUrlRef.current && qrUrlRef.current === localCreatedUrl) {
+        qrUrlRef.current = null;
+      }
     };
   }, [dueId, t]);
 
   useEffect(() => {
-    const cleanup = fetchDuePay();
     return () => {
-      cleanup?.();
+      if (qrUrlRef.current) {
+        URL.revokeObjectURL(qrUrlRef.current);
+        qrUrlRef.current = null;
+      }
     };
-  }, [fetchDuePay]);
+  }, []);
 
   const copy = async (label: string, value?: string) => {
     if (!value) return;

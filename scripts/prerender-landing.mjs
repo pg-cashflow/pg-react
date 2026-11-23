@@ -248,7 +248,11 @@ const updatedHtml = stripModuleScripts(
 
 const landingHtmlPath = path.resolve(__dirname, "../dist/landing.html");
 fs.writeFileSync(landingHtmlPath, updatedHtml, "utf-8");
-console.log("✓ Pre-rendered static landing page written to dist/landing.html (dist/index.html preserved clean)");
+
+const landingDir = path.resolve(__dirname, "../dist/landing");
+if (!fs.existsSync(landingDir)) fs.mkdirSync(landingDir, { recursive: true });
+fs.writeFileSync(path.resolve(landingDir, "index.html"), updatedHtml, "utf-8");
+console.log("✓ Pre-rendered static landing page written to dist/landing.html and dist/landing/index.html (dist/index.html preserved clean)");
 
 function writeStaticPage(routeSlug, title, subtitle, sections) {
   const sectionsHtml = sections

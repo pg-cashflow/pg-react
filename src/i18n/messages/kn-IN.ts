@@ -435,6 +435,8 @@ export const knIN: Record<MessageKey, string> = {
   "error.payment.ambiguousMatch": "ಬಹು ಬಾಕಿಗಳು ಈ ಮೊತ್ತಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುತ್ತವೆ.",
   "error.payment.noMatch": "ಈ ಪಾವತಿಗೆ ಯಾವುದೇ ಬಾಕಿ ಕಂಡುಬಂದಿಲ್ಲ.",
   "error.payment.invalidAmount": "ಪಾವತಿ ಮೊತ್ತವು ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿರಬೇಕು.",
+  "error.payment.checkoutPending": "ಹಿಂದಿನ ಪಾವತಿ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ. ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯ ಕಾಯಿರಿ.",
+  "error.payment.checkoutExpired": "ಪಾವತಿ ಅವಧಿ ಮುಗಿದಿದೆ. ದಯವಿಟ್ಟು ಹೊಸ ಪಾವತಿಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಮರುಪ್ರಯತ್ನಿಸಿ.",
   "error.finance.duplicateRequest": "ನಕಲಿ ಹಣಕಾಸು ವಹಿವಾಟು ಪತ್ತೆಯಾಗಿದೆ.",
   "error.finance.idempotencyRequired": "ವಹಿವಾಟಿಗೆ ಐಡೆಂಪೊಟೆನ್ಸಿ ಕೀ ಅಗತ್ಯವಿದೆ.",
   "error.finance.invalidAmount": "ಅಮಾನ್ಯ ಹಣಕಾಸು ಮೊತ್ತ.",
