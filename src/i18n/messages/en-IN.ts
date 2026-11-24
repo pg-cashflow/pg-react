@@ -431,6 +431,8 @@ export const enIN = {
   "error.payment.ambiguousMatch": "Multiple dues match this amount. Please select the specific due.",
   "error.payment.noMatch": "No matching due found for this payment.",
   "error.payment.invalidAmount": "Payment amount must be greater than zero.",
+  "error.payment.checkoutPending": "A previous payment attempt is being verified. Please wait a moment and try again.",
+  "error.payment.checkoutExpired": "The payment session has expired. Please retry to start a new payment.",
   "error.finance.duplicateRequest": "Duplicate financial transaction detected.",
   "error.finance.idempotencyRequired": "Transaction requires an Idempotency-Key.",
   "error.finance.invalidAmount": "Invalid financial amount.",

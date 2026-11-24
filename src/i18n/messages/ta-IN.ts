@@ -434,6 +434,8 @@ export const taIN: Record<MessageKey, string> = {
   "error.payment.ambiguousMatch": "பல பாக்கிகள் இந்தத் தொகையுடன் ஒத்துப்போகின்றன.",
   "error.payment.noMatch": "இந்த கட்டணத்திற்கு பொருந்தும் பாக்கி எதுவும் இல்லை.",
   "error.payment.invalidAmount": "கட்டணத் தொகை பூஜ்ஜியத்தை விட அதிகமாக இருக்க வேண்டும்.",
+  "error.payment.checkoutPending": "முந்தைய கட்டண முயற்சி சரிபார்க்கப்படுகிறது. சிறிது நேரம் கழித்து மீண்டும் முயற்சிக்கவும்.",
+  "error.payment.checkoutExpired": "கட்டண அமர்வு முடிந்துவிட்டது. புதிய கட்டணத்தைத் தொடங்க மீண்டும் முயற்சிக்கவும்.",
   "error.finance.duplicateRequest": "நகல் நிதி பரிவர்த்தனை கண்டறியப்பட்டது.",
   "error.finance.idempotencyRequired": "பரிவர்த்தனைக்கு தனித்துவ விசை தேவை.",
   "error.finance.invalidAmount": "தவறான நிதி தொகை.",
