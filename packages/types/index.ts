@@ -65,6 +65,8 @@ export const ERROR_CODES = [
   "payment.refundExceedsBalance",
   "payment.refundInFlight",
   "payment.refundNotEligible",
+  "payment.checkoutPending",
+  "payment.checkoutExpired",
   "finance.duplicateRequest",
   "finance.idempotencyRequired",
   "finance.invalidAmount",

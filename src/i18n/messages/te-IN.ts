@@ -434,6 +434,8 @@ export const teIN: Record<MessageKey, string> = {
   "error.payment.ambiguousMatch": "ఈ మొత్తానికి పలు బకాయిలు సరిపోలుతున్నాయి. నిర్దిష్ట బకాయిని ఎంచుకోండి.",
   "error.payment.noMatch": "ఈ చెల్లింపునకు సరిపోలే బకాయి ఏదీ కనుగొనబడలేదు.",
   "error.payment.invalidAmount": "చెల్లింపు మొత్తం సున్నా కంటే ఎక్కువగా ఉండాలి.",
+  "error.payment.checkoutPending": "మునుపటి చెల్లింపు ధృవీకరించబడుతోంది. దయచేసి కొద్దిసేపు వేచి ఉండి మళ్లీ ప్రయత్నించండి.",
+  "error.payment.checkoutExpired": "చెల్లింపు సెషన్ గడువు ముగిసింది. కొత్త చెల్లింపును ప్రారంభించడానికి మళ్లీ ప్రయత్నించండి.",
   "error.finance.duplicateRequest": "నకిలీ ఆర్థిక లావాదేవీ గుర్తించబడింది.",
   "error.finance.idempotencyRequired": "ఈ లావాదేవీకి ఐడెంపోటెన్సీ కీ అవసరం.",
   "error.finance.invalidAmount": "చెల్లని ఆర్థిక మొత్తం.",
