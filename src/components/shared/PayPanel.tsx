@@ -19,6 +19,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
   const [initialError, setInitialError] = useState<string | null>(null);
   const [isKycRequired, setIsKycRequired] = useState(false);
   const [showKycModal, setShowKycModal] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
   const [submittedManual, setSubmittedManual] = useState(false);
   const [showFallbackForm, setShowFallbackForm] = useState(false);
@@ -79,7 +80,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
         qrUrlRef.current = null;
       }
     };
-  }, [dueId, t]);
+  }, [dueId, reloadKey, t]);
 
   useEffect(() => {
     return () => {
@@ -126,7 +127,7 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
               onClose={() => setShowKycModal(false)}
               onSuccess={() => {
                 setShowKycModal(false);
-                fetchDuePay();
+                setReloadKey((k) => k + 1);
               }}
             />
           )}
