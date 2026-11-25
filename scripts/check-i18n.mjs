@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
 const ROOT = join(process.cwd(), "src");
 const MESSAGES_DIR = join(ROOT, "i18n", "messages");
@@ -121,11 +122,72 @@ for (const f of files) {
   });
 }
 
-console.log(`\n[i18n SCAN] Found ${literalHits} literal strings across ${hitsByFile.size} files.`);
+console.log(`\n[i18n SCAN] Found ${literalHits} single-line literal strings across ${hitsByFile.size} files.`);
+
+// The line-based check above cannot see JSX text that spans multiple lines.
+// Add a compiler-AST check for the KYC and refund critical paths so visible
+// text, accessibility labels, and translation fallbacks cannot bypass the ratchet.
+const CRITICAL_COPY_FILES = [
+  join(ROOT, "components", "shared", "TenantKYCCard.tsx"),
+  join(ROOT, "components", "owner", "RefundModal.tsx"),
+];
+let criticalLiteralHits = 0;
+for (const filePath of CRITICAL_COPY_FILES) {
+  if (!existsSync(filePath)) {
+    console.error(`[i18n AST] Critical component missing: ${filePath}`);
+    criticalLiteralHits++;
+    continue;
+  }
+  const content = readFileSync(filePath, "utf8");
+  const source = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const report = (node, text) => {
+    const pos = source.getLineAndCharacterOfPosition(node.getStart(source));
+    console.warn(`[i18n AST LITERAL] ${filePath}:${pos.line + 1} -> "${text}"`);
+    criticalLiteralHits++;
+  };
+  const hasVisibleWords = (value) => {
+    const normalized = value
+      .replace(/&(?:amp|nbsp|quot|apos|lt|gt);/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return /[A-Za-z]{2,}/.test(normalized) ? normalized : "";
+  };
+  const visit = (node) => {
+    if (ts.isJsxText(node)) {
+      const text = hasVisibleWords(node.getText(source));
+      if (text) report(node, text);
+    }
+    if (ts.isJsxAttribute(node) && ["aria-label", "placeholder", "title", "alt"].includes(node.name.getText(source))) {
+      const initializer = node.initializer;
+      if (initializer && ts.isStringLiteral(initializer)) {
+        const text = hasVisibleWords(initializer.text);
+        if (text) report(initializer, text);
+      }
+    }
+    if (ts.isBinaryExpression(node) &&
+        (node.operatorToken.kind === ts.SyntaxKind.BarBarToken || node.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken) &&
+        ts.isStringLiteral(node.right)) {
+      const text = hasVisibleWords(node.right.text);
+      if (text) report(node.right, text);
+    }
+    if (ts.isJsxExpression(node) && node.expression && ts.isStringLiteral(node.expression)) {
+      const text = hasVisibleWords(node.expression.text);
+      if (text) report(node.expression, text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+}
+console.log(`[i18n AST] Critical KYC/refund components: ${criticalLiteralHits} hardcoded UI strings across ${CRITICAL_COPY_FILES.length} files.`);
 console.log(`[i18n RATCHET] Current baseline ceiling: ${BASELINE_LITERAL_CEILING}`);
 
-// Check if user requested updating the baseline ceiling
+// Check if user requested updating the baseline ceiling. Never allow this
+// maintenance command to bypass locale parity or the critical-component AST ratchet.
 if (process.argv.includes("--update-baseline")) {
+  if (parityHits > 0 || criticalLiteralHits > 0) {
+    console.error(`[FAIL] Cannot update i18n baseline: parityErrors=${parityHits}, criticalLiteralHits=${criticalLiteralHits}`);
+    process.exit(1);
+  }
   const selfPath = fileURLToPath(import.meta.url);
   const selfContent = readFileSync(selfPath, "utf8");
   const updatedContent = selfContent.replace(
@@ -149,8 +211,8 @@ if (literalHits > BASELINE_LITERAL_CEILING) {
   console.log(`Run 'node scripts/check-i18n.mjs --update-baseline' to lock in this progress.`);
 }
 
-if (parityHits > 0 || ratchetViolation) {
-  console.error(`\n[FAIL] i18n check failed: parityErrors=${parityHits}, ratchetViolation=${ratchetViolation}`);
+if (parityHits > 0 || ratchetViolation || criticalLiteralHits > 0) {
+  console.error(`\n[FAIL] i18n check failed: parityErrors=${parityHits}, ratchetViolation=${ratchetViolation}, criticalLiteralHits=${criticalLiteralHits}`);
   process.exit(1);
 } else {
   console.log("\n[OK] i18n check passed (parity intact, ratchet within limit).");

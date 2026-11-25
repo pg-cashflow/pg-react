@@ -34,6 +34,8 @@ export interface PaymentRefundHistory {
   refunded_amount_paise: number;
   reserved_amount_paise: number;
   remaining_refundable_paise: number;
+  refund_eligible: boolean;
+  refund_window_days: number;
   refunds: PaymentRefundSummary[];
   pending_operation?: PaymentRefundSummary | null;
 }

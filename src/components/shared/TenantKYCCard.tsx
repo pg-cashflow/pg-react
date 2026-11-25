@@ -119,7 +119,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       if (res?.redirect_url) {
         window.location.href = res.redirect_url;
       } else {
-        setUiError(t("kyc.digilocker.failed") || "Failed to initialize DigiLocker.");
+        setUiError(t("kyc.digilocker.failed"));
       }
     },
     onError: (err: unknown) => {
@@ -136,7 +136,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     },
     onSuccess: (res) => {
       if (res && (res as any).status === "failed") {
-        setUiError(t("error.kyc.qr_invalid") || "QR verification failed");
+        setUiError(t("error.kyc.qr_invalid"));
         return;
       }
       setSuccessMsg(t("kyc.card.qrVerifiedSuccess"));
@@ -183,7 +183,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
       refreshKYC();
     },
     onError: (err: unknown) => {
-      setUiError(err instanceof Error ? err.message : "Revocation failed");
+      setUiError(err instanceof Error ? err.message : t("error.kyc.revocationFailed"));
     },
   });
 
@@ -405,7 +405,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <span className="t-caption text-ink-faint block">{t("kyc.card.method")}</span>
               <span className="t-caption font-medium uppercase tracking-wider text-ink-muted">
                 {kyc?.method === "digilocker"
-                  ? (t("kyc.card.methodDigiLocker") || "DigiLocker")
+                  ? t("kyc.card.methodDigiLocker")
                   : kyc?.method === "aadhaar_otp"
                   ? t("kyc.card.methodDirectOtp")
                   : kyc?.method === "ocr"
@@ -490,7 +490,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 shrink-0" />
-                <span className="truncate">{t("kyc.card.tabDigiLocker") || "DigiLocker"}</span>
+                <span className="truncate">{t("kyc.card.tabDigiLocker")}</span>
               </button>
             )}
             <button
@@ -548,15 +548,15 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               {/* Document Type Selector (Voluntary Non-Aadhaar Route per Aadhaar Act) */}
               <div className="space-y-1.5">
                 <span className="t-caption font-semibold text-ink block text-xs">
-                  Document Type
+                  {t("kyc.card.documentType")}
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                   {[
-                    { id: "aadhaar", label: "Aadhaar Card" },
-                    { id: "pan", label: "PAN Card" },
-                    { id: "passport", label: "Passport" },
-                    { id: "voter_id", label: "Voter ID" },
-                    { id: "driving_licence", label: "Driving Licence" },
+                    { id: "aadhaar", label: t("kyc.document.aadhaar") },
+                    { id: "pan", label: t("kyc.document.pan") },
+                    { id: "passport", label: t("kyc.document.passport") },
+                    { id: "voter_id", label: t("kyc.document.voterId") },
+                    { id: "driving_licence", label: t("kyc.document.drivingLicence") },
                   ].map((doc) => (
                     <button
                       key={doc.id}
@@ -694,26 +694,26 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               <div>
                 <span className="t-caption font-semibold text-ink flex items-center gap-1">
                   <ShieldCheck className="w-4 h-4 text-accent" />
-                  {t("kyc.digilocker.heading") || "Official DigiLocker Verification"}
+                  {t("kyc.digilocker.heading")}
                 </span>
                 <p className="t-caption text-ink-muted mt-0.5">
-                  {t("kyc.digilocker.description") || "Digital verification via Government of India DigiLocker records. Submissions with mismatched details route to quick manual review."}
+                  {t("kyc.digilocker.description")}
                 </p>
               </div>
 
               <div className="p-3 rounded-lg bg-surface border border-hairline space-y-2">
                 <div className="flex items-center gap-2 text-ink t-caption font-medium">
                   <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                  <span>{t("kyc.digilocker.featureInstant") || "Fast digital verification — unlocks rent payments once approved"}</span>
+                  <span>{t("kyc.digilocker.featureInstant")}</span>
                 </div>
                 <div className="flex items-center gap-2 text-ink t-caption font-medium">
                   <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                  <span>{t("kyc.digilocker.featureOfficial") || "Government of India DigiLocker via Cashfree"}</span>
+                  <span>{t("kyc.digilocker.featureOfficial")}</span>
                 </div>
               </div>
 
               <p className="t-micro text-ink-faint text-center">
-                DigiLocker is voluntary. You can also verify by uploading any government ID in the Upload tab.
+                {t("kyc.digilocker.voluntaryNotice")}
               </p>
 
               <button
@@ -727,7 +727,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
                 ) : (
                   <>
                     <ExternalLink className="w-4 h-4" />
-                    <span>{t("kyc.digilocker.button") || "Verify with DigiLocker"}</span>
+                    <span>{t("kyc.digilocker.button")}</span>
                   </>
                 )}
               </button>
@@ -802,7 +802,7 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
               type="button"
               onClick={onClose}
               className="absolute top-4 right-4 p-2 rounded-xl text-ink-muted hover:text-ink hover:bg-hairline/20 transition z-10"
-              aria-label="Close"
+              aria-label={t("common.close")}
             >
               <X className="w-5 h-5" />
             </button>

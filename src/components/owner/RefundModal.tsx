@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, RotateCcw, AlertCircle, CheckCircle2, Clock, Loader2, ShieldAlert } from "lucide-react";
 import { formatPaise, rupeesToPaise } from "@/lib/utils";
 import { refundPayment, requestRefundOTP, getPaymentRefundHistory, createRefundApprovalRequest } from "@/api/payments";
@@ -15,6 +15,13 @@ interface RefundModalProps {
   onApprovalSubmitted?: () => void;
 }
 
+function generateRefundIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `ref_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export const RefundModal: React.FC<RefundModalProps> = ({
   payment,
   tenantName,
@@ -24,6 +31,8 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   onApprovalSubmitted,
 }) => {
   const { t } = useLocale();
+  const tRef = useRef(t);
+  const paymentId = payment?.id ?? null;
   const [rupeesInput, setRupeesInput] = useState("");
   const [reason, setReason] = useState("");
   const [otp, setOtp] = useState("");
@@ -38,57 +47,72 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   const [remainingPaise, setRemainingPaise] = useState<number | null>(null);
   const [hasPendingOp, setHasPendingOp] = useState(false);
   const [isExpiredWindow, setIsExpiredWindow] = useState(false);
+  const [refundWindowDays, setRefundWindowDays] = useState(REFUND_WINDOW_DAYS);
   const [dualControlRequired, setDualControlRequired] = useState(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState(false);
 
-  const generateNewKey = () => {
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
-    }
-    return `ref_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  };
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   useEffect(() => {
-    if (isOpen && payment) {
+    // A payment switch or modal close invalidates the previous request. This
+    // prevents a late response from replacing the selected payment's balance.
+    // Depend on the stable payment ID rather than the full object so a parent
+    // re-render cannot restart the request or rotate an in-flight idempotency key.
+    let isCurrent = true;
+    if (isOpen && paymentId) {
       setReason("");
       setOtp("");
       setNeedsStepUp(false);
       setOtpDestination("");
       setErrorMessage(null);
       setRefundResult(null);
-      setIdempotencyKey(generateNewKey());
+      setIdempotencyKey(generateRefundIdempotencyKey());
       setAttemptPending(false);
       setRemainingPaise(null);
       setHasPendingOp(false);
       setDualControlRequired(false);
       setApprovalSubmitted(false);
+      setIsExpiredWindow(false);
+      setRefundWindowDays(REFUND_WINDOW_DAYS);
 
-      const paymentDate = new Date(payment.matched_at || payment.created_at || Date.now());
-      const expired = Date.now() - paymentDate.getTime() > REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
-      setIsExpiredWindow(expired);
-      if (expired) {
-        setErrorMessage(`Payment is older than ${REFUND_WINDOW_DAYS} days and cannot be refunded via gateway.`);
-      }
-
-      getPaymentRefundHistory(payment.id)
+      getPaymentRefundHistory(paymentId)
         .then((hist) => {
+          if (!isCurrent) return;
+          if (
+            hist.payment_id !== paymentId ||
+            typeof hist.refund_eligible !== "boolean" ||
+            !Number.isSafeInteger(hist.refund_window_days) ||
+            hist.refund_window_days < 1 ||
+            !Number.isSafeInteger(hist.remaining_refundable_paise) ||
+            hist.remaining_refundable_paise < 0
+          ) {
+            setRemainingPaise(0);
+            setRupeesInput("0");
+            setErrorMessage(tRef.current("error.payment.refundHistoryFailed"));
+            return;
+          }
+          setRefundWindowDays(hist.refund_window_days);
+          setIsExpiredWindow(!hist.refund_eligible);
           setRemainingPaise(hist.remaining_refundable_paise);
           setHasPendingOp(Boolean(hist.pending_operation));
           setRupeesInput((hist.remaining_refundable_paise / 100).toString());
-          if (!expired && hist.remaining_refundable_paise <= 0) {
-            setErrorMessage("This payment has already been fully refunded.");
+          if (!hist.refund_eligible) {
+            setErrorMessage(tRef.current("owner.refund.expiredWindow", { days: hist.refund_window_days }));
+          } else if (hist.remaining_refundable_paise <= 0) {
+            setErrorMessage(tRef.current("owner.refund.fullyRefunded"));
           }
         })
         .catch(() => {
+          if (!isCurrent) return;
           setRemainingPaise(0);
           setRupeesInput("0");
-          if (!expired) {
-            setErrorMessage(t("error.payment.refundHistoryFailed") || "Unable to verify refundable balance. Please try again.");
-          }
+          setErrorMessage(tRef.current("error.payment.refundHistoryFailed"));
         });
 
       try {
-        const raw = sessionStorage.getItem(`pg_refund_attempt:${payment.id}`);
+        const raw = sessionStorage.getItem(`pg_refund_attempt:${paymentId}`);
         const saved = raw ? JSON.parse(raw) : null;
         if (saved && typeof saved.key === "string" && Number.isSafeInteger(saved.amount) && typeof saved.reason === "string") {
           setIdempotencyKey(saved.key);
@@ -98,7 +122,10 @@ export const RefundModal: React.FC<RefundModalProps> = ({
         }
       } catch { /* Storage may be unavailable; same-open retries still reuse the key. */ }
     }
-  }, [isOpen, payment, t]);
+    return () => {
+      isCurrent = false;
+    };
+  }, [isOpen, paymentId]);
 
   if (!isOpen || !payment) return null;
 
@@ -111,17 +138,17 @@ export const RefundModal: React.FC<RefundModalProps> = ({
     setErrorMessage(null);
 
     if (isExpiredWindow) {
-      setErrorMessage(`Payment is older than ${REFUND_WINDOW_DAYS} days and cannot be refunded via gateway.`);
+      setErrorMessage(t("owner.refund.expiredWindow", { days: refundWindowDays }));
       return;
     }
 
     if (requestedPaise <= 0) {
-      setErrorMessage("Refund amount must be greater than zero.");
+      setErrorMessage(t("owner.refund.invalidAmount"));
       return;
     }
 
     if (requestedPaise > effectiveMaxPaise) {
-      setErrorMessage(`Refund amount cannot exceed remaining balance of ${formatPaise(effectiveMaxPaise)}.`);
+      setErrorMessage(t("owner.refund.exceedsBalance", { amount: formatPaise(effectiveMaxPaise) }));
       return;
     }
 
@@ -140,7 +167,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
     }
 
     if (needsStepUp && !/^\d{6}$/.test(otp)) {
-      setErrorMessage("Please enter the authorization OTP.");
+      setErrorMessage(t("owner.refund.otpRequired"));
       return;
     }
 
@@ -177,7 +204,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
       if (isDualControl) {
         setDualControlRequired(true);
         setErrorMessage(
-          "This refund exceeds the single-owner threshold. A maker-checker approval request is required."
+          t("owner.refund.dualControlRequired")
         );
       } else {
         const isStepUp =
@@ -236,7 +263,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
   const handleRetryWithNewKey = () => {
     try { sessionStorage.removeItem(`pg_refund_attempt:${payment.id}`); } catch { /* best effort */ }
     setAttemptPending(false);
-    setIdempotencyKey(generateNewKey());
+    setIdempotencyKey(generateRefundIdempotencyKey());
     setRefundResult(null);
     setErrorMessage(null);
   };
@@ -293,7 +320,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({
             <div className="p-3.5 bg-warning-tint border border-warning/30 rounded-xl flex items-start gap-3 text-xs text-warning">
               <Clock className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="flex-1">
-                A refund operation is currently reserved or processing for this payment. Additional refunds are paused until reconciliation finishes.
+                {t("owner.refund.pendingOperationNotice")}
               </div>
             </div>
           )}
