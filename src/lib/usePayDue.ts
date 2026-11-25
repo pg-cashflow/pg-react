@@ -13,11 +13,13 @@ export type PayDueState =
   | "CHECKING"
   | "CONFIRMING"
   | "PAID"
+  | "WAIVED"
   | "STILL_PENDING"
   | "REDIRECTING";
 
 interface UsePayDueOptions {
   onPaid?: () => void;
+  onWaived?: () => void;
   onRedirect?: () => void;
   paymentMode?: "cashfree" | "manual";
   environment?: "production" | "sandbox";
@@ -46,6 +48,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
   const isCheckingRef = useRef(false);
   const paymentInFlightRef = useRef(false);
   const lastConfirmedRef = useRef(false);
+  const lastRetryableRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (pollTimerRef.current) {
@@ -63,21 +66,37 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
     optionsRef.current.onPaid?.();
   }, [clearTimer, queryClient]);
 
-  // Check if target due is paid from server via verify endpoint or query client cache
+  const markWaived = useCallback(() => {
+    clearTimer();
+    setState("WAIVED");
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tenantDues });
+    optionsRef.current.onWaived?.();
+  }, [clearTimer, queryClient]);
+
+  // Check if target due is paid/waived or explicitly retryable from server
   const checkDueStatus = useCallback(async (): Promise<boolean> => {
     if (isCheckingRef.current) return false;
     isCheckingRef.current = true;
     let serverQueried = false;
+    let serverRetryable = false;
 
     try {
       try {
         const verifyRes = await verifyTenantDuePay(dueId);
         serverQueried = true;
-        if (verifyRes.paid) {
+        if (verifyRes.paid || verifyRes.status === "PAID") {
           lastConfirmedRef.current = true;
+          lastRetryableRef.current = false;
           markPaid();
           return true;
         }
+        if (verifyRes.status === "WAIVED") {
+          lastConfirmedRef.current = true;
+          lastRetryableRef.current = false;
+          markWaived();
+          return true;
+        }
+        serverRetryable = verifyRes.status === "RETRYABLE" || verifyRes.status === "EXPIRED";
       } catch {
         // transient network blip or manual mode intent; fall through to query dues
       }
@@ -91,20 +110,30 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
         serverQueried = true;
         const dues = Array.isArray(data) ? data : ((data as any)?.dues || []);
         const match = dues.find((d: Due) => d.id === dueId);
-        if (match && (match.status === "paid" || match.status === "waived")) {
-          lastConfirmedRef.current = true;
-          markPaid();
-          return true;
+        if (match) {
+          if (match.status === "paid") {
+            lastConfirmedRef.current = true;
+            lastRetryableRef.current = false;
+            markPaid();
+            return true;
+          }
+          if (match.status === "waived") {
+            lastConfirmedRef.current = true;
+            lastRetryableRef.current = false;
+            markWaived();
+            return true;
+          }
         }
       } catch {
         // transient network blip; keep trying
       }
       lastConfirmedRef.current = serverQueried;
+      lastRetryableRef.current = serverRetryable;
       return false;
     } finally {
       isCheckingRef.current = false;
     }
-  }, [dueId, markPaid, queryClient]);
+  }, [dueId, markPaid, markWaived, queryClient]);
 
 
   // Poll loop: polls checkDueStatus with backoff until deadline is reached
@@ -116,18 +145,18 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
       let attempt = 0;
 
       const tick = async () => {
-        const isPaid = await checkDueStatus();
-        if (isPaid) return;
+        const isSettled = await checkDueStatus();
+        if (isSettled) return;
 
         const now = Date.now();
         if (now >= deadlineRef.current) {
           clearTimer();
-          // PAY-UI-02: If server status could not be proven due to continuous network/query failures,
-          // remain in unresolved STILL_PENDING rather than resetting to READY.
-          if (!lastConfirmedRef.current) {
-            setState("STILL_PENDING");
+          // Never transition to READY on timeout unless the server explicitly classified
+          // all attempts as terminal (RETRYABLE / EXPIRED). Pending stays STILL_PENDING.
+          if (onTimeoutState === "READY" && lastConfirmedRef.current && lastRetryableRef.current) {
+            setState("READY");
           } else {
-            setState(onTimeoutState);
+            setState("STILL_PENDING");
           }
           return;
         }
@@ -153,8 +182,12 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
     // 1. Immediate synchronous verify call
     try {
       const verifyRes = await verifyTenantDuePay(dueId);
-      if (verifyRes.paid) {
+      if (verifyRes.paid || verifyRes.status === "PAID") {
         markPaid();
+        return;
+      }
+      if (verifyRes.status === "WAIVED") {
+        markWaived();
         return;
       }
     } catch {
@@ -163,7 +196,7 @@ export function usePayDue(dueId: string, options: UsePayDueOptions = {}) {
 
     // 2. Backstop polling: 60s
     startPolling(60 * 1000, "STILL_PENDING");
-  }, [dueId, markPaid, startPolling]);
+  }, [dueId, markPaid, markWaived, startPolling]);
 
   // Transition to CHECKING: polls for verification. For user-initiated modal dismiss,
   // falls back to READY after short poll; for ambiguous/crash outcomes, holds unresolved STILL_PENDING (PAY-UI-01).

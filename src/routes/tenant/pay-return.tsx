@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { verifyTenantDuePay, verifyTenantOrderPay } from "@/api/pay";
 import { getMyDues } from "@/api/tenant";
@@ -14,6 +14,7 @@ export const TenantPayReturnView: React.FC = () => {
   const queryClient = useQueryClient();
 
   const [status, setStatus] = useState<"CONFIRMING" | "PAID" | "WAIVED" | "STILL_PENDING">("CONFIRMING");
+  const [recheckCount, setRecheckCount] = useState(0);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Extract query params from location search
@@ -139,7 +140,7 @@ export const TenantPayReturnView: React.FC = () => {
         clearTimeout(pollTimerRef.current);
       }
     };
-  }, [checkStatus, dueId, orderId, markPaid]);
+  }, [checkStatus, dueId, orderId, markPaid, recheckCount]);
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-6 pt-12">
@@ -206,13 +207,26 @@ export const TenantPayReturnView: React.FC = () => {
               {t("payreturn.inProgressDesc")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/tenant/dues" })}
-            className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm"
-          >
-            {t("payreturn.backToDues")}
-          </button>
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                setStatus("CONFIRMING");
+                setRecheckCount((c) => c + 1);
+              }}
+              className="w-full h-12 rounded-[10px] bg-accent text-accent-contrast font-semibold t-body-sm inline-flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              {t("paypanel.checkAgainBtn")}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/tenant/dues" })}
+              className="w-full h-12 rounded-[10px] border border-hairline text-ink font-semibold t-body-sm"
+            >
+              {t("payreturn.backToDues")}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="p-8 rounded-[16px] border border-hairline bg-surface text-center space-y-4">

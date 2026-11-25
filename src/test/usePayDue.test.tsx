@@ -53,6 +53,7 @@ const dueId = "due-test-123";
 
 let verifyShouldSucceed = true;
 let verifyStatus = 200;
+let verifyClassification = "PENDING";
 let dueStatus = "pending";
 
 const server = setupServer(
@@ -80,7 +81,10 @@ const server = setupServer(
     if (verifyStatus === 404) {
       return HttpResponse.json({ error: "not found" }, { status: 404 });
     }
-    return HttpResponse.json({ paid: verifyShouldSucceed });
+    return HttpResponse.json({
+      paid: verifyShouldSucceed,
+      status: verifyShouldSucceed ? "PAID" : verifyClassification,
+    });
   }),
   http.get(`${API_BASE}/tenant/dues`, () => {
     return HttpResponse.json({
@@ -114,6 +118,7 @@ describe("usePayDue State Machine", () => {
     });
     verifyShouldSucceed = true;
     verifyStatus = 200;
+    verifyClassification = "PENDING";
     dueStatus = "pending";
   });
 
@@ -188,8 +193,9 @@ describe("usePayDue State Machine", () => {
     vi.useRealTimers();
   });
 
-  it("enters CHECKING and quietly returns to READY on modal dismiss if unpaid", async () => {
+  it("keeps STILL_PENDING when modal errors/dismisses and server reports PENDING", async () => {
     verifyShouldSucceed = false;
+    verifyClassification = "PENDING";
     vi.useFakeTimers({ shouldAdvanceTime: true });
 
     vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({
@@ -205,15 +211,63 @@ describe("usePayDue State Machine", () => {
 
     expect(result.current.state).toBe("CHECKING");
 
-    // Advance through 10s quiet checking deadline
     await act(async () => {
       await vi.advanceTimersByTimeAsync(11000);
     });
 
-    // Returns to READY with no error banner
+    // Must NOT allow retry while Cashfree still reports PENDING
+    expect(result.current.state).toBe("STILL_PENDING");
+    expect(result.current.error).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("returns to READY only when server confirms RETRYABLE after terminal attempt", async () => {
+    verifyShouldSucceed = false;
+    verifyClassification = "RETRYABLE";
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({
+      kind: "error",
+      error: { message: "User closed popup" },
+    });
+
+    const { result } = renderHook(() => usePayDue(dueId), { wrapper });
+
+    await act(async () => {
+      await result.current.startPayment();
+    });
+
+    expect(result.current.state).toBe("CHECKING");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(11000);
+    });
+
     expect(result.current.state).toBe("READY");
     expect(result.current.error).toBeNull();
     vi.useRealTimers();
+  });
+
+  it("transitions to WAIVED without firing onPaid when due is waived", async () => {
+    verifyShouldSucceed = false;
+    verifyClassification = "WAIVED";
+    const onPaid = vi.fn();
+    const onWaived = vi.fn();
+
+    vi.spyOn(cashfreeModule, "startCashfreeCheckout").mockResolvedValue({
+      kind: "completed",
+      details: { orderId: "ord_waived" },
+    });
+
+    const { result } = renderHook(() => usePayDue(dueId, { onPaid, onWaived }), { wrapper });
+
+    await act(async () => {
+      await result.current.startPayment();
+    });
+
+    expect(result.current.state).toBe("WAIVED");
+    expect(onPaid).not.toHaveBeenCalled();
+    expect(onWaived).toHaveBeenCalledTimes(1);
   });
 
   it("transitions to REDIRECTING when checkout requires browser redirection", async () => {

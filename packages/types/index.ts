@@ -294,6 +294,7 @@ export interface PayIntent {
   amount_paise: Paise;
   qr_png_url: string;
   payable: boolean;
+  availability_status?: string;
   payment_session_id?: string;
   /** Set when property is Cashfree but backend fell back to manual. Values: "missing_phone" | "gateway_down" */
   fallback_reason?: "missing_phone" | "gateway_down";

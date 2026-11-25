@@ -137,6 +137,75 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
     return <p className="t-body-sm text-danger">{initialError}</p>;
   }
   if (!pay) return <Loader2 className="w-5 h-5 animate-spin text-ink-muted my-6 mx-auto" />;
+  if (!pay.payable && gatewayState !== "PAID" && gatewayState !== "WAIVED") {
+    if (pay.availability_status === "KYC_REQUIRED") {
+      return (
+        <div className="p-4 rounded-[14px] bg-warning-tint/30 border border-warning/20 space-y-3">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="t-body font-semibold text-ink">
+                {t("tenant.dashboard.kycRequiredTitle")}
+              </p>
+              <p className="t-body-sm text-ink-muted">
+                {t("tenant.dashboard.kycRequiredDesc")}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowKycModal(true)}
+            className="h-10 px-4 rounded-[10px] bg-accent text-accent-contrast t-body-sm font-semibold flex items-center gap-2 hover:opacity-95 transition"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>{t("kyc.card.title")}</span>
+          </button>
+          {showKycModal && (
+            <TenantKYCCard
+              isModal
+              onClose={() => setShowKycModal(false)}
+              onSuccess={() => {
+                setShowKycModal(false);
+                setReloadKey((k) => k + 1);
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+    if (
+      pay.availability_status === "GUARDIAN_CONSENT_REQUIRED" ||
+      pay.availability_status === "AGE_VERIFICATION_REQUIRED" ||
+      pay.availability_status === "TEMPORARILY_UNAVAILABLE"
+    ) {
+      return (
+        <div className="p-4 rounded-[14px] bg-warning-tint/30 border border-warning/20 space-y-2">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="t-body font-semibold text-ink">
+                {t("tenant.dashboard.kycRequiredTitle")}
+              </p>
+              <p className="t-body-sm text-ink-muted">
+                {t("tenant.dashboard.kycRequiredDesc")}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+  if (gatewayState === "WAIVED" || pay.availability_status === "WAIVED") {
+    return (
+      <div className="p-4 rounded-[14px] bg-surface border border-hairline space-y-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
+          <p className="t-h3 text-ink">{t("payreturn.waived")}</p>
+        </div>
+        <p className="t-body-sm text-ink-muted">{t("payreturn.waivedDesc")}</p>
+      </div>
+    );
+  }
   if (!pay.payable || gatewayState === "PAID") {
     return (
       <div className="p-4 rounded-[14px] bg-success-tint border border-success/20 text-success space-y-3">
@@ -319,15 +388,6 @@ export const PayPanel: React.FC<{ dueId: string; onDone?: () => void }> = ({ due
                 >
                   <RefreshCw className="w-4 h-4" /> {t("paypanel.checkAgainBtn")}
                 </button>
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowFallbackForm(true)}
-                    className="t-caption text-ink-muted hover:text-ink min-h-[44px] inline-flex items-center"
-                  >
-                    {t("paypanel.paidNotShowing")}
-                  </button>
-                </div>
               </div>
 
               <p className="t-caption text-ink-muted text-center">

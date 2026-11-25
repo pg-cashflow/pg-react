@@ -56,8 +56,8 @@ export const verifyOrderPay = async (
  * Triggers synchronous order verification with Cashfree for a specific due.
  * Returns { paid: true } if ledger transitioned to paid.
  */
-export const verifyTenantDuePay = async (dueId: string): Promise<{ paid: boolean }> => {
-  return await apiFetch<{ paid: boolean }>(`/tenant/dues/${dueId}/pay/verify`, {
+export const verifyTenantDuePay = async (dueId: string): Promise<{ paid: boolean; status?: string }> => {
+  return await apiFetch<{ paid: boolean; status?: string }>(`/tenant/dues/${dueId}/pay/verify`, {
     method: "POST",
     body: "{}",
   });
