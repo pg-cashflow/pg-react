@@ -237,6 +237,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (stored) {
         clearLocalSession();
       } else {
+        setSessionHint(null);
+        setRole(null);
         setSessionStatus("anon");
       }
     }
@@ -295,6 +297,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setJustActivated(true);
     }
     applySession(res.token, res.user, payload);
+    setInviteCode("");
   }, [applySession]);
 
   const handleSendPhoneOtp = useCallback(async (phone: string) => {

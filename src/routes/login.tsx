@@ -275,17 +275,19 @@ export const LoginPage: React.FC = () => {
               <label className="block text-xs font-medium text-ink-muted mb-1.5 uppercase tracking-wider">
                 {t("auth.phoneLabel")}
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-faint">
-                  <Phone className="w-4 h-4" />
-                </div>
+              <div className="flex items-stretch bg-bg border border-hairline rounded-xl focus-within:ring-2 focus-within:ring-accent focus-within:border-accent transition overflow-hidden">
+                <span className="inline-flex items-center gap-1.5 px-3 bg-surface border-r border-hairline text-ink-muted text-sm font-medium select-none">
+                  <Phone className="w-3.5 h-3.5 text-ink-faint" />
+                  +91
+                </span>
                 <input
                   type="tel"
+                  autoComplete="tel"
                   required
-                  placeholder="+91 98765 43210"
+                  placeholder="98765 43210"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-bg border border-hairline rounded-xl text-ink placeholder-ink-faint text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition"
+                  className="flex-1 min-w-0 px-3 py-2.5 bg-transparent text-ink placeholder-ink-faint text-sm focus:outline-none"
                 />
               </div>
               <p className="t-micro text-ink-faint mt-1.5">
