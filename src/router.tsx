@@ -35,7 +35,13 @@ function safeImport<T>(loader: () => Promise<T>): Promise<T> {
       if (isChunkLoadFailed && typeof window !== "undefined") {
         try {
           const url = new URL(window.location.href);
-          if (!url.searchParams.has("_chunk_retry")) {
+          const isCriticalRoute =
+            url.pathname.startsWith("/payment/return") ||
+            url.pathname.includes("/kyc");
+          const isCriticalActive =
+            isCriticalRoute ||
+            document.body?.dataset?.criticalActivity === "true";
+          if (!isCriticalActive && !url.searchParams.has("_chunk_retry")) {
             url.searchParams.set("_chunk_retry", "1");
             const reload = () => window.location.replace(url.toString());
             const clearCaches = "caches" in window
