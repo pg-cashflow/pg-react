@@ -588,6 +588,8 @@ export const teIN: Record<MessageKey, string> = {
   "owner.payouts.reviewApprove": "సమీక్షించి ఆమోదించండి",
   "owner.payouts.dispatchTransfer": "చెల్లింపును పంపండి",
   "owner.payouts.dispatching": "పంపుతోంది...",
+  "owner.payouts.manualReviewTitle": "మాన్యువల్ సమీక్ష అవసరం",
+  "owner.payouts.manualReviewDesc": "ఈ చెల్లింపు బ్యాచ్‌ను Cashfree అంగీకరించిందో లేదో ఇంకా నిర్ధారణ కాలేదు. డూప్లికేట్ బదిలీలను నివారించడానికి ఆటోమేటిక్ రీట్రైలు మరియు తనిఖీలు నిలిపివేయబడ్డాయి. ఈ బ్యాచ్‌ను మళ్లీ సృష్టించవద్దు; సమన్వయం కోసం మద్దతును సంప్రదించండి.",
   "owner.payouts.export": "ఎగుమతి",
   "owner.payouts.exporting": "ఎగుమతి చేస్తోంది...",
   "owner.payouts.pendingBanner": "బ్యాచ్ చేయడానికి {count} పెండింగ్ అంశాలు సిద్ధంగా ఉన్నాయి",

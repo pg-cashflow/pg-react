@@ -1,12 +1,17 @@
 import { apiFetch, requestTokenRefresh, getLastRefreshError, ApiError } from "./client";
-import { getStoredUser } from "@/auth/storage";
+import { getStoredUser, isPendingLogout } from "@/auth/storage";
 import { getAccessToken } from "@/auth/tokenStore";
 import type { LoginResponse } from "@pg/types";
 
-export const exchangeFirebaseToken = (
+export const exchangeFirebaseToken = async (
   idToken: string,
   inviteCode?: string
 ): Promise<LoginResponse> => {
+  // Do not overwrite the refresh cookie while a previous logout still needs
+  // that cookie to retry server-side session-family revocation.
+  if (isPendingLogout()) {
+    throw new ApiError(503, "Previous session logout is still being finalized. Reconnect and retry.");
+  }
   const body: { id_token: string; invite_code?: string } = { id_token: idToken };
   const code = inviteCode?.trim();
   if (code) body.invite_code = code;
@@ -30,10 +35,16 @@ export const refreshSession = async (): Promise<LoginResponse> => {
   return { token, user };
 };
 
-export const logoutSession = (): Promise<{ ok: boolean }> => {
-  return apiFetch<{ ok: boolean }>("/auth/logout", {
+export const logoutSession = async (): Promise<{ ok: boolean }> => {
+  const result = await apiFetch<{ ok: boolean }>("/auth/logout", {
     method: "POST",
   });
+  // Some older servers return a 2xx response with ok=false when revocation
+  // fails. Treat that as a retryable failure, not a completed logout.
+  if (result?.ok !== true) {
+    throw new ApiError(503, "Server-side session revocation is still pending.");
+  }
+  return result;
 };
 
 export interface ActiveSession {

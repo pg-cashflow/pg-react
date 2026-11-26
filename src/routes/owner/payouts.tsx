@@ -288,7 +288,16 @@ export const PayoutsView: React.FC = () => {
       {/* Tab 1: Payout Batches */}
       {activeTab === "batches" && (
         <div className="space-y-4">
-          {batches.some((b) => b.status === "dispatch_unknown") && (
+          {batches.some((b) => b.status === "dispatch_unknown" && b.dispatch_review_required_at) && (
+            <div className="p-4 rounded-2xl bg-danger/5 border border-danger/30 text-ink text-sm flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-danger">{t("owner.payouts.manualReviewTitle")}</p>
+                <p className="text-xs text-ink-muted mt-0.5">{t("owner.payouts.manualReviewDesc")}</p>
+              </div>
+            </div>
+          )}
+          {batches.some((b) => b.status === "dispatch_unknown" && !b.dispatch_review_required_at) && (
             <div className="p-4 rounded-2xl bg-warning-tint border border-warning/30 text-ink text-sm flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
               <div>
@@ -299,7 +308,7 @@ export const PayoutsView: React.FC = () => {
               </div>
             </div>
           )}
-          {batches.some((b) => b.status === "processing") && (
+          {batches.some((b) => b.status === "processing" && b.dispatch_attempt_opened_at && !b.dispatch_review_required_at) && (
             <div className="p-4 rounded-2xl bg-warning-tint/30 border border-warning/30 text-ink text-sm flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
@@ -373,7 +382,11 @@ export const PayoutsView: React.FC = () => {
                           {b.status === "approved" && <FileCheck2 className="w-3.5 h-3.5" />}
                           {b.status === "processing" && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                           {b.status === "dispatch_unknown" && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
-                          {b.status === "dispatch_unknown" ? "Polling Gateway" : b.status.replace("_", " ")}
+                          {b.status === "dispatch_unknown" && b.dispatch_review_required_at
+                            ? t("owner.payouts.manualReviewTitle")
+                            : b.status === "dispatch_unknown"
+                            ? "Polling Gateway"
+                            : b.status.replace("_", " ")}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-xs text-ink-muted font-medium">

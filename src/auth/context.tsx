@@ -80,6 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   sessionStatusRef.current = sessionStatus;
   const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryAttemptRef = useRef<number>(0);
+  const logoutRetryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const logoutRetryAttemptRef = useRef<number>(0);
+  const logoutRequestInFlightRef = useRef<boolean>(false);
+  const logoutRetryCallbackRef = useRef<() => void>(() => {});
 
   const clearRetryTimer = useCallback(() => {
     if (retryTimeoutRef.current) {
@@ -87,6 +91,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       retryTimeoutRef.current = null;
     }
   }, []);
+
+  const sendPendingLogout = useCallback(async (): Promise<void> => {
+    if (!isPendingLogout() || logoutRequestInFlightRef.current) return;
+
+    logoutRequestInFlightRef.current = true;
+    try {
+      const result = await logoutSession();
+      if (result?.ok !== true) {
+        throw new Error("Server-side session revocation was not confirmed");
+      }
+      setPendingLogout(false);
+      logoutRetryAttemptRef.current = 0;
+      if (logoutRetryTimerRef.current) {
+        clearTimeout(logoutRetryTimerRef.current);
+        logoutRetryTimerRef.current = null;
+      }
+    } catch {
+      // Keep the marker and HttpOnly cookie. Retry with bounded exponential
+      // backoff so a transient API/DB outage does not strand a live refresh token.
+      if (!logoutRetryTimerRef.current && isPendingLogout()) {
+        const attempt = logoutRetryAttemptRef.current++;
+        const delay = Math.min(60_000, 1_000 * 2 ** Math.min(attempt, 6));
+        logoutRetryTimerRef.current = setTimeout(() => {
+          logoutRetryTimerRef.current = null;
+          logoutRetryCallbackRef.current();
+        }, delay);
+      }
+    } finally {
+      logoutRequestInFlightRef.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    logoutRetryCallbackRef.current = () => {
+      void sendPendingLogout();
+    };
+  }, [sendPendingLogout]);
 
   const endSession = useCallback((callServerLogout = false) => {
     stopProactiveRefresh();
@@ -115,13 +156,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (callServerLogout) {
       setPendingLogout(true);
-      logoutSession()
-        .then(() => setPendingLogout(false))
-        .catch(() => {
-          // Retry will occur on reconnect
-        });
+      logoutRetryAttemptRef.current = 0;
+      void sendPendingLogout();
     }
-  }, [clearRetryTimer]);
+  }, [clearRetryTimer, sendPendingLogout]);
 
   const clearLocalSession = useCallback(() => {
     endSession(false);
@@ -252,7 +290,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleUnauthorized = () => clearLocalSession();
     const handleOnline = () => {
       if (isPendingLogout()) {
-        logoutSession().then(() => setPendingLogout(false)).catch(() => {});
+        if (logoutRetryTimerRef.current) {
+          clearTimeout(logoutRetryTimerRef.current);
+          logoutRetryTimerRef.current = null;
+        }
+        void sendPendingLogout();
       } else if (sessionStatusRef.current !== "online" || !getAccessToken()) {
         void evaluateStored();
       }
@@ -276,8 +318,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.removeEventListener("pg:session_changed", handleSessionChanged);
       window.removeEventListener("pg:session_ended", handleSessionEnded);
       clearRetryTimer();
+      if (logoutRetryTimerRef.current) {
+        clearTimeout(logoutRetryTimerRef.current);
+        logoutRetryTimerRef.current = null;
+      }
     };
-  }, [evaluateStored, clearLocalSession, clearRetryTimer]);
+  }, [evaluateStored, clearLocalSession, clearRetryTimer, sendPendingLogout]);
 
   useEffect(() => {
     return onAccessTokenChange((t) => {

@@ -811,6 +811,11 @@ export interface PayoutBatch {
   approved_at?: string | null;
   file_checksum?: string | null;
   notes?: string | null;
+  dispatch_attempt_opened_at?: string | null;
+  dispatch_attempt_count: number;
+  dispatch_reconciliation_attempts: number;
+  dispatch_last_reconciled_at?: string | null;
+  dispatch_review_required_at?: string | null;
   created_at: string;
   updated_at: string;
 }

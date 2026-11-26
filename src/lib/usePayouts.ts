@@ -66,7 +66,9 @@ export function usePayoutBatches() {
     queryFn: listPayoutBatches,
     refetchInterval: (query) => {
       const batches = query.state.data;
-      if (batches?.some((b) => b.status === "processing" || b.status === "dispatch_unknown")) {
+      if (batches?.some((b) =>
+        (b.status === "processing" || b.status === "dispatch_unknown") && !b.dispatch_review_required_at
+      )) {
         return 5000;
       }
       return false;

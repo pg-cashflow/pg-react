@@ -589,6 +589,8 @@ export const knIN: Record<MessageKey, string> = {
   "owner.payouts.reviewApprove": "ಪರಿಶೀಲಿಸಿ ಅನುಮೋದಿಸಿ",
   "owner.payouts.dispatchTransfer": "ವರ್ಗಾವಣೆಯನ್ನು ಕಳುಹಿಸಿ",
   "owner.payouts.dispatching": "ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...",
+  "owner.payouts.manualReviewTitle": "ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
+  "owner.payouts.manualReviewDesc": "ಈ ಪಾವತಿ ಬ್ಯಾಚ್ ಅನ್ನು Cashfree ಸ್ವೀಕರಿಸಿದೆಯೇ ಎಂಬುದು ಇನ್ನೂ ದೃಢಪಟ್ಟಿಲ್ಲ. ದ್ವಂದ್ವ ವರ್ಗಾವಣೆಗಳನ್ನು ತಪ್ಪಿಸಲು ಸ್ವಯಂಚಾಲಿತ ಮರುಪ್ರಯತ್ನಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಪರಿಶೀಲನೆಗಳನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ. ಈ ಬ್ಯಾಚ್ ಅನ್ನು ಮರುಸೃಷ್ಟಿಸಬೇಡಿ; ಹೊಂದಾಣಿಕೆಗಾಗಿ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.",
   "owner.payouts.export": "ರಫ್ತು ಮಾಡಿ",
   "owner.payouts.exporting": "ರಫ್ತು ಮಾಡಲಾಗುತ್ತಿದೆ...",
   "owner.payouts.pendingBanner": "ಬ್ಯಾಚ್ ಮಾಡಲು {count} ಬಾಕಿ ಐಟಂಗಳು ಸಿದ್ಧವಾಗಿವೆ",

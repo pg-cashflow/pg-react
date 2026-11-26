@@ -588,6 +588,8 @@ export const taIN: Record<MessageKey, string> = {
   "owner.payouts.reviewApprove": "சரிபார்த்து ஒப்புதல் அளிக்கவும்",
   "owner.payouts.dispatchTransfer": "பரிமாற்றத்தை அனுப்பு",
   "owner.payouts.dispatching": "அனுப்புகிறது...",
+  "owner.payouts.manualReviewTitle": "கைமுறை ஆய்வு தேவை",
+  "owner.payouts.manualReviewDesc": "இந்த வழங்கல் தொகுதியை Cashfree ஏற்றுக்கொண்டதா என்பது இன்னும் உறுதிப்படுத்தப்படவில்லை. இரட்டை பரிமாற்றங்களைத் தடுக்க தானியங்கி மறுமுயற்சிகளும் நிலைச் சரிபார்ப்புகளும் நிறுத்தப்பட்டுள்ளன. இந்தத் தொகுதியை மீண்டும் உருவாக்க வேண்டாம்; ஒப்புமைக்காக ஆதரவைத் தொடர்புகொள்ளவும்.",
   "owner.payouts.export": "ஏற்றுமதி",
   "owner.payouts.exporting": "ஏற்றுமதி செய்கிறது...",
   "owner.payouts.pendingBanner": "தொகுக்க {count} நிலுவை உருப்படிகள் தயாராக உள்ளன",

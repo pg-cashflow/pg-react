@@ -585,6 +585,8 @@ export const enIN = {
   "owner.payouts.reviewApprove": "Review & Approve",
   "owner.payouts.dispatchTransfer": "Dispatch Transfer",
   "owner.payouts.dispatching": "Dispatching...",
+  "owner.payouts.manualReviewTitle": "Manual review required",
+  "owner.payouts.manualReviewDesc": "Cashfree has not confirmed whether this payout batch was accepted. Automatic retries and polling are stopped to prevent duplicate transfers. Do not recreate this batch; contact support for reconciliation.",
   "owner.payouts.export": "Export",
   "owner.payouts.exporting": "Exporting...",
   "owner.payouts.pendingBanner": "{count} pending items ready for batching",
