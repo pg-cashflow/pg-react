@@ -78,7 +78,7 @@ const landingHtml = `
       <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mt-10 t-caption text-ink-muted">
         <div class="inline-flex items-center gap-1.5">
           ${checkIcon}
-          <span>Aadhaar-verified tenants</span>
+          <span>Supported ID verification</span>
         </div>
         <div class="inline-flex items-center gap-1.5">
           ${checkIcon}
@@ -117,7 +117,7 @@ const landingHtml = `
           <div class="p-5">
             <div class="t-caption text-ink-muted">Identity verified</div>
             <div class="t-amount-lg text-ink mt-1">100%</div>
-            <div class="t-caption text-ink-muted font-semibold mt-1">Smart OCR &amp; Secure QR · 0 paper forms</div>
+            <div class="t-caption text-ink-muted font-semibold mt-1">Smart OCR &amp; Secure QR · Digital ID submission</div>
           </div>
         </div>
       </div>
@@ -137,7 +137,7 @@ const landingHtml = `
             </div>
             <h3 class="t-h2 text-ink">Tenants</h3>
             <p class="t-caption text-accent font-medium mt-0.5">Move in with dignity, not paper registers</p>
-            <p class="t-body-sm text-ink-muted mt-2.5 leading-relaxed">Scan your room-bound code, complete verified Aadhaar onboarding, and pay rent with UPI.</p>
+            <p class="t-body-sm text-ink-muted mt-2.5 leading-relaxed">Scan your room-bound code, submit supported ID for owner review, and pay rent with UPI.</p>
           </div>
           <div class="mt-6 pt-4 border-t border-hairline">
             <a href="/" class="inline-flex items-center gap-1.5 t-body-sm font-semibold text-accent hover:underline">
@@ -195,7 +195,7 @@ const landingHtml = `
         <div class="space-y-3.5 t-body-sm text-ink-muted">
           <div class="flex items-start gap-2.5">
             ${checkIcon}
-            <span>Identity checked before move-in, every single time.</span>
+            <span>Identity verified with owner review before rent payment.</span>
           </div>
           <div class="flex items-start gap-2.5">
             ${checkIcon}
@@ -238,12 +238,46 @@ function stripModuleScripts(html) {
     .replace(/<link\s+rel="modulepreload"[^>]*>/gi, "");
 }
 
+function escapeHtmlAttr(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function applyRouteMetadata(html, { title, description }) {
+  const safeTitle = escapeHtmlAttr(title);
+  const safeDesc = escapeHtmlAttr(description);
+  return html
+    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`)
+    .replace(
+      /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
+      `<meta name="description" content="${safeDesc}" />`
+    )
+    .replace(
+      /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i,
+      `<meta property="og:title" content="${safeTitle}" />`
+    )
+    .replace(
+      /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i,
+      `<meta property="og:description" content="${safeDesc}" />`
+    );
+}
+
 const currentHtml = fs.readFileSync(distHtmlPath, "utf-8");
-const updatedHtml = stripModuleScripts(
-  currentHtml.replace(
-    '<div id="root"></div>',
-    `<div id="root">${landingHtml}</div>`
-  )
+const updatedHtml = applyRouteMetadata(
+  stripModuleScripts(
+    currentHtml.replace(
+      '<div id="root"></div>',
+      `<div id="root">${landingHtml}</div>`
+    )
+  ),
+  {
+    title: "PG Cashflow — Rent ledger & identity workflow for Indian PGs",
+    description:
+      "Digital rent ledger, UPI collection, owner-reviewed KYC, and daily warden operations for Indian PGs and hostels.",
+  }
 );
 
 const landingHtmlPath = path.resolve(__dirname, "../dist/landing.html");
@@ -254,7 +288,7 @@ if (!fs.existsSync(landingDir)) fs.mkdirSync(landingDir, { recursive: true });
 fs.writeFileSync(path.resolve(landingDir, "index.html"), updatedHtml, "utf-8");
 console.log("✓ Pre-rendered static landing page written to dist/landing.html and dist/landing/index.html (dist/index.html preserved clean)");
 
-function writeStaticPage(routeSlug, title, subtitle, sections) {
+function writeStaticPage(routeSlug, title, subtitle, sections, lastUpdated = "November 26, 2026") {
   const sectionsHtml = sections
     .map(
       (s) => `
@@ -289,7 +323,7 @@ function writeStaticPage(routeSlug, title, subtitle, sections) {
         <div class="t-caption uppercase font-semibold text-accent tracking-wider mb-2">Compliance &amp; Governance</div>
         <h1 class="t-display text-ink font-bold tracking-tight">${title}</h1>
         <p class="t-body text-ink-muted mt-2">${subtitle}</p>
-        <p class="t-caption text-ink-muted mt-3">Last Updated: October 30, 2026</p>
+        <p class="t-caption text-ink-muted mt-3">Last Updated: ${lastUpdated}</p>
       </div>
       <div class="rounded-[14px] border border-hairline bg-surface p-6 sm:p-10 shadow-xs">
         ${sectionsHtml}
@@ -314,8 +348,14 @@ function writeStaticPage(routeSlug, title, subtitle, sections) {
   </footer>
 </div>`.trim();
 
-  const rendered = stripModuleScripts(
-    currentHtml.replace('<div id="root"></div>', `<div id="root">${pageHtml}</div>`)
+  const rendered = applyRouteMetadata(
+    stripModuleScripts(
+      currentHtml.replace('<div id="root"></div>', `<div id="root">${pageHtml}</div>`)
+    ),
+    {
+      title: `${title} — PG Cashflow`,
+      description: subtitle,
+    }
   );
   const flatPath = path.resolve(__dirname, `../dist/${routeSlug}.html`);
   fs.writeFileSync(flatPath, rendered, "utf-8");
@@ -398,7 +438,7 @@ const privacySections = privacyPolicy.sections.map((sec) => {
   return item;
 });
 
-writeStaticPage("privacy", privacyPolicy.title, privacyPolicy.subtitle, privacySections);
+writeStaticPage("privacy", privacyPolicy.title, privacyPolicy.subtitle, privacySections, privacyPolicy.lastUpdated);
 
 writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensive rules, timelines, and payment rail processing for rent dues, security deposits, and duplicate charges.", [
   {
@@ -421,7 +461,7 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
     ],
     list: [
       "Source Reversal (Within 120 Days): If the move-out settlement occurs within 120 days of the deposit payment, the refund is initiated via the Payment Gateway Source Refund API directly back to the original funding instrument (UPI ID, debit/credit card, or netbanking account).",
-      "Payments Exceeding 120 Days: In accordance with payment gateway and banking regulations, gateway refund requests cannot be accepted after 120 days. Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed."
+      "Payments Exceeding 120 Days: Under PG Cashflow's operational refund window (within Cashfree's six-month PG refund limit), automated gateway source refunds are accepted only within 120 days. Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed."
     ]
   },
   {
@@ -442,7 +482,7 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
     list: [
       "UPI, Cards & Netbanking: Credit to the customer account typically takes 5 to 7 working days after initiation, subject to receiving bank clearance and acquiring bank exceptions.",
       "Direct IMPS Payouts: Credited within minutes of release by the property owner, subject to beneficiary bank network availability.",
-      "Gateway Cutoff Limit: Payment gateway source refunds are permitted only within 120 days of payment. Transactions older than 120 days require offline verification and settlement."
+      "Gateway Cutoff Limit: Under PG Cashflow's operational policy, gateway source refunds are permitted within 120 days of payment (within Cashfree's six-month PG limit). Transactions older than 120 days require offline verification and settlement."
     ]
   },
   {

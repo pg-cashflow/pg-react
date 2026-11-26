@@ -29,12 +29,27 @@ const policy = JSON.parse(fs.readFileSync(policyJsonPath, "utf8"));
 const privacy = fs.readFileSync(privacyPath, "utf8");
 const index = fs.readFileSync(indexPath, "utf8");
 
-// 1. Verify all sections from canonical JSON are in the prerendered HTML
+// 1. Verify all sections, version/date, and route metadata are in the prerendered HTML
 for (const section of policy.sections) {
   if (!privacy.includes(section.heading)) {
     console.error(`[FAIL] Missing heading in dist/privacy.html: "${section.heading}"`);
     process.exit(1);
   }
+}
+
+if (policy.lastUpdated && !privacy.includes(policy.lastUpdated)) {
+  console.error(`[FAIL] dist/privacy.html missing policy lastUpdated "${policy.lastUpdated}"`);
+  process.exit(1);
+}
+
+if (privacy.includes("October 30, 2026")) {
+  console.error("[FAIL] Stale hardcoded date October 30, 2026 found in dist/privacy.html");
+  process.exit(1);
+}
+
+if (!privacy.includes(`<title>${policy.title} — PG Cashflow</title>`)) {
+  console.error("[FAIL] dist/privacy.html missing route-specific <title>");
+  process.exit(1);
 }
 
 // 2. Ensure retired Aadhaar OTP claims are not present

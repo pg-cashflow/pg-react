@@ -37,9 +37,10 @@ export const TenantDuesView: React.FC = () => {
     <div className="space-y-4">
       {/* KYC Status Reminder Banner */}
       {!isKycVerified && (
-        <div
+        <button
+          type="button"
           onClick={() => setShowKycModal(true)}
-          className={`p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition ${
+          className={`w-full text-left p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
             isKycPendingReview
               ? "bg-warning-tint/30 border-warning/20 text-warning"
               : "bg-accent-tint border-accent/20 text-accent hover:border-accent/40"
@@ -65,7 +66,7 @@ export const TenantDuesView: React.FC = () => {
             </div>
           </div>
           <ArrowRight className="w-4 h-4 shrink-0 text-ink-muted" />
-        </div>
+        </button>
       )}
 
       {showKycModal && (

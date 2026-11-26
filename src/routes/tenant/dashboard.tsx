@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getMyDues, getMyPayments, getMyProfile } from "@/api/tenant";
+import { getMyDues, getMyProfile } from "@/api/tenant";
 import { getTenantPoints } from "@/api/gamification";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
@@ -26,11 +26,6 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
     queryFn: getMyDues,
     refetchInterval: 30000,
   });
-  const paymentsQuery = useQuery({
-    queryKey: QUERY_KEYS.tenantPayments,
-    queryFn: getMyPayments,
-    refetchInterval: 30000,
-  });
   const pointsQuery = useQuery({ queryKey: QUERY_KEYS.tenantPoints, queryFn: getTenantPoints });
   const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
 
@@ -50,13 +45,12 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
 
   return (
     <QueryState
-      isLoading={profileQuery.isLoading || duesQuery.isLoading || paymentsQuery.isLoading}
-      isError={Boolean(profileQuery.isError || duesQuery.isError || paymentsQuery.isError)}
-      error={(profileQuery.error || duesQuery.error || paymentsQuery.error) as Error | null}
+      isLoading={profileQuery.isLoading || duesQuery.isLoading}
+      isError={Boolean(profileQuery.isError || duesQuery.isError)}
+      error={(profileQuery.error || duesQuery.error) as Error | null}
       onRetry={() => {
         profileQuery.refetch();
         duesQuery.refetch();
-        paymentsQuery.refetch();
         pointsQuery.refetch();
         kycQuery.refetch();
       }}
@@ -75,9 +69,10 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
 
         {/* KYC Status Reminder Banner */}
         {!isKycVerified && (
-          <div
+          <button
+            type="button"
             onClick={() => setShowKycModal(true)}
-            className={`p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition ${
+            className={`w-full text-left p-4 rounded-[14px] border flex items-center justify-between cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
               isKycPendingReview
                 ? "bg-warning-tint/30 border-warning/20 text-warning"
                 : "bg-accent-tint border-accent/20 text-accent hover:border-accent/40"
@@ -103,7 +98,7 @@ export const TenantDashboardView: React.FC<TenantDashboardProps> = ({ onNavigate
               </div>
             </div>
             <ArrowRight className="w-4 h-4 shrink-0 text-ink-muted" />
-          </div>
+          </button>
         )}
 
         {showKycModal && (
