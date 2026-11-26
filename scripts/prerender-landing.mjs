@@ -461,7 +461,7 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
     ],
     list: [
       "Source Reversal (Within 120 Days): If the move-out settlement occurs within 120 days of the deposit payment, the refund is initiated via the Payment Gateway Source Refund API directly back to the original funding instrument (UPI ID, debit/credit card, or netbanking account).",
-      "Payments Exceeding 120 Days: Under PG Cashflow's operational refund window (within Cashfree's six-month PG refund limit), automated gateway source refunds are accepted only within 120 days. Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed."
+      "Payments Exceeding 120 Days: Under PG Cashflow's operational refund window, automated gateway source refunds are accepted only within 120 days (Cashfree's published Customer Grievance Redressal Policy cites 120 days subject to acquiring-bank support, while Merchant Terms cite 180 days). Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed."
     ]
   },
   {
@@ -482,7 +482,7 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
     list: [
       "UPI, Cards & Netbanking: Credit to the customer account typically takes 5 to 7 working days after initiation, subject to receiving bank clearance and acquiring bank exceptions.",
       "Direct IMPS Payouts: Credited within minutes of release by the property owner, subject to beneficiary bank network availability.",
-      "Gateway Cutoff Limit: Under PG Cashflow's operational policy, gateway source refunds are permitted within 120 days of payment (within Cashfree's six-month PG limit). Transactions older than 120 days require offline verification and settlement."
+      "Gateway Cutoff Limit: Under PG Cashflow's operational policy, automated gateway source refunds are permitted within 120 days of payment. Transactions older than 120 days require offline verification and settlement."
     ]
   },
   {

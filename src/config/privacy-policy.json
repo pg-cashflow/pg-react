@@ -1,7 +1,7 @@
 {
-  "policyVersion": "2026.11.1",
+  "policyVersion": "2026.11.2",
   "effectiveDate": "2026-11-17",
-  "lastUpdated": "November 17, 2026",
+  "lastUpdated": "November 26, 2026",
   "title": "Privacy Policy",
   "subtitle": "How PG Cashflow handles, protects, and stores personal data under the Digital Personal Data Protection (DPDP) Act, 2023.",
   "dpdpCommencementNotice": "Certain provisions and Rule 4 commenced on 13 November 2026, with substantive provisions and remaining Rules scheduled for commencement on 13 May 2027.",
@@ -42,7 +42,7 @@
       "id": "security-encryption",
       "heading": "4. Data Security, Encryption & Storage",
       "paragraphs": [
-        "All data in transit is encrypted using Transport Layer Security (TLS 1.3). Sensitive identity and transaction records at rest are secured using AES-256 encryption. Access to tenant records is restricted by role-based scopes (Wardens cannot view owner bank accounts or tenant financial histories outside their building). Documents are served exclusively through authenticated, role- and property-scoped API endpoints with strict no-store caching directives and access audit logging."
+        "Traffic between clients and our edge/API endpoints uses HTTPS/TLS, and sensitive KYC document bytes and payout/refund bank-account details are encrypted at rest using AES-256-GCM. Access to tenant records is restricted by role-based scopes (Wardens cannot view owner bank accounts or tenant financial histories outside their building). Documents are served exclusively through authenticated, role- and property-scoped API endpoints with strict no-store caching directives and access audit logging."
       ]
     },
     {

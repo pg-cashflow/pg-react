@@ -38,7 +38,7 @@ export const RefundPolicyPage: React.FC = () => {
               <strong>Source Reversal (Within 120 Days):</strong> If the move-out settlement occurs within 120 days of the deposit payment, the refund is initiated via the Payment Gateway Source Refund API directly back to the original funding instrument (UPI ID, debit/credit card, or netbanking account).
             </li>
             <li>
-              <strong>Payments Exceeding 120 Days:</strong> Under PG Cashflow's operational refund window (within Cashfree's six-month PG refund limit), automated gateway source refunds are accepted only within 120 days. Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed.
+              <strong>Payments Exceeding 120 Days:</strong> Under PG Cashflow's operational refund window, automated gateway source refunds are accepted only within 120 days (Cashfree's published Customer Grievance Redressal Policy cites 120 days subject to acquiring-bank support, while Merchant Terms cite 180 days). Any deposit settlement beyond 120 days requires explicit operational review and offline verification before funds can be disbursed.
             </li>
           </ul>
         </div>
@@ -63,7 +63,7 @@ export const RefundPolicyPage: React.FC = () => {
         <ul className="list-disc pl-5 space-y-1.5 t-body-sm text-ink-muted">
           <li><strong>UPI, Cards &amp; Netbanking:</strong> Credit to the customer account typically takes 5 to 7 working days after initiation, subject to receiving bank clearance and acquiring bank exceptions.</li>
           <li><strong>Direct IMPS Payouts:</strong> Credited within minutes of release by the property owner, subject to beneficiary bank network availability.</li>
-          <li><strong>Gateway Cutoff Limit:</strong> Under PG Cashflow's operational policy, gateway source refunds are permitted within 120 days of payment (within Cashfree's six-month PG limit). Transactions older than 120 days require offline verification and settlement.</li>
+          <li><strong>Gateway Cutoff Limit:</strong> Under PG Cashflow's operational policy, automated gateway source refunds are permitted within 120 days of payment. Transactions older than 120 days require offline verification and settlement.</li>
         </ul>
       </section>
 
