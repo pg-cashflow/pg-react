@@ -722,6 +722,8 @@ export const enIN = {
   "tenant.dues.batchCheckAgain": "Check status",
   "tenant.dues.batchUnavailable": "Online batch checkout is currently unavailable for this selection.",
   "tenant.dues.batchDuesCount": "{count} dues selected",
+  "tenant.dues.offlineSummaryTitle": "Offline summary (saved locally)",
+  "tenant.dues.offlineSummaryBody": "Outstanding: {amount} across {count} pending due(s).",
   "tenant.dues.hidePay": "Hide pay",
   "tenant.dues.pay": "Pay",
   "paypanel.dueCodeLabel": "Due code / UPI note",

@@ -725,6 +725,8 @@ export const teIN: Record<MessageKey, string> = {
   "tenant.dues.batchCheckAgain": "స్థితి తనిఖీ చేయండి",
   "tenant.dues.batchUnavailable": "ఈ ఎంపికకు ఆన్‌లైన్ బ్యాచ్ చెక్‌అవుట్ ప్రస్తుతం అందుబాటులో లేదు.",
   "tenant.dues.batchDuesCount": "{count} బకాయిలు ఎంచుకోబడ్డాయి",
+  "tenant.dues.offlineSummaryTitle": "ఆఫ్‌లైన్ సారాంశం (స్థానికంగా సేవ్ చేయబడింది)",
+  "tenant.dues.offlineSummaryBody": "బకాయి మొత్తం: {amount} ({count} పెండింగ్ బకాయిలు).",
   "tenant.dues.hidePay": "చెల్లింపును దాచండి",
   "tenant.dues.pay": "చెల్లించండి",
   "paypanel.dueCodeLabel": "బకాయి కోడ్ / UPI నోట్",

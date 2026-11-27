@@ -107,6 +107,7 @@ export const TenantBatchPayPanel: React.FC<{ onPaid?: () => void }> = ({ onPaid 
       if (
         intent.mode !== "cashfree" ||
         !intent.payable ||
+        !intent.order_id ||
         !intent.payment_session_id ||
         !sameDueSet(intent.due_ids, selectedOption.due_ids) ||
         (intent.due_count !== undefined && intent.due_count !== selectedOption.due_ids.length)
@@ -116,7 +117,7 @@ export const TenantBatchPayPanel: React.FC<{ onPaid?: () => void }> = ({ onPaid 
         return;
       }
 
-      const orderId = intent.due_code;
+      const orderId = intent.order_id;
       setLastOrderId(orderId);
       setLastDueIds(selectedOption.due_ids);
       setState("CHECKOUT_OPEN");

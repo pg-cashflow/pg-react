@@ -1,4 +1,4 @@
-import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { getStoredUser } from "@/auth/storage";
 
 export const PASSBOOK_STORAGE_KEY = "pg_passbook_cache";
@@ -6,25 +6,34 @@ export const PASSBOOK_OPT_IN_STORAGE_KEY = "pg_passbook_offline_enabled";
 export const PASSBOOK_OPT_OUT_STORAGE_KEY = "pg_passbook_offline_disabled";
 
 /**
- * Maximum time financial records remain in offline browser storage.
- * Invariant: Financial data retention is capped at 1 hour (down from 24h) to limit local exposure.
+ * Maximum time aggregate summary remains in offline browser storage.
+ * Invariant: Financial data retention is capped at 1 hour to limit local exposure.
  */
 export const PASSBOOK_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
 const PASSBOOK_QUERY_PREFIXES = new Set(["dues", "payments", "points"]);
 
-/**
- * Checks if a query key belongs to the tenant passbook domain.
- */
+export interface OfflinePassbookSummary {
+  outstanding_total: number;
+  pending_due_count: number;
+  next_due_date: string | null;
+  next_due_amount: number | null;
+  total_paid: number;
+  saved_at: number;
+}
+
+interface StoredPassbookEnvelope {
+  version: 2;
+  userId: string;
+  savedAt: number;
+  summary: Omit<OfflinePassbookSummary, "saved_at">;
+}
+
 function isPassbookKey(queryKey: readonly unknown[]): boolean {
   if (!Array.isArray(queryKey) || queryKey.length < 2) return false;
   return queryKey[0] === "tenant" && typeof queryKey[1] === "string" && PASSBOOK_QUERY_PREFIXES.has(queryKey[1]);
 }
 
-/**
- * Returns true if the user has explicitly opted into offline passbook storage in localStorage.
- * Default is FALSE (TanStack Query in-memory caching only, zero localStorage exposure by default).
- */
 export function isPassbookOfflineEnabled(): boolean {
   try {
     if (typeof window === "undefined") return false;
@@ -34,18 +43,10 @@ export function isPassbookOfflineEnabled(): boolean {
   }
 }
 
-/**
- * Returns true if offline passbook storage is disabled.
- * In-memory by default, so offline localStorage is disabled unless opted in.
- */
 export function isPassbookOfflineDisabled(): boolean {
   return !isPassbookOfflineEnabled();
 }
 
-/**
- * Sets user preference for offline passbook storage.
- * If enabling, sets opt-in key. If disabling, removes key and purges cached passbook data.
- */
 export function setPassbookOfflineEnabled(enabled: boolean): void {
   try {
     if (typeof window === "undefined") return;
@@ -60,68 +61,71 @@ export function setPassbookOfflineEnabled(enabled: boolean): void {
   } catch {}
 }
 
-/**
- * Sets user preference for offline passbook storage (disabled = !enabled).
- */
 export function setPassbookOfflineDisabled(disabled: boolean): void {
   setPassbookOfflineEnabled(!disabled);
 }
 
-/**
- * Returns the timestamp when passbook data was last saved to offline storage, or null if empty.
- */
-export function getPassbookLastSync(): number | null {
+function readValidEnvelope(): StoredPassbookEnvelope | null {
   try {
     if (typeof window === "undefined") return null;
+    if (!isPassbookOfflineEnabled()) {
+      clearPassbookCache();
+      return null;
+    }
     const raw = localStorage.getItem(PASSBOOK_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return typeof parsed.savedAt === "number" ? parsed.savedAt : null;
+    if (raw.length > 16_384) {
+      clearPassbookCache();
+      return null;
+    }
+    const parsed = JSON.parse(raw) as Partial<StoredPassbookEnvelope>;
+    const user = getStoredUser();
+    const now = Date.now();
+    if (
+      parsed.version !== 2 ||
+      user?.role !== "tenant" ||
+      parsed.userId !== user.id ||
+      typeof parsed.savedAt !== "number" ||
+      !Number.isFinite(parsed.savedAt) ||
+      now - parsed.savedAt > PASSBOOK_MAX_AGE_MS ||
+      parsed.savedAt > now ||
+      !parsed.summary ||
+      typeof parsed.summary.outstanding_total !== "number" ||
+      typeof parsed.summary.pending_due_count !== "number" ||
+      typeof parsed.summary.total_paid !== "number"
+    ) {
+      clearPassbookCache();
+      return null;
+    }
+    return parsed as StoredPassbookEnvelope;
   } catch {
+    clearPassbookCache();
     return null;
   }
 }
 
-function maskRef(value: unknown): string | undefined {
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  return value.length <= 4 ? "****" : `****${value.slice(-4)}`;
+export function getPassbookLastSync(): number | null {
+  const env = readValidEnvelope();
+  return env ? env.savedAt : null;
+}
+
+export function getOfflinePassbookSummary(): OfflinePassbookSummary | null {
+  const env = readValidEnvelope();
+  if (!env) return null;
+  return {
+    outstanding_total: env.summary.outstanding_total,
+    pending_due_count: env.summary.pending_due_count,
+    next_due_date: env.summary.next_due_date ?? null,
+    next_due_amount: env.summary.next_due_amount ?? null,
+    total_paid: env.summary.total_paid,
+    saved_at: env.savedAt,
+  };
 }
 
 /**
- * Sanitizes passbook query data to a minimal masked summary before persisting to localStorage
- * (Decision 6: never store full raw financial/PII payloads in browser storage).
- */
-function sanitizePassbookData(queryKey: readonly unknown[], data: unknown): unknown {
-  const domain = queryKey[1];
-  if (domain === "dues" && Array.isArray(data)) {
-    return data.map((d: Record<string, unknown>) => ({
-      id: d.id,
-      due_code: maskRef(d.due_code),
-      due_date: d.due_date,
-      amount: d.amount,
-      status: d.status,
-      kind: d.kind,
-    }));
-  }
-  if (domain === "payments" && Array.isArray(data)) {
-    return data.map((p: Record<string, unknown>) => ({
-      id: p.id,
-      amount: p.amount,
-      status: p.status,
-      paid_at: p.paid_at,
-      reference: maskRef(p.provider_payment_id ?? p.upi_txn_id ?? p.receipt_number),
-    }));
-  }
-  if (domain === "points" && data && typeof data === "object") {
-    const pts = data as Record<string, unknown>;
-    return { balance: pts.balance, tier: pts.tier };
-  }
-  return data;
-}
-
-/**
- * Dehydrates passbook queries as minimal masked summaries and persists them to localStorage
- * when the user has explicitly opted in.
+ * Computes and persists an allowlisted aggregate-only summary DTO to localStorage
+ * when the user has explicitly opted in. Never stores individual due/payment records,
+ * internal IDs, or transaction references.
  */
 export function savePassbookCache(client: QueryClient): void {
   try {
@@ -133,78 +137,69 @@ export function savePassbookCache(client: QueryClient): void {
 
     const user = getStoredUser();
     if (!user?.id || user.role !== "tenant") return;
-    const dehydrated = dehydrate(client, {
-      shouldDehydrateQuery: (query) => {
-        return query.state.status === "success" && isPassbookKey(query.queryKey);
-      },
-    });
 
-    if (dehydrated.queries.length > 0) {
-      const maskedState = {
-        ...dehydrated,
-        queries: dehydrated.queries.map((q) => ({
-          ...q,
-          state: {
-            ...q.state,
-            data: sanitizePassbookData(q.queryKey, q.state.data),
-          },
-        })),
-      };
-      const raw = JSON.stringify({ version: 1, userId: user.id, savedAt: Date.now(), state: maskedState });
-      // Bound synchronous storage work on the main thread.
-      if (raw.length <= 500_000) localStorage.setItem(PASSBOOK_STORAGE_KEY, raw);
-      else localStorage.removeItem(PASSBOOK_STORAGE_KEY);
-    } else {
+    const duesData = client.getQueryData<Array<Record<string, unknown>>>(["tenant", "dues"]);
+    const paymentsData = client.getQueryData<Array<Record<string, unknown>>>(["tenant", "payments"]);
+
+    if (!Array.isArray(duesData) && !Array.isArray(paymentsData)) {
       localStorage.removeItem(PASSBOOK_STORAGE_KEY);
+      return;
     }
+
+    let outstandingTotal = 0;
+    let pendingDueCount = 0;
+    let nextDueDate: string | null = null;
+    let nextDueAmount: number | null = null;
+
+    if (Array.isArray(duesData)) {
+      const openDues = duesData
+        .filter((d) => (d.status === "pending" || d.status === "partial") && typeof d.amount === "number" && d.amount > 0)
+        .sort((a, b) => String(a.due_date ?? "").localeCompare(String(b.due_date ?? "")));
+      pendingDueCount = openDues.length;
+      for (const d of openDues) {
+        outstandingTotal += Number(d.amount);
+      }
+      if (openDues.length > 0) {
+        nextDueDate = typeof openDues[0].due_date === "string" ? openDues[0].due_date : null;
+        nextDueAmount = typeof openDues[0].amount === "number" ? openDues[0].amount : null;
+      }
+    }
+
+    let totalPaid = 0;
+    if (Array.isArray(paymentsData)) {
+      for (const p of paymentsData) {
+        if (typeof p.amount === "number" && p.amount > 0 && (p.status === undefined || p.status === "paid" || p.status === "success")) {
+          totalPaid += p.amount;
+        }
+      }
+    }
+
+    const envelope: StoredPassbookEnvelope = {
+      version: 2,
+      userId: user.id,
+      savedAt: Date.now(),
+      summary: {
+        outstanding_total: outstandingTotal,
+        pending_due_count: pendingDueCount,
+        next_due_date: nextDueDate,
+        next_due_amount: nextDueAmount,
+        total_paid: totalPaid,
+      },
+    };
+    localStorage.setItem(PASSBOOK_STORAGE_KEY, JSON.stringify(envelope));
   } catch {
     // QuotaExceededError or private browsing restriction: fail safe
   }
 }
 
 /**
- * Restores passbook queries from localStorage into the QueryClient cache.
+ * Validates any stored offline summary on cold boot (enforcing user isolation and 1h TTL)
+ * without hydrating individual financial records into TanStack Query.
  */
-export function restorePassbookCache(client: QueryClient): void {
-  try {
-    if (typeof window === "undefined") return;
-    if (!isPassbookOfflineEnabled()) {
-      clearPassbookCache();
-      return;
-    }
-
-    const raw = localStorage.getItem(PASSBOOK_STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    const user = getStoredUser();
-    if (
-      raw.length > 500_000 ||
-      parsed.version !== 1 ||
-      user?.role !== "tenant" ||
-      parsed.userId !== user.id ||
-      !Number.isFinite(parsed.savedAt) ||
-      Date.now() - parsed.savedAt > PASSBOOK_MAX_AGE_MS ||
-      parsed.savedAt > Date.now() ||
-      !Array.isArray(parsed.state?.queries)
-    ) {
-      clearPassbookCache();
-      return;
-    }
-    hydrate(client, {
-      mutations: [],
-      queries: parsed.state.queries.filter((query: { queryKey: readonly unknown[] }) => isPassbookKey(query.queryKey)),
-    });
-  } catch {
-    // Malformed JSON or outdated structure: purge corrupt key
-    try {
-      localStorage.removeItem(PASSBOOK_STORAGE_KEY);
-    } catch {}
-  }
+export function restorePassbookCache(_client: QueryClient): void {
+  readValidEnvelope();
 }
 
-/**
- * Purges the offline passbook cache from localStorage on user logout.
- */
 export function clearPassbookCache(): void {
   try {
     if (typeof window === "undefined") return;
@@ -212,11 +207,7 @@ export function clearPassbookCache(): void {
   } catch {}
 }
 
-/**
- * Subscribes to QueryClient mutations and updates the passbook cache with debouncing.
- */
 export function setupPassbookCache(client: QueryClient): () => void {
-  // Rehydrate on bootstrap
   restorePassbookCache(client);
 
   let saveTimer: ReturnType<typeof setTimeout> | null = null;

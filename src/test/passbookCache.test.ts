@@ -13,9 +13,10 @@ import {
   setPassbookOfflineEnabled,
   setPassbookOfflineDisabled,
   getPassbookLastSync,
+  getOfflinePassbookSummary,
 } from "../lib/passbookCache";
 
-describe("passbookCache", () => {
+describe("passbookCache (aggregate-only DTO)", () => {
   let client: QueryClient;
 
   beforeEach(() => {
@@ -28,49 +29,72 @@ describe("passbookCache", () => {
     expect(isPassbookOfflineEnabled()).toBe(false);
     expect(isPassbookOfflineDisabled()).toBe(true);
 
-    client.setQueryData(["tenant", "dues"], [{ id: "due_1", amount: 6500 }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_1", amount: 6500, status: "pending" }]);
     savePassbookCache(client);
 
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
   });
 
-  it("persists only tenant passbook queries to localStorage when opted in", () => {
+  it("persists only an allowlisted aggregate DTO with no individual records, IDs, or references", () => {
     setPassbookOfflineEnabled(true);
-    expect(isPassbookOfflineEnabled()).toBe(true);
-    expect(isPassbookOfflineDisabled()).toBe(false);
-
-    client.setQueryData(["tenant", "dues"], [{ id: "due_1", amount: 6500 }]);
-    client.setQueryData(["tenant", "payments"], [{ id: "pay_1", amount: 6500 }]);
-    client.setQueryData(["owner", "dues"], [{ id: "owner_due_1", amount: 10000 }]);
+    client.setQueryData(["tenant", "dues"], [
+      { id: "due_1", due_code: "RENT-NOV", due_date: "2026-11-05", amount: 650000, status: "pending" },
+      { id: "due_2", due_code: "RENT-DEC", due_date: "2026-12-05", amount: 700000, status: "pending" },
+    ]);
+    client.setQueryData(["tenant", "payments"], [
+      { id: "pay_1", amount: 650000, status: "paid", upi_txn_id: "UTR99887766", provider_payment_id: "cf_pay_123" },
+    ]);
+    client.setQueryData(["owner", "dues"], [{ id: "owner_due_1", amount: 1000000, status: "pending" }]);
 
     savePassbookCache(client);
 
     const storedRaw = localStorage.getItem(PASSBOOK_STORAGE_KEY);
     expect(storedRaw).toBeTruthy();
 
-    const parsed = JSON.parse(storedRaw!);
-    const keys = parsed.state.queries.map((q: { queryKey: unknown[] }) => q.queryKey);
+    // Forbidden individual fields/IDs/references must never appear in localStorage
+    expect(storedRaw).not.toContain("due_1");
+    expect(storedRaw).not.toContain("due_2");
+    expect(storedRaw).not.toContain("pay_1");
+    expect(storedRaw).not.toContain("RENT-NOV");
+    expect(storedRaw).not.toContain("UTR99887766");
+    expect(storedRaw).not.toContain("cf_pay_123");
+    expect(storedRaw).not.toContain("owner_due_1");
+    expect(storedRaw).not.toContain("queries");
 
-    expect(keys).toContainEqual(["tenant", "dues"]);
-    expect(keys).toContainEqual(["tenant", "payments"]);
-    expect(keys).not.toContainEqual(["owner", "dues"]);
+    const parsed = JSON.parse(storedRaw!);
+    expect(parsed.version).toBe(2);
+    expect(Object.keys(parsed.summary).sort()).toEqual([
+      "next_due_amount",
+      "next_due_date",
+      "outstanding_total",
+      "pending_due_count",
+      "total_paid",
+    ]);
+    expect(parsed.summary).toEqual({
+      outstanding_total: 1350000,
+      pending_due_count: 2,
+      next_due_date: "2026-11-05",
+      next_due_amount: 650000,
+      total_paid: 650000,
+    });
   });
 
-  it("restores cached passbook queries on cold boot when opted in", () => {
+  it("never hydrates individual dues or payments arrays into QueryClient on cold boot", () => {
     setPassbookOfflineEnabled(true);
-    client.setQueryData(["tenant", "dues"], [{ id: "due_cached", amount: 8000 }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_cached", amount: 8000, status: "pending", due_date: "2026-11-01" }]);
     savePassbookCache(client);
 
     const freshClient = new QueryClient();
-    expect(freshClient.getQueryData(["tenant", "dues"])).toBeUndefined();
-
     restorePassbookCache(freshClient);
-    expect(freshClient.getQueryData(["tenant", "dues"])).toEqual([{ id: "due_cached", amount: 8000 }]);
+
+    expect(freshClient.getQueryData(["tenant", "dues"])).toBeUndefined();
+    expect(freshClient.getQueryData(["tenant", "payments"])).toBeUndefined();
+    expect(getOfflinePassbookSummary()?.outstanding_total).toBe(8000);
   });
 
   it("purges storage cleanly on clearPassbookCache", () => {
     setPassbookOfflineEnabled(true);
-    client.setQueryData(["tenant", "dues"], [{ id: "due_1" }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_1", amount: 1000, status: "pending" }]);
     savePassbookCache(client);
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeTruthy();
 
@@ -78,43 +102,42 @@ describe("passbookCache", () => {
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
   });
 
-  it("does not restore another account's financial data", () => {
+  it("does not expose another account's offline summary", () => {
     setPassbookOfflineEnabled(true);
-    client.setQueryData(["tenant", "dues"], [{ id: "private-due" }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "private-due", amount: 5000, status: "pending" }]);
     savePassbookCache(client);
     setStoredUser({ id: "tenant-user-2", role: "tenant", phone: "+919000000002" });
     const fresh = new QueryClient();
     restorePassbookCache(fresh);
-    expect(fresh.getQueryData(["tenant", "dues"])).toBeUndefined();
+    expect(getOfflinePassbookSummary()).toBeNull();
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
   });
 
-  it("removes cached finance records after the 1-hour offline limit (PASSBOOK_MAX_AGE_MS)", () => {
+  it("removes cached summary after the 1-hour offline limit (PASSBOOK_MAX_AGE_MS)", () => {
     setPassbookOfflineEnabled(true);
-    client.setQueryData(["tenant", "dues"], [{ id: "expired-due" }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "expired-due", amount: 5000, status: "pending" }]);
     savePassbookCache(client);
     const data = JSON.parse(localStorage.getItem(PASSBOOK_STORAGE_KEY)!);
-    // Move savedAt back by 65 minutes (exceeding PASSBOOK_MAX_AGE_MS = 60 mins)
     data.savedAt -= PASSBOOK_MAX_AGE_MS + 5 * 60 * 1000;
     localStorage.setItem(PASSBOOK_STORAGE_KEY, JSON.stringify(data));
     const fresh = new QueryClient();
     restorePassbookCache(fresh);
-    expect(fresh.getQueryData(["tenant", "dues"])).toBeUndefined();
+    expect(getOfflinePassbookSummary()).toBeNull();
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
   });
 
   it("handles user preference toggling via setPassbookOfflineDisabled", () => {
     expect(isPassbookOfflineDisabled()).toBe(true);
 
-    setPassbookOfflineDisabled(false); // opt in
+    setPassbookOfflineDisabled(false);
     expect(isPassbookOfflineDisabled()).toBe(false);
     expect(isPassbookOfflineEnabled()).toBe(true);
 
-    client.setQueryData(["tenant", "dues"], [{ id: "due_opt_in" }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_opt_in", amount: 1000, status: "pending" }]);
     savePassbookCache(client);
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeTruthy();
 
-    setPassbookOfflineDisabled(true); // opt out
+    setPassbookOfflineDisabled(true);
     expect(isPassbookOfflineDisabled()).toBe(true);
     expect(isPassbookOfflineEnabled()).toBe(false);
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
@@ -124,7 +147,7 @@ describe("passbookCache", () => {
     setPassbookOfflineEnabled(true);
     expect(getPassbookLastSync()).toBeNull();
 
-    client.setQueryData(["tenant", "dues"], [{ id: "due_sync_check" }]);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_sync_check", amount: 1000, status: "pending" }]);
     savePassbookCache(client);
 
     const lastSync = getPassbookLastSync();
@@ -139,20 +162,14 @@ describe("passbookCache", () => {
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
   });
 
-  it("debounces save on setupPassbookCache query updates when opted in", async () => {
-    setPassbookOfflineEnabled(true);
+  it("setupPassbookCache subscribes to QueryClient and persists aggregate summary on success", () => {
     vi.useFakeTimers();
-    const unsubscribe = setupPassbookCache(client);
-
-    client.setQueryData(["tenant", "dues"], [{ id: "due_stream" }]);
-    // Before debounce timer
-    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
-
-    // Fast-forward past debounce
+    setPassbookOfflineEnabled(true);
+    const cleanup = setupPassbookCache(client);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_sub", amount: 3000, status: "pending" }]);
     vi.advanceTimersByTime(350);
-    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeTruthy();
-
-    unsubscribe();
+    expect(getOfflinePassbookSummary()?.outstanding_total).toBe(3000);
+    cleanup();
     vi.useRealTimers();
   });
 });

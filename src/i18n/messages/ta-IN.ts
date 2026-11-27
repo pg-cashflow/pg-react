@@ -725,6 +725,8 @@ export const taIN: Record<MessageKey, string> = {
   "tenant.dues.batchCheckAgain": "நிலையைச் சரிபார்க்கவும்",
   "tenant.dues.batchUnavailable": "இந்தத் தேர்விற்கு ஆன்லைன் தொகுப்பு செக்அவுட் தற்போது கிடைக்கவில்லை.",
   "tenant.dues.batchDuesCount": "{count} நிலுவைகள் தேர்ந்தெடுக்கப்பட்டன",
+  "tenant.dues.offlineSummaryTitle": "ஆஃப்லைன் சுருக்கம் (உள்ளூரில் சேமிக்கப்பட்டது)",
+  "tenant.dues.offlineSummaryBody": "நிலுவை: {amount} ({count} நிலுவையில் உள்ளவை).",
   "tenant.dues.hidePay": "கட்டணத்தை மறை",
   "tenant.dues.pay": "செலுத்து",
   "paypanel.dueCodeLabel": "நிலுவை குறியீடு / UPI குறிப்பு",

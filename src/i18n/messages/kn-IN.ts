@@ -726,6 +726,8 @@ export const knIN: Record<MessageKey, string> = {
   "tenant.dues.batchCheckAgain": "ಸ್ಥಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಿ",
   "tenant.dues.batchUnavailable": "ಈ ಆಯ್ಕೆಗೆ ಆನ್‌ಲೈನ್ ಬ್ಯಾಚ್ ಚೆಕ್‌ಔಟ್ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ.",
   "tenant.dues.batchDuesCount": "{count} ಬಾಕಿಗಳನ್ನು ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ",
+  "tenant.dues.offlineSummaryTitle": "ಆಫ್‌ಲೈನ್ ಸಾರಾಂಶ (ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಲಾಗಿದೆ)",
+  "tenant.dues.offlineSummaryBody": "ಬಾಕಿ ಮೊತ್ತ: {amount} ({count} ಬಾಕಿ ಇರುವವು).",
   "tenant.dues.hidePay": "ಪಾವತಿಯನ್ನು ಮರೆಮಾಡಿ",
   "tenant.dues.pay": "ಪಾವತಿಸಿ",
   "paypanel.dueCodeLabel": "ಬಾಕಿ ಕೋಡ್ / UPI ಟಿಪ್ಪಣಿ",

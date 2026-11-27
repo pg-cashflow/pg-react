@@ -10,7 +10,8 @@ import { PayPanel } from "@/components/shared/PayPanel";
 import { TenantBatchPayPanel } from "@/components/shared/TenantBatchPayPanel";
 import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
-import { displayDueStatus, formatDate, formatDaysOverdue, getDaysOverdue, isOverdue } from "@/lib/utils";
+import { displayDueStatus, formatDate, formatDaysOverdue, formatPaise, getDaysOverdue, isOverdue } from "@/lib/utils";
+import { getOfflinePassbookSummary } from "@/lib/passbookCache";
 import { useLocale } from "@/i18n";
 import { ShieldCheck, Clock, ArrowRight } from "lucide-react";
 
@@ -29,6 +30,7 @@ export const TenantDuesView: React.FC = () => {
   const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
 
   const dues = duesQuery.data ?? [];
+  const offlineSummary = duesQuery.isError ? getOfflinePassbookSummary() : null;
   const awaitingAllocation = profileQuery.data?.status === "pending_allocation";
   const kyc = kycQuery.data?.verification;
   const isKycVerified = kyc?.status === "verified";
@@ -88,6 +90,17 @@ export const TenantDuesView: React.FC = () => {
         </div>
       )}
       {isKycVerified && <TenantBatchPayPanel onPaid={() => void duesQuery.refetch()} />}
+      {offlineSummary && (
+        <div role="status" className="rounded-[14px] border border-hairline bg-surface p-4 space-y-1">
+          <p className="t-body-sm font-semibold text-ink">{t("tenant.dues.offlineSummaryTitle")}</p>
+          <p className="t-caption text-ink-muted">
+            {t("tenant.dues.offlineSummaryBody", {
+              amount: formatPaise(offlineSummary.outstanding_total),
+              count: offlineSummary.pending_due_count,
+            })}
+          </p>
+        </div>
+      )}
       <QueryState
         isLoading={duesQuery.isLoading}
         isError={duesQuery.isError}
