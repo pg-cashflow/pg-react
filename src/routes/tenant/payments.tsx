@@ -35,15 +35,15 @@ export const TenantPaymentsView: React.FC = () => {
 
   return (
     <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
-      {(isOffline || isError) && (
-        <div role="status" className="bg-warning-tint border-b border-warning/30 px-4 py-2.5 space-y-1 text-xs text-warning">
+      {isOffline && (
+        <div role="status" className="bg-warning-tint border-b border-warning/30 px-4 py-3 space-y-1 text-xs text-warning">
           <div className="flex items-center justify-between">
             <span className="font-medium">{t("tenant.offlineSnapshot")}</span>
             <span className="text-muted">
               {lastSync ? t("tenant.lastSynced", { time: formatDate(new Date(lastSync).toISOString()) }) : t("tenant.offlineView")}
             </span>
           </div>
-          {offlineSummary && (
+          {offlineSummary ? (
             <p className="text-ink-muted">
               {t("tenant.dues.offlineSummaryTitle")}: {formatPaise(offlineSummary.total_paid)} ·{" "}
               {t("tenant.dues.offlineSummaryBody", {
@@ -51,52 +51,73 @@ export const TenantPaymentsView: React.FC = () => {
                 count: offlineSummary.pending_due_count,
               })}
             </p>
+          ) : (
+            <p className="text-ink-muted">{t("tenant.dues.offlineUnavailableBody")}</p>
           )}
         </div>
       )}
-      <QueryState
-        isLoading={isLoading}
-        isError={isError}
-        error={error as Error | null}
-        isEmpty={!isLoading && !isError && sorted.length === 0}
-        loadingMessage={t("tenant.loadingPayments")}
-        emptyMessage={t("tenant.noPayments")}
-        onRetry={() => refetch()}
-      >
-        <div className="divide-y divide-hairline">
-          {sorted.map((p) => {
-            const refId = p.upi_txn_id || p.cf_payment_id || p.provider_payment_id;
-            return (
-              <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <p className="text-sm text-ink">{formatMatchedBy(p.matched_by, t)}</p>
-                  <p className="text-xs text-ink-muted">{formatDate(p.matched_at)}</p>
-                  {refId && (
-                    <div className="flex items-center gap-1.5 pt-0.5">
-                      <span className="t-micro font-mono text-ink-muted select-all">
-                        Ref: {refId}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(refId)}
-                        title="Copy reference ID"
-                        className="p-1 rounded hover:bg-hairline/20 text-ink-muted hover:text-ink transition"
-                      >
-                        {copiedId === refId ? (
-                          <Check className="w-3 h-3 text-success" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <AmountBadge amount={p.amount} variant="success" />
-              </div>
-            );
-          })}
+      {isOnline && isError && offlineSummary && (
+        <div role="status" className="bg-warning-tint border-b border-warning/30 px-4 py-2.5 space-y-1 text-xs text-warning">
+          <div className="flex items-center justify-between">
+            <span className="font-medium">{t("tenant.payments.apiErrorSnapshot")}</span>
+            <span className="text-muted">
+              {lastSync ? t("tenant.lastSynced", { time: formatDate(new Date(lastSync).toISOString()) }) : null}
+            </span>
+          </div>
+          <p className="text-ink-muted">
+            {t("tenant.dues.apiErrorFallbackDesc")} {formatPaise(offlineSummary.total_paid)} ·{" "}
+            {t("tenant.dues.offlineSummaryBody", {
+              amount: formatPaise(offlineSummary.outstanding_total),
+              count: offlineSummary.pending_due_count,
+            })}
+          </p>
         </div>
-      </QueryState>
+      )}
+      {!isOffline && (
+        <QueryState
+          isLoading={isLoading}
+          isError={isError}
+          error={error as Error | null}
+          isEmpty={!isLoading && !isError && sorted.length === 0}
+          loadingMessage={t("tenant.loadingPayments")}
+          emptyMessage={t("tenant.noPayments")}
+          onRetry={() => refetch()}
+        >
+          <div className="divide-y divide-hairline">
+            {sorted.map((p) => {
+              const refId = p.upi_txn_id || p.cf_payment_id || p.provider_payment_id;
+              return (
+                <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-sm text-ink">{formatMatchedBy(p.matched_by, t)}</p>
+                    <p className="text-xs text-ink-muted">{formatDate(p.matched_at)}</p>
+                    {refId && (
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <span className="t-micro font-mono text-ink-muted select-all">
+                          Ref: {refId}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(refId)}
+                          title="Copy reference ID"
+                          className="p-1 rounded hover:bg-hairline/20 text-ink-muted hover:text-ink transition"
+                        >
+                          {copiedId === refId ? (
+                            <Check className="w-3 h-3 text-success" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <AmountBadge amount={p.amount} variant="success" />
+                </div>
+              );
+            })}
+          </div>
+        </QueryState>
+      )}
     </div>
   );
 };

@@ -94,9 +94,25 @@ export const TenantDuesView: React.FC = () => {
         </div>
       )}
       {isKycVerified && canTransactOnline && <TenantBatchPayPanel onPaid={() => void duesQuery.refetch()} />}
-      {offlineSummary && (
+      {isOffline && (
         <div role="status" className="rounded-[14px] border border-hairline bg-surface p-4 space-y-1">
-          <p className="t-body-sm font-semibold text-ink">{t("tenant.dues.offlineSummaryTitle")}</p>
+          <p className="t-body-sm font-semibold text-ink">
+            {offlineSummary ? t("tenant.dues.offlineSummaryTitle") : t("tenant.dues.offlineUnavailableTitle")}
+          </p>
+          <p className="t-caption text-ink-muted">
+            {offlineSummary
+              ? t("tenant.dues.offlineSummaryBody", {
+                  amount: formatPaise(offlineSummary.outstanding_total),
+                  count: offlineSummary.pending_due_count,
+                })
+              : t("tenant.dues.offlineUnavailableBody")}
+          </p>
+        </div>
+      )}
+      {isOnline && duesQuery.isError && offlineSummary && (
+        <div role="status" className="rounded-[14px] border border-warning/30 bg-warning-tint p-4 space-y-1">
+          <p className="t-body-sm font-semibold text-warning">{t("tenant.dues.apiErrorFallbackTitle")}</p>
+          <p className="t-caption text-ink-muted">{t("tenant.dues.apiErrorFallbackDesc")}</p>
           <p className="t-caption text-ink-muted">
             {t("tenant.dues.offlineSummaryBody", {
               amount: formatPaise(offlineSummary.outstanding_total),
@@ -105,63 +121,65 @@ export const TenantDuesView: React.FC = () => {
           </p>
         </div>
       )}
-      <QueryState
-        isLoading={duesQuery.isLoading}
-        isError={duesQuery.isError}
-        error={duesQuery.error as Error | null}
-        isEmpty={!duesQuery.isLoading && !duesQuery.isError && dues.length === 0}
-        emptyMessage={awaitingAllocation ? t("tenant.dues.emptyWaiting") : t("tenant.dues.emptyPassbook")}
-        onRetry={() => duesQuery.refetch()}
-        isFetching={duesQuery.isFetching}
-      >
-        <div className="space-y-2.5">
-          {dues.map((d) => {
-            const canPay = canTransactOnline && d.status !== "paid" && d.status !== "waived" && d.amount > 0;
-            return (
-              <div key={d.id} className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="t-code text-ink-muted">{d.due_code}</p>
-                    <p className="t-date text-ink-muted">{formatDate(d.due_date, locale)}</p>
-                    {isOverdue(d) && (
-                      <p className="text-danger t-micro font-medium mt-0.5">
-                        {formatDaysOverdue(getDaysOverdue(d.due_date), t)}
-                      </p>
-                    )}
+      {!isOffline && (
+        <QueryState
+          isLoading={duesQuery.isLoading}
+          isError={duesQuery.isError}
+          error={duesQuery.error as Error | null}
+          isEmpty={!duesQuery.isLoading && !duesQuery.isError && dues.length === 0}
+          emptyMessage={awaitingAllocation ? t("tenant.dues.emptyWaiting") : t("tenant.dues.emptyPassbook")}
+          onRetry={() => duesQuery.refetch()}
+          isFetching={duesQuery.isFetching}
+        >
+          <div className="space-y-2.5">
+            {dues.map((d) => {
+              const canPay = canTransactOnline && d.status !== "paid" && d.status !== "waived" && d.amount > 0;
+              return (
+                <div key={d.id} className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="t-code text-ink-muted">{d.due_code}</p>
+                      <p className="t-date text-ink-muted">{formatDate(d.due_date, locale)}</p>
+                      {isOverdue(d) && (
+                        <p className="text-danger t-micro font-medium mt-0.5">
+                          {formatDaysOverdue(getDaysOverdue(d.due_date), t)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <AmountBadge amount={d.amount} />
+                      <StatusPill status={displayDueStatus(d)} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <AmountBadge amount={d.amount} />
-                    <StatusPill status={displayDueStatus(d)} />
-                  </div>
+                  <DuePaymentTimeline due={d} utrSubmitted={utrIds[d.id]} />
+                  {canPay && (
+                    <button
+                      type="button"
+                      onClick={() => setOpenId(openId === d.id ? null : d.id)}
+                      className={`w-full min-h-11 rounded-[10px] t-body font-semibold ${
+                        openId === d.id
+                          ? "border border-hairline text-ink"
+                          : "bg-accent text-accent-contrast"
+                      }`}
+                    >
+                      {openId === d.id ? t("tenant.dues.hidePay") : t("tenant.dues.pay")}
+                    </button>
+                  )}
+                  {openId === d.id && canPay && (
+                    <PayPanel
+                      dueId={d.id}
+                      onDone={() => {
+                        setUtrIds((s) => ({ ...s, [d.id]: true }));
+                        duesQuery.refetch();
+                      }}
+                    />
+                  )}
                 </div>
-                <DuePaymentTimeline due={d} utrSubmitted={utrIds[d.id]} />
-                {canPay && (
-                  <button
-                    type="button"
-                    onClick={() => setOpenId(openId === d.id ? null : d.id)}
-                    className={`w-full min-h-11 rounded-[10px] t-body font-semibold ${
-                      openId === d.id
-                        ? "border border-hairline text-ink"
-                        : "bg-accent text-accent-contrast"
-                    }`}
-                  >
-                    {openId === d.id ? t("tenant.dues.hidePay") : t("tenant.dues.pay")}
-                  </button>
-                )}
-                {openId === d.id && canPay && (
-                  <PayPanel
-                    dueId={d.id}
-                    onDone={() => {
-                      setUtrIds((s) => ({ ...s, [d.id]: true }));
-                      duesQuery.refetch();
-                    }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </QueryState>
+              );
+            })}
+          </div>
+        </QueryState>
+      )}
     </div>
   );
 };
