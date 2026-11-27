@@ -5,20 +5,23 @@ import { getMyPayments } from "@/api/tenant";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
-import { formatDate, formatMatchedBy } from "@/lib/utils";
+import { formatDate, formatMatchedBy, formatPaise } from "@/lib/utils";
 import { useLocale } from "@/i18n";
-import { getPassbookLastSync } from "@/lib/passbookCache";
+import { getOfflinePassbookSummary, getPassbookLastSync } from "@/lib/passbookCache";
+import { useOnlineStatus } from "@/lib/useOnlineStatus";
 
 export const TenantPaymentsView: React.FC = () => {
   const { t } = useLocale();
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
-  const lastSync = getPassbookLastSync();
+  const isOnline = useOnlineStatus();
+  const isOffline = !isOnline;
   const { data: payments = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.tenantPayments,
     queryFn: getMyPayments,
     refetchInterval: 30000,
   });
+  const offlineSummary = isOffline || isError ? getOfflinePassbookSummary() : null;
+  const lastSync = offlineSummary?.saved_at ?? getPassbookLastSync();
 
   const handleCopy = (text: string) => {
     void navigator.clipboard.writeText(text);
@@ -32,12 +35,23 @@ export const TenantPaymentsView: React.FC = () => {
 
   return (
     <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
-      {isOffline && (
-        <div className="bg-warning-tint border-b border-warning/30 px-4 py-2 flex items-center justify-between text-xs text-warning">
-          <span className="font-medium">{t("tenant.offlineSnapshot")}</span>
-          <span className="text-muted">
-            {lastSync ? t("tenant.lastSynced", { time: formatDate(new Date(lastSync).toISOString()) }) : t("tenant.offlineView")}
-          </span>
+      {(isOffline || isError) && (
+        <div role="status" className="bg-warning-tint border-b border-warning/30 px-4 py-2.5 space-y-1 text-xs text-warning">
+          <div className="flex items-center justify-between">
+            <span className="font-medium">{t("tenant.offlineSnapshot")}</span>
+            <span className="text-muted">
+              {lastSync ? t("tenant.lastSynced", { time: formatDate(new Date(lastSync).toISOString()) }) : t("tenant.offlineView")}
+            </span>
+          </div>
+          {offlineSummary && (
+            <p className="text-ink-muted">
+              {t("tenant.dues.offlineSummaryTitle")}: {formatPaise(offlineSummary.total_paid)} ·{" "}
+              {t("tenant.dues.offlineSummaryBody", {
+                amount: formatPaise(offlineSummary.outstanding_total),
+                count: offlineSummary.pending_due_count,
+              })}
+            </p>
+          )}
         </div>
       )}
       <QueryState

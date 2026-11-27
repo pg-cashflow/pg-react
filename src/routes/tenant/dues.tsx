@@ -12,6 +12,7 @@ import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 import { displayDueStatus, formatDate, formatDaysOverdue, formatPaise, getDaysOverdue, isOverdue } from "@/lib/utils";
 import { getOfflinePassbookSummary } from "@/lib/passbookCache";
+import { useOnlineStatus } from "@/lib/useOnlineStatus";
 import { useLocale } from "@/i18n";
 import { ShieldCheck, Clock, ArrowRight } from "lucide-react";
 
@@ -29,8 +30,11 @@ export const TenantDuesView: React.FC = () => {
   });
   const kycQuery = useQuery({ queryKey: QUERY_KEYS.tenantKYCStatus, queryFn: getTenantKYCStatus });
 
+  const isOnline = useOnlineStatus();
+  const isOffline = !isOnline;
   const dues = duesQuery.data ?? [];
-  const offlineSummary = duesQuery.isError ? getOfflinePassbookSummary() : null;
+  const offlineSummary = isOffline || duesQuery.isError ? getOfflinePassbookSummary() : null;
+  const canTransactOnline = isOnline && !duesQuery.isError;
   const awaitingAllocation = profileQuery.data?.status === "pending_allocation";
   const kyc = kycQuery.data?.verification;
   const isKycVerified = kyc?.status === "verified";
@@ -89,7 +93,7 @@ export const TenantDuesView: React.FC = () => {
           {t("tenant.dues.awaitingRoomRent")}
         </div>
       )}
-      {isKycVerified && <TenantBatchPayPanel onPaid={() => void duesQuery.refetch()} />}
+      {isKycVerified && canTransactOnline && <TenantBatchPayPanel onPaid={() => void duesQuery.refetch()} />}
       {offlineSummary && (
         <div role="status" className="rounded-[14px] border border-hairline bg-surface p-4 space-y-1">
           <p className="t-body-sm font-semibold text-ink">{t("tenant.dues.offlineSummaryTitle")}</p>
@@ -112,7 +116,7 @@ export const TenantDuesView: React.FC = () => {
       >
         <div className="space-y-2.5">
           {dues.map((d) => {
-            const canPay = d.status !== "paid" && d.status !== "waived" && d.amount > 0;
+            const canPay = canTransactOnline && d.status !== "paid" && d.status !== "waived" && d.amount > 0;
             return (
               <div key={d.id} className="rounded-[14px] border border-hairline bg-surface p-4 space-y-3">
                 <div className="flex items-center justify-between gap-3">

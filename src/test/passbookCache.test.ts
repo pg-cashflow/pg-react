@@ -82,6 +82,7 @@ describe("passbookCache (aggregate-only DTO)", () => {
   it("never hydrates individual dues or payments arrays into QueryClient on cold boot", () => {
     setPassbookOfflineEnabled(true);
     client.setQueryData(["tenant", "dues"], [{ id: "due_cached", amount: 8000, status: "pending", due_date: "2026-11-01" }]);
+    client.setQueryData(["tenant", "payments"], []);
     savePassbookCache(client);
 
     const freshClient = new QueryClient();
@@ -95,6 +96,7 @@ describe("passbookCache (aggregate-only DTO)", () => {
   it("purges storage cleanly on clearPassbookCache", () => {
     setPassbookOfflineEnabled(true);
     client.setQueryData(["tenant", "dues"], [{ id: "due_1", amount: 1000, status: "pending" }]);
+    client.setQueryData(["tenant", "payments"], []);
     savePassbookCache(client);
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeTruthy();
 
@@ -105,6 +107,7 @@ describe("passbookCache (aggregate-only DTO)", () => {
   it("does not expose another account's offline summary", () => {
     setPassbookOfflineEnabled(true);
     client.setQueryData(["tenant", "dues"], [{ id: "private-due", amount: 5000, status: "pending" }]);
+    client.setQueryData(["tenant", "payments"], []);
     savePassbookCache(client);
     setStoredUser({ id: "tenant-user-2", role: "tenant", phone: "+919000000002" });
     const fresh = new QueryClient();
@@ -116,6 +119,7 @@ describe("passbookCache (aggregate-only DTO)", () => {
   it("removes cached summary after the 1-hour offline limit (PASSBOOK_MAX_AGE_MS)", () => {
     setPassbookOfflineEnabled(true);
     client.setQueryData(["tenant", "dues"], [{ id: "expired-due", amount: 5000, status: "pending" }]);
+    client.setQueryData(["tenant", "payments"], []);
     savePassbookCache(client);
     const data = JSON.parse(localStorage.getItem(PASSBOOK_STORAGE_KEY)!);
     data.savedAt -= PASSBOOK_MAX_AGE_MS + 5 * 60 * 1000;
@@ -134,6 +138,7 @@ describe("passbookCache (aggregate-only DTO)", () => {
     expect(isPassbookOfflineEnabled()).toBe(true);
 
     client.setQueryData(["tenant", "dues"], [{ id: "due_opt_in", amount: 1000, status: "pending" }]);
+    client.setQueryData(["tenant", "payments"], []);
     savePassbookCache(client);
     expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeTruthy();
 
@@ -148,6 +153,7 @@ describe("passbookCache (aggregate-only DTO)", () => {
     expect(getPassbookLastSync()).toBeNull();
 
     client.setQueryData(["tenant", "dues"], [{ id: "due_sync_check", amount: 1000, status: "pending" }]);
+    client.setQueryData(["tenant", "payments"], []);
     savePassbookCache(client);
 
     const lastSync = getPassbookLastSync();
@@ -167,9 +173,69 @@ describe("passbookCache (aggregate-only DTO)", () => {
     setPassbookOfflineEnabled(true);
     const cleanup = setupPassbookCache(client);
     client.setQueryData(["tenant", "dues"], [{ id: "due_sub", amount: 3000, status: "pending" }]);
+    client.setQueryData(["tenant", "payments"], [{ id: "pay_sub", amount: 1500, status: "paid" }]);
     vi.advanceTimersByTime(350);
     expect(getOfflinePassbookSummary()?.outstanding_total).toBe(3000);
+    expect(getOfflinePassbookSummary()?.total_paid).toBe(1500);
     cleanup();
     vi.useRealTimers();
+  });
+
+  it("does not persist partial snapshot when only dues or only payments is loaded", () => {
+    setPassbookOfflineEnabled(true);
+    client.setQueryData(["tenant", "dues"], [{ id: "due_only", amount: 4000, status: "pending" }]);
+    savePassbookCache(client);
+    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+
+    client = new QueryClient();
+    client.setQueryData(["tenant", "payments"], [{ id: "pay_only", amount: 4000, status: "paid" }]);
+    savePassbookCache(client);
+    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+  });
+
+  it("rejects unexpected properties and non-safe-integer amounts in stored envelope", () => {
+    setPassbookOfflineEnabled(true);
+    const baseEnvelope = {
+      version: 2,
+      userId: "tenant-user-1",
+      savedAt: Date.now(),
+      summary: {
+        outstanding_total: 1000,
+        pending_due_count: 1,
+        next_due_date: "2026-11-05",
+        next_due_amount: 1000,
+        total_paid: 500,
+      },
+    };
+
+    // Unexpected property on summary
+    localStorage.setItem(
+      PASSBOOK_STORAGE_KEY,
+      JSON.stringify({
+        ...baseEnvelope,
+        summary: { ...baseEnvelope.summary, leaked_id: "due_123" },
+      })
+    );
+    expect(getOfflinePassbookSummary()).toBeNull();
+    expect(localStorage.getItem(PASSBOOK_STORAGE_KEY)).toBeNull();
+
+    // Non-integer / negative / unsafe integer amounts
+    localStorage.setItem(
+      PASSBOOK_STORAGE_KEY,
+      JSON.stringify({
+        ...baseEnvelope,
+        summary: { ...baseEnvelope.summary, outstanding_total: 100.5 },
+      })
+    );
+    expect(getOfflinePassbookSummary()).toBeNull();
+
+    localStorage.setItem(
+      PASSBOOK_STORAGE_KEY,
+      JSON.stringify({
+        ...baseEnvelope,
+        summary: { ...baseEnvelope.summary, pending_due_count: -1 },
+      })
+    );
+    expect(getOfflinePassbookSummary()).toBeNull();
   });
 });

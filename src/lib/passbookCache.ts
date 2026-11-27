@@ -65,6 +65,28 @@ export function setPassbookOfflineDisabled(disabled: boolean): void {
   setPassbookOfflineEnabled(!disabled);
 }
 
+const ENVELOPE_KEYS = new Set(["version", "userId", "savedAt", "summary"]);
+const SUMMARY_KEYS = new Set([
+  "outstanding_total",
+  "pending_due_count",
+  "next_due_date",
+  "next_due_amount",
+  "total_paid",
+]);
+
+function hasOnlyAllowedKeys(obj: Record<string, unknown>, allowed: Set<string>): boolean {
+  const keys = Object.keys(obj);
+  if (keys.length !== allowed.size) return false;
+  for (const k of keys) {
+    if (!allowed.has(k)) return false;
+  }
+  return true;
+}
+
+function isNonNegativeSafeInt(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
 function readValidEnvelope(): StoredPassbookEnvelope | null {
   try {
     if (typeof window === "undefined") return null;
@@ -78,21 +100,41 @@ function readValidEnvelope(): StoredPassbookEnvelope | null {
       clearPassbookCache();
       return null;
     }
-    const parsed = JSON.parse(raw) as Partial<StoredPassbookEnvelope>;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      clearPassbookCache();
+      return null;
+    }
+    const env = parsed as Record<string, unknown>;
+    if (!hasOnlyAllowedKeys(env, ENVELOPE_KEYS)) {
+      clearPassbookCache();
+      return null;
+    }
     const user = getStoredUser();
     const now = Date.now();
     if (
-      parsed.version !== 2 ||
+      env.version !== 2 ||
       user?.role !== "tenant" ||
-      parsed.userId !== user.id ||
-      typeof parsed.savedAt !== "number" ||
-      !Number.isFinite(parsed.savedAt) ||
-      now - parsed.savedAt > PASSBOOK_MAX_AGE_MS ||
-      parsed.savedAt > now ||
-      !parsed.summary ||
-      typeof parsed.summary.outstanding_total !== "number" ||
-      typeof parsed.summary.pending_due_count !== "number" ||
-      typeof parsed.summary.total_paid !== "number"
+      env.userId !== user.id ||
+      typeof env.savedAt !== "number" ||
+      !Number.isFinite(env.savedAt) ||
+      now - env.savedAt > PASSBOOK_MAX_AGE_MS ||
+      env.savedAt > now ||
+      !env.summary ||
+      typeof env.summary !== "object" ||
+      Array.isArray(env.summary)
+    ) {
+      clearPassbookCache();
+      return null;
+    }
+    const summary = env.summary as Record<string, unknown>;
+    if (
+      !hasOnlyAllowedKeys(summary, SUMMARY_KEYS) ||
+      !isNonNegativeSafeInt(summary.outstanding_total) ||
+      !isNonNegativeSafeInt(summary.pending_due_count) ||
+      !isNonNegativeSafeInt(summary.total_paid) ||
+      !(summary.next_due_date === null || (typeof summary.next_due_date === "string" && summary.next_due_date.length > 0 && summary.next_due_date.length <= 64)) ||
+      !(summary.next_due_amount === null || isNonNegativeSafeInt(summary.next_due_amount))
     ) {
       clearPassbookCache();
       return null;
@@ -141,8 +183,7 @@ export function savePassbookCache(client: QueryClient): void {
     const duesData = client.getQueryData<Array<Record<string, unknown>>>(["tenant", "dues"]);
     const paymentsData = client.getQueryData<Array<Record<string, unknown>>>(["tenant", "payments"]);
 
-    if (!Array.isArray(duesData) && !Array.isArray(paymentsData)) {
-      localStorage.removeItem(PASSBOOK_STORAGE_KEY);
+    if (!Array.isArray(duesData) || !Array.isArray(paymentsData)) {
       return;
     }
 
