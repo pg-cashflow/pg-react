@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, Root } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
 import { TenantDuesView } from "@/routes/tenant/dues";
 import { TenantPaymentsView } from "@/routes/tenant/payments";
 import { LocaleProvider } from "@/i18n";
@@ -15,6 +15,16 @@ import {
   PASSBOOK_MAX_AGE_MS,
 } from "@/lib/passbookCache";
 import type { Due, Payment } from "@pg/types";
+
+vi.mock("@/api/tenant", () => ({
+  getMyProfile: vi.fn(),
+  getMyDues: vi.fn(),
+  getMyPayments: vi.fn(),
+}));
+
+vi.mock("@/api/kyc", () => ({
+  getTenantKYCStatus: vi.fn(),
+}));
 
 vi.mock("@/components/shared/TenantBatchPayPanel", () => ({
   TenantBatchPayPanel: () => <div data-testid="batch-pay-panel">Batch Pay</div>,
@@ -37,6 +47,7 @@ const setNavigatorOnLine = (online: boolean) => {
     configurable: true,
     value: online,
   });
+  onlineManager.setOnline(online);
 };
 
 const flushQueries = async () => {
@@ -113,17 +124,17 @@ beforeEach(() => {
   document.body.appendChild(container);
   root = createRoot(container);
 
-  vi.spyOn(tenantApi, "getMyProfile").mockResolvedValue({
+  vi.mocked(tenantApi.getMyProfile).mockResolvedValue({
     id: "tenant-1",
     status: "active",
   } as Awaited<ReturnType<typeof tenantApi.getMyProfile>>);
 
-  vi.spyOn(kycApi, "getTenantKYCStatus").mockResolvedValue({
+  vi.mocked(kycApi.getTenantKYCStatus).mockResolvedValue({
     verification: { status: "verified" },
   } as Awaited<ReturnType<typeof kycApi.getTenantKYCStatus>>);
 
-  vi.spyOn(tenantApi, "getMyDues").mockResolvedValue(sampleDues);
-  vi.spyOn(tenantApi, "getMyPayments").mockResolvedValue(samplePayments);
+  vi.mocked(tenantApi.getMyDues).mockResolvedValue(sampleDues);
+  vi.mocked(tenantApi.getMyPayments).mockResolvedValue(samplePayments);
 });
 
 afterEach(() => {
@@ -182,8 +193,8 @@ describe("F-04 offline passbook route regression tests", () => {
 
   it("4. Online API errors display a distinct server recovery message rather than offline disconnection copy", async () => {
     seedValidSnapshot();
-    vi.spyOn(tenantApi, "getMyDues").mockRejectedValue(new Error("500 Internal Server Error"));
-    vi.spyOn(tenantApi, "getMyPayments").mockRejectedValue(new Error("502 Bad Gateway"));
+    vi.mocked(tenantApi.getMyDues).mockRejectedValue(new Error("500 Internal Server Error"));
+    vi.mocked(tenantApi.getMyPayments).mockRejectedValue(new Error("502 Bad Gateway"));
 
     await renderView(<TenantDuesView />);
     expect(container?.textContent).toContain("Unable to refresh from server");
