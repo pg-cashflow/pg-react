@@ -145,9 +145,11 @@ export const ActiveSessionsCard: React.FC<{ className?: string }> = ({ className
       {identities.length > 0 && (
         <div className="rounded-[10px] border border-hairline bg-bg p-3 flex items-center justify-between gap-3">
           <div className="text-xs space-y-0.5">
-            <div className="font-medium text-ink">Sign-in methods</div>
+            <div className="font-medium text-ink">{t("sessions.signInMethods")}</div>
             <div className="text-ink-muted">
-              {hasGoogleIdentity ? "Phone & Google connected" : "Google not connected"}
+              {hasGoogleIdentity
+                ? t("sessions.phoneGoogleConnected")
+                : t("sessions.googleNotConnected")}
             </div>
           </div>
           {!hasGoogleIdentity && (
@@ -157,7 +159,9 @@ export const ActiveSessionsCard: React.FC<{ className?: string }> = ({ className
               disabled={linkGoogleMutation.isPending}
               className="px-2.5 py-1.5 rounded-lg border border-hairline text-xs font-medium text-ink hover:bg-accent-tint disabled:opacity-50"
             >
-              {linkGoogleMutation.isPending ? "Connecting…" : "Connect Google"}
+              {linkGoogleMutation.isPending
+                ? t("sessions.connectingGoogle")
+                : t("sessions.connectGoogle")}
             </button>
           )}
         </div>

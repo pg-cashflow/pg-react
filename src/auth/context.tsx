@@ -284,6 +284,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, [applySession, clearLocalSession, endSession, clearRetryTimer]);
 
+  const completeWithIdToken = useCallback(async (idToken: string) => {
+    const priorUser = getStoredUser();
+    const isFirstEntry = !priorUser;
+    const res = await exchangeFirebaseToken(idToken, getInviteCode() || undefined);
+    const payload = parseJwt(res.token);
+    if (!payload || !isValidRole(res.user.role)) {
+      throw new Error("Invalid session from server");
+    }
+    if (isFirstEntry && (res.user.role === "owner" || res.user.role === "manager")) {
+      setJustActivated(true);
+    }
+    applySession(res.token, res.user, payload);
+    setInviteCode("");
+  }, [applySession]);
+
   useEffect(() => {
     void (async () => {
       if (!isPendingLogout() && !getAccessToken()) {
@@ -338,28 +353,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logoutRetryTimerRef.current = null;
       }
     };
-  }, [evaluateStored, clearLocalSession, clearRetryTimer, sendPendingLogout]);
+  }, [evaluateStored, clearLocalSession, clearRetryTimer, sendPendingLogout, completeWithIdToken]);
 
   useEffect(() => {
     return onAccessTokenChange((t) => {
       setTokenState(t);
     });
   }, []);
-
-  const completeWithIdToken = useCallback(async (idToken: string) => {
-    const priorUser = getStoredUser();
-    const isFirstEntry = !priorUser;
-    const res = await exchangeFirebaseToken(idToken, getInviteCode() || undefined);
-    const payload = parseJwt(res.token);
-    if (!payload || !isValidRole(res.user.role)) {
-      throw new Error("Invalid session from server");
-    }
-    if (isFirstEntry && (res.user.role === "owner" || res.user.role === "manager")) {
-      setJustActivated(true);
-    }
-    applySession(res.token, res.user, payload);
-    setInviteCode("");
-  }, [applySession]);
 
   const handleSendPhoneOtp = useCallback(async (phone: string) => {
     const { sendFirebasePhoneOtp } = await import("@/auth/firebasePhone");

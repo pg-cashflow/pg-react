@@ -1,5 +1,5 @@
 import { apiFetch, apiFetchBlob, unwrapList } from "./client";
-import type { AadhaarPreview, Due, Payment, TenantMeResponse } from "@pg/types";
+import type { AadhaarPreview, Due, Payment, PaymentOption, TenantMeResponse } from "@pg/types";
 
 export const getMyProfile = (): Promise<TenantMeResponse> =>
   apiFetch<TenantMeResponse>("/tenant/me");
@@ -7,6 +7,11 @@ export const getMyProfile = (): Promise<TenantMeResponse> =>
 export const getMyDues = async (): Promise<Due[]> => {
   const data = await apiFetch<{ dues: Due[] }>("/tenant/dues");
   return unwrapList(data, "dues");
+};
+
+export const getTenantDueOptions = async (): Promise<PaymentOption[]> => {
+  const data = await apiFetch<{ options: PaymentOption[] }>("/tenant/dues/options");
+  return unwrapList(data, "options");
 };
 
 export const getMyPayments = async (): Promise<Payment[]> => {

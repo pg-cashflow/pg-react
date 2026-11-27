@@ -288,6 +288,25 @@ export interface DueTokenResponse {
   wa_me?: string;
 }
 
+export type PaymentOptionType = "oldest_1" | "oldest_2" | "all";
+
+export interface DueSummary {
+  id: string;
+  due_code: string;
+  due_date: string;
+  amount_paise: Paise;
+  kind: string;
+}
+
+export interface PaymentOption {
+  option_type: PaymentOptionType;
+  label: string;
+  due_count: number;
+  amount_paise: Paise;
+  due_ids: string[];
+  dues: DueSummary[];
+}
+
 export interface PayIntent {
   mode: PaymentMode;
   vpa?: string;
@@ -295,6 +314,8 @@ export interface PayIntent {
   note: string;
   due_code: string;
   amount_paise: Paise;
+  due_count?: number;
+  due_ids?: string[];
   qr_png_url: string;
   payable: boolean;
   availability_status?: string;

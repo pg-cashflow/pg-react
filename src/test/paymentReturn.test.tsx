@@ -72,7 +72,7 @@ describe("PaymentReturnView", () => {
     delete (window as any).location;
     window.location = new URL("https://app.pg.local/payment/return?order_id=order_abc123&due_id=due_xyz") as any;
 
-    const verifySpy = vi.spyOn(payApi, "verifyOrderPay").mockResolvedValue({
+    const verifySpy = vi.spyOn(payApi, "verifyTenantOrderPay").mockResolvedValue({
       paid: true,
       status: "SUCCESS",
       due_ids: ["due_xyz"],
@@ -80,7 +80,7 @@ describe("PaymentReturnView", () => {
 
     await renderWithProviders("tenant");
 
-    // Expect verifyOrderPay to be called with only orderId
+    // Expect verifyTenantOrderPay to be called with only orderId for tenant sessions
     expect(verifySpy).toHaveBeenCalledWith("order_abc123");
 
     // Fast-forward promises

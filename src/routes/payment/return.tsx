@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import { verifyOrderPay, verifyTenantDuePay } from "@/api/pay";
+import { verifyOrderPay, verifyTenantDuePay, verifyTenantOrderPay } from "@/api/pay";
 import { getMyDues } from "@/api/tenant";
 import { useLocale } from "@/i18n";
 import { useAuth } from "@/auth/context";
@@ -91,10 +91,13 @@ export const PaymentReturnView: React.FC = () => {
       if (inFlight) return false;
       inFlight = true;
       try {
-        // 1. Order-ID-based verification
+        // 1. Order-ID-based verification (tenant-scoped for tenants, owner-scoped for owners)
         if (orderId) {
           try {
-            const res = await verifyOrderPay(orderId);
+            const res =
+              role === "owner"
+                ? await verifyOrderPay(orderId)
+                : await verifyTenantOrderPay(orderId);
             if (active && res.paid) {
               markPaid();
               return true;

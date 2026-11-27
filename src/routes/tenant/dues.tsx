@@ -7,6 +7,7 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { QueryState } from "@/components/shared/QueryState";
 import { PayPanel } from "@/components/shared/PayPanel";
+import { TenantBatchPayPanel } from "@/components/shared/TenantBatchPayPanel";
 import { DuePaymentTimeline } from "@/components/shared/DuePaymentTimeline";
 import { TenantKYCCard } from "@/components/shared/TenantKYCCard";
 import { displayDueStatus, formatDate, formatDaysOverdue, getDaysOverdue, isOverdue } from "@/lib/utils";
@@ -86,6 +87,7 @@ export const TenantDuesView: React.FC = () => {
           {t("tenant.dues.awaitingRoomRent")}
         </div>
       )}
+      {isKycVerified && <TenantBatchPayPanel onPaid={() => void duesQuery.refetch()} />}
       <QueryState
         isLoading={duesQuery.isLoading}
         isError={duesQuery.isError}

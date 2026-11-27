@@ -82,8 +82,46 @@ export function getPassbookLastSync(): number | null {
   }
 }
 
+function maskRef(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  return value.length <= 4 ? "****" : `****${value.slice(-4)}`;
+}
+
 /**
- * Dehydrates passbook queries and persists them to localStorage for instant offline cold-boot.
+ * Sanitizes passbook query data to a minimal masked summary before persisting to localStorage
+ * (Decision 6: never store full raw financial/PII payloads in browser storage).
+ */
+function sanitizePassbookData(queryKey: readonly unknown[], data: unknown): unknown {
+  const domain = queryKey[1];
+  if (domain === "dues" && Array.isArray(data)) {
+    return data.map((d: Record<string, unknown>) => ({
+      id: d.id,
+      due_code: maskRef(d.due_code),
+      due_date: d.due_date,
+      amount: d.amount,
+      status: d.status,
+      kind: d.kind,
+    }));
+  }
+  if (domain === "payments" && Array.isArray(data)) {
+    return data.map((p: Record<string, unknown>) => ({
+      id: p.id,
+      amount: p.amount,
+      status: p.status,
+      paid_at: p.paid_at,
+      reference: maskRef(p.provider_payment_id ?? p.upi_txn_id ?? p.receipt_number),
+    }));
+  }
+  if (domain === "points" && data && typeof data === "object") {
+    const pts = data as Record<string, unknown>;
+    return { balance: pts.balance, tier: pts.tier };
+  }
+  return data;
+}
+
+/**
+ * Dehydrates passbook queries as minimal masked summaries and persists them to localStorage
+ * when the user has explicitly opted in.
  */
 export function savePassbookCache(client: QueryClient): void {
   try {
@@ -102,7 +140,17 @@ export function savePassbookCache(client: QueryClient): void {
     });
 
     if (dehydrated.queries.length > 0) {
-      const raw = JSON.stringify({ version: 1, userId: user.id, savedAt: Date.now(), state: dehydrated });
+      const maskedState = {
+        ...dehydrated,
+        queries: dehydrated.queries.map((q) => ({
+          ...q,
+          state: {
+            ...q.state,
+            data: sanitizePassbookData(q.queryKey, q.state.data),
+          },
+        })),
+      };
+      const raw = JSON.stringify({ version: 1, userId: user.id, savedAt: Date.now(), state: maskedState });
       // Bound synchronous storage work on the main thread.
       if (raw.length <= 500_000) localStorage.setItem(PASSBOOK_STORAGE_KEY, raw);
       else localStorage.removeItem(PASSBOOK_STORAGE_KEY);

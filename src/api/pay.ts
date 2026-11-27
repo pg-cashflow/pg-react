@@ -1,5 +1,5 @@
 import { apiFetch, apiFetchBlob } from "./client";
-import type { PayIntent } from "@pg/types";
+import type { PayIntent, PaymentOptionType } from "@pg/types";
 
 export const getOwnerDuePay = (dueId: string): Promise<PayIntent> =>
   apiFetch(`/owner/dues/${dueId}/pay`);
@@ -17,6 +17,16 @@ export const createTenantDuePay = (dueId: string, idempotencyKey?: string): Prom
   apiFetch(`/tenant/dues/${dueId}/pay`, {
     method: "POST",
     headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+  });
+
+export const createTenantDuePayBatch = (
+  payload: { option_type?: PaymentOptionType; due_ids?: string[] },
+  idempotencyKey?: string
+): Promise<PayIntent> =>
+  apiFetch("/tenant/dues/pay-batch", {
+    method: "POST",
+    headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    body: JSON.stringify(payload),
   });
 
 export const getPayQrBlob = (qrPngUrl: string): Promise<Blob> => apiFetchBlob(qrPngUrl);

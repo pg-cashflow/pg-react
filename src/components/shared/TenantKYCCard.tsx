@@ -71,8 +71,8 @@ export const TenantKYCCard: React.FC<TenantKYCCardProps> = ({
     }
   }, [data?.has_consent]);
 
-  // Older servers send no "methods" field: treat DigiLocker as available (the server still enforces it).
-  const digiLockerEnabled = data?.methods?.digilocker !== false;
+  // Fail-closed: only treat DigiLocker as enabled when the server explicitly advertises it.
+  const digiLockerEnabled = data?.methods?.digilocker === true;
   // DigiLocker is an automated fast path, voluntary under Indian regulations (KYC-ADR-01).
   // Default to digilocker if enabled, while offering Document Upload and Secure QR as voluntary alternate routes.
   const activeTab: "upload" | "qr" | "digilocker" =
