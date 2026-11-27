@@ -34,6 +34,8 @@ export const ERROR_CODES = [
   "auth.noPropertyScope",
   "auth.noDeliveryChannel",
   "auth.endpointDisabled",
+  "auth.identityMergeRequired",
+  "auth.identityAlreadyLinked",
   "join.invalidInvite",
   "join.noPendingRequest",
   "join.notFound",
@@ -108,6 +110,7 @@ export const ERROR_CODES = [
   "payment.bankAccountInvalid",
   "payment.bankNameMismatch",
   "payment.bankVerifierUnavailable",
+  "payment.refundCancellationUnsupported",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

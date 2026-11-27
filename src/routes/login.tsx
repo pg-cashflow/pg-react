@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { useLocale, formatAuthFlowError } from "@/i18n";
 import { OtpInput } from "@/components/shared/OtpInput";
+import { isEmbeddedWebView } from "@/auth/firebaseGoogle";
 
 const GoogleMark: React.FC = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -319,12 +320,17 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogle}
-              disabled={loading}
+              disabled={loading || isEmbeddedWebView()}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-surface text-ink font-semibold text-sm border border-hairline hover:bg-accent-tint transition disabled:opacity-50"
             >
               <GoogleMark />
               {t("auth.googleSignIn")}
             </button>
+            {isEmbeddedWebView() && (
+              <p className="text-xs text-ink-muted text-center leading-relaxed">
+                Google sign-in is blocked in in-app browsers. Use Phone OTP above or open this link in Chrome / Safari.
+              </p>
+            )}
 
             <div className="pt-2 text-center">
               <button

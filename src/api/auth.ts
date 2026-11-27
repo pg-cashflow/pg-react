@@ -72,3 +72,40 @@ export const revokeAllSessions = (): Promise<{ ok: boolean }> => {
     method: "POST",
   });
 };
+
+export interface UserIdentity {
+  id: string;
+  user_id: string;
+  firebase_project_id: string;
+  firebase_uid: string;
+  provider: string;
+  status: string;
+  link_method: string;
+  created_at: string;
+  linked_at: string;
+  last_authenticated_at?: string;
+}
+
+export const getAuthIdentities = (): Promise<{ identities: UserIdentity[] }> => {
+  return apiFetch<{ identities: UserIdentity[] }>("/auth/identities");
+};
+
+export const linkAuthIdentity = (idToken: string): Promise<{ ok: boolean }> => {
+  return apiFetch<{ ok: boolean }>("/auth/identities/link", {
+    method: "POST",
+    body: JSON.stringify({ id_token: idToken }),
+  });
+};
+
+export const mergeAuthIdentity = (
+  currentIdToken: string,
+  secondaryIdToken: string
+): Promise<{ ok: boolean }> => {
+  return apiFetch<{ ok: boolean }>("/auth/identities/merge", {
+    method: "POST",
+    body: JSON.stringify({
+      current_id_token: currentIdToken,
+      secondary_id_token: secondaryIdToken,
+    }),
+  });
+};

@@ -285,7 +285,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [applySession, clearLocalSession, endSession, clearRetryTimer]);
 
   useEffect(() => {
-    void evaluateStored();
+    void (async () => {
+      if (!isPendingLogout() && !getAccessToken()) {
+        try {
+          const { completeGoogleRedirectSignIn } = await import("@/auth/firebaseGoogle");
+          const redirectToken = await completeGoogleRedirectSignIn();
+          if (redirectToken) {
+            await completeWithIdToken(redirectToken);
+            setIsLoading(false);
+            return;
+          }
+        } catch {
+          // Fall through to normal stored-session evaluation; user can retry login if needed
+        }
+      }
+      await evaluateStored();
+    })();
 
     const handleUnauthorized = () => clearLocalSession();
     const handleOnline = () => {
@@ -360,6 +375,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleGoogleLogin = useCallback(async (): Promise<void> => {
     const { signInWithGoogle } = await import("@/auth/firebaseGoogle");
     const idToken = await signInWithGoogle();
+    if (!idToken) {
+      // Mobile/PWA redirect is in flight; completeGoogleRedirectSignIn handles return.
+      return;
+    }
     await completeWithIdToken(idToken);
   }, [completeWithIdToken]);
 

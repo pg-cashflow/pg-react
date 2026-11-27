@@ -2,7 +2,14 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Smartphone, Laptop, ShieldCheck, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { getActiveSessions, deleteSession, revokeAllSessions, type ActiveSession } from "@/api/auth";
+import {
+  getActiveSessions,
+  deleteSession,
+  revokeAllSessions,
+  getAuthIdentities,
+  linkAuthIdentity,
+  type ActiveSession,
+} from "@/api/auth";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { useLocale } from "@/i18n";
 
@@ -16,6 +23,36 @@ export const ActiveSessionsCard: React.FC<{ className?: string }> = ({ className
     queryKey: QUERY_KEYS.sessions,
     queryFn: getActiveSessions,
   });
+
+  const { data: identitiesData, refetch: refetchIdentities } = useQuery({
+    queryKey: ["auth", "identities"],
+    queryFn: () => (typeof getAuthIdentities === "function" ? getAuthIdentities() : Promise.resolve({ identities: [] })),
+    retry: false,
+  });
+
+  const linkGoogleMutation = useMutation({
+    mutationFn: async () => {
+      const { linkGoogleToCurrentUser } = await import("@/auth/firebaseGoogle");
+      const result = await linkGoogleToCurrentUser();
+      if (result.status === "already_in_use") {
+        throw new Error(
+          "This Google account is already linked to another login. Sign in with both methods to merge them."
+        );
+      }
+      await linkAuthIdentity(result.idToken);
+    },
+    onSuccess: () => {
+      setNotice("Google account connected.");
+      setError(null);
+      void refetchIdentities();
+    },
+    onError: (err: unknown) => {
+      setError(err instanceof Error ? err.message : "Could not connect Google account.");
+    },
+  });
+
+  const identities = identitiesData?.identities ?? [];
+  const hasGoogleIdentity = identities.some((i) => i.provider === "google.com" && i.status === "active");
 
   const revokeOneMutation = useMutation({
     mutationFn: (id: string) => deleteSession(id),
@@ -102,6 +139,27 @@ export const ActiveSessionsCard: React.FC<{ className?: string }> = ({ className
           className="p-3 rounded-[10px] bg-danger-tint border border-danger/20 text-danger text-xs animate-step-in"
         >
           {error}
+        </div>
+      )}
+
+      {identities.length > 0 && (
+        <div className="rounded-[10px] border border-hairline bg-bg p-3 flex items-center justify-between gap-3">
+          <div className="text-xs space-y-0.5">
+            <div className="font-medium text-ink">Sign-in methods</div>
+            <div className="text-ink-muted">
+              {hasGoogleIdentity ? "Phone & Google connected" : "Google not connected"}
+            </div>
+          </div>
+          {!hasGoogleIdentity && (
+            <button
+              type="button"
+              onClick={() => linkGoogleMutation.mutate()}
+              disabled={linkGoogleMutation.isPending}
+              className="px-2.5 py-1.5 rounded-lg border border-hairline text-xs font-medium text-ink hover:bg-accent-tint disabled:opacity-50"
+            >
+              {linkGoogleMutation.isPending ? "Connecting…" : "Connect Google"}
+            </button>
+          )}
         </div>
       )}
 
