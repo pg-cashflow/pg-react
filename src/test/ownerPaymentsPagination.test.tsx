@@ -8,6 +8,10 @@ import * as paymentsApi from "@/api/payments";
 import * as tenantsApi from "@/api/tenants";
 import type { Payment } from "@pg/types";
 
+vi.mock("@/components/owner/RefundApprovalsPanel", () => ({
+  RefundApprovalsPanel: () => null,
+}));
+
 vi.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: ({ count }: { count: number }) => ({
     getVirtualItems: () =>
@@ -60,7 +64,6 @@ beforeEach(() => {
       joined_at: "2026-01-01T00:00:00Z",
     },
   ]);
-  vi.spyOn(paymentsApi, "getRefundApprovals").mockResolvedValue([]);
 });
 
 afterEach(() => {
