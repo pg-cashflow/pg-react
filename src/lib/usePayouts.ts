@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "./queryKeys";
 import {
   listPayees,
@@ -6,6 +6,7 @@ import {
   verifyPayee,
   verifyPayeeProvider,
   listUnbatchedPayoutItems,
+  listUnbatchedPayoutItemsPage,
   listPayoutBatches,
   getPayoutBatch,
   createPayoutBatch,
@@ -57,6 +58,23 @@ export function useUnbatchedPayoutItems() {
   return useQuery({
     queryKey: QUERY_KEYS.unbatchedPayoutItems,
     queryFn: listUnbatchedPayoutItems,
+  });
+}
+
+export function useUnbatchedPayoutItemsInfinite() {
+  return useInfiniteQuery({
+    queryKey: [...QUERY_KEYS.unbatchedPayoutItems, "infinite"],
+    initialPageParam: undefined as { cursor?: string; cursorId?: string } | undefined,
+    queryFn: ({ pageParam }) =>
+      listUnbatchedPayoutItemsPage({
+        cursor: pageParam?.cursor,
+        cursorId: pageParam?.cursorId,
+        limit: 50,
+      }),
+    getNextPageParam: (lastPage) =>
+      lastPage.has_more && lastPage.next_cursor && lastPage.next_cursor_id
+        ? { cursor: lastPage.next_cursor, cursorId: lastPage.next_cursor_id }
+        : undefined,
   });
 }
 

@@ -10,10 +10,35 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /** Format paise as Indian rupee string, e.g. 150000 -> "₹1,500.00" */
+const PLAIN_RUPEES_RE = /^\d+(?:\.\d{1,2})?$/;
+const WESTERN_COMMA_RUPEES_RE = /^\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?$/;
+const INDIAN_COMMA_RUPEES_RE = /^\d{1,2}(?:,\d{2})*,\d{3}(?:\.\d{1,2})?$/;
+
+/**
+ * Strictly parse a non-negative rupee amount (plain or comma-grouped, up to 2 decimal places)
+ * into integer paise. Returns 0 for invalid, negative, exponential, or overflowing inputs.
+ */
 export function rupeesToPaise(rupees: string | number): number {
-  const n = typeof rupees === "number" ? rupees : parseFloat(String(rupees).replace(/,/g, ""));
-  if (Number.isNaN(n)) return 0;
-  return Math.round(n * 100);
+  if (typeof rupees === "number") {
+    if (!Number.isFinite(rupees) || rupees < 0) return 0;
+    const paise = Math.round(rupees * 100);
+    return Number.isSafeInteger(paise) ? paise : 0;
+  }
+  const trimmed = String(rupees).trim();
+  if (
+    !trimmed ||
+    (!PLAIN_RUPEES_RE.test(trimmed) &&
+      !WESTERN_COMMA_RUPEES_RE.test(trimmed) &&
+      !INDIAN_COMMA_RUPEES_RE.test(trimmed))
+  ) {
+    return 0;
+  }
+  const normalized = trimmed.replace(/,/g, "");
+  const [wholePart, fracPart = ""] = normalized.split(".");
+  const whole = Number(wholePart);
+  const frac = Number(fracPart.padEnd(2, "0"));
+  const paise = whole * 100 + frac;
+  return Number.isSafeInteger(paise) ? paise : 0;
 }
 
 export function paiseToRupeeInput(paise: number): string {

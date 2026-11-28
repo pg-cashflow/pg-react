@@ -51,9 +51,42 @@ export const verifyPayeeProvider = async (payeeId: string): Promise<PayoutPayee>
   return data.payee;
 };
 
+export interface UnbatchedPayoutItemsPage {
+  items: PayoutItem[];
+  limit: number;
+  total_count: number;
+  has_more: boolean;
+  next_cursor?: string | null;
+  next_cursor_id?: string | null;
+}
+
+export const listUnbatchedPayoutItemsPage = async (params?: {
+  cursor?: string;
+  cursorId?: string;
+  limit?: number;
+}): Promise<UnbatchedPayoutItemsPage> => {
+  const sp = new URLSearchParams();
+  if (params?.cursor) sp.set("cursor", params.cursor);
+  if (params?.cursorId) sp.set("cursor_id", params.cursorId);
+  if (params?.limit) sp.set("limit", String(params.limit));
+  const qs = sp.toString();
+  const data = await apiFetch<Partial<UnbatchedPayoutItemsPage>>(
+    `/owner/payouts/items/unbatched${qs ? `?${qs}` : ""}`
+  );
+  const items = unwrapList(data as { items: PayoutItem[] }, "items");
+  return {
+    items,
+    limit: typeof data.limit === "number" ? data.limit : params?.limit ?? 50,
+    total_count: typeof data.total_count === "number" ? data.total_count : items.length,
+    has_more: Boolean(data.has_more),
+    next_cursor: data.next_cursor ?? null,
+    next_cursor_id: data.next_cursor_id ?? null,
+  };
+};
+
 export const listUnbatchedPayoutItems = async (): Promise<PayoutItem[]> => {
-  const data = await apiFetch<{ items: PayoutItem[] }>("/owner/payouts/items/unbatched");
-  return unwrapList(data, "items");
+  const page = await listUnbatchedPayoutItemsPage();
+  return page.items;
 };
 
 export const listPayoutBatches = async (): Promise<PayoutBatch[]> => {

@@ -1138,6 +1138,23 @@ export const enIN = {
   "owner.refund.approvalSubmittedTitle": "Approval Request Submitted",
   "owner.refund.dualControlDesc": "This refund amount exceeds your single-owner limit. Submit a maker-checker approval request to route this refund to secondary owner review.",
   "owner.refund.approvalSubmittedDesc": "Your refund request has been queued for maker-checker review. A second owner must approve it before payment dispatch.",
+  "owner.payouts.reconcilePollingTitle": "Reconciliation Polling In Progress",
+  "owner.payouts.reconcilePollingDesc": "One or more payout batches have an ambiguous dispatch status. The system is actively querying Cashfree to verify whether transfers settled. Do not re-initiate or duplicate instructions while reconciliation is running.",
+  "owner.payouts.protectNoticeTitle": "Cashfree Payout Protect Notice",
+  "owner.payouts.protectNoticeDesc": "Batches in processing may contain transfers held for manual risk approval. If held, approve them directly in the Cashfree Merchant Dashboard.",
+  "owner.payouts.cashfreeDashboardCta": "Cashfree Dashboard ↗",
+  "owner.payouts.unverifiedPayeesTitle": "Unverified Payees Detected",
+  "owner.payouts.unverifiedPayeesDesc": "{count} unbatched instruction(s) belong to payees awaiting penny-drop bank verification. Verify them in the Payees tab before generating a batch.",
+  "owner.payouts.goToPayees": "Go to Payees",
+  "owner.batch.instructionsReview": "Payout Instructions Review ({count})",
+  "owner.batch.inspectPayeesHint": "Inspect payees & amounts before authorizing",
+  "owner.batch.loadingInstructions": "Loading batch instructions...",
+  "owner.batch.loadInstructionsError": "Failed to load batch instructions.",
+  "owner.batch.noItems": "No items found in this batch.",
+  "owner.batch.bankVerifiedTag": "• Bank Verified",
+  "owner.batch.attestedTag": "• Attested",
+  "owner.payments.loadMoreError": "Failed to load older payments.",
+  "owner.payouts.loadMoreUnbatchedError": "Failed to load more pending items.",
 };
 
 export type MessageKey = keyof typeof enIN;

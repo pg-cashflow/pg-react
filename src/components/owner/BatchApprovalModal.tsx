@@ -190,22 +190,22 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-ink uppercase tracking-wider">
-                Payout Instructions Review ({items.length || batch.item_count}) {/* lint-allow-i18n */}
+                {t("owner.batch.instructionsReview", { count: items.length || batch.item_count })}
               </label>
-              <span className="text-xs text-ink-muted">Inspect payees & amounts before authorizing</span> {/* lint-allow-i18n */}
+              <span className="text-xs text-ink-muted">{t("owner.batch.inspectPayeesHint")}</span>
             </div>
 
             <div className="border border-hairline rounded-xl overflow-hidden bg-bg">
               {isBatchLoading ? (
                 <div className="p-6 text-center text-xs text-ink-muted flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Loading batch instructions...</span> {/* lint-allow-i18n */}
+                  <span>{t("owner.batch.loadingInstructions")}</span>
                 </div>
               ) : isBatchError ? (
                 <div className="p-6 text-center text-xs text-danger flex flex-col items-center justify-center gap-2">
                   <div className="flex items-center gap-2 font-medium">
                     <AlertCircle className="w-4 h-4" />
-                    <span>Failed to load batch instructions.</span> {/* lint-allow-i18n */}
+                    <span>{t("owner.batch.loadInstructionsError")}</span>
                   </div>
                   <button
                     type="button"
@@ -213,12 +213,12 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
                     className="mt-1 px-3 py-1 rounded-lg border border-hairline bg-surface text-ink hover:bg-bg inline-flex items-center gap-1.5 transition text-xs"
                   >
                     <RefreshCw className="w-3 h-3" />
-                    Retry {/* lint-allow-i18n */}
+                    {t("common.retry")}
                   </button>
                 </div>
               ) : items.length === 0 ? (
                 <div className="p-6 text-center text-xs text-ink-muted">
-                  <span>No items found in this batch.</span> {/* lint-allow-i18n */}
+                  <span>{t("owner.batch.noItems")}</span>
                 </div>
               ) : (
                 <div className="max-h-52 overflow-y-auto">
@@ -240,8 +240,10 @@ export const BatchApprovalModal: React.FC<BatchApprovalModalProps> = ({
                               <div className="font-semibold text-ink">{payee?.name || it.payee_id}</div>
                               {payee && (
                                 <span className="t-micro text-ink-muted capitalize">
-                                  {payee.payee_type.replace("_", " ")}
-                                  {payee.verification_status === "provider_verified" ? " • Bank Verified" : " • Attested"} {/* lint-allow-i18n */}
+                                  {payee.payee_type.replace("_", " ")}{" "}
+                                  {payee.verification_status === "provider_verified"
+                                    ? t("owner.batch.bankVerifiedTag")
+                                    : t("owner.batch.attestedTag")}
                                 </span>
                               )}
                             </td>

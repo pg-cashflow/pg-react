@@ -9,10 +9,39 @@ import type {
   ReconciliationSummary,
 } from "@pg/types";
 
+export interface PaymentsPage {
+  payments: Payment[];
+  limit: number;
+  next_cursor?: string | null;
+  next_cursor_id?: string | null;
+}
+
+export interface GetPaymentsPageParams {
+  matchedBy?: MatchedBy;
+  cursor?: string;
+  cursorId?: string;
+  limit?: number;
+}
+
+export const getPaymentsPage = async (params: GetPaymentsPageParams = {}): Promise<PaymentsPage> => {
+  const sp = new URLSearchParams();
+  if (params.matchedBy) sp.set("matched_by", params.matchedBy);
+  if (params.cursor) sp.set("cursor", params.cursor);
+  if (params.cursorId) sp.set("cursor_id", params.cursorId);
+  if (params.limit) sp.set("limit", String(params.limit));
+  const qs = sp.toString();
+  const data = await apiFetch<Partial<PaymentsPage>>(`/owner/payments${qs ? `?${qs}` : ""}`);
+  return {
+    payments: unwrapList(data as { payments: Payment[] }, "payments"),
+    limit: typeof data.limit === "number" ? data.limit : params.limit ?? 50,
+    next_cursor: data.next_cursor ?? null,
+    next_cursor_id: data.next_cursor_id ?? null,
+  };
+};
+
 export const getPayments = async (matchedBy?: MatchedBy): Promise<Payment[]> => {
-  const qs = matchedBy ? `?matched_by=${matchedBy}` : "";
-  const data = await apiFetch<{ payments: Payment[] }>(`/owner/payments${qs}`);
-  return unwrapList(data, "payments");
+  const page = await getPaymentsPage({ matchedBy });
+  return page.payments;
 };
 
 export const requestRefundOTP = (paymentId: string): Promise<{ channel: string; destination: string }> =>

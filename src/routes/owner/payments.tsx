@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getPayments } from "@/api/payments";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPaymentsPage } from "@/api/payments";
 import { getTenants } from "@/api/tenants";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { QueryState } from "@/components/shared/QueryState";
 import { formatDate, formatMatchedBy } from "@/lib/utils";
-import { Search, CheckCircle2, RotateCcw } from "lucide-react";
+import { Search, CheckCircle2, RotateCcw, RefreshCw } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { RefundModal } from "@/components/owner/RefundModal";
 import { RefundApprovalsPanel } from "@/components/owner/RefundApprovalsPanel";
@@ -25,11 +25,36 @@ export const PaymentsView: React.FC = () => {
     queryFn: getTenants,
   });
 
-  const { data: payments = [], isLoading, isError, error, refetch } = useQuery({
-    queryKey: QUERY_KEYS.payments(),
-    queryFn: () => getPayments(),
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+  } = useInfiniteQuery({
+    queryKey: [...QUERY_KEYS.payments(), "infinite"],
+    initialPageParam: undefined as { cursor?: string; cursorId?: string } | undefined,
+    queryFn: ({ pageParam }) =>
+      getPaymentsPage({
+        cursor: pageParam?.cursor,
+        cursorId: pageParam?.cursorId,
+        limit: 50,
+      }),
+    getNextPageParam: (lastPage) =>
+      lastPage.next_cursor && lastPage.next_cursor_id
+        ? { cursor: lastPage.next_cursor, cursorId: lastPage.next_cursor_id }
+        : undefined,
     refetchInterval: 30000,
   });
+
+  const payments = React.useMemo(
+    () => data?.pages.flatMap((page) => page.payments) ?? [],
+    [data]
+  );
 
   const tenantMap = React.useMemo(() => new Map(tenants.map((t) => [t.id, t.name])), [tenants]);
 
@@ -59,16 +84,37 @@ export const PaymentsView: React.FC = () => {
     <div className="space-y-6">
       <RefundApprovalsPanel />
 
-      <div className="relative flex-1 max-w-md">
-        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
-        <input
-          type="text"
-          placeholder="Search by tenant, UPI ref, or note..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm"
-        />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative flex-1 min-w-[240px] max-w-md">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
+          <input
+            type="text"
+            placeholder="Search loaded payments by tenant, UPI ref, or note..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-surface border border-hairline rounded-xl text-ink text-sm"
+          />
+        </div>
+        <div className="flex items-center gap-3 text-xs text-ink-muted">
+          <span>
+            {payments.length} loaded{hasNextPage ? " (more available)" : ""}
+          </span>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg font-medium text-ink hover:border-accent/40 transition"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {searchTerm.trim() !== "" && hasNextPage && (
+        <p className="text-xs text-ink-muted">
+          Search filters the {payments.length} payments loaded so far. Load more pages to search older history.
+        </p>
+      )}
 
       <div className="bg-surface border border-hairline rounded-2xl overflow-hidden shadow-sm">
         <QueryState
@@ -143,7 +189,7 @@ export const PaymentsView: React.FC = () => {
                           ) : (
                             <span
                               className="inline-flex items-center gap-1 px-2.5 py-1 bg-bg border border-hairline rounded-lg text-xs text-ink-muted cursor-not-allowed"
-                              title={`Payment exceeds ${REFUND_WINDOW_DAYS}-day gateway refund limit`}
+                              title={`Payment exceeds ${REFUND_WINDOW_DAYS}-day configured refund window`}
                             >
                               Expired
                             </span>
@@ -163,6 +209,23 @@ export const PaymentsView: React.FC = () => {
               </tbody>
             </table>
           </div>
+          {(hasNextPage || isFetchNextPageError) && (
+            <div className="flex items-center justify-between gap-3 px-6 py-3 border-t border-hairline bg-bg text-xs">
+              {isFetchNextPageError ? (
+                <span className="text-danger">{t("owner.payments.loadMoreError")}</span>
+              ) : (
+                <span className="text-ink-muted">Showing {payments.length} payments</span>
+              )}
+              <button
+                type="button"
+                onClick={() => void fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg font-medium text-ink hover:border-accent/40 disabled:opacity-60 transition"
+              >
+                {isFetchingNextPage ? "Loading..." : isFetchNextPageError ? "Retry load more" : "Load more"}
+              </button>
+            </div>
+          )}
         </QueryState>
       </div>
 

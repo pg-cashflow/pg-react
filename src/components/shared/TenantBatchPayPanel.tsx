@@ -136,7 +136,34 @@ export const TenantBatchPayPanel: React.FC<{ onPaid?: () => void }> = ({ onPaid 
     }
   };
 
-  if (optionsQuery.isLoading || options.length < 2 || !selectedOption) {
+  if (optionsQuery.isLoading && options.length === 0) {
+    return null;
+  }
+
+  if (optionsQuery.isError && options.length === 0) {
+    return (
+      <section
+        aria-label={t("tenant.dues.batchTitle")}
+        role="alert"
+        className="rounded-[14px] border border-danger/20 bg-danger-tint p-4 flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-2 text-xs text-danger">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{formatApiError(optionsQuery.error, t)}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => void optionsQuery.refetch()}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/30 bg-surface text-xs font-medium text-ink hover:bg-bg shrink-0"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          {t("common.retry")}
+        </button>
+      </section>
+    );
+  }
+
+  if (options.length < 2 || !selectedOption) {
     return null;
   }
 
@@ -152,6 +179,23 @@ export const TenantBatchPayPanel: React.FC<{ onPaid?: () => void }> = ({ onPaid 
         </div>
         <CreditCard className="w-5 h-5 text-accent shrink-0" />
       </div>
+
+      {optionsQuery.isError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-2 rounded-[10px] bg-warning-tint/40 border border-warning/30 p-2.5 text-xs text-warning"
+        >
+          <span>{formatApiError(optionsQuery.error, t)}</span>
+          <button
+            type="button"
+            onClick={() => void optionsQuery.refetch()}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-warning/40 font-medium hover:bg-warning-tint/60 shrink-0"
+          >
+            <RefreshCw className="w-3 h-3" />
+            {t("common.retry")}
+          </button>
+        </div>
+      )}
 
       <div className="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label={t("tenant.dues.batchTitle")}>
         {options.map((opt) => {

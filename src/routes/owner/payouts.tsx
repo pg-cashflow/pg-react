@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import {
   usePayoutBatches,
-  useUnbatchedPayoutItems,
+  useUnbatchedPayoutItemsInfinite,
   usePayees,
   useCreatePayoutBatch,
   useDispatchPayoutBatch,
@@ -59,12 +59,22 @@ export const PayoutsView: React.FC = () => {
   } = usePayoutBatches();
 
   const {
-    data: unbatchedItems = [],
+    data: unbatchedData,
     isLoading: isUnbatchedLoading,
     isError: isUnbatchedError,
     error: unbatchedError,
     refetch: refetchUnbatched,
-  } = useUnbatchedPayoutItems();
+    fetchNextPage: fetchNextUnbatchedPage,
+    hasNextPage: hasNextUnbatchedPage,
+    isFetchingNextPage: isFetchingNextUnbatchedPage,
+    isFetchNextPageError: isFetchNextUnbatchedError,
+  } = useUnbatchedPayoutItemsInfinite();
+
+  const unbatchedItems = React.useMemo(
+    () => unbatchedData?.pages.flatMap((page) => page.items) ?? [],
+    [unbatchedData]
+  );
+  const unbatchedTotalCount = unbatchedData?.pages[0]?.total_count ?? unbatchedItems.length;
 
   const {
     data: payees = [],
@@ -301,9 +311,9 @@ export const PayoutsView: React.FC = () => {
             <div className="p-4 rounded-2xl bg-warning-tint border border-warning/30 text-ink text-sm flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-warning">Reconciliation Polling In Progress</p> {/* lint-allow-i18n */}
-                <p className="text-xs text-ink-muted mt-0.5"> {/* lint-allow-i18n */}
-                  One or more payout batches have an ambiguous dispatch status. The system is actively querying Cashfree to verify whether transfers settled. Do not re-initiate or duplicate instructions while reconciliation is running.
+                <p className="font-semibold text-warning">{t("owner.payouts.reconcilePollingTitle")}</p>
+                <p className="text-xs text-ink-muted mt-0.5">
+                  {t("owner.payouts.reconcilePollingDesc")}
                 </p>
               </div>
             </div>
@@ -313,9 +323,9 @@ export const PayoutsView: React.FC = () => {
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-warning">Cashfree Payout Protect Notice</p> {/* lint-allow-i18n */}
-                  <p className="text-xs text-ink-muted mt-0.5"> {/* lint-allow-i18n */}
-                    Batches in processing may contain transfers held for manual risk approval. If held, approve them directly in the Cashfree Merchant Dashboard.
+                  <p className="font-semibold text-warning">{t("owner.payouts.protectNoticeTitle")}</p>
+                  <p className="text-xs text-ink-muted mt-0.5">
+                    {t("owner.payouts.protectNoticeDesc")}
                   </p>
                 </div>
               </div>
@@ -325,7 +335,7 @@ export const PayoutsView: React.FC = () => {
                 rel="noreferrer"
                 className="px-3 py-1.5 rounded-xl border border-warning/40 bg-surface font-semibold text-xs text-ink hover:bg-bg shrink-0 transition"
               >
-                Cashfree Dashboard ↗ {/* lint-allow-i18n */}
+                {t("owner.payouts.cashfreeDashboardCta")}
               </a>
             </div>
           )}
@@ -493,17 +503,17 @@ export const PayoutsView: React.FC = () => {
               <div className="flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-warning">Unverified Payees Detected</span>{" "} {/* lint-allow-i18n */}
+                  <span className="font-semibold text-warning">{t("owner.payouts.unverifiedPayeesTitle")}</span>{" "}
                   <span className="text-ink-muted">
-                    {unverifiedItemsCount} unbatched instruction{unverifiedItemsCount > 1 ? "s" : ""} belong to payees awaiting penny-drop bank verification. Verify them in the Payees tab before generating a batch.
-                  </span> {/* lint-allow-i18n */}
+                    {t("owner.payouts.unverifiedPayeesDesc", { count: unverifiedItemsCount })}
+                  </span>
                 </div>
               </div>
               <button
                 onClick={() => setActiveTab("payees")}
                 className="px-3 py-1 rounded-lg bg-surface border border-hairline text-xs font-semibold text-ink hover:bg-bg shrink-0 transition"
               >
-                Go to Payees {/* lint-allow-i18n */}
+                {t("owner.payouts.goToPayees")}
               </button>
             </div>
           )}
@@ -584,6 +594,29 @@ export const PayoutsView: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+              {(hasNextUnbatchedPage || isFetchNextUnbatchedError) && (
+                <div className="flex items-center justify-between gap-3 px-6 py-3 border-t border-hairline bg-bg text-xs">
+                  {isFetchNextUnbatchedError ? (
+                    <span className="text-danger">{t("owner.payouts.loadMoreUnbatchedError")}</span>
+                  ) : (
+                    <span className="text-ink-muted">
+                      Showing {unbatchedItems.length} of {unbatchedTotalCount} pending items
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void fetchNextUnbatchedPage()}
+                    disabled={isFetchingNextUnbatchedPage}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg font-medium text-ink hover:border-accent/40 disabled:opacity-60 transition"
+                  >
+                    {isFetchingNextUnbatchedPage
+                      ? "Loading..."
+                      : isFetchNextUnbatchedError
+                        ? "Retry load more"
+                        : "Load more"}
+                  </button>
+                </div>
+              )}
             </QueryState>
           </div>
         </div>
