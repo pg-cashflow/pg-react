@@ -48,7 +48,6 @@ export const PaymentsView: React.FC = () => {
       lastPage.next_cursor && lastPage.next_cursor_id
         ? { cursor: lastPage.next_cursor, cursorId: lastPage.next_cursor_id }
         : undefined,
-    refetchInterval: 30000,
   });
 
   const payments = React.useMemo(
@@ -101,7 +100,7 @@ export const PaymentsView: React.FC = () => {
           </span>
           <button
             type="button"
-            onClick={() => refetch()}
+            onClick={() => void queryClient.resetQueries({ queryKey: [...QUERY_KEYS.payments(), "infinite"] })}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-hairline rounded-lg font-medium text-ink hover:border-accent/40 transition"
           >
             <RefreshCw className="w-3.5 h-3.5" />

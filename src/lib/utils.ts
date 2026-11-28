@@ -21,8 +21,7 @@ const INDIAN_COMMA_RUPEES_RE = /^\d{1,2}(?:,\d{2})*,\d{3}(?:\.\d{1,2})?$/;
 export function rupeesToPaise(rupees: string | number): number {
   if (typeof rupees === "number") {
     if (!Number.isFinite(rupees) || rupees < 0) return 0;
-    const paise = Math.round(rupees * 100);
-    return Number.isSafeInteger(paise) ? paise : 0;
+    return rupeesToPaise(String(rupees));
   }
   const trimmed = String(rupees).trim();
   if (
