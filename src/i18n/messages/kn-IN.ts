@@ -364,7 +364,7 @@ export const knIN: Record<MessageKey, string> = {
   "kyc.digilocker.tabTitle": "ಡಿಜಿಲಾಕರ್",
   "kyc.digilocker.heading": "ಅಧಿಕೃತ ಡಿಜಿಲಾಕರ್ ಪರಿಶೀಲನೆ",
   "kyc.digilocker.description": "ಭಾರತ ಸರ್ಕಾರದ ಡಿಜಿಲಾಕರ್ ದಾಖಲೆಗಳಿಂದ ತ್ವರಿತ ಪರಿಶೀಲನೆ. ವಿವರಗಳು ಹೊಂದಾಣಿಕೆಯಾಗದಿದ್ದರೆ ತ್ವರಿತ ಮ್ಯಾನುಯಲ್ ಪರಿಶೀಲನೆಗೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ.",
-  "kyc.digilocker.featureInstant": "ತ್ವರಿತ ಡಿಜಿಟಲ್ ಪರಿಶೀಲನೆ — ಸ್ವಯಂಚಾಲಿತ ಅಥವಾ ಆಪರೇಟರ್ ಅನುಮೋದನೆಯ ನಂತರ ಬಾಡಿಗೆ ಪಾವತಿಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುತ್ತದೆ",
+  "kyc.digilocker.featureInstant": "ತ್ವರಿತ ಡಿಜಿಟಲ್ ದಾಖಲೆ ಪಡೆಯುವಿಕೆ — ಮಾಲೀಕರ ಅನುಮೋದನೆಯ ನಂತರ ಬಾಡಿಗೆ ಪಾವತಿ ಅನ್‌ಲಾಕ್ ಆಗುತ್ತದೆ",
   "kyc.digilocker.featureOfficial": "ಕ್ಯಾಶ್‌ಫ್ರೀ ಮೂಲಕ ಭಾರತ ಸರ್ಕಾರದ ಡಿಜಿಲಾಕರ್",
   "kyc.digilocker.button": "ಡಿಜಿಲಾಕರ್ ಮೂಲಕ ಪರಿಶೀಲಿಸಿ",
   "kyc.digilocker.returnTitle": "ಡಿಜಿಲಾಕರ್ ಪರಿಶೀಲನೆ",

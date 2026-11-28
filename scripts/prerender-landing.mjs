@@ -470,7 +470,7 @@ writeStaticPage("refund-policy", "Refund and Cancellation Policy", "Comprehensiv
       "If your account is debited twice for a single due code (for example, due to an intermittent mobile connection or network timeout at checkout):"
     ],
     list: [
-      "Our automated polling and reconciliation system detects duplicate receipts and initiates a refund request within 24 to 48 hours.",
+      "Duplicate or late captures are recorded as unapplied receipts for owner review; any authorized refund is processed asynchronously through Cashfree.",
       `Alternatively, you can report the transaction ID to ${company.supportEmail} for immediate verification and manual initiation.`
     ]
   },

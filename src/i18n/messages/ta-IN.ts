@@ -363,7 +363,7 @@ export const taIN: Record<MessageKey, string> = {
   "kyc.digilocker.tabTitle": "டிஜிலாக்கர்",
   "kyc.digilocker.heading": "அதிகாரப்பூர்வ டிஜிலாக்கர் சரிபார்ப்பு",
   "kyc.digilocker.description": "இந்திய அரசு டிஜிலாக்கர் பதிவுகள் மூலம் விரைவான சரிபார்ப்பு. பொருந்தாத விவரங்கள் விரைவான கைமுறை மதிப்பாய்வுக்கு அனுப்பப்படும்.",
-  "kyc.digilocker.featureInstant": "விரைவான டிஜிட்டல் சரிபார்ப்பு — தானியங்கி அல்லது ஆபரேட்டர் ஒப்புதலுக்குப் பிறகு வாடகை செலுத்துதல் திறக்கப்படும்",
+  "kyc.digilocker.featureInstant": "விரைவான டிஜிட்டல் ஆவணப் பெறுதல் — உரிமையாளர் ஒப்புதலுக்குப் பிறகு வாடகை செலுத்துதல் திறக்கப்படும்",
   "kyc.digilocker.featureOfficial": "கேஷ்ப்ரீ வழியாக இந்திய அரசு டிஜிலாக்கர்",
   "kyc.digilocker.button": "டிஜிலாக்கர் மூலம் சரிபார்க்கவும்",
   "kyc.digilocker.returnTitle": "டிஜிலாக்கர் சரிபார்ப்பு",

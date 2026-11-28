@@ -363,7 +363,7 @@ export const teIN: Record<MessageKey, string> = {
   "kyc.digilocker.tabTitle": "డిజిలాకర్",
   "kyc.digilocker.heading": "అధికారిక డిజిలాకర్ ధృవీకరణ",
   "kyc.digilocker.description": "భారత ప్రభుత్వ డిజిలాకర్ రికార్డుల ద్వారా వేగవంతమైన ధృవీకరణ. వివరాలు సరిపోలకపోతే వేగవంతమైన మాన్యువల్ సమీక్షకు పంపబడుతుంది.",
-  "kyc.digilocker.featureInstant": "వేగవంతమైన డిజిటల్ ధృవీకరణ — ఆటోమేటెడ్ లేదా ఆపరేటర్ ఆమోదం పొందిన తర్వాత అద్దె చెల్లింపు అన్‌లాక్ అవుతుంది",
+  "kyc.digilocker.featureInstant": "వేగవంతమైన డిజిటల్ పత్రాల సేకరణ — యజమాని ఆమోదం తర్వాత అద్దె చెల్లింపు అన్‌లాక్ అవుతుంది",
   "kyc.digilocker.featureOfficial": "క్యాష్‌ఫ్రీ ద్వారా భారత ప్రభుత్వ డిజిలాకర్",
   "kyc.digilocker.button": "డిజిలాకర్‌తో ధృవీకరించండి",
   "kyc.digilocker.returnTitle": "డిజిలాకర్ ధృవీకరణ",

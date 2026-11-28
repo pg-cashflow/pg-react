@@ -30,12 +30,21 @@ import { AmountBadge } from "@/components/shared/AmountBadge";
 import { BatchApprovalModal } from "@/components/owner/BatchApprovalModal";
 import { CreatePayeeModal } from "@/components/owner/CreatePayeeModal";
 import { useLocale } from "@/i18n";
-import type { PayoutBatch } from "@pg/types";
+import type { PayoutBatch, PayoutPayee } from "@pg/types";
 
-const getCoolingOffRemainingHours = (createdAt?: string): number => {
-  if (!createdAt) return 0;
-  const createdTime = new Date(createdAt).getTime();
-  const elapsedHours = (Date.now() - createdTime) / (1000 * 60 * 60);
+const getCoolingOffRemainingHours = (
+  payee?: Pick<PayoutPayee, "created_at" | "verified_at"> | null
+): number => {
+  if (!payee?.created_at) return 24;
+  const createdTime = new Date(payee.created_at).getTime();
+  if (Number.isNaN(createdTime)) return 24;
+  let verifiedTime = 0;
+  if (payee.verified_at) {
+    verifiedTime = new Date(payee.verified_at).getTime();
+    if (Number.isNaN(verifiedTime)) return 24;
+  }
+  const anchorTime = Math.max(createdTime, verifiedTime);
+  const elapsedHours = (Date.now() - anchorTime) / (1000 * 60 * 60);
   if (elapsedHours < 24) {
     return Math.max(1, Math.ceil(24 - elapsedHours));
   }
@@ -97,7 +106,7 @@ export const PayoutsView: React.FC = () => {
   const coolingOffItemsCount = React.useMemo(() => {
     return unbatchedItems.filter((it) => {
       const p = payeeMap.get(it.payee_id);
-      return getCoolingOffRemainingHours(p?.created_at) > 0;
+      return getCoolingOffRemainingHours(p) > 0;
     }).length;
   }, [unbatchedItems, payeeMap]);
 
@@ -149,7 +158,7 @@ export const PayoutsView: React.FC = () => {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      setTimeout(() => window.URL.revokeObjectURL(url), 0);
     } catch (err: any) {
       setActionError(err.message || "Failed to export payout batch CSV.");
     } finally {
@@ -562,10 +571,10 @@ export const PayoutsView: React.FC = () => {
                                     Unverified
                                   </span>
                                 )}
-                                {getCoolingOffRemainingHours(payee.created_at) > 0 && (
+                                {getCoolingOffRemainingHours(payee) > 0 && (
                                   <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-micro font-medium bg-warning-tint text-warning border border-warning/30">
                                     <Clock className="w-2.5 h-2.5" />
-                                    {getCoolingOffRemainingHours(payee.created_at)}h cooling-off
+                                    {getCoolingOffRemainingHours(payee)}h cooling-off
                                   </span>
                                 )}
                               </div>
@@ -704,11 +713,11 @@ export const PayoutsView: React.FC = () => {
                             {t("owner.payouts.pendingVerification")}
                           </span>
                         )}
-                        {getCoolingOffRemainingHours(p.created_at) > 0 && (
+                        {getCoolingOffRemainingHours(p) > 0 && (
                           <div className="mt-1">
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning-tint text-warning font-medium t-micro border border-warning/30">
                               <Clock className="w-3 h-3" />
-                              Cooling off ({getCoolingOffRemainingHours(p.created_at)}h left)
+                              Cooling off ({getCoolingOffRemainingHours(p)}h left)
                             </span>
                           </div>
                         )}

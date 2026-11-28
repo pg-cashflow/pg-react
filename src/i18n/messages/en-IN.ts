@@ -360,7 +360,7 @@ export const enIN = {
   "kyc.digilocker.tabTitle": "DigiLocker",
   "kyc.digilocker.heading": "Official DigiLocker Verification",
   "kyc.digilocker.description": "Fast verification via Government of India DigiLocker records. Submissions with mismatched details route to quick manual review.",
-  "kyc.digilocker.featureInstant": "Fast digital verification — unlocks rent payment upon automated or operator approval",
+  "kyc.digilocker.featureInstant": "Fast digital evidence retrieval — rent payment unlocks after owner approval",
   "kyc.digilocker.featureOfficial": "Government of India DigiLocker via Cashfree",
   "kyc.digilocker.button": "Verify with DigiLocker",
   "kyc.digilocker.returnTitle": "DigiLocker Verification",
